@@ -615,10 +615,55 @@ html[data-theme="dark"] .phone-frame{background:#121417}
   @keyframes fadeOnly{from{opacity:0}}
   .tbl tbody tr.resolving{animation-name:fadeOnly !important;animation-direction:reverse !important}
 }
+
+/* password gate — hobby fallback; not a substitute for Deployment Protection */
+body.is-locked #root,
+body.is-locked #reflect-demo-feedback{display:none}
+body:not(.is-locked) #gate{display:none}
+.gate{
+  min-height:100vh;display:grid;place-items:center;padding:24px;
+  background:var(--background);
+}
+.gate-card{
+  width:min(400px,100%);
+  background:var(--card);color:var(--card-foreground);
+  border:1px solid var(--border);border-radius:var(--r-xl);
+  box-shadow:var(--shadow-lg);padding:24px;
+}
+.gate-err{color:var(--destructive);font-size:14px;line-height:20px;margin-top:12px;min-height:20px}
 </style>
 </head>
-<body>
+<body class="is-locked">
+<div id="gate" class="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title">
+  <form class="gate-card" id="gate-form">
+    <p class="t-detail dim" style="font-weight:700;letter-spacing:.08em;text-transform:uppercase">Reflect</p>
+    <h1 class="t-h4" id="gate-title" style="margin-top:8px">Enter the password to view this prototype</h1>
+    <label class="t-subtle" style="font-weight:700;display:block;margin:20px 0 8px" for="gate-pass">Password</label>
+    <input class="input" id="gate-pass" type="password" autocomplete="current-password" required>
+    <button class="btn btn-primary" type="submit" style="width:100%;margin-top:16px">Continue</button>
+    <p class="gate-err" id="gate-err" role="alert"></p>
+  </form>
+</div>
 <div id="root"></div>
+<script>
+const GATE_KEY = "reflect-gate";
+const GATE_HASH = "8c04d88f20cf01cb9d8e48dc75ef6e1d36d810d2b74dbe690603f9cefe370c6e";
+async function gateHash(s){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+function unlockGate(){ document.body.classList.remove("is-locked"); }
+if(sessionStorage.getItem(GATE_KEY)==="ok") unlockGate();
+document.getElementById("gate-form").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const err = document.getElementById("gate-err");
+  err.textContent = "";
+  const ok = await gateHash(document.getElementById("gate-pass").value) === GATE_HASH;
+  if(!ok){ err.textContent = "That password doesn't match."; return; }
+  sessionStorage.setItem(GATE_KEY, "ok");
+  unlockGate();
+});
+</script>
 <script>
 /* ============================================================
    1. MOCK DATA — seeded, deterministic. No PHI. All synthetic.
