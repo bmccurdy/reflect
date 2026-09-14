@@ -1,0 +1,24 @@
+---
+description: Staff UI must use the vendored FirstWatch design system.
+alwaysApply: true
+---
+
+# FirstWatch design system
+
+Before generating or changing UI, read `vendor/firstwatch/SKILL.md` and `vendor/firstwatch/readme.md`.
+
+- Link `vendor/firstwatch/styles.css`. Do not copy hex colors, new fonts, or a second `:root` palette.
+- Staff UI: Lato (`--font-sans`), FirstWatch blue (`--primary`), neutrals, Lucide icons. Sentence case. No emoji, no gradients, no Fraunces/Inter.
+- Use kit classes (`fw-btn`, `fw-badge`, `fw-input`, `fw-card`, `fw-table`, …) and tokens (`--radius-md`, `--semantic-destructive`, `--dur-fast`).
+- Red is destructive only; green/amber are status. Brand navy/gold (`--fw-navy`, `--fw-gold`) are for brand moments only.
+- Patient survey may keep scoped `--p-*` tokens. Everything else stays on the kit.
+- This prototype is static HTML. Do not import React `components/*.jsx`; use the CSS `fw-*` classes.
+
+```html
+<!-- ✅ -->
+<button class="fw-btn fw-btn--primary">Publish</button>
+<span class="fw-badge fw-badge--destructive">Urgent</span>
+
+<!-- ❌ -->
+<button class="btn btn-primary" style="background:#0284C7">Publish</button>
+```

@@ -8,12 +8,13 @@
 <style>
 /* ============================================================
    REFLECT — clickable prototype
-   Staff and patient surfaces: FirstWatch kit (vendor/firstwatch).
-   Patient layout classes consume kit tokens — no second palette.
+   Staff surfaces: FirstWatch kit (vendor/firstwatch).
+   Patient surface: scoped extension tokens below.
    ============================================================ */
 
 :root{
   --font:var(--font-sans);
+  --font-display:var(--font-serif);
   --r-sm:calc(var(--border-radius-sm) * 1px);
   --r-default:calc(var(--border-radius-default) * 1px);
   --r-md:var(--radius-md);
@@ -77,11 +78,8 @@ ul{margin:0;padding:0;list-style:none}
 .t-detail{font-size:12px;line-height:20px;font-weight:400;letter-spacing:.01em}
 .dim{color:var(--muted-foreground)}
 
-/* Kit cards are slot-based; this prototype uses one padded box. */
 .fw-card{padding:24px}
-.bento .fw-card,.grid .fw-card{box-shadow:none}
 .fw-card-tight{padding:16px}
-.fw-navy{background:var(--fw-navy);color:var(--base-white)}
 textarea.fw-input{height:auto;min-height:88px;padding:12px;resize:vertical;line-height:24px}
 .fw-btn--ghost-destructive{background:transparent;color:var(--destructive)}
 .fw-btn--ghost-destructive:hover{background:var(--status-critical-wash);color:var(--destructive-hover)}
@@ -132,6 +130,11 @@ a.fw-btn{text-decoration:none}
 
 /* demo-only affordance — see docs/decisions.md #1 */
 .demo-switch{display:flex;align-items:center;gap:8px}
+.demo-tag{
+  font-size:10px;line-height:14px;font-weight:900;letter-spacing:.08em;
+  text-transform:uppercase;color:color-mix(in srgb,var(--base-white) 72%,transparent);
+  border:1px dashed color-mix(in srgb,var(--base-white) 28%,transparent);border-radius:var(--r-sm);padding:1px 5px;
+}
 .seg{display:flex;background:var(--neutral-200);border-radius:var(--r-md);padding:4px;gap:2px}
 .seg button{
   height:28px;padding:0 10px;border:0;background:transparent;border-radius:var(--r-sm);
@@ -168,6 +171,8 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 }
 .dot{width:8px;height:8px;border-radius:var(--r-full);background:var(--status-elevated);flex:0 0 auto}
 
+/* KPI restyle — white cards, sentence-case labels, no rainbow tiles.
+   Forbidden fills removed: indigo, purple, rose, slate, green billboard, navy-as-metric. */
 .stat-cell{
   background:var(--card);color:var(--foreground);
   border:1px solid var(--border);border-radius:var(--r-lg);
@@ -203,9 +208,12 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
   padding:2px 8px;border-radius:var(--r-md);
 }
 
+/* Ranked bento — funnel-four under page head; then lowest | action / quality.
+   Four cell types total; no decorative fills. */
 .bento-funnel{
   display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
   margin-bottom:16px;
+  /* A — KPI band: --accent wash behind the 4-up. Cards stay --card white. */
   background:var(--accent);
   padding:16px;
   border-radius:var(--r-lg);
@@ -213,7 +221,10 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .bento-funnel .stat-cell{
   background:var(--card);
   padding:28px;
-  box-shadow:var(--shadow-md);
+  /* Kit semantic.css --shadow-md (cards). Prototype --shadow-md is weaker. */
+  /* D scale uses this same A shadow only — do not stack --shadow-sm. */
+  box-shadow:0 4px 6px -1px rgba(0,0,0,.09),0 2px 4px -2px rgba(0,0,0,.05);
+  /* 3px primary top edge — brief. Kit border widths are 1/2/4/8 (gap). */
   border-top:3px solid var(--primary);
 }
 .bento-funnel .stat-v{
@@ -252,6 +263,15 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
   margin-top:12px;color:var(--primary);font-size:14px;font-weight:600;
 }
 .bento-action:hover .action-go{color:var(--primary-hover);text-decoration:underline}
+
+@media (max-width:1080px){
+  .bento{grid-template-columns:1fr;grid-template-areas:"lowest" "action" "quality"}
+  .bento-funnel{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:760px){
+  .bento-funnel{grid-template-columns:1fr}
+  .quality-row{grid-template-columns:1fr}
+}
 
 /* queue table */
 .tbl{width:100%;border-collapse:collapse}
@@ -295,103 +315,6 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 @keyframes resolveOut{to{opacity:0;transform:translateX(12px)}}
 .snip{color:var(--muted-foreground);font-size:14px;line-height:20px;max-width:420px}
 .mono{font-family:var(--font-mono);font-size:14px;font-weight:700}
-
-.fw-card-flush{padding:0;overflow:hidden}
-.fw-card-head{
-  padding:16px 24px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;gap:16px;
-}
-.fw-card--dashed{border-style:dashed}
-.live-tag{
-  display:flex;align-items:center;gap:6px;
-  font-size:13px;line-height:20px;font-weight:600;color:var(--status-resolved);
-}
-.live-dot{
-  width:8px;height:8px;border-radius:var(--r-full);
-  background:var(--status-resolved);flex:0 0 auto;
-  animation:livePulse 2s var(--ease-out) infinite;
-}
-@keyframes livePulse{50%{opacity:.35}}
-.rule{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 12px;border-radius:var(--r-md);
-  font-size:14px;line-height:20px;
-  border:1px solid transparent;
-}
-.rule-list{display:flex;flex-direction:column;gap:6px}
-.rule--in{
-  background:var(--status-resolved-wash);
-  border-color:color-mix(in srgb,var(--status-resolved) 22%,var(--border));
-}
-.rule--out{
-  background:var(--status-critical-wash);
-  border-color:color-mix(in srgb,var(--status-critical) 22%,var(--border));
-}
-.rule-ico{flex:0 0 auto;display:grid;place-items:center}
-.rule--in .rule-ico{color:var(--status-resolved)}
-.rule--out .rule-ico{color:var(--status-critical)}
-.icon-yes{color:var(--status-resolved)}
-.icon-no{color:var(--muted-foreground)}
-.rule-head{margin-bottom:14px}
-.rule-head--in{color:var(--status-resolved)}
-.rule-head--out{color:var(--status-critical)}
-.timing{align-items:flex-start;gap:16px}
-
-.score-hero{
-  display:flex;align-items:center;gap:14px;
-  padding:16px 24px;
-}
-.score-hero .fw-avatar{
-  background:color-mix(in srgb,var(--base-white) 20%,transparent);
-  color:var(--base-white);
-}
-.score-hero-name{font-size:16px;line-height:24px;font-weight:700}
-.score-hero-meta{font-size:12px;line-height:16px;color:color-mix(in srgb,var(--base-white) 72%,transparent)}
-.score-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
-.stat-cell--accent{border-top:3px solid var(--stat-accent,var(--primary))}
-.stat-cell--accent .stat-k{margin-top:0;margin-bottom:4px}
-.stat-sub{font-size:12px;line-height:16px;color:var(--muted-foreground);margin-top:6px}
-.tbl-wrap{overflow-x:auto}
-.tbl th.group{text-align:center;background:var(--secondary);color:var(--secondary-foreground);font-weight:600}
-.tbl th.group-sys{background:var(--neutral-200);color:var(--muted-foreground)}
-html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--muted-foreground)}
-.tbl .comp{font-weight:700}
-.comp--good{color:var(--status-resolved)}
-.comp--ok{color:var(--primary)}
-.comp--warn{color:var(--status-elevated)}
-.comp--bad{color:var(--status-critical)}
-.score-meter{height:5px;margin:8px 0}
-.row-current{background:var(--status-resolved-wash)}
-.row-current .crew-name{color:var(--status-resolved)}
-.crew-name{font-weight:700;display:inline-flex;align-items:center;gap:6px}
-.flag-hot{color:var(--status-critical);font-weight:700}
-
-.commend{border-left:3px solid var(--primary);margin-bottom:12px}
-.commend:last-child{margin-bottom:0}
-.commend-meta{font-size:12px;line-height:16px;color:var(--muted-foreground)}
-.commend-quote{font-size:14px;line-height:22px;margin:12px 0}
-.commend-by{font-size:12px;line-height:16px;color:var(--muted-foreground);margin-bottom:12px}
-.commend-actions{display:flex;flex-wrap:wrap;gap:8px}
-.blink-board{border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;background:var(--muted)}
-.blink-board-bar{
-  display:flex;align-items:baseline;gap:8px;
-  padding:12px 16px;background:var(--fw-navy);color:var(--base-white);
-}
-.blink-board-title{font-size:14px;line-height:20px;font-weight:700}
-.blink-board-sub{font-size:12px;line-height:16px;color:color-mix(in srgb,var(--base-white) 72%,transparent)}
-.blink-feed{padding:12px;display:flex;flex-direction:column;gap:10px}
-.blink-post{
-  background:var(--card);color:var(--foreground);
-  border:1px solid var(--border);border-radius:var(--r-lg);padding:12px;
-}
-.blink-post-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.blink-post-head > div{flex:1;min-width:0}
-.blink-post-status{margin-left:auto;flex:0 0 auto}
-.blink-post-name{font-size:14px;line-height:20px;font-weight:600}
-.blink-post-to,.blink-post-by{font-size:12px;line-height:16px;color:var(--muted-foreground)}
-.blink-post-text{font-size:14px;line-height:22px;margin-top:4px}
-.blink-empty{text-align:center;padding:32px 16px;color:var(--muted-foreground)}
-.col-start{align-items:start}
 
 .ans{padding:12px 0;border-bottom:1px solid var(--border)}
 .ans:last-child{border-bottom:0}
@@ -454,7 +377,7 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 .preview-col{align-self:stretch}
 .preview-sticky{
   position:sticky;top:72px;z-index:20;
-  background:transparent;
+  background:var(--background);
 }
 .qcard{
   border:1px solid var(--border);border-radius:var(--r-lg);background:var(--card);
@@ -473,25 +396,6 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 .qcard-select.locked.selected{
   background:color-mix(in srgb,var(--accent) 55%,var(--muted));
 }
-.qcard.added{background:var(--muted);opacity:.7}
-.qcard.added:hover{border-color:var(--border);box-shadow:none}
-.lib-filters{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
-.lib-chip{
-  display:inline-flex;align-items:center;justify-content:center;
-  height:28px;padding:0 12px;border-radius:var(--r-full);
-  border:1px solid var(--border);background:var(--card);
-  font-size:12px;line-height:1;font-weight:600;
-  color:var(--muted-foreground);cursor:pointer;
-  transition:background-color var(--dur-micro) var(--ease-out),
-             color var(--dur-micro) var(--ease-out),
-             border-color var(--dur-micro) var(--ease-out);
-}
-.lib-chip:hover{background:var(--accent);color:var(--accent-foreground)}
-.lib-chip[aria-pressed="true"]{
-  background:var(--primary);color:var(--primary-foreground);border-color:var(--primary);
-}
-.lib-chip[aria-pressed="true"]:hover{background:var(--primary-hover);color:var(--primary-foreground)}
-.lib-list{margin-top:16px;max-height:360px;overflow-y:auto}
 .grip{color:var(--muted-foreground);cursor:grab;line-height:1;padding-top:2px}
 .qmeta{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
 .qbtns{display:flex;gap:4px;margin-left:auto}
@@ -504,7 +408,7 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 .iconbtn[disabled]{opacity:.5;cursor:not-allowed}
 .phone-frame{
   border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;
-  background:var(--muted);
+  background:#6E6C68;
 }
 .phone-frame .cap{
   display:flex;align-items:center;gap:8px;
@@ -516,9 +420,10 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 .preview-overlay{
   position:fixed;inset:0;z-index:56;
   display:flex;flex-direction:column;
-  background:var(--muted);
+  background:#6E6C68;
   animation:fade var(--dur-layout) var(--ease-out);
 }
+html[data-theme="dark"] .preview-overlay{background:#121417}
 .preview-bar{
   flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;
   padding:10px 16px;background:var(--card);color:var(--card-foreground);
@@ -543,94 +448,178 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 .stagger>*{animation:rise var(--dur-page) var(--ease-out) both;animation-delay:calc(var(--i,0)*var(--stagger))}
 @keyframes rise{from{opacity:0;transform:translateY(8px)}}
 
-/* Patient survey — kit tokens, larger tap targets */
+/* ============================================================
+   PATIENT SURFACE — scoped extension tokens
+   Derivation: the lit interior of an ambulance seen from the
+   gurney — dim warm surround, one bright card, amber dome light.
+   ============================================================ */
 .patient{
-  min-height:100vh;background:var(--muted);color:var(--foreground);
+  --p-surround:#6E6C68;
+  --p-card:#FDFCFA;
+  --p-ink:#1A1D22;
+  --p-ink-soft:#585D66;
+  --p-amber:#E0A458;
+  --p-amber-deep:#9A6520;
+  --p-on-amber:#FFFFFF;
+  --p-line:#E5E0D8;
+  --p-rule:#98907E;
+  --p-face:#FFFFFF;
+  --p-face-hover:#FFFDF8;
+  --p-face-on:#FFF8EC;
+  --p-note-bg:#FBF7F0;
+  --p-mute:#8A9099;
+  --p-chrome:#E8E5E0;
+  --p-placeholder:#9AA0A8;
+  --p-cta:#1A1D22;
+  --p-cta-ink:#FFFFFF;
+  --p-cta-hover:#2C3039;
+  min-height:100vh;background:var(--p-surround);color:var(--p-ink);
   display:flex;flex-direction:column;align-items:center;
   padding:24px 16px 48px;
 }
-.patient--embed{min-height:0;padding:16px}
-.patient--embed .p-opt,
-.patient--embed .p-scale-btn{pointer-events:none}
+html[data-theme="dark"] .patient{
+  --p-surround:#121417;
+  --p-card:#1C1F26;
+  --p-ink:#F2EFE8;
+  --p-ink-soft:#B0AAA0;
+  --p-amber-deep:#D4A05A;
+  --p-on-amber:#1A1D22;
+  --p-line:#3A3D44;
+  --p-rule:#5E5C56;
+  --p-face:#262A32;
+  --p-face-hover:#2E333C;
+  --p-face-on:#3A3228;
+  --p-note-bg:#2A261F;
+  --p-placeholder:#7A7F88;
+  --p-chrome:#8A9099;
+  --p-cta:#F2EFE8;
+  --p-cta-ink:#1A1D22;
+  --p-cta-hover:#E5E0D8;
+}
+html[data-theme="dark"] .phone-frame{background:#121417}
 .p-wrap{width:100%;max-width:520px}
 .p-lock{
   display:flex;align-items:center;gap:8px;justify-content:center;
-  color:var(--muted-foreground);font-size:12px;line-height:20px;margin-bottom:16px;
+  color:var(--p-chrome);font-size:12px;line-height:20px;margin-bottom:16px;
 }
-.p-card.fw-card{padding:28px 24px}
-.patient--embed .p-card.fw-card{padding:20px 16px;box-shadow:none}
-.p-progress{display:flex;gap:6px;margin-bottom:16px}
+.p-card{
+  background:var(--p-card);border-radius:16px;padding:32px 28px;
+  box-shadow:0 24px 48px -12px rgba(0,0,0,.45),0 2px 4px rgba(0,0,0,.2);
+  position:relative;overflow:hidden;
+}
+/* signature element: the dome-light wash across the top of the card */
+.p-card::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,transparent,var(--p-amber),transparent);
+}
+.p-display{
+  font-family:var(--font-display);font-weight:600;
+  font-size:32px;line-height:38px;letter-spacing:-.015em;
+  font-variation-settings:"SOFT" 40,"opsz" 40;
+}
+.p-lede{font-size:17px;line-height:28px;color:var(--p-ink-soft);margin-top:12px}
+.p-q{
+  font-family:var(--font-display);font-weight:600;
+  font-size:26px;line-height:34px;letter-spacing:-.01em;
+  font-variation-settings:"SOFT" 40,"opsz" 30;
+}
+.p-help{font-size:15px;line-height:24px;color:var(--p-ink-soft);margin-top:8px}
+.p-progress{display:flex;gap:6px;margin-bottom:24px}
 .p-progress i{
-  height:4px;flex:1;border-radius:var(--r-full);background:var(--border);
+  height:4px;flex:1;border-radius:var(--r-full);background:var(--p-line);
   transition:background-color var(--dur-layout) var(--ease-out);
 }
-.p-progress i.done{background:var(--primary)}
-.p-progress i.now{background:var(--foreground)}
-.p-step{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.p-progress i.done{background:var(--p-amber-deep)}
+.p-progress i.now{background:var(--p-ink)}
+.p-step{font-size:13px;line-height:20px;color:var(--p-ink-soft);letter-spacing:.02em}
 
-.p-opts{display:flex;flex-direction:column;gap:8px;margin-top:20px}
+.p-opts{display:flex;flex-direction:column;gap:10px;margin-top:24px}
 .p-opt{
-  display:flex;align-items:center;gap:12px;width:100%;min-height:48px;
-  padding:12px 16px;text-align:left;cursor:pointer;appearance:none;
-  background:var(--card);border:1px solid var(--border);border-radius:var(--r-md);
-  background:var(--card);border:1px solid var(--border);border-radius:var(--r-md);
-  font-size:16px;line-height:24px;color:var(--foreground);
+  display:flex;align-items:center;gap:12px;width:100%;min-height:56px;
+  padding:14px 18px;text-align:left;cursor:pointer;
+  background:var(--p-face);border:1px solid var(--p-rule);border-radius:12px;
+  font-size:17px;line-height:24px;color:var(--p-ink);
   transition:border-color var(--dur-micro) var(--ease-out),
              background-color var(--dur-micro) var(--ease-out),
-             box-shadow var(--dur-micro) var(--ease-out);
+             transform var(--dur-micro) var(--ease-spring);
 }
-.p-opt:hover{background:var(--accent);border-color:var(--muted-foreground)}
-.p-opt[aria-pressed="true"]{
-  border-color:var(--primary);background:var(--accent);
-  box-shadow:0 0 0 1px var(--primary);font-weight:600;
-}
+.p-opt:hover{border-color:var(--p-amber-deep);background:var(--p-face-hover)}
+.p-opt:active{transform:scale(.99)}
+.p-opt[aria-pressed="true"]{border-color:var(--p-amber-deep);background:var(--p-face-on);font-weight:700}
 .p-tick{
-  width:18px;height:18px;border-radius:var(--r-full);flex:0 0 auto;
-  border:1px solid var(--border-strong);background:var(--surface);
-  display:grid;place-items:center;
-  transition:border-color var(--dur-micro) var(--ease-out);
+  width:22px;height:22px;border-radius:var(--r-full);flex:0 0 auto;
+  border:1.5px solid var(--p-rule);display:grid;place-items:center;
+  transition:all var(--dur-micro) var(--ease-out);
 }
-.p-opt[aria-pressed="true"] .p-tick{border-color:var(--primary)}
-.p-opt[aria-pressed="true"] .p-tick::after{
-  content:"";width:10px;height:10px;border-radius:var(--r-full);background:var(--primary);
-}
+.p-opt[aria-pressed="true"] .p-tick{background:var(--p-amber-deep);border-color:var(--p-amber-deep)}
+.p-tick svg{opacity:0;transition:opacity var(--dur-micro) var(--ease-out)}
+.p-opt[aria-pressed="true"] .p-tick svg{opacity:1}
 
-.p-scale{display:flex;gap:8px;margin-top:20px}
-.p-scale-btn{
-  flex:1;min-height:56px;border-radius:var(--r-md);cursor:pointer;appearance:none;
-  border:1px solid var(--border);background:var(--card);color:var(--foreground);
-  font-size:16px;font-weight:600;
+/* rating scale */
+.p-scale{display:flex;gap:8px;margin-top:24px}
+.p-scale button{
+  flex:1;min-height:64px;border-radius:12px;cursor:pointer;
+  border:1px solid var(--p-rule);background:var(--p-face);color:var(--p-ink);
+  font-size:20px;font-weight:700;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-  transition:border-color var(--dur-micro) var(--ease-out),
-             background-color var(--dur-micro) var(--ease-out),
-             color var(--dur-micro) var(--ease-out);
+  transition:all var(--dur-micro) var(--ease-out);
 }
-.p-scale-btn span{font-size:11px;font-weight:500;color:var(--muted-foreground)}
-.p-scale-btn:hover{background:var(--accent);border-color:var(--muted-foreground)}
-.p-scale-btn[aria-pressed="true"]{
-  background:var(--primary);border-color:var(--primary);color:var(--primary-foreground);
+.p-scale button span{font-size:11px;font-weight:400;color:var(--p-ink-soft);letter-spacing:.02em}
+.p-scale button:hover{border-color:var(--p-amber-deep)}
+.p-scale button[aria-pressed="true"]{background:var(--p-amber-deep);border-color:var(--p-amber-deep);color:var(--p-on-amber)}
+.p-scale button[aria-pressed="true"] span{color:color-mix(in srgb,var(--p-on-amber) 85%,transparent)}
+
+.p-text{
+  width:100%;margin-top:24px;padding:16px;min-height:132px;resize:vertical;
+  border:1px solid var(--p-rule);border-radius:12px;background:var(--p-face);
+  font-size:17px;line-height:28px;color:var(--p-ink);
 }
-.p-scale-btn[aria-pressed="true"] span{color:color-mix(in srgb,var(--primary-foreground) 85%,transparent)}
+.p-text::placeholder{color:var(--p-placeholder)}
+.p-count{font-size:13px;line-height:20px;color:var(--p-ink-soft);margin-top:8px;text-align:right}
 
-.p-fields{margin-top:20px}
-.p-fields .fw-textarea{min-height:120px}
-.p-count{margin-top:8px;text-align:right}
-
-.p-actions{display:flex;gap:12px;align-items:flex-start;margin-top:24px}
-.p-cta{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0}
-.p-cta .p-next{align-self:stretch}
-.p-back{margin-top:12px;min-height:0;height:auto;padding:0}
-.p-fieldset{border:0;padding:0;margin:16px 0 0}
+.p-actions{display:flex;gap:12px;align-items:center;margin-top:28px}
+.p-next{
+  flex:1;min-height:56px;border:0;border-radius:12px;cursor:pointer;
+  background:var(--p-cta);color:var(--p-cta-ink);font-size:17px;font-weight:700;
+  transition:background-color var(--dur-micro) var(--ease-out),transform var(--dur-micro) var(--ease-spring);
+}
+.p-next:hover{background:var(--p-cta-hover)}
+.p-next:active{transform:translateY(1px)}
+.p-next[disabled]{opacity:.4;cursor:not-allowed}
+.p-skip{
+  min-height:56px;padding:0 18px;border:0;background:transparent;cursor:pointer;
+  color:var(--p-ink-soft);font-size:16px;text-decoration:underline;text-underline-offset:3px;
+}
+.p-back{
+  margin-top:20px;background:transparent;border:0;cursor:pointer;padding:8px 0;
+  color:var(--p-mute);font-size:14px;
+}
+.p-note{
+  margin-top:24px;padding:16px;border-radius:12px;
+  background:var(--p-note-bg);border:1px solid var(--p-line);
+  font-size:15px;line-height:24px;color:var(--p-ink-soft);
+}
+.p-optional{
+  display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:var(--r-full);
+  background:var(--p-face-on);color:var(--p-amber-deep);font-size:11px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+}
+.p-fieldset{border:0;padding:0;margin:20px 0 0}
+.p-fieldset legend{font-size:15px;font-weight:700;padding:0;margin-bottom:8px}
+.p-select{
+  width:100%;min-height:52px;padding:12px 14px;border-radius:12px;
+  border:1px solid var(--p-rule);background:var(--p-face);color:var(--p-ink);font-size:16px;
+}
 .p-foot{
-  margin-top:24px;text-align:center;color:var(--muted-foreground);
+  margin-top:24px;text-align:center;color:var(--p-chrome);
   font-size:12px;line-height:20px;
 }
 .p-view{animation:pageTurn var(--dur-page) var(--ease-out) both}
 @keyframes pageTurn{from{opacity:0;transform:translateY(8px)}}
+.p-done .p-display{font-size:34px;line-height:42px}
 .p-seal{
-  width:48px;height:48px;border-radius:var(--r-full);margin:0 auto 16px;
-  display:grid;place-items:center;background:var(--accent);color:var(--primary);
-  border:1px solid var(--border);
+  width:56px;height:56px;border-radius:var(--r-full);margin:0 auto 20px;
+  display:grid;place-items:center;background:var(--p-face-on);border:1px solid var(--p-amber);
   animation:seal 520ms var(--ease-spring) both 120ms;
 }
 @keyframes seal{from{opacity:0;transform:scale(.7)}}
@@ -644,21 +633,15 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   .split{grid-template-columns:1fr}
   .preview-col,.preview-sticky{position:static;align-self:auto;z-index:auto}
   .g-4{grid-template-columns:repeat(2,1fr)}
-  .bento{grid-template-columns:1fr;grid-template-areas:"lowest" "action" "quality"}
-  .bento-funnel{grid-template-columns:repeat(2,1fr)}
-  .score-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media (max-width:760px){
   .main{padding:24px 16px 80px}
   .topbar{padding:0 16px;gap:8px}
   .nav{display:none}
   .g-4,.g-3,.g-2{grid-template-columns:1fr}
-  .bento-funnel{grid-template-columns:1fr}
-  .quality-row{grid-template-columns:1fr}
   .t-h1{font-size:34px;line-height:38px}
   .bar-row{grid-template-columns:120px 1fr 48px}
   .brand-sub{display:none}
-  .score-kpis{grid-template-columns:1fr 1fr}
 }
 
 @media (prefers-reduced-motion:reduce){
@@ -669,7 +652,6 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   .stagger>*,.p-view,.p-seal,.bar i{animation-name:fadeOnly !important}
   @keyframes fadeOnly{from{opacity:0}}
   .tbl tbody tr.resolving{animation-name:fadeOnly !important;animation-direction:reverse !important}
-  .live-dot{animation:none}
 }
 
 /* password gate — hobby fallback; not a substitute for Deployment Protection */
@@ -897,37 +879,11 @@ const RESPONSES = {
 };
 
 const LIBRARY = [
-  { id:"lib1", category:"Care quality", text:"Providing professional, compassionate, and personal care during your emergency is our priority. How well did we do?", type:"choice", options:["Exceptional","Good","Fine","Poor","Unacceptable"], benchmark:true },
-  { id:"lib2", category:"Recommendation", text:"How likely are you to recommend our emergency services?", type:"choice", options:["Very Likely","Somewhat Likely","Not Sure","Not Likely","Definitely Not Likely"], benchmark:true },
-  { id:"lib3", category:"Communication", text:"Did you feel listened to by the crew?", type:"yesno", benchmark:false },
-  { id:"lib4", category:"Care quality", text:"Did you feel cared for by the crew?", type:"yesno", benchmark:false },
-  { id:"lib5", category:"Open feedback", text:"What did we do well?", type:"text", benchmark:false },
-  { id:"lib6", category:"Open feedback", text:"What could we have done better?", type:"text", benchmark:false },
-  { id:"lib7", category:"Follow-up", text:"Would you like us to call you?", type:"yesno", benchmark:false },
-  { id:"lib8", category:"Communication", text:"Did the crew explain what they were doing during treatment?", type:"yesno", benchmark:false },
-  { id:"lib9", category:"Communication", text:"Were you given information about what to expect after your care?", type:"yesno", benchmark:false },
-  { id:"lib10", category:"Care quality", text:"Did the crew treat you with dignity and respect?", type:"yesno", benchmark:true },
-  { id:"lib11", category:"Response", text:"How would you rate the crew's response time?", type:"choice", options:["Excellent","Good","Fair","Poor"], benchmark:false },
-  { id:"lib12", category:"Care quality", text:"How would you rate the overall professionalism of the crew?", type:"choice", options:["Excellent","Good","Fair","Poor"], benchmark:false },
-  { id:"lib13", category:"Comfort", text:"Were you kept comfortable during transport?", type:"yesno", benchmark:false },
-  { id:"lib14", category:"Communication", text:"Did the crew speak with you in your preferred language or make efforts to communicate clearly?", type:"yesno", benchmark:false },
-  { id:"lib15", category:"Follow-up", text:"Would you like to recognize a crew member by name?", type:"text", benchmark:false },
-  { id:"lib16", category:"Open feedback", text:"Is there anything else you would like to share about your experience?", type:"text", benchmark:false },
-  { id:"lib17", category:"Care quality", text:"Was your pain managed as well as you expected?", type:"scale", benchmark:false },
-  { id:"lib18", category:"Communication", text:"Did someone explain what would happen at the hospital?", type:"yesno", benchmark:false },
-  { id:"lib19", category:"Care quality", text:"Was the ambulance clean?", type:"yesno", benchmark:false },
-  { id:"lib20", category:"Follow-up", text:"Did you have a way to reach us afterward if you had questions?", type:"yesno", benchmark:false }
-];
-const LIB_FILTERS = [
-  ["all","All"],
-  ["benchmark","Benchmark"],
-  ["Care quality","Care quality"],
-  ["Communication","Communication"],
-  ["Response","Response"],
-  ["Comfort","Comfort"],
-  ["Open feedback","Open feedback"],
-  ["Follow-up","Follow-up"],
-  ["Recommendation","Recommendation"]
+  { text:"Was your pain managed as well as you expected?", type:"scale" },
+  { text:"Did someone explain what would happen at the hospital?", type:"yesno" },
+  { text:"Was the ambulance clean?", type:"yesno" },
+  { text:"Did you have a way to reach us afterward if you had questions?", type:"yesno" },
+  { text:"What is one thing we could have done better?", type:"text" }
 ];
 
 const EQUITY = [
@@ -944,93 +900,6 @@ const ZONES = [
   { label:"Great Neck",       n:24, score:4.1 },
   { label:"New Hyde Park",    n:18, score:4.4 },
   { label:"Port Washington",  n:13, score:4.5 }
-];
-
-const TRIGGERS = [
-  { call:"#7741", patient:"M. Rodriguez, 54", crew:"Gilligan / Smith", unit:"M-12", impression:"Chest pain", mobile:true, status:"sent" },
-  { call:"#7738", patient:"C. Jean-Baptiste, 67", crew:"Baptiste / Lee", unit:"M-7", impression:"Syncope", mobile:true, status:"sent" },
-  { call:"#7735", patient:"A. Nguyen, 41", crew:"Hernandez / Williams", unit:"M-3", impression:"Fall / injury", mobile:true, status:"pending" },
-  { call:"#7732", patient:"L. Okafor, 29", crew:"Gilligan / Smith", unit:"M-12", impression:"Respiratory", mobile:true, status:"alert" },
-  { call:"#7729", patient:"E. Santos, 73", crew:"Sanchez / Tran", unit:"M-19", impression:"CVA / stroke", mobile:false, status:"excluded" },
-  { call:"#7727", patient:"P. Alvarez, 38", crew:"Baptiste / Lee", unit:"M-7", impression:"Abdominal pain", mobile:true, status:"sent" }
-];
-const TRIGGER_STATUS = {
-  sent:{ label:"Survey sent", cls:"fw-badge fw-badge--success" },
-  pending:{ label:"Pending response", cls:"fw-badge fw-badge--default" },
-  alert:{ label:"Alert fired", cls:"fw-badge fw-badge--destructive" },
-  excluded:{ label:"Excluded", cls:"fw-badge fw-badge--secondary" }
-};
-const INCLUSION_RULES = [
-  "Patient treated and transported",
-  "Age within configured range",
-  "GCS score meets threshold",
-  "Mental status: alert",
-  "Mobile number on record"
-];
-const EXCLUSION_RULES = [
-  "Suspected drug or alcohol involvement",
-  "Behavioral / psychiatric treatment codes",
-  "Specific mechanism of injury codes",
-  "Specific dispatch exclusion codes",
-  "No mobile number on record"
-];
-
-const SCORECARD_CREW = [
-  {
-    name:"D. Gilligan", initials:"DG", role:"Paramedic", unit:"M-12",
-    surveys:47, q1:4.7, rec:82, commend:12, flags:2,
-    ops:[
-      {metric:"Chute time (60 sec)", comp:"29.69%", calls:64, avg:"00:01:39", sysCalls:"1,227", sysAvg:"00:01:33", tone:"warn"},
-      {metric:"Charlie / Delta / Echo response (10 min)", comp:"54.55%", calls:55, avg:"00:08:12", sysCalls:"1,336", sysAvg:"00:07:09", tone:"good"},
-      {metric:"Bravo response time (12 min)", comp:"80.00%", calls:5, avg:"00:05:54", sysCalls:"55", sysAvg:"00:06:37", tone:"good"},
-      {metric:"Alpha response time (15 min)", comp:"100.00%", calls:3, avg:"00:07:00", sysCalls:"62", sysAvg:"00:06:01", tone:"good"},
-      {metric:"Transfer of care (10 min)", comp:"16.22%", calls:35, avg:"00:15:27", sysCalls:"705", sysAvg:"00:15:08", tone:"bad"},
-      {metric:"Hospital offload (30 min)", comp:"83.78%", calls:37, avg:"00:22:35", sysCalls:"705", sysAvg:"00:33:03", tone:"good"}
-    ],
-    protos:[
-      {name:"Universal", ind:"89.74%", calls:39, sys:"85.85%", tone:"good"},
-      {name:"ACS / STEMI", ind:"100.00%", calls:3, sys:"72.22%", tone:"good"},
-      {name:"Cardiac arrest", ind:"50.00%", calls:2, sys:"67.86%", tone:"warn"},
-      {name:"BLS release", ind:"100.00%", calls:1, sys:"82.35%", tone:"good"}
-    ]
-  },
-  { name:"R. Baptiste", initials:"RB", role:"Paramedic", unit:"M-7", surveys:39, q1:4.5, rec:75, commend:9, flags:1 },
-  { name:"M. Smith", initials:"MS", role:"EMT", unit:"M-12", surveys:47, q1:4.6, rec:79, commend:11, flags:2 },
-  { name:"P. Sanchez", initials:"PS", role:"Paramedic", unit:"M-19", surveys:31, q1:3.9, rec:58, commend:4, flags:4 },
-  { name:"K. Lee", initials:"KL", role:"EMT", unit:"M-7", surveys:39, q1:4.4, rec:72, commend:8, flags:1 }
-];
-const SCORECARD_HIGHLIGHTS = [
-  { k:"Avg care rating", v:"4.7 / 5", sub:"Agency avg: 4.2", accent:"var(--status-resolved)" },
-  { k:"Likely to recommend", v:"82%", sub:"Agency avg: 69%", accent:"var(--primary)" },
-  { k:"Felt listened to", v:"91% yes", sub:"Agency avg: 79%", accent:"var(--status-resolved)" },
-  { k:"Commendations", v:"12", sub:"Agency avg: 6.4", accent:"var(--primary)" },
-  { k:"Flagged responses", v:"2", sub:"Agency avg: 3.8 · lower is better", accent:"var(--status-resolved)" }
-];
-const SCORECARD_SURVEY = [
-  { k:"Avg care rating (Q1)", v:"4.7 / 5", sub:"Agency avg: 4.2 / 5", pct:94, accent:"var(--status-resolved)" },
-  { k:"Likelihood to recommend (Q2)", v:"82%", sub:"Agency avg: 69%", pct:82, accent:"var(--primary)" },
-  { k:"Felt listened to (Q3)", v:"91% yes", sub:"Agency avg: 79%", pct:91, accent:"var(--status-resolved)" },
-  { k:"Felt cared for (Q4)", v:"88% yes", sub:"Agency avg: 81%", pct:88, accent:"var(--status-resolved)" },
-  { k:"Commendations", v:"12", sub:"Agency avg: 6.4 per crew", pct:72, accent:"var(--primary)" },
-  { k:"Flagged responses", v:"2", sub:"Agency avg: 3.8 · lower is better", pct:12, accent:"var(--status-resolved)" }
-];
-
-const COMMENDATIONS = [
-  { id:"b1", crew:"Gilligan / Smith", unit:"M-12", call:"#7741",
-    text:"The crew were absolutely wonderful. They kept me calm the entire time and explained everything that was happening. I couldn't have asked for better care.",
-    patient:"M. Rodriguez", sent:false },
-  { id:"b2", crew:"Baptiste / Lee", unit:"M-7", call:"#7738",
-    text:"Muy profesionales y amables. Me hicieron sentir segura durante todo el traslado. Gracias a los dos.",
-    patient:"C. Jean-Baptiste", lang:"Spanish", sent:false },
-  { id:"b3", crew:"Hernandez / Williams", unit:"M-3", call:"#7735",
-    text:"Antonio and William treated my father like a king. Very kind, very caring. We are so grateful.",
-    patient:"A. Nguyen", sent:false },
-  { id:"b4", crew:"Sanchez / Tran", unit:"M-19", call:"#7698",
-    text:"Crew was calm and professional, stellar patient care. Thank you!",
-    patient:"F. Delgado", sent:true },
-  { id:"b5", crew:"Baptiste / Lee", unit:"M-7", call:"#7727",
-    text:"Smooth drive, caring, kind and compassionate crew. Thank you!",
-    patient:"P. Alvarez", sent:true }
 ];
 
 /* mutable runtime state */
@@ -1050,8 +919,6 @@ const state = {
   previewSurvey:false,
   previewQId:null,
   toast:null,
-  blinkSent:{},
-  libraryFilter:"all",
   survey:{ step:0, answers:{}, showDemo:false, demo:{} }
 };
 </script>
@@ -1091,9 +958,7 @@ const I = {
   moon:       s=>ic('<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',s),
   sun:        s=>ic('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/>',s),
   shield:     s=>ic('<path d="M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1 1 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/>',s),
-  info:       s=>ic('<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',s),
-  inbox:      s=>ic('<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1z"/>',s),
-  bolt:       s=>ic('<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/>',s)
+  inbox:      s=>ic('<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1z"/>',s)
 };
 
 const STATUS = {
@@ -1119,10 +984,7 @@ function shell(body){
   const nav = [
     ["#/","Overview"],
     ["#/alerts","Alerts"],
-    ["#/surveys","Surveys"],
-    ["#/triggers","Triggers"],
-    ["#/scorecard","Scorecard"],
-    ["#/blink","Blink"]
+    ["#/surveys","Surveys"]
   ];
   return `
   <div class="shell">
@@ -1131,6 +993,7 @@ function shell(body){
       <div class="brand">
         <img class="brand-mark" src="logo.png" width="24" height="24" alt="">
         Reflect
+        <span class="brand-sub">${AGENCY.name}</span>
       </div>
       <nav class="nav" aria-label="Reflect">
         ${nav.map(([h,l])=>{
@@ -1141,7 +1004,7 @@ function shell(body){
       </nav>
       <div class="spacer"></div>
       <div class="demo-switch">
-        <span class="brand-sub">${AGENCY.name}</span>
+        <!-- <span class="demo-tag" title="Demo affordance only — production uses real role claims">Demo</span> -->
         <div class="seg" role="group" aria-label="View as role">
           <button aria-pressed="${state.role==="supervisor"}" onclick="setRole('supervisor')">Supervisor</button>
           <button aria-pressed="${state.role==="leadership"}" onclick="setRole('leadership')">Leadership</button>
@@ -1242,286 +1105,6 @@ function viewOverview(){
     ${cardByDemographic()}
     ${cardAlertsByUnit()}
   </div>`;
-}
-
-function viewScorecard(){
-  const selected = SCORECARD_CREW[0];
-  const scoreClass = v => v>=4.3?"comp--good":v>=4.0?"comp--ok":"comp--warn";
-  const recClass = n => n>=75?"comp--good":n>=65?"comp--ok":"comp--warn";
-
-  return `
-  <div class="page-head">
-    <div class="crumbs"><a href="#/">Reflect</a><span class="sep">/</span><span>Scorecard</span></div>
-    <div>
-      <h1 class="t-h2">Employee scorecard</h1>
-      <p class="t-p dim">FirstPass integration · ${day(mins(43200))} to ${day(NOW)}</p>
-    </div>
-  </div>
-
-  <section class="fw-card fw-card-flush">
-    <div class="score-hero fw-navy">
-      <span class="fw-avatar fw-avatar--lg" aria-hidden="true">${selected.initials}</span>
-      <div>
-        <div class="score-hero-name">${esc(selected.name)}</div>
-        <div class="score-hero-meta">${esc(selected.role)} · ${esc(selected.unit)} · ${esc(AGENCY.name)}</div>
-      </div>
-    </div>
-  </section>
-
-  <div class="score-kpis sec">
-    ${SCORECARD_HIGHLIGHTS.map(h=>`
-      <div class="stat-cell stat-cell--accent" style="--stat-accent:${h.accent}">
-        <div class="stat-k">${esc(h.k)}</div>
-        <div class="stat-v" style="color:${h.accent}">${esc(h.v)}</div>
-        <div class="stat-sub">${esc(h.sub)}</div>
-      </div>`).join("")}
-  </div>
-
-  <section class="fw-card sec">
-    <h2 class="t-h4">Operations</h2>
-    <div class="tbl-wrap mt16">
-      <table class="tbl">
-        <thead>
-          <tr>
-            <th>Metric</th>
-            <th class="group" colspan="3">Individual</th>
-            <th class="group group-sys" colspan="2">System</th>
-          </tr>
-          <tr>
-            <th></th>
-            <th>Comp %</th><th>Calls</th><th>Avg time</th>
-            <th>Calls</th><th>Avg time</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${selected.ops.map(r=>`
-            <tr>
-              <td>${esc(r.metric)}</td>
-              <td class="comp comp--${r.tone}">${esc(r.comp)}</td>
-              <td>${r.calls}</td>
-              <td class="dim">${esc(r.avg)}</td>
-              <td class="dim">${esc(r.sysCalls)}</td>
-              <td class="dim">${esc(r.sysAvg)}</td>
-            </tr>`).join("")}
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section class="fw-card sec">
-    <h2 class="t-h4">FirstPass protocols</h2>
-    <div class="tbl-wrap mt16">
-      <table class="tbl">
-        <thead><tr><th>Protocol</th><th>Individual %</th><th>Calls</th><th>System %</th></tr></thead>
-        <tbody>
-          ${selected.protos.map(r=>`
-            <tr>
-              <td>${esc(r.name)}</td>
-              <td class="comp comp--${r.tone}">${esc(r.ind)}</td>
-              <td>${r.calls}</td>
-              <td class="dim">${esc(r.sys)}</td>
-            </tr>`).join("")}
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section class="fw-card sec">
-    <h2 class="t-h4">Patient survey results</h2>
-    <p class="t-subtle dim mt8">${esc(selected.name)} vs. ${esc(AGENCY.name)} average · last 30 days</p>
-    <div class="grid g-2 mt16">
-      ${SCORECARD_SURVEY.map(h=>`
-        <div class="stat-cell stat-cell--accent" style="--stat-accent:${h.accent}">
-          <div class="stat-k">${esc(h.k)}</div>
-          <div class="stat-v" style="color:${h.accent}">${esc(h.v)}</div>
-          <span class="bar score-meter"><i style="width:${h.pct}%;background:${h.accent}"></i></span>
-          <div class="stat-sub">${esc(h.sub)}</div>
-        </div>`).join("")}
-    </div>
-  </section>
-
-  <section class="fw-card sec">
-    <h2 class="t-h4">All crew · last 30 days</h2>
-    <div class="tbl-wrap mt16">
-      <table class="tbl">
-        <thead><tr>
-          <th>Crew member</th><th>Unit</th><th>Surveys</th><th>Avg Q1</th><th>% Recommend</th><th>Commendations</th><th>Flags</th>
-        </tr></thead>
-        <tbody>
-          ${SCORECARD_CREW.map((c,i)=>`
-            <tr class="${i===0?"row-current":""}">
-              <td>
-                <span class="crew-name">${esc(c.name)}${i===0?I.starFill(14):""}</span>
-              </td>
-              <td class="mono">${esc(c.unit)}</td>
-              <td>${c.surveys}</td>
-              <td class="comp ${scoreClass(c.q1)}">${c.q1.toFixed(1)}</td>
-              <td class="comp ${recClass(c.rec)}">${c.rec}%</td>
-              <td>${c.commend}</td>
-              <td${c.flags>=4?' class="flag-hot"':""}>${c.flags}</td>
-            </tr>`).join("")}
-        </tbody>
-      </table>
-    </div>
-  </section>`;
-}
-
-function viewBlink(){
-  const pending = COMMENDATIONS.filter(c=>!c.sent && !state.blinkSent[c.id]);
-  const posted = COMMENDATIONS.filter(c=>c.sent || state.blinkSent[c.id]);
-
-  const postCard = c => {
-    const just = !!state.blinkSent[c.id];
-    return `
-      <article class="blink-post">
-        <div class="blink-post-head">
-          <span class="fw-avatar fw-avatar--sm" aria-hidden="true">FW</span>
-          <div>
-            <div class="blink-post-name">Reflect</div>
-            <div class="blink-post-to">To: ${esc(c.crew)}</div>
-          </div>
-          <span class="fw-badge blink-post-status ${just?"fw-badge--default":"fw-badge--success"}">${just?"Just sent":"Sent"}</span>
-        </div>
-        <p class="blink-post-text">${esc(c.text)}</p>
-        <div class="blink-post-by">— ${esc(c.patient)}</div>
-      </article>`;
-  };
-
-  return `
-  <div class="page-head">
-    <div class="crumbs"><a href="#/">Reflect</a><span class="sep">/</span><span>Blink</span></div>
-    <div>
-      <h1 class="t-h2">Blink export</h1>
-      <p class="t-p dim">Review patient commendations and send them to crew Blink boards.</p>
-    </div>
-  </div>
-
-  <div class="grid g-2 col-start">
-    <section>
-      <h2 class="t-h4">Pending moderation (${pending.length})</h2>
-      <div class="mt16">
-        ${pending.length?pending.map(c=>`
-          <article class="fw-card commend">
-            <div class="w-semibold t-subtle">${esc(c.crew)}</div>
-            <div class="commend-meta mt8">${esc(c.unit)} · Call ${esc(c.call)}${c.lang?` · ${esc(c.lang)}`:""}</div>
-            <p class="commend-quote">${esc(c.text)}</p>
-            <div class="commend-by">— ${esc(c.patient)}, patient</div>
-            <div class="commend-actions">
-              <button class="fw-btn fw-btn--primary fw-btn--sm" onclick="blinkSend('${c.id}')">${I.arrow(14)} Send to Blink</button>
-              <button class="fw-btn fw-btn--outline fw-btn--sm" onclick="toast('Editing isn\\'t wired up in this prototype')">Edit</button>
-            </div>
-          </article>`).join(""):`
-          <div class="fw-card blink-empty">
-            <div>${I.checkCircle(24)}</div>
-            <p class="t-subtle mt8">All commendations sent.</p>
-          </div>`}
-      </div>
-    </section>
-    <section>
-      <h2 class="t-h4">Sent to Blink (${posted.length})</h2>
-      <div class="blink-board mt16">
-        <div class="blink-board-bar">
-          <span class="blink-board-title">Blink</span>
-          <span class="blink-board-sub">Crew recognition feed</span>
-        </div>
-        <div class="blink-feed">
-          ${posted.length?posted.map(postCard).join(""):`
-            <div class="blink-empty">Nothing on the board yet.</div>`}
-        </div>
-      </div>
-    </section>
-  </div>`;
-}
-
-function triggerStatusBadge(k){
-  const s = TRIGGER_STATUS[k];
-  return `<span class="${s.cls}">${s.label}</span>`;
-}
-
-function viewTriggers(){
-  return `
-  <div class="page-head">
-    <div class="crumbs"><a href="#/">Reflect</a><span class="sep">/</span><span>Triggers</span></div>
-    <div>
-      <h1 class="t-h2">Triggers</h1>
-      <p class="t-p dim">Every qualifying encounter is identified and queued for a survey. No one has to send it by hand.</p>
-    </div>
-  </div>
-
-  <div class="fw-alert fw-alert--info" role="status">
-    <span class="fw-alert__icon">${I.bolt(20)}</span>
-    <p class="fw-alert__desc">Triggers check every incoming call against your agency's eligibility rules. Qualifying patients get an SMS survey automatically.</p>
-  </div>
-
-  <section class="fw-card fw-card-flush sec">
-    <div class="fw-card-head">
-      <div>
-        <h2 class="t-h4">Recent qualifying encounters</h2>
-        <p class="t-subtle dim mt8">${esc(AGENCY.name)} · live monitoring</p>
-      </div>
-      <div class="live-tag"><span class="live-dot" aria-hidden="true"></span> Live</div>
-    </div>
-    <table class="tbl">
-      <thead><tr>
-        <th>Call #</th><th>Patient</th><th>Crew</th><th>Unit</th><th>Impression</th><th>Mobile</th><th>Status</th>
-      </tr></thead>
-      <tbody>
-        ${TRIGGERS.map(t=>`
-          <tr>
-            <td class="mono">${esc(t.call)}</td>
-            <td>${esc(t.patient)}</td>
-            <td class="dim">${esc(t.crew)}</td>
-            <td class="mono">${esc(t.unit)}</td>
-            <td>${esc(t.impression)}</td>
-            <td>${t.mobile
-              ? `<span class="icon-yes" title="Mobile on record">${I.check(16)}<span class="sr">Yes</span></span>`
-              : `<span class="icon-no" title="No mobile on record">${I.x(16)}<span class="sr">No</span></span>`}</td>
-            <td>${triggerStatusBadge(t.status)}</td>
-          </tr>`).join("")}
-      </tbody>
-    </table>
-  </section>
-
-  <div class="grid g-2 sec">
-    <section class="fw-card">
-      <div class="row rule-head">
-        <span class="rule-head--in">${I.checkCircle(18)}</span>
-        <h2 class="t-h4">Inclusion criteria</h2>
-      </div>
-      <div class="rule-list">
-        ${INCLUSION_RULES.map(r=>`
-          <div class="rule rule--in">
-            <span class="rule-ico">${I.checkCircle(16)}</span>
-            <span>${esc(r)}</span>
-          </div>`).join("")}
-      </div>
-      <p class="t-detail dim mt16">All inclusion criteria must be met for a survey to be queued.</p>
-    </section>
-    <section class="fw-card">
-      <div class="row rule-head">
-        <span class="rule-head--out">${I.x(18)}</span>
-        <h2 class="t-h4">Exclusion criteria</h2>
-      </div>
-      <div class="rule-list">
-        ${EXCLUSION_RULES.map(r=>`
-          <div class="rule rule--out">
-            <span class="rule-ico">${I.x(16)}</span>
-            <span>${esc(r)}</span>
-          </div>`).join("")}
-      </div>
-      <p class="t-detail dim mt16">If any exclusion criterion is matched, the encounter is skipped.</p>
-    </section>
-  </div>
-
-  <section class="fw-card fw-card--dashed sec">
-    <div class="row timing">
-      <span class="sec-icon">${I.shield(20)}</span>
-      <div>
-        <h2 class="t-h4">Timing and delivery</h2>
-        <p class="t-body dim mt8">Surveys go out by SMS within minutes of transport. Each qualifying encounter gets one unique link. Links expire after your agency's window. Patients pick a language before they start.</p>
-      </div>
-    </div>
-  </section>`;
 }
 
 /* ============================================================
@@ -1844,36 +1427,15 @@ function viewSurveys(){
       <div class="fw-card sec">
         <h2 class="t-h4">Question library</h2>
         <p class="t-subtle dim mt8">Wording other agencies have already tested.</p>
-        <div class="lib-filters" role="group" aria-label="Filter library">
-          ${LIB_FILTERS.map(([id,label])=>`
-            <button type="button" class="lib-chip" aria-pressed="${state.libraryFilter===id}"
-              onclick="setLibraryFilter('${id}')">${label}</button>`).join("")}
-        </div>
-        <div class="lib-list">
-          ${(() => {
-            const filter = state.libraryFilter;
-            const rows = filter==="all" ? LIBRARY
-              : filter==="benchmark" ? LIBRARY.filter(l=>l.benchmark)
-              : LIBRARY.filter(l=>l.category===filter);
-            const added = new Set(qs.map(q=>q.text.trim().toLowerCase()));
-            if(!rows.length) return `<p class="t-subtle dim">No questions in this category.</p>`;
-            return rows.map(l=>{
-              const already = added.has(l.text.trim().toLowerCase());
-              return `
-            <div class="qcard${already?" added":""}">
-              <div style="flex:1;min-width:0">
+        <div class="mt16">
+          ${LIBRARY.map((l,i)=>`
+            <div class="qcard">
+              <div style="flex:1">
                 <div class="t-pui">${esc(l.text)}</div>
-                <div class="qmeta">
-                  <span class="fw-badge fw-badge--secondary">${esc(l.category)}</span>
-                  <span class="fw-badge fw-badge--outline">${TYPE_LABEL[l.type]||l.type}</span>
-                  ${l.benchmark?`<span class="fw-badge fw-badge--warning">${I.lock(12)}Benchmark</span>`:""}
-                </div>
+                <div class="qmeta"><span class="fw-badge fw-badge--secondary">${TYPE_LABEL[l.type]}</span></div>
               </div>
-              <button class="fw-btn fw-btn--${already?"outline":"primary"} fw-btn--sm"
-                ${already?"disabled":""} onclick="addFromLib('${l.id}')">${already?"Added":"Add"}</button>
-            </div>`;
-            }).join("");
-          })()}
+              <button class="fw-btn fw-btn--outline fw-btn--sm" onclick="addFromLib(${i})">Add</button>
+            </div>`).join("")}
         </div>
       </div>
 
@@ -2050,6 +1612,36 @@ function cardByDemographic(){
       <p class="t-detail dim mt16">Groups with fewer than 10 responses are hidden to protect anonymity.</p>
     </section>`;
 }
+function cardByArea(){
+  return `
+    <section class="fw-card">
+      <h2 class="t-h4">By area</h2>
+      <p class="t-subtle dim mt8">Average score by response zone.</p>
+      <div class="bars">
+        ${ZONES.map((z,i)=>`<div class="bar-row">
+          <span>${esc(z.label)} <span class="dim">(${z.n})</span></span>
+          <span class="bar"><i style="width:${(z.score/5*100).toFixed(0)}%;animation-delay:${i*50}ms;
+            background:${z.score<4?"var(--status-elevated)":"var(--primary)"}"></i></span>
+          <span style="text-align:right" class="${z.score<4?"gap-flag":""}">${z.score.toFixed(1)}</span>
+        </div>`).join("")}
+      </div>
+      <div class="mt24">
+        <h3 class="t-subtle" style="font-weight:700">Alerts by unit</h3>
+        <table class="tbl mt8">
+          <thead><tr><th>Unit</th><th>Open</th><th>Followed up</th></tr></thead>
+          <tbody>
+            ${["M-12","E-7","M-3","M-8","E-2"].map(u=>{
+              const o = state.alerts.filter(a=>a.unit===u&&a.status!=="resolved").length;
+              const r = state.alerts.filter(a=>a.unit===u&&a.status==="resolved").length;
+              return `<tr><td><span class="mono">${u}</span></td>
+                <td>${o?`<span style="color:var(--status-elevated);font-weight:700">${o}</span>`:`<span class="dim">0</span>`}</td>
+                <td class="dim">${r}</td></tr>`;}).join("")}
+          </tbody>
+        </table>
+      </div>
+    </section>`;
+}
+
 function cardAlertsByUnit(){
   return `
     <section class="fw-card">
@@ -2074,82 +1666,34 @@ function cardAlertsByUnit(){
 /* ============================================================
    8. PATIENT SURVEY
    ============================================================ */
-function pProgress(total, idx){
-  return `<div class="p-progress" role="progressbar" aria-valuemin="1" aria-valuemax="${total}" aria-valuenow="${Math.min(idx+1,total)}">
-    ${Array.from({length:total},(_,i)=>`<i class="${i<idx?"done":i===idx?"now":""}"></i>`).join("")}
-  </div>`;
-}
-function pChoice(labelHtml, {pressed=false, onclick}={}){
-  if(onclick){
-    return `<button type="button" class="p-opt" aria-pressed="${pressed}" onclick="${onclick}">
-      <span class="p-tick" aria-hidden="true"></span>${labelHtml}</button>`;
-  }
-  return `<div class="p-opt"><span class="p-tick" aria-hidden="true"></span>${labelHtml}</div>`;
-}
-function pQuestionHead(q, idx, total){
-  return `${pProgress(total, idx)}
-    <div class="p-step">
-      <span class="t-detail dim">Question ${idx+1} of ${total}</span>
-      ${q.required?"":`<span class="fw-badge fw-badge--secondary">Optional</span>`}
-    </div>
-    <h1 class="t-h3 mt8">${esc(q.text)}</h1>
-    ${q.help?`<p class="t-body dim mt8">${esc(q.help)}</p>`:""}`;
-}
-function pQuestionFields(q, {interactive=false, val}={}){
-  const group = interactive ? "radiogroup" : "group";
-  if(q.type==="yesno"){
-    return `<div class="p-opts" role="${group}" aria-label="${esc(q.text)}">
-      ${["Yes","No"].map(o=>pChoice(o,{
-        pressed: interactive && val===o,
-        onclick: interactive ? `pAnswer('${q.id}','${o}',this)` : null
-      })).join("")}
-    </div>`;
-  }
-  if(q.type==="choice"){
-    return `<div class="p-opts" role="${group}" aria-label="${esc(q.text)}">
-      ${(q.options||[]).map(o=>pChoice(esc(o),{
-        pressed: interactive && val===o,
-        onclick: interactive ? `pAnswer('${q.id}',${esc(JSON.stringify(o))},this)` : null
-      })).join("")}
-    </div>`;
-  }
-  if(q.type==="scale"){
-    const tag = interactive ? "button" : "div";
-    return `<div class="p-scale" role="${group}" aria-label="${esc(q.text)}">
-      ${[1,2,3,4,5].map(n=>{
-        const on = interactive && Number(val)===n;
-        const attrs = interactive
-          ? `type="button" aria-pressed="${on}" onclick="pAnswer('${q.id}',${n},this)"`
-          : "";
-        const label = (q.labels && q.labels[n-1]) ? `<span>${esc(q.labels[n-1])}</span>` : "";
-        return `<${tag} class="p-scale-btn" ${attrs}>${n}${label}</${tag}>`;
-      }).join("")}
-    </div>`;
-  }
-  return `<div class="p-fields">
-    <textarea class="fw-input fw-textarea"${interactive?` id="ptext" maxlength="600" oninput="pText('${q.id}',this.value)"`:` readonly tabindex="-1"`} placeholder="Type your answer…">${interactive&&val?esc(val):""}</textarea>
-    ${interactive?`<p class="t-detail dim p-count">${(val||"").length} of 600</p>`:""}
-  </div>`;
-}
-
 function patientPreview(){
   const qs = qList();
   const idx = previewQIndex();
   const q = idx>=0 ? qs[idx] : null;
   if(!q){
-    return `<div class="patient patient--embed">
+    return `<div class="patient" style="min-height:0;padding:20px 16px 28px">
       <div class="p-wrap">
-        <div class="fw-card fw-card--flat p-card">
-          <p class="t-body dim">Add a question to see the patient preview.</p>
+        <div class="p-card" style="padding:24px 20px;box-shadow:none">
+          <p class="p-help">Add a question to see the patient preview.</p>
         </div>
       </div>
     </div>`;
   }
-  return `<div class="patient patient--embed">
+  return `<div class="patient" style="min-height:0;padding:20px 16px 28px">
     <div class="p-wrap">
-      <div class="fw-card fw-card--flat p-card">
-        ${pQuestionHead(q, idx, qs.length)}
-        ${pQuestionFields(q)}
+      <div class="p-card" style="padding:24px 20px;box-shadow:none">
+        <div class="p-progress">${qs.map((_,i)=>`<i class="${i<idx?"done":i===idx?"now":""}"></i>`).join("")}</div>
+        <div class="p-step">Question ${idx+1} of ${qs.length}${q.required?"":" · optional"}</div>
+        <h1 class="p-q mt8" style="font-size:21px;line-height:28px">${esc(q.text)}</h1>
+        ${q.type==="yesno"?`<div class="p-opts">
+          ${["Yes","No"].map(o=>`<div class="p-opt" style="min-height:48px;font-size:16px">
+            <span class="p-tick"></span>${o}</div>`).join("")}</div>`:""}
+        ${q.type==="scale"?`<div class="p-scale">${[1,2,3,4,5].map(n=>`
+          <div style="flex:1;min-height:52px;border:1px solid var(--p-rule);border-radius:12px;background:var(--p-face);
+            display:grid;place-items:center;font-weight:700">${n}</div>`).join("")}</div>`:""}
+        ${q.type==="text"?`<div class="p-text" style="min-height:90px;color:var(--p-placeholder);font-size:16px">Type your answer…</div>`:""}
+        ${q.type==="choice"?`<div class="p-opts">${(q.options||[]).map(o=>`
+          <div class="p-opt" style="min-height:48px;font-size:16px"><span class="p-tick"></span>${esc(o)}</div>`).join("")}</div>`:""}
       </div>
     </div>
   </div>`;
@@ -2164,18 +1708,17 @@ function viewPatient(){
   if(S.step === -1){
     return `<div class="patient"><div class="p-wrap">
       <div class="p-lock">${I.lock(12)} Private — only ${AGENCY.name} sees this</div>
-      <div class="fw-card p-card">
+      <div class="p-card">
         <div class="p-view">
-        <h1 class="t-h2">A few questions about your ride with ${AGENCY.name}.</h1>
-        <p class="t-body dim mt16">${total} questions, about a minute. Skip anything you'd rather not answer,
+        <h1 class="p-display">A few questions about your ride with ${AGENCY.name}.</h1>
+        <p class="p-lede">${total} questions, about a minute. Skip anything you'd rather not answer,
           and stop whenever you want.</p>
-        <div class="fw-alert fw-alert--info mt16">
-          <span class="fw-alert__icon">${I.shield(20)}</span>
-          <p class="fw-alert__desc">Your answers go to a supervisor, not to the crew who treated you.
-            Nothing here changes your bill or your care.</p>
+        <div class="p-note">
+          Your answers go to a supervisor, not to the crew who treated you.
+          Nothing here changes your bill or your care.
         </div>
         <div class="p-actions">
-          <button class="fw-btn fw-btn--primary fw-btn--lg p-next" onclick="pStart()">Start</button>
+          <button class="p-next" onclick="pStart()">Start</button>
         </div>
         </div>
       </div>
@@ -2187,49 +1730,47 @@ function viewPatient(){
   if(S.step === total){
     return `<div class="patient"><div class="p-wrap">
       <div class="p-lock">${I.lock(12)} Private — only ${AGENCY.name} sees this</div>
-      <div class="fw-card p-card">
+      <div class="p-card">
         <div class="p-view">
-        ${pProgress(total, total)}
-        <div class="p-step">
-          <span class="fw-badge fw-badge--secondary">Optional</span>
+        <div class="p-progress">${qs.map(()=>`<i class="done"></i>`).join("")}</div>
+        <div class="row" style="gap:8px;margin-bottom:8px">
+          <span class="p-optional">Optional</span>
         </div>
-        <h1 class="t-h3 mt8">Three questions about you — only if you want.</h1>
-        <p class="t-body dim mt8">We ask so we can check whether some people get a worse experience than others.
+        <h1 class="p-q">Three questions about you — only if you want.</h1>
+        <p class="p-help">We ask so we can check whether some people get a worse experience than others.
           You can send your answers without filling any of this in.</p>
 
-        <div class="fw-field p-fieldset">
-          <label class="fw-label" for="p-age">Your age</label>
-          <select class="fw-input" id="p-age" onchange="pDemo('age',this.value)">
+        <fieldset class="p-fieldset">
+          <legend>Your age</legend>
+          <select class="p-select" onchange="pDemo('age',this.value)">
             <option value="">Prefer not to say</option>
             ${["18–24","25–34","35–44","45–54","55–64","65–74","75 or older"].map(o=>
               `<option ${S.demo.age===o?"selected":""}>${o}</option>`).join("")}
           </select>
-        </div>
-        <div class="fw-field p-fieldset">
-          <label class="fw-label" for="p-lang">The language you're most comfortable in</label>
-          <select class="fw-input" id="p-lang" onchange="pDemo('lang',this.value)">
+        </fieldset>
+        <fieldset class="p-fieldset">
+          <legend>The language you're most comfortable in</legend>
+          <select class="p-select" onchange="pDemo('lang',this.value)">
             <option value="">Prefer not to say</option>
             ${["English","Spanish","Vietnamese","Tagalog","Arabic","Another language"].map(o=>
               `<option ${S.demo.lang===o?"selected":""}>${o}</option>`).join("")}
           </select>
-        </div>
-        <div class="fw-field p-fieldset">
-          <label class="fw-label" for="p-eth">How you describe your race or ethnicity</label>
-          <select class="fw-input" id="p-eth" onchange="pDemo('eth',this.value)">
+        </fieldset>
+        <fieldset class="p-fieldset">
+          <legend>How you describe your race or ethnicity</legend>
+          <select class="p-select" onchange="pDemo('eth',this.value)">
             <option value="">Prefer not to say</option>
             ${["American Indian or Alaska Native","Asian","Black or African American",
                "Hispanic or Latino","Middle Eastern or North African",
                "Native Hawaiian or Pacific Islander","White","More than one"].map(o=>
               `<option ${S.demo.eth===o?"selected":""}>${o}</option>`).join("")}
           </select>
-        </div>
+        </fieldset>
 
         <div class="p-actions">
-          <div class="p-cta">
-            <button class="fw-btn fw-btn--primary fw-btn--lg p-next" onclick="pFinish()">Send my answers</button>
-            <button class="fw-btn fw-btn--link p-back" onclick="pBack()">Back</button>
-          </div>
+          <button class="p-next" onclick="pFinish()">Send my answers</button>
         </div>
+        <button class="p-back" onclick="pBack()">Back</button>
         </div>
       </div>
       <p class="p-foot">Reflect · ${AGENCY.name}</p>
@@ -2244,20 +1785,18 @@ function viewPatient(){
       if(k==="q3" || k==="q4") return v==="No";
       return false;
     });
-    return `<div class="patient"><div class="p-wrap">
-      <div class="fw-card p-card" style="text-align:center">
+    return `<div class="patient"><div class="p-wrap p-done">
+      <div class="p-card" style="text-align:center">
         <div class="p-view">
-        <div class="p-seal">${I.check(22)}</div>
-        <h1 class="t-h2">Thank you — that's genuinely useful.</h1>
-        <p class="t-body dim mt16">Someone at ${AGENCY.name} will read this. You don't need to do anything else.</p>
-        ${low?`<div class="fw-alert fw-alert--warning mt16" style="text-align:left">
-          <span class="fw-alert__icon">${I.info(20)}</span>
-          <p class="fw-alert__desc">You told us something went wrong. A supervisor will see this today and may call you
-            if you left a number. We can't promise a particular outcome, but this doesn't disappear
-            into a spreadsheet — a person reads it.</p>
-        </div>`:`<div class="fw-alert fw-alert--info mt16" style="text-align:left">
-          <span class="fw-alert__icon">${I.info(20)}</span>
-          <p class="fw-alert__desc">If you think of something later, the link in your message stays open for 14 days.</p>
+        <div class="p-seal" style="color:var(--p-amber-deep)">${I.check(26)}</div>
+        <h1 class="p-display">Thank you — that's genuinely useful.</h1>
+        <p class="p-lede">Someone at ${AGENCY.name} will read this. You don't need to do anything else.</p>
+        ${low?`<div class="p-note" style="text-align:left">
+          You told us something went wrong. A supervisor will see this today and may call you
+          if you left a number. We can't promise a particular outcome, but this doesn't disappear
+          into a spreadsheet — a person reads it.
+        </div>`:`<div class="p-note" style="text-align:left">
+          If you think of something later, the link in your message stays open for 14 days.
         </div>`}
         </div>
       </div>
@@ -2269,23 +1808,41 @@ function viewPatient(){
   const q = qs[S.step];
   const val = S.answers[q.id];
   const answered = val !== undefined && val !== "";
+  const body =
+    q.type==="yesno" ? `<div class="p-opts">
+        ${["Yes","No"].map(o=>`<button class="p-opt" aria-pressed="${val===o}" onclick="pAnswer('${q.id}','${o}',this)">
+          <span class="p-tick">${I.check(13)}</span>${o}</button>`).join("")}</div>`
+    : q.type==="choice" ? `<div class="p-opts">
+        ${(q.options||[]).map(o=>`<button class="p-opt" aria-pressed="${val===o}"
+          onclick="pAnswer('${q.id}',${esc(JSON.stringify(o))},this)">
+          <span class="p-tick">${I.check(13)}</span>${esc(o)}</button>`).join("")}</div>`
+    : q.type==="scale" ? `<div class="p-scale" role="group" aria-label="${esc(q.text)}">
+        ${[1,2,3,4,5].map(n=>`<button aria-pressed="${Number(val)===n}" onclick="pAnswer('${q.id}',${n},this)">
+          ${n}<span>${(q.labels&&q.labels[n-1])||""}</span></button>`).join("")}</div>`
+    : `<textarea class="p-text" id="ptext" maxlength="600"
+         placeholder="Whatever you want to say. It's read by a person."
+         oninput="pText('${q.id}',this.value)">${val?esc(val):""}</textarea>
+       <div class="p-count">${(val||"").length} of 600</div>`;
 
   return `<div class="patient"><div class="p-wrap">
     <div class="p-lock">${I.lock(12)} Private — only ${AGENCY.name} sees this</div>
-    <div class="fw-card p-card">
+    <div class="p-card">
       <div class="p-view">
-      ${pQuestionHead(q, S.step, total)}
-      ${pQuestionFields(q, {interactive:true, val})}
-      <div class="p-actions">
-        <div class="p-cta">
-          <button class="fw-btn fw-btn--primary fw-btn--lg p-next" ${q.required&&!answered?"disabled":""} onclick="pNext()">
-            ${S.step===total-1?"Almost done":"Next"}</button>
-          ${S.step>0?`<button class="fw-btn fw-btn--link p-back" onclick="pBack()">Back</button>`:""}
-        </div>
-        ${q.required?"":`<button class="fw-btn fw-btn--ghost" onclick="pSkip()">Skip</button>`}
+      <div class="p-progress">
+        ${qs.map((_,i)=>`<i class="${i<S.step?"done":i===S.step?"now":""}"></i>`).join("")}
       </div>
-      ${q.required&&!answered?`<p class="t-body dim mt16" data-need-answer>Pick an answer to keep going,
+      <div class="p-step">Question ${S.step+1} of ${total}${q.required?"":" · optional"}</div>
+      <h1 class="p-q mt8">${esc(q.text)}</h1>
+      ${q.help?`<p class="p-help">${esc(q.help)}</p>`:""}
+      ${body}
+      <div class="p-actions">
+        <button class="p-next" ${q.required&&!answered?"disabled":""} onclick="pNext()">
+          ${S.step===total-1?"Almost done":"Next"}</button>
+        ${q.required?"":`<button class="p-skip" onclick="pSkip()">Skip</button>`}
+      </div>
+      ${q.required&&!answered?`<p class="p-help" data-need-answer style="margin-top:12px">Pick an answer to keep going,
         or close the page if you'd rather not.</p>`:""}
+      ${S.step>0?`<button class="p-back" onclick="pBack()">Back</button>`:""}
       </div>
     </div>
     <p class="p-foot">Reflect · ${AGENCY.name}</p>
@@ -2308,11 +1865,6 @@ function toast(msg){
   state.toast = msg; render();
   clearTimeout(toastTimer);
   toastTimer = setTimeout(()=>{ state.toast=null; render(); }, 2600);
-}
-
-function blinkSend(id){
-  state.blinkSent[id] = true;
-  toast("Sent to Blink feed.");
 }
 
 function openAlert(id){ state.openAlert = id; render(); }
@@ -2380,29 +1932,14 @@ function addQ(type){
   syncQuestionCount(surveyIdFromHash() || "sv_post");
   render(); toast("Question added.");
 }
-function addFromLib(id){
-  const l = LIBRARY.find(x=>x.id===id);
-  if(!l) return;
-  const already = qList().some(q=>q.text.trim().toLowerCase()===l.text.trim().toLowerCase());
-  if(already){ toast("That question is already in this survey."); return; }
-  const qid = "q"+(++qn);
-  qList().push({
-    id: qid,
-    text: l.text,
-    type: l.type,
-    required: !!l.benchmark,
-    locked: !!l.benchmark,
-    lockNote: l.benchmark ? "Benchmark question — shared wording across participating agencies" : undefined,
-    options: l.options ? [...l.options] : undefined,
-    labels: l.type==="scale" ? ["Poor","","","","Excellent"] : undefined
-  });
-  state.previewQId = qid;
+function addFromLib(i){
+  const l = LIBRARY[i];
+  const id = "q"+(++qn);
+  qList().push({ id, text:l.text, type:l.type, required:false, locked:false,
+    labels: l.type==="scale" ? ["Poor","","","","Excellent"] : undefined });
+  state.previewQId = id;
   syncQuestionCount(surveyIdFromHash() || "sv_post");
   render(); toast("Added from library.");
-}
-function setLibraryFilter(f){
-  state.libraryFilter = f;
-  render();
 }
 
 let sn = 100;
@@ -2617,9 +2154,6 @@ function render(){
   }
   let body;
   if(h==="#/alerts") body = viewAlerts();
-  else if(h==="#/triggers") body = viewTriggers();
-  else if(h==="#/scorecard") body = viewScorecard();
-  else if(h==="#/blink") body = viewBlink();
   else if(h==="#/surveys") body = viewSurveysIndex();
   else if(isResponsesRoute(h)) body = viewSurveyResponses();
   else if(h.startsWith("#/surveys/")) body = viewSurveys();

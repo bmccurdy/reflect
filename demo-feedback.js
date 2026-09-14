@@ -60,6 +60,12 @@
       page = "Patient survey";
     } else if (hash === "#/alerts") {
       page = "Alerts";
+    } else if (hash === "#/triggers") {
+      page = "Triggers";
+    } else if (hash === "#/scorecard") {
+      page = "Scorecard";
+    } else if (hash === "#/blink") {
+      page = "Blink";
     } else if (hash === "#/surveys") {
       page = "Surveys";
     } else if (hash.startsWith("#/surveys/")) {
@@ -68,8 +74,6 @@
       const title = document.querySelector("h1.t-h2");
       const name = title ? title.textContent.trim() : "";
       page = name ? "Survey: " + name : "Survey builder";
-    } else if (hash === "#/insights") {
-      page = "Insights";
     }
     const roleBtn = document.querySelector('.seg button[aria-pressed="true"]');
     const role = patient ? "Patient" : (roleBtn ? roleBtn.textContent.trim() : "Unknown");

@@ -1,0 +1,11 @@
+{
+  "name": "reflect",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "screenshot": "node hires-screenshot.mjs"
+  },
+  "dependencies": {
+    "playwright-core": "^1.62.1"
+  }
+}
