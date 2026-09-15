@@ -739,6 +739,10 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   .kpi-label{font-size:13px;line-height:18px}
   .kpi-foot{padding-top:8px;font-size:11px}
   .between{flex-direction:column;align-items:stretch;gap:12px}
+  .between--inline{
+    flex-direction:row;align-items:flex-start;gap:12px;
+  }
+  .between--inline .fw-badge{flex:0 0 auto}
   .fw-card-head{flex-wrap:wrap}
   .kv{grid-template-columns:1fr}
   .t-h1{font-size:34px;line-height:38px}
@@ -2233,7 +2237,7 @@ function viewSurveys(){
   <div class="split">
     <div>
       <div class="fw-card">
-        <div class="between" style="margin-bottom:16px">
+        <div class="between between--inline" style="margin-bottom:16px">
           <div>
             <h2 class="t-h4">Questions</h2>
             <p class="t-subtle dim mt8">Drag to reorder. Benchmark questions can't be edited.</p>
