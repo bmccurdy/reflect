@@ -6,11 +6,6 @@
 <title>Reflect — FirstWatch</title>
 <link rel="stylesheet" href="vendor/firstwatch/styles.css">
 <style>
-/* ============================================================
-   REFLECT — clickable prototype
-   Staff and patient surfaces: FirstWatch kit (vendor/firstwatch).
-   Patient layout classes consume kit tokens — no second palette.
-   ============================================================ */
 
 :root{
   --font:var(--font-sans);
@@ -166,6 +161,13 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
   background:var(--card);color:var(--muted-foreground);
   font-size:14px;line-height:20px;margin-bottom:16px;
 }
+.stale-banner{
+  margin-bottom:16px;align-items:center;
+  background:color-mix(in srgb,var(--status-elevated) 10%,var(--card));
+}
+.stale-banner .fw-alert__icon{margin-top:0}
+.stale-banner .fw-alert__desc{flex:1}
+.stale-banner__close{margin-left:auto;color:var(--muted-foreground)}
 .dot{width:8px;height:8px;border-radius:var(--r-full);background:var(--status-elevated);flex:0 0 auto}
 
 .stat-cell{
@@ -206,52 +208,71 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .bento-funnel{
   display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
   margin-bottom:16px;
-  background:var(--accent);
-  padding:16px;
-  border-radius:var(--r-lg);
 }
-.bento-funnel .stat-cell{
+.kpi{
+  display:flex;flex-direction:column;gap:8px;
   background:var(--card);
-  padding:28px;
-  box-shadow:var(--shadow-md);
-  border-top:3px solid var(--primary);
+  color:var(--foreground);
+  border:1px solid var(--border);border-radius:var(--r-xl);
+  padding:16px 18px;
+  box-shadow:var(--shadow-sm);
+  min-height:0;
 }
-.bento-funnel .stat-v{
-  font-size:30px;line-height:36px;
+.kpi-top{display:flex;align-items:center;gap:10px}
+.kpi-ico{
+  width:32px;height:32px;flex:0 0 auto;
+  display:grid;place-items:center;
+  border-radius:var(--r-md);
+  background:var(--muted);color:var(--primary);
+  border:1px solid var(--border);
 }
-.bento-funnel .stat-k{
-  margin-top:4px;
+.kpi--warn .kpi-ico{color:var(--status-elevated)}
+.kpi-label{flex:1;font-size:16px;line-height:24px;font-weight:600}
+.kpi-delta{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:12px;line-height:16px;font-weight:600;color:var(--primary);
 }
+.kpi-delta.is-down{color:var(--status-elevated)}
+.kpi-v{
+  font-size:32px;line-height:36px;font-weight:700;letter-spacing:-.02em;
+  display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
+}
+.kpi-foot{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  margin-top:auto;
+  padding-top:12px;border-top:1px solid var(--border);
+  color:var(--muted-foreground);font-size:12px;line-height:16px;
+}
+.kpi-foot .row{gap:6px}
 .bento{
   display:grid;
-  grid-template-columns:1.7fr 1fr;
-  grid-template-areas:
-    "lowest action"
-    "lowest quality";
+  grid-template-columns:1fr 1fr;
   gap:16px;
   align-items:stretch;
 }
-.bento-lowest{grid-area:lowest}
+.kpi-spot{
+  display:flex;flex-direction:column;gap:16px;
+  padding:20px 24px;
+}
+.bento .fw-card.kpi-spot{box-shadow:var(--shadow-sm)}
+.kpi-spot .kpi-top{align-items:flex-start}
+.kpi-head{flex:1;min-width:0}
+.kpi-head .t-subtle{margin-top:4px}
+.kpi-spot--urgent .kpi-ico{color:var(--status-critical)}
+.kpi-spot--good .kpi-ico{color:var(--status-resolved)}
+.kpi-spot--good .kpi-delta{color:var(--status-resolved)}
 .bento-action{
-  grid-area:action;
-  display:flex;flex-direction:column;
-  color:inherit;text-decoration:none;
-  cursor:pointer;
+  color:inherit;text-decoration:none;cursor:pointer;
   transition:border-color var(--dur-micro) var(--ease-out),
              background-color var(--dur-micro) var(--ease-out);
 }
-.bento-action:hover{border-color:var(--primary);background:var(--accent)}
-.bento-quality{grid-area:quality}
-.quality-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
-.action-metric{
-  display:flex;align-items:center;gap:12px;
-  margin-top:16px;flex:1;
+.bento-action:hover{
+  border-color:var(--primary);
+  background:var(--surface-hover);
 }
-.action-metric .stat-v{font-size:36px;line-height:40px}
-.action-go{
-  margin-top:12px;color:var(--primary);font-size:14px;font-weight:600;
-}
-.bento-action:hover .action-go{color:var(--primary-hover);text-decoration:underline}
+.spot-split{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1;align-items:center}
+.spot-split > div + div{border-left:1px solid var(--border);padding-left:16px}
+.kpi-spot--good .spot-split .kpi-v{color:var(--status-resolved)}
 
 /* queue table */
 .tbl{width:100%;border-collapse:collapse}
@@ -644,7 +665,7 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   .split{grid-template-columns:1fr}
   .preview-col,.preview-sticky{position:static;align-self:auto;z-index:auto}
   .g-4{grid-template-columns:repeat(2,1fr)}
-  .bento{grid-template-columns:1fr;grid-template-areas:"lowest" "action" "quality"}
+  .bento{grid-template-columns:1fr}
   .bento-funnel{grid-template-columns:repeat(2,1fr)}
   .score-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
@@ -654,7 +675,8 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   .nav{display:none}
   .g-4,.g-3,.g-2{grid-template-columns:1fr}
   .bento-funnel{grid-template-columns:1fr}
-  .quality-row{grid-template-columns:1fr}
+  .spot-split{grid-template-columns:1fr}
+  .spot-split > div + div{border-left:none;padding-left:0;border-top:1px solid var(--border);padding-top:16px}
   .t-h1{font-size:34px;line-height:38px}
   .bar-row{grid-template-columns:120px 1fr 48px}
   .brand-sub{display:none}
@@ -1052,6 +1074,7 @@ const state = {
   toast:null,
   blinkSent:{},
   libraryFilter:"all",
+  hideStale:false,
   survey:{ step:0, answers:{}, showDemo:false, demo:{} }
 };
 </script>
@@ -1093,7 +1116,11 @@ const I = {
   shield:     s=>ic('<path d="M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1 1 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/>',s),
   info:       s=>ic('<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',s),
   inbox:      s=>ic('<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1z"/>',s),
-  bolt:       s=>ic('<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/>',s)
+  bolt:       s=>ic('<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/>',s),
+  send:       s=>ic('<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',s),
+  calendar:   s=>ic('<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',s),
+  trendUp:    s=>ic('<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',s),
+  trendDown:  s=>ic('<polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/>',s)
 };
 
 const STATUS = {
@@ -1118,9 +1145,9 @@ function shell(body){
   const c = openCount();
   const nav = [
     ["#/","Overview"],
-    ["#/alerts","Alerts"],
-    ["#/surveys","Surveys"],
     ["#/triggers","Triggers"],
+    ["#/surveys","Surveys"],
+    ["#/alerts","Alerts"],
     ["#/scorecard","Scorecard"],
     ["#/blink","Blink"]
   ];
@@ -1163,10 +1190,14 @@ function shell(body){
       role="status">${I.check(16)} ${esc(state.toast)}</div>`:""}`;
 }
 
-const staleBanner = () => `
-  <div class="stale" role="status">
-    <span class="dot"></span>
-    Last updated ${ago(mins(4))} — reconnecting. Counts may be behind.
+const staleBanner = () => state.hideStale ? "" : `
+  <div class="fw-alert fw-alert--warning stale-banner" role="status">
+    <span class="fw-alert__icon">${I.clock(20)}</span>
+    <p class="fw-alert__desc">Last updated ${ago(mins(4))} — reconnecting. Counts may be behind.</p>
+    <button class="fw-btn fw-btn--ghost fw-btn--icon fw-btn--sm stale-banner__close" type="button"
+            onclick="dismissStale()" aria-label="Dismiss">
+      ${I.x(16)}
+    </button>
   </div>`;
 
 /* ============================================================
@@ -1174,6 +1205,15 @@ const staleBanner = () => `
    ============================================================ */
 function viewOverview(){
   const supervisorFirst = state.role==="supervisor";
+  const period = `${day(mins(43200))} – ${day(NOW)}`;
+  const open = state.alerts.filter(a=>a.status!=="resolved");
+  const oldest = open.reduce((a,b)=>a.at<b.at?a:b, open[0]);
+  const oldestWait = oldest ? ago(oldest.at).replace(" ago","") : "—";
+  const liveSurveys = state.surveys.filter(s=>s.status==="Live");
+  const responseN = liveSurveys.reduce((n,s)=>n+s.responses,0);
+  const sentN = liveSurveys.reduce((n,s)=>n+s.sent,0);
+  const responseRate = sentN ? Math.round(responseN/sentN*100) : 0;
+  const followedN = state.alerts.filter(a=>a.status==="resolved").length;
 
   return `
   <div class="page-head">
@@ -1184,24 +1224,140 @@ function viewOverview(){
   </div>
   ${staleBanner()}
   <section class="bento-funnel" aria-label="Survey funnel">
-    <div class="stat-cell">
-      <div class="stat-v">14,101</div>
-      <div class="stat-k">Distributed</div>
-    </div>
-    <div class="stat-cell">
-      <div class="stat-v">2,327</div>
-      <div class="stat-k">Returned</div>
-    </div>
-    <div class="stat-cell">
-      <div class="stat-v elevated">17% <span class="stat-flag">Low</span></div>
-      <div class="stat-k">Return rate</div>
-    </div>
-    <div class="stat-cell">
-      <div class="stat-v muted">00:10:19</div>
-      <div class="stat-k">Avg time</div>
-    </div>
+    <article class="kpi">
+      <div class="kpi-top">
+        <span class="kpi-ico">${I.send(16)}</span>
+        <span class="kpi-label">Distributed</span>
+      </div>
+      <div class="kpi-v">14,101</div>
+      <div class="kpi-foot">
+        <span class="row">${I.calendar(14)} ${period}</span>
+      </div>
+    </article>
+    <article class="kpi">
+      <div class="kpi-top">
+        <span class="kpi-ico">${I.inbox(16)}</span>
+        <span class="kpi-label">Returned</span>
+      </div>
+      <div class="kpi-v">2,327</div>
+      <div class="kpi-foot">
+        <span>Of 14,101 sent</span>
+      </div>
+    </article>
+    <article class="kpi kpi--warn">
+      <div class="kpi-top">
+        <span class="kpi-ico">${I.chart(16)}</span>
+        <span class="kpi-label">Return rate</span>
+        <span class="kpi-delta is-down">${I.trendDown(14)} Low</span>
+      </div>
+      <div class="kpi-v">17%</div>
+      <div class="kpi-foot">
+        <span>Target 30%</span>
+      </div>
+    </article>
+    <article class="kpi">
+      <div class="kpi-top">
+        <span class="kpi-ico">${I.clock(16)}</span>
+        <span class="kpi-label">Avg time</span>
+      </div>
+      <div class="kpi-v">00:10:19</div>
+      <div class="kpi-foot">
+        <span>Per completed survey</span>
+      </div>
+    </article>
   </section>
-  <div class="bento" aria-label="Reflect overview">
+  <section class="bento-funnel" aria-label="Current work">
+    <article class="kpi">
+      <div class="kpi-top">
+        <span class="kpi-ico">${I.alert(16)}</span>
+        <span class="kpi-label">Open alerts</span>
+      </div>
+      <div class="kpi-v">${openCount()}</div>
+      <div class="kpi-foot">
+        <span>${critCount()} critical</span>
+      </div>
+    </article>
+    <article class="kpi">
+      <div class="kpi-top">
+        <span class="kpi-ico">${I.checkCircle(16)}</span>
+        <span class="kpi-label">Followed up</span>
+      </div>
+      <div class="kpi-v">${followedN}</div>
+      <div class="kpi-foot">
+        <span>In the last 48 hours</span>
+      </div>
+    </article>
+    <article class="kpi">
+      <div class="kpi-top">
+        <span class="kpi-ico">${I.users(16)}</span>
+        <span class="kpi-label">Responses</span>
+      </div>
+      <div class="kpi-v">${responseN.toLocaleString("en-US")}</div>
+      <div class="kpi-foot">
+        <span>${liveSurveys.length} surveys live</span>
+      </div>
+    </article>
+    <article class="kpi">
+      <div class="kpi-top">
+        <span class="kpi-ico">${I.chart(16)}</span>
+        <span class="kpi-label">Response rate</span>
+      </div>
+      <div class="kpi-v">${responseRate}%</div>
+      <div class="kpi-foot">
+        <span>${sentN.toLocaleString("en-US")} invitations sent</span>
+      </div>
+    </article>
+  </section>
+  <div class="bento" aria-label="Open work">
+    <a href="#/alerts" class="fw-card kpi-spot kpi-spot--urgent bento-action" aria-label="52 urgent alerts. Open the queue.">
+      <div class="kpi-top">
+        <span class="kpi-ico">${I.phone(16)}</span>
+        <div class="kpi-head">
+          <h2 class="t-h4">Needs a callback</h2>
+          <p class="t-subtle dim">Open alerts waiting in the queue.</p>
+        </div>
+        <span class="fw-badge fw-badge--destructive">Urgent</span>
+      </div>
+      <div class="spot-split">
+        <div>
+          <div class="kpi-v">52</div>
+          <div class="stat-k">Open</div>
+        </div>
+        <div>
+          <div class="kpi-v">${oldestWait}</div>
+          <div class="stat-k">Oldest wait</div>
+        </div>
+      </div>
+      <div class="kpi-foot">
+        <span class="row">${I.clock(14)} Waiting in queue</span>
+        <span class="fw-btn fw-btn--outline fw-btn--sm" aria-hidden="true">Open queue</span>
+      </div>
+    </a>
+    <section class="fw-card kpi-spot kpi-spot--good bento-quality">
+      <div class="kpi-top">
+        <span class="kpi-ico">${I.star(16)}</span>
+        <div class="kpi-head">
+          <h2 class="t-h4">Quality</h2>
+          <p class="t-subtle dim">Patient scores this period.</p>
+        </div>
+        <span class="kpi-delta">${I.trendUp(14)} Strong</span>
+      </div>
+      <div class="spot-split">
+        <div>
+          <div class="kpi-v">96%</div>
+          <div class="stat-k">Recommended</div>
+        </div>
+        <div>
+          <div class="kpi-v">4.2 <span class="stat-unit">of 5</span></div>
+          <div class="stat-k">Care</div>
+        </div>
+      </div>
+      <div class="kpi-foot">
+        <span class="row">${I.calendar(14)} ${period}</span>
+      </div>
+    </section>
+  </div>
+  <div class="grid g-2 mt16" aria-label="Score charts">
     <section class="fw-card bento-lowest">
       <h2 class="t-h4">Where scores are lowest</h2>
       <p class="t-subtle dim mt8">Average respect + listening score, last 30 days. By area.</p>
@@ -1215,31 +1371,9 @@ function viewOverview(){
         </div>`).join("")}
       </div>
     </section>
-    <a href="#/alerts" class="fw-card bento-action" aria-label="52 urgent alerts. Open the queue.">
-      <h2 class="t-h4">Needs a callback</h2>
-      <p class="t-subtle dim mt8">Open alerts waiting in the queue.</p>
-      <div class="action-metric">
-        <span class="stat-v">52</span>
-        <span class="fw-badge fw-badge--destructive">Urgent</span>
-      </div>
-      <span class="action-go">Open queue</span>
-    </a>
-    <section class="fw-card bento-quality">
-      <h2 class="t-h4">Quality</h2>
-      <div class="quality-row">
-        <div>
-          <div class="stat-v good"><span class="stat-wash-num">96%</span></div>
-          <div class="stat-k">Recommended</div>
-        </div>
-        <div>
-          <div class="stat-v good">4.2 <span class="stat-unit">of 5</span></div>
-          <div class="stat-k">Care</div>
-        </div>
-      </div>
-    </section>
-  </div>
-  <div class="grid g-2 sec" style="align-items:start">
     ${cardByDemographic()}
+  </div>
+  <div class="mt16">
     ${cardAlertsByUnit()}
   </div>`;
 }
@@ -2037,7 +2171,7 @@ function cardByDemographic(){
     <section class="fw-card">
       <h2 class="t-h4">By demographic</h2>
       <p class="t-subtle dim mt8">Average score. Optional questions, so not every respondent is counted.</p>
-      <div class="bars">
+      <div class="bars mt16">
         ${EQUITY.map((e,i)=>{
           const gap = e.base - e.score;
           return `<div class="bar-row">
@@ -2297,6 +2431,7 @@ function viewPatient(){
    9. ACTIONS
    ============================================================ */
 function go(h){ location.hash = h; }
+function dismissStale(){ state.hideStale = true; render(); }
 function setRole(r){ state.role = r; render(); }
 function toggleTheme(){
   state.theme = state.theme==="light" ? "dark" : "light";
