@@ -118,7 +118,8 @@ a.fw-btn{text-decoration:none}
 }
 .nav a:hover{background:color-mix(in srgb,var(--base-white) 12%,transparent);color:var(--base-white)}
 .nav a[aria-current="page"]{background:color-mix(in srgb,var(--base-white) 16%,transparent);color:var(--base-white)}
-.nav .count{
+.nav .count,
+.nav-drawer-links .count{
   margin-left:6px;min-width:18px;height:18px;padding:0 5px;border-radius:var(--r-full);
   background:var(--status-critical);color:var(--base-white);font-size:11px;line-height:18px;
   text-align:center;font-weight:700;
@@ -139,6 +140,55 @@ a.fw-btn{text-decoration:none}
 .topbar .seg button[aria-pressed="true"]{background:var(--base-white);color:var(--fw-navy);box-shadow:none}
 .topbar .iconbtn{color:color-mix(in srgb,var(--base-white) 80%,transparent)}
 .topbar .iconbtn:hover{background:color-mix(in srgb,var(--base-white) 12%,transparent);color:var(--base-white)}
+.iconbtn.nav-toggle{display:none}
+
+.nav-scrim{
+  position:fixed;inset:0;z-index:45;
+  background:var(--overlay);
+  animation:fade var(--dur-base) var(--ease-out);
+}
+.nav-drawer{
+  position:fixed;top:0;left:0;bottom:0;z-index:46;
+  width:min(320px,86vw);
+  display:flex;flex-direction:column;
+  background:var(--card);color:var(--foreground);
+  border-right:1px solid var(--border);
+  box-shadow:var(--shadow-xl);
+  animation:navSlideIn var(--dur-slow) var(--ease-out);
+}
+@keyframes navSlideIn{from{transform:translateX(-100%)}}
+.nav-drawer-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  height:56px;padding:0 12px 0 16px;flex:0 0 auto;
+  background:var(--fw-navy);color:var(--base-white);
+}
+.nav-drawer-head .brand{color:var(--base-white)}
+.nav-drawer-head .iconbtn{color:color-mix(in srgb,var(--base-white) 80%,transparent)}
+.nav-drawer-head .iconbtn:hover{background:color-mix(in srgb,var(--base-white) 12%,transparent);color:var(--base-white)}
+.nav-drawer-links{
+  display:flex;flex-direction:column;gap:4px;
+  padding:12px;margin:0;flex:1;overflow:auto;
+}
+.nav-drawer-links a{
+  display:flex;align-items:center;min-height:44px;padding:0 12px;
+  border-radius:var(--r-md);font-size:16px;font-weight:600;
+  color:var(--foreground);
+}
+.nav-drawer-links a:hover{background:var(--surface-hover);color:var(--foreground)}
+.nav-drawer-links a[aria-current="page"]{
+  background:var(--accent);color:var(--primary);
+}
+.nav-drawer-links .count{
+  margin-left:auto;
+}
+.nav-drawer-foot{
+  display:none;
+  padding:16px;border-top:1px solid var(--border);
+}
+.nav-drawer-foot .brand-sub{display:block;margin-bottom:12px;color:var(--muted-foreground)}
+.nav-drawer-foot .seg{width:100%}
+.nav-drawer-foot .seg button{flex:1}
+body.nav-open{overflow:hidden}
 html[data-theme="dark"] .seg{background:var(--neutral-900)}
 html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-white) 12%,transparent)}
 
@@ -317,7 +367,9 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .snip{color:var(--muted-foreground);font-size:14px;line-height:20px;max-width:420px}
 .mono{font-family:var(--font-mono);font-size:14px;font-weight:700}
 
-.fw-card-flush{padding:0;overflow:hidden}
+.fw-card-flush{padding:0;overflow:auto}
+.fw-card:has(> table.tbl),
+.fw-card-flush:has(table.tbl){overflow-x:auto;-webkit-overflow-scrolling:touch}
 .fw-card-head{
   padding:16px 24px;border-bottom:1px solid var(--border);
   display:flex;align-items:center;justify-content:space-between;gap:16px;
@@ -661,6 +713,12 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 .hide{display:none !important}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
+@media (max-width:1199px){
+  .iconbtn.nav-toggle{display:grid}
+  .topbar .nav{display:none}
+  .brand-sub{display:none}
+  .topbar{padding:0 16px;gap:8px}
+}
 @media (max-width:1080px){
   .split{grid-template-columns:1fr}
   .preview-col,.preview-sticky{position:static;align-self:auto;z-index:auto}
@@ -671,16 +729,24 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 }
 @media (max-width:760px){
   .main{padding:24px 16px 80px}
-  .topbar{padding:0 16px;gap:8px}
-  .nav{display:none}
+  .topbar{padding:0 12px;gap:8px}
+  .topbar .demo-switch{display:none}
+  .nav-drawer-foot{display:block}
   .g-4,.g-3,.g-2{grid-template-columns:1fr}
   .bento-funnel{grid-template-columns:1fr}
   .spot-split{grid-template-columns:1fr}
   .spot-split > div + div{border-left:none;padding-left:0;border-top:1px solid var(--border);padding-top:16px}
+  .between{flex-direction:column;align-items:stretch;gap:12px}
+  .fw-card-head{flex-wrap:wrap}
+  .kv{grid-template-columns:1fr}
   .t-h1{font-size:34px;line-height:38px}
-  .bar-row{grid-template-columns:120px 1fr 48px}
-  .brand-sub{display:none}
+  .t-h2{font-size:24px;line-height:32px}
+  .bar-row{grid-template-columns:100px 1fr 48px}
   .score-kpis{grid-template-columns:1fr 1fr}
+  .drawer{width:100vw;border-left:0}
+  .kpi-v{font-size:28px;line-height:32px}
+  .fw-card{padding:16px}
+  .kpi-spot{padding:16px}
 }
 
 @media (prefers-reduced-motion:reduce){
@@ -692,6 +758,7 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   @keyframes fadeOnly{from{opacity:0}}
   .tbl tbody tr.resolving{animation-name:fadeOnly !important;animation-direction:reverse !important}
   .live-dot{animation:none}
+  .nav-drawer{animation-name:fadeOnly}
 }
 
 /* password gate — hobby fallback; not a substitute for Deployment Protection */
@@ -1075,6 +1142,7 @@ const state = {
   blinkSent:{},
   libraryFilter:"all",
   hideStale:false,
+  navOpen:false,
   survey:{ step:0, answers:{}, showDemo:false, demo:{} }
 };
 </script>
@@ -1120,7 +1188,8 @@ const I = {
   send:       s=>ic('<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',s),
   calendar:   s=>ic('<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',s),
   trendUp:    s=>ic('<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',s),
-  trendDown:  s=>ic('<polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/>',s)
+  trendDown:  s=>ic('<polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/>',s),
+  menu:       s=>ic('<line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/>',s)
 };
 
 const STATUS = {
@@ -1143,6 +1212,7 @@ const critCount = () => state.alerts.filter(a=>a.status==="critical").length;
    ============================================================ */
 function shell(body){
   const c = openCount();
+  const compactNav = window.matchMedia("(max-width: 1199px)").matches;
   const nav = [
     ["#/","Overview"],
     ["#/triggers","Triggers"],
@@ -1151,28 +1221,49 @@ function shell(body){
     ["#/scorecard","Scorecard"],
     ["#/blink","Blink"]
   ];
+  const navLinks = nav.map(([h,l])=>{
+    const on = h==="#/surveys" ? state.route.startsWith("#/surveys") : state.route===h;
+    return `<a href="${h}" ${on?'aria-current="page"':''} onclick="onNavLink('${h}')">${l}${
+      l==="Alerts"&&c?`<span class="count" aria-label="${c} open">${c}</span>`:""}</a>`;
+  }).join("");
+  const roleSwitch = `
+    <div class="seg" role="group" aria-label="View as role">
+      <button aria-pressed="${state.role==="supervisor"}" onclick="setRole('supervisor')">Supervisor</button>
+      <button aria-pressed="${state.role==="leadership"}" onclick="setRole('leadership')">Leadership</button>
+    </div>`;
   return `
   <div class="shell">
     ${state.surveyMenu?`<div class="menu-catch" onclick="closeSurveyMenu()"></div>`:""}
+    ${state.navOpen?`<div class="nav-scrim" onclick="closeNav()"></div>
+    <aside class="nav-drawer" id="app-nav" role="dialog" aria-modal="true" aria-label="Menu">
+      <div class="nav-drawer-head">
+        <div class="brand">
+          <img class="brand-mark" src="logo.png" width="24" height="24" alt="">
+          Reflect
+        </div>
+        <button class="iconbtn nav-drawer-close" type="button" onclick="closeNav()" aria-label="Close menu">${I.x(18)}</button>
+      </div>
+      <nav class="nav-drawer-links">${navLinks}</nav>
+      <div class="nav-drawer-foot">
+        <div class="brand-sub">${AGENCY.name}</div>
+        ${roleSwitch}
+      </div>
+    </aside>`:""}
     <header class="topbar">
+      ${compactNav?`<button class="iconbtn nav-toggle" type="button" onclick="toggleNav()"
+              aria-label="${state.navOpen?"Close menu":"Open menu"}"
+              aria-expanded="${state.navOpen}" aria-controls="app-nav">
+        ${state.navOpen?I.x(20):I.menu(20)}
+      </button>`:""}
       <div class="brand">
         <img class="brand-mark" src="logo.png" width="24" height="24" alt="">
         Reflect
       </div>
-      <nav class="nav" aria-label="Reflect">
-        ${nav.map(([h,l])=>{
-          const on = h==="#/surveys" ? state.route.startsWith("#/surveys") : state.route===h;
-          return `<a href="${h}" ${on?'aria-current="page"':''}>${l}${
-          l==="Alerts"&&c?`<span class="count" aria-label="${c} open">${c}</span>`:""}</a>`;
-        }).join("")}
-      </nav>
+      ${compactNav?"":`<nav class="nav" aria-label="Reflect">${navLinks}</nav>`}
       <div class="spacer"></div>
       <div class="demo-switch">
         <span class="brand-sub">${AGENCY.name}</span>
-        <div class="seg" role="group" aria-label="View as role">
-          <button aria-pressed="${state.role==="supervisor"}" onclick="setRole('supervisor')">Supervisor</button>
-          <button aria-pressed="${state.role==="leadership"}" onclick="setRole('leadership')">Leadership</button>
-        </div>
+        ${roleSwitch}
       </div>
       <button class="iconbtn" onclick="toggleTheme()" aria-label="Switch theme">
         ${state.theme==="light"?I.moon(18):I.sun(18)}
@@ -2432,6 +2523,14 @@ function viewPatient(){
    ============================================================ */
 function go(h){ location.hash = h; }
 function dismissStale(){ state.hideStale = true; render(); }
+function toggleNav(){ state.navOpen = !state.navOpen; render(); }
+function closeNav(){ if(!state.navOpen) return; state.navOpen = false; render(); }
+function onNavLink(h){
+  const cur = location.hash || "#/";
+  const same = h==="#/surveys" ? cur.startsWith("#/surveys") : cur===h;
+  state.navOpen = false;
+  if(same) render();
+}
 function setRole(r){ state.role = r; render(); }
 function toggleTheme(){
   state.theme = state.theme==="light" ? "dark" : "light";
@@ -2747,7 +2846,9 @@ function render(){
 
   if(isPatientRoute(h)){
     if(state.survey.step === undefined) state.survey.step = -1;
+    state.navOpen = false;
     root.innerHTML = viewPatient();
+    document.body.classList.remove("nav-open");
     return;
   }
   let body;
@@ -2760,6 +2861,7 @@ function render(){
   else if(h.startsWith("#/surveys/")) body = viewSurveys();
   else body = viewOverview();
   root.innerHTML = shell(body);
+  document.body.classList.toggle("nav-open", !!state.navOpen);
 }
 
 window.addEventListener("hashchange", ()=>{
@@ -2769,17 +2871,23 @@ window.addEventListener("hashchange", ()=>{
   state.surveyMenu = null;
   state.previewSurvey = false;
   state.openResponse = null;
+  state.navOpen = false;
   render();
   if(!isPatientRoute(location.hash||"")) window.scrollTo({top:0});
 });
 window.addEventListener("keydown", e=>{
   if(e.key!=="Escape") return;
+  if(state.navOpen){ closeNav(); return; }
   if(state.previewSurvey){ closeSurveyPreview(); return; }
   if(state.renameSurvey){ closeRenameSurvey(); return; }
   if(state.surveyMenu){ closeSurveyMenu(); return; }
   if(state.deleteSurvey){ closeDeleteSurvey(); return; }
   if(state.openResponse){ closeResponse(); return; }
   if(state.openAlert){ closeAlert(); }
+});
+window.matchMedia("(max-width: 1199px)").addEventListener("change", ev=>{
+  if(!ev.matches) state.navOpen = false;
+  if(!isPatientRoute(location.hash||"#/")) render();
 });
 state.survey.step = -1;
 render();
