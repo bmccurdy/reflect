@@ -2794,12 +2794,17 @@ function captureLibScroll(libId){
 function restoreLibScroll(){
   const sp = state.scrollPreserve;
   if(!sp || sp.anchorTop == null) return;
-  const el = document.querySelector(`[data-lib-id="${sp.libId}"]`) || document.querySelector(".lib-list");
-  if(!el) return;
-  const delta = el.getBoundingClientRect().top - sp.anchorTop;
-  if(Math.abs(delta) > 0.5) window.scrollBy(0, delta);
-  const list = document.querySelector(".lib-list");
-  if(list) list.scrollTop = sp.libScroll;
+  const apply = ()=>{
+    if(state.scrollPreserve !== sp) return;
+    const el = document.querySelector(`[data-lib-id="${sp.libId}"]`) || document.querySelector(".lib-list");
+    if(!el) return;
+    const delta = el.getBoundingClientRect().top - sp.anchorTop;
+    if(Math.abs(delta) > 0.5) window.scrollBy(0, delta);
+    const list = document.querySelector(".lib-list");
+    if(list) list.scrollTop = sp.libScroll;
+  };
+  apply();
+  requestAnimationFrame(apply);
 }
 
 function blinkSend(id){
