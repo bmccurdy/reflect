@@ -878,6 +878,38 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
     margin-right:8px;
     color:var(--muted-foreground);
   }
+  .tbl--alerts tbody tr{align-items:flex-start}
+  .tbl--alerts .al-status{order:1;flex:1;min-width:0}
+  .tbl--alerts .al-opened{
+    order:2;flex:0 0 auto;margin-left:auto;
+    font-size:13px;line-height:20px;padding-top:2px;
+  }
+  .tbl--alerts .al-why{
+    order:3;flex:1 1 100%;width:100%;
+  }
+  .tbl--alerts .al-why .snip{max-width:none}
+  .tbl--alerts .al-unit,
+  .tbl--alerts .al-assigned{
+    flex:0 0 auto;
+    color:var(--muted-foreground);
+    font-size:13px;line-height:20px;
+  }
+  .tbl--alerts .al-unit{
+    order:4;
+    display:inline-flex;flex-wrap:wrap;align-items:baseline;
+  }
+  .tbl--alerts .al-unit .t-subtle{display:inline}
+  .tbl--alerts .al-unit .t-subtle::before{
+    content:"·";
+    margin:0 8px;
+    color:var(--muted-foreground);
+  }
+  .tbl--alerts .al-assigned{order:5}
+  .tbl--alerts .al-assigned::before{
+    content:"·";
+    margin-right:8px;
+    color:var(--muted-foreground);
+  }
 }
 
 @media (prefers-reduced-motion:reduce){
@@ -1939,7 +1971,7 @@ function viewAlerts(){
   </section>
   <div class="fw-card sec" style="padding:0;overflow:hidden">
     ${list.length?`
-    <table class="tbl">
+    <table class="tbl tbl--stack tbl--alerts">
       <thead><tr>
         <th style="width:132px">Status</th><th>Why it opened</th>
         <th style="width:96px">Unit</th><th style="width:132px">Assigned</th><th style="width:104px">Opened</th>
@@ -1947,14 +1979,14 @@ function viewAlerts(){
       <tbody aria-live="polite">
         ${list.map(a=>`
           <tr class="clickable" id="row-${a.id}" onclick="openAlert('${a.id}')">
-            <td>${statusBadge(a.status)}</td>
-            <td>
+            <td class="al-status">${statusBadge(a.status)}</td>
+            <td class="al-why">
               <div style="font-weight:700">${esc(a.reason)}</div>
               <div class="snip">${esc(a.quote)}</div>
             </td>
-            <td><span class="mono">${a.unit}</span><div class="t-subtle dim">${esc(a.call)}</div></td>
-            <td class="${a.assigned==="Unassigned"?"dim":""}">${esc(a.assigned)}</td>
-            <td class="dim">${ago(a.at)}</td>
+            <td class="al-unit"><span class="mono">${a.unit}</span><div class="t-subtle dim">${esc(a.call)}</div></td>
+            <td class="al-assigned${a.assigned==="Unassigned"?" dim":""}">${esc(a.assigned)}</td>
+            <td class="dim al-opened">${ago(a.at)}</td>
           </tr>`).join("")}
       </tbody>
     </table>`:`
