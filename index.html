@@ -840,6 +840,42 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   .tbl--surveys .sv-responses[data-live="no"] + .sv-rate[data-empty="yes"] + .sv-updated::before{
     content:none;margin:0;
   }
+  .tbl--responses tbody tr{align-items:flex-start}
+  .tbl--responses .rs-when{
+    order:1;flex:1;min-width:0;
+    font-size:13px;line-height:20px;
+  }
+  .tbl--responses .rs-id{
+    order:2;flex:0 0 auto;margin-left:auto;
+    font-size:13px;line-height:20px;
+  }
+  .tbl--responses .rs-quote{
+    order:3;flex:1 1 100%;width:100%;
+  }
+  .tbl--responses .rs-quote .snip{max-width:none}
+  .tbl--responses .rs-area,
+  .tbl--responses .rs-lang{
+    flex:0 0 auto;
+    color:var(--muted-foreground);
+    font-size:13px;line-height:20px;
+  }
+  .tbl--responses .rs-area{
+    order:4;
+    display:inline-flex;flex-wrap:wrap;align-items:baseline;
+  }
+  .tbl--responses .rs-area .t-detail{display:inline}
+  .tbl--responses .rs-area .t-detail:empty{display:none}
+  .tbl--responses .rs-area .t-detail:not(:empty)::before{
+    content:"·";
+    margin:0 8px;
+    color:var(--muted-foreground);
+  }
+  .tbl--responses .rs-lang{order:5}
+  .tbl--responses .rs-lang::before{
+    content:"·";
+    margin-right:8px;
+    color:var(--muted-foreground);
+  }
 }
 
 @media (prefers-reduced-motion:reduce){
@@ -2271,20 +2307,20 @@ function viewSurveyResponses(){
     </div>
   </div>
   ${rows.length?`<div class="fw-card" style="padding:0">
-    <table class="tbl">
+    <table class="tbl tbl--stack tbl--responses">
       <thead><tr><th>When</th><th>What they said</th><th>Area</th><th>Language</th><th></th></tr></thead>
       <tbody>
         ${rows.map(r=>`
           <tr class="clickable" onclick="openResponse('${s.id}','${r.id}')">
-            <td class="dim" style="white-space:nowrap">${ago(r.at)}</td>
-            <td>
+            <td class="dim rs-when" style="white-space:nowrap">${ago(r.at)}</td>
+            <td class="rs-quote">
               <div class="snip">${esc(responseSummary(r, qs))}</div>
               ${r.alert?`<div class="mt8">${statusBadge(state.alerts.find(a=>a.id===r.alert)?.status || "elevated")}
                 <span class="t-detail dim">Alert ${r.alert}</span></div>`:""}
             </td>
-            <td>${esc(r.zone||"—")}<div class="t-detail dim">${esc(r.band||"")}</div></td>
-            <td class="dim">${esc(r.lang||"—")}</td>
-            <td class="mono dim">${r.id}</td>
+            <td class="rs-area">${esc(r.zone||"—")}<div class="t-detail dim">${esc(r.band||"")}</div></td>
+            <td class="dim rs-lang">${esc(r.lang||"—")}</td>
+            <td class="mono dim rs-id">${r.id}</td>
           </tr>`).join("")}
       </tbody>
     </table>
