@@ -147,20 +147,24 @@ a.fw-btn{text-decoration:none}
 .iconbtn.nav-toggle{display:none}
 
 .nav-scrim{
-  position:fixed;inset:0;z-index:45;
+  position:fixed;inset:0;z-index:80;
   background:var(--overlay);
-  animation:fade var(--dur-base) var(--ease-out);
+  opacity:0;pointer-events:none;
+  transition:opacity var(--dur-base) var(--ease-out);
 }
+.nav-scrim.is-open{opacity:1;pointer-events:auto}
 .nav-drawer{
-  position:fixed;top:0;left:0;bottom:0;z-index:46;
+  position:fixed;top:0;left:0;bottom:0;z-index:81;
   width:min(320px,86vw);
   display:flex;flex-direction:column;
   background:var(--card);color:var(--foreground);
   border-right:1px solid var(--border);
   box-shadow:var(--shadow-xl);
-  animation:navSlideIn var(--dur-slow) var(--ease-out);
+  transform:translateX(-100%);
+  pointer-events:none;
+  transition:transform var(--dur-slow) var(--ease-out);
 }
-@keyframes navSlideIn{from{transform:translateX(-100%)}}
+.nav-drawer.is-open{transform:translateX(0);pointer-events:auto}
 .nav-drawer-head{
   display:flex;align-items:center;justify-content:space-between;gap:12px;
   height:56px;padding:0 12px 0 16px;flex:0 0 auto;
@@ -1059,7 +1063,6 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
   @keyframes fadeOnly{from{opacity:0}}
   .tbl tbody tr.resolving{animation-name:fadeOnly !important;animation-direction:reverse !important}
   .live-dot{animation:none}
-  .nav-drawer{animation-name:fadeOnly}
   .topbar,.main{view-transition-name:none}
   ::view-transition-group(*),
   ::view-transition-old(*),
@@ -1542,8 +1545,9 @@ function shell(body){
   return `
   <div class="shell">
     ${state.surveyMenu?`<div class="menu-catch" onclick="closeSurveyMenu()"></div>`:""}
-    ${state.navOpen?`<div class="nav-scrim" onclick="closeNav()"></div>
-    <aside class="nav-drawer" id="app-nav" role="dialog" aria-modal="true" aria-label="Menu">
+    ${compactNav?`<div class="nav-scrim${state.navOpen?" is-open":""}" onclick="closeNav()"></div>
+    <aside class="nav-drawer${state.navOpen?" is-open":""}" id="app-nav" role="dialog" aria-modal="true"
+      aria-label="Menu" aria-hidden="${state.navOpen?"false":"true"}" ${state.navOpen?"":"inert"}>
       <div class="nav-drawer-head">
         <div class="brand">
           <img class="brand-mark" src="logo.png" width="24" height="24" alt="">
@@ -2861,13 +2865,39 @@ function withFlip(sel, mutate){
   });
 }
 function dismissStale(){ state.hideStale = true; render(); }
-function toggleNav(){ state.navOpen = !state.navOpen; render(); }
-function closeNav(){ if(!state.navOpen) return; state.navOpen = false; render(); }
+function syncNavDom(){
+  const open = !!state.navOpen;
+  document.body.classList.toggle("nav-open", open);
+  const drawer = document.getElementById("app-nav");
+  const scrim = document.querySelector(".nav-scrim");
+  const btn = document.querySelector(".nav-toggle");
+  if(drawer){
+    drawer.classList.toggle("is-open", open);
+    drawer.setAttribute("aria-hidden", open ? "false" : "true");
+    if(open) drawer.removeAttribute("inert");
+    else drawer.setAttribute("inert", "");
+  }
+  if(scrim) scrim.classList.toggle("is-open", open);
+  if(btn){
+    btn.setAttribute("aria-expanded", String(open));
+    btn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    btn.innerHTML = open ? I.x(20) : I.menu(20);
+  }
+}
+function toggleNav(){
+  state.navOpen = !state.navOpen;
+  syncNavDom();
+}
+function closeNav(){
+  if(!state.navOpen) return;
+  state.navOpen = false;
+  syncNavDom();
+}
 function onNavLink(h){
   const cur = location.hash || "#/";
   const same = h==="#/surveys" ? cur.startsWith("#/surveys") : cur===h;
-  state.navOpen = false;
-  if(same) render();
+  closeNav();
+  if(same) return;
 }
 function setRole(r){ state.role = r; render(); }
 function toggleTheme(){
