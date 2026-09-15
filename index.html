@@ -198,10 +198,46 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 
 .main{flex:1;padding:32px 24px 96px;max-width:1280px;width:100%;margin:0 auto;background:var(--muted)}
 .page-head{margin-bottom:24px}
+.title-edit{display:flex;align-items:center;gap:8px;min-width:0;max-width:100%}
+.title-edit-hit{
+  display:inline-flex;align-items:center;gap:8px;min-width:0;max-width:100%;
+  margin:0;padding:0;border:0;background:transparent;
+  font:inherit;color:inherit;letter-spacing:inherit;text-align:left;cursor:pointer;
+  border-radius:var(--r-sm);
+}
+.title-edit-pen{
+  flex:0 0 auto;display:grid;place-items:center;
+  width:16px;height:16px;background:transparent;
+  color:var(--muted-foreground);opacity:0;
+  transition:opacity var(--dur-micro) var(--ease-out);
+}
+.title-edit-hit:hover .title-edit-pen,
+.title-edit-hit:focus-visible .title-edit-pen{opacity:1}
+@media (hover:none){
+  .title-edit-pen{opacity:1}
+}
+.title-edit-input{
+  width:min(36rem,100%);max-width:100%;
+  height:auto;min-height:40px;padding:4px 12px;
+  font-size:inherit;line-height:inherit;font-weight:inherit;letter-spacing:inherit;
+}
+.title-edit-field{
+  position:relative;flex:1 1 auto;min-width:0;width:100%;max-width:36rem;
+}
+.title-edit-field .title-edit-input{width:100%;max-width:none;padding-right:76px}
+.title-edit-actions{
+  position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  display:flex;align-items:center;gap:2px;
+}
+.title-edit-save.iconbtn{color:var(--status-resolved)}
+.title-edit-save.iconbtn:hover{background:var(--status-resolved-wash);color:var(--status-resolved)}
+.title-edit-cancel.iconbtn{color:var(--muted-foreground)}
 .crumbs{display:flex;gap:8px;align-items:center;font-size:14px;line-height:20px;color:var(--muted-foreground);margin-bottom:8px}
 .crumbs .sep{opacity:.5}
 .row{display:flex;align-items:center;gap:12px}
 .between{display:flex;align-items:flex-start;justify-content:space-between;gap:24px}
+.page-head .between > div:first-child{flex:1 1 auto;min-width:0}
+.page-head .title-edit{width:100%}
 .grid{display:grid;gap:16px}
 .g-4{grid-template-columns:repeat(4,1fr)}
 .g-3{grid-template-columns:repeat(3,1fr)}
@@ -1356,6 +1392,7 @@ const state = {
   openResponse:null,
   deleteSurvey:null,
   renameSurvey:null,
+  editingSurveyName:null,
   surveyMenu:null,
   previewSurvey:false,
   previewQId:null,
@@ -2243,7 +2280,27 @@ function viewSurveys(){
       <span class="sep">/</span><span>${esc(s.name)}</span></div>
     <div class="between">
       <div>
-        <h1 class="t-h2">${esc(s.name)}</h1>
+        ${state.editingSurveyName===s.id?`
+        <h1 class="t-h2 title-edit">
+          <label class="sr" for="survey-name-input">Survey name</label>
+          <div class="title-edit-field">
+            <input class="fw-input title-edit-input" id="survey-name-input" value="${esc(s.name)}"
+              maxlength="80" autocomplete="off"
+              onkeydown="surveyNameKey(event)" onblur="onSurveyNameBlur()">
+            <div class="title-edit-actions">
+              <button type="button" class="iconbtn title-edit-save" aria-label="Save name"
+                onmousedown="event.preventDefault()" onclick="confirmInlineRename()">${I.check(18)}</button>
+              <button type="button" class="iconbtn title-edit-cancel" aria-label="Cancel rename"
+                onmousedown="event.preventDefault()" onclick="cancelInlineRename()">${I.x(18)}</button>
+            </div>
+          </div>
+        </h1>`:`
+        <h1 class="t-h2 title-edit">
+          <button type="button" class="title-edit-hit" title="Rename survey" onclick="startInlineRename('${s.id}')">
+            <span>${esc(s.name)}</span>
+            <span class="title-edit-pen" aria-hidden="true">${I.pencil(16)}</span>
+          </button>
+        </h1>`}
         <p class="t-p dim">${meta}</p>
       </div>
       <div class="row" style="gap:8px">
@@ -2943,6 +3000,15 @@ function renameDialog(id){
     </div>
   </div>`;
 }
+function applySurveyName(id, raw){
+  const name = (raw || "").trim();
+  if(!name){ toast("Give the survey a name."); return {ok:false, changed:false}; }
+  const s = state.surveys.find(x=>x.id===id);
+  if(!s) return {ok:false, changed:false};
+  const changed = s.name !== name;
+  if(changed){ s.name = name; s.updated = NOW; }
+  return {ok:true, changed};
+}
 function askRenameSurvey(id){
   if(!state.surveys.find(x=>x.id===id)) return;
   state.surveyMenu = null;
@@ -2955,14 +3021,52 @@ function closeRenameSurvey(){ state.renameSurvey = null; render(); }
 function confirmRenameSurvey(){
   const id = state.renameSurvey;
   const input = document.getElementById("rename-input");
-  const name = input && input.value.trim();
   if(!id) return;
-  if(!name){ toast("Give the survey a name."); return; }
-  const s = state.surveys.find(x=>x.id===id);
-  if(s){ s.name = name; s.updated = NOW; }
+  const result = applySurveyName(id, input && input.value);
+  if(!result.ok) return;
   state.renameSurvey = null;
   render();
-  toast("Renamed.");
+  if(result.changed) toast("Renamed.");
+}
+
+let skipSurveyNameBlur = false;
+function startInlineRename(id){
+  if(!state.surveys.find(x=>x.id===id)) return;
+  state.editingSurveyName = id;
+  render();
+  const input = document.getElementById("survey-name-input");
+  if(input){ input.focus(); input.select(); }
+}
+function cancelInlineRename(){
+  if(!state.editingSurveyName) return;
+  skipSurveyNameBlur = true;
+  state.editingSurveyName = null;
+  render();
+}
+function confirmInlineRename(){
+  const id = state.editingSurveyName;
+  if(!id) return;
+  const input = document.getElementById("survey-name-input");
+  skipSurveyNameBlur = true;
+  const result = applySurveyName(id, input && input.value);
+  if(!result.ok){
+    const el = document.getElementById("survey-name-input");
+    if(el) el.focus();
+    skipSurveyNameBlur = false;
+    return;
+  }
+  state.editingSurveyName = null;
+  render();
+  skipSurveyNameBlur = false;
+  if(result.changed) toast("Renamed.");
+}
+function onSurveyNameBlur(){
+  if(skipSurveyNameBlur){ skipSurveyNameBlur = false; return; }
+  confirmInlineRename();
+}
+function surveyNameKey(e){
+  if(e.key==="Enter"){ e.preventDefault(); confirmInlineRename(); }
+  if(e.key==="Escape"){ e.preventDefault(); e.stopPropagation(); cancelInlineRename(); }
 }
 
 function deleteConfirm(id){
@@ -3099,6 +3203,7 @@ window.addEventListener("hashchange", ()=>{
   if(!isPatientRoute(location.hash||"")) state.openAlert = null;
   state.deleteSurvey = null;
   state.renameSurvey = null;
+  state.editingSurveyName = null;
   state.surveyMenu = null;
   state.previewSurvey = false;
   state.openResponse = null;
@@ -3111,6 +3216,7 @@ window.addEventListener("keydown", e=>{
   if(state.navOpen){ closeNav(); return; }
   if(state.previewSurvey){ closeSurveyPreview(); return; }
   if(state.renameSurvey){ closeRenameSurvey(); return; }
+  if(state.editingSurveyName){ cancelInlineRename(); return; }
   if(state.surveyMenu){ closeSurveyMenu(); return; }
   if(state.deleteSurvey){ closeDeleteSurvey(); return; }
   if(state.openResponse){ closeResponse(); return; }
