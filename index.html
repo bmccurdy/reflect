@@ -322,13 +322,19 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .kpi-spot--good .spot-split .kpi-v{color:var(--status-resolved)}
 
 /* queue table */
-.tbl{width:100%;border-collapse:collapse}
+.tbl{width:100%;border-collapse:separate;border-spacing:0}
+.tbl thead tr{background:var(--surface-hover)}
 .tbl th{
   text-align:left;padding:12px 16px;height:48px;
   font-size:16px;line-height:24px;font-weight:400;color:var(--muted-foreground);
   border-bottom:1px solid var(--border);white-space:nowrap;
+  background:var(--surface-hover);
+  position:sticky;top:56px;z-index:3;
 }
+.tbl thead tr + tr th{top:104px}
 .tbl td{padding:12px 16px;font-size:16px;line-height:24px;border-bottom:1px solid var(--border);vertical-align:top}
+.tbl tbody tr:first-child td{padding-top:28px}
+.tbl tbody tr:last-child td{padding-bottom:28px;border-bottom:0}
 .tbl tbody tr{transition:background-color var(--dur-micro) var(--ease-out)}
 .tbl tbody tr:hover{background:var(--accent)}
 .tbl tbody tr.clickable{cursor:pointer}
@@ -364,11 +370,10 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .snip{color:var(--muted-foreground);font-size:14px;line-height:20px;max-width:420px}
 .mono{font-family:var(--font-mono);font-size:14px;font-weight:700}
 
-.fw-card-flush{padding:0;overflow:auto}
-.tbl-inset{padding:0 16px 16px}
+.fw-card-flush{padding:0;overflow:visible}
+.tbl-inset{padding:0}
 .fw-card:has(table.tbl),
-.fw-card-flush:has(table.tbl){overflow-x:auto;-webkit-overflow-scrolling:touch}
-.fw-card:has(table.tbl--surveys){overflow:visible}
+.fw-card-flush:has(table.tbl){overflow:visible}
 .fw-card-head{
   padding:16px 24px;border-bottom:1px solid var(--border);
   display:flex;align-items:center;justify-content:space-between;gap:16px;
@@ -424,7 +429,7 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .stat-cell--accent{border-top:3px solid var(--stat-accent,var(--primary))}
 .stat-cell--accent .stat-k{margin-top:0;margin-bottom:4px}
 .stat-sub{font-size:12px;line-height:16px;color:var(--muted-foreground);margin-top:6px}
-.tbl-wrap{overflow-x:auto}
+.tbl-wrap{overflow:visible}
 .tbl th.group{text-align:center;background:var(--secondary);color:var(--secondary-foreground);font-weight:600}
 .tbl th.group-sys{background:var(--neutral-200);color:var(--muted-foreground)}
 html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--muted-foreground)}
@@ -758,6 +763,12 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   .fw-card:has(table.tbl--stack),
   .fw-card-flush:has(table.tbl--stack),
   .tbl-wrap:has(.tbl--stack){overflow:visible}
+  .tbl-inset{padding:0 16px 16px}
+  .tbl tbody tr:first-child td{padding-top:0}
+  .tbl tbody tr:last-child td{padding-bottom:0}
+  .tbl--stack thead th{position:static;top:auto}
+  .tbl--stack tbody tr:first-child td,
+  .tbl--stack tbody tr:last-child td{padding-top:0;padding-bottom:0;border-bottom:0}
   .fw-card-flush .fw-card-head{padding:16px}
   .kpi-spot{padding:16px}
   .tbl--stack,
@@ -850,7 +861,7 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   .tbl--surveys .sv-responses[data-live="no"] + .sv-rate[data-empty="yes"] + .sv-updated::before{
     content:none;margin:0;
   }
-  .tbl--responses tbody tr{align-items:flex-start}
+  .tbl--responses tbody tr{align-items:flex-start;padding:16px 0}
   .tbl--responses .rs-when{
     order:1;flex:1;min-width:0;
     font-size:13px;line-height:20px;
@@ -886,7 +897,7 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
     margin-right:8px;
     color:var(--muted-foreground);
   }
-  .tbl--alerts tbody tr{align-items:flex-start}
+  .tbl--alerts tbody tr{align-items:flex-start;padding:16px 0}
   .tbl--alerts .al-status{order:1;flex:1;min-width:0}
   .tbl--alerts .al-opened{
     order:2;flex:0 0 auto;margin-left:auto;
@@ -2018,8 +2029,9 @@ function viewAlerts(){
         </button>`).join("")}
     </div>`:""}
   </section>
-  <div class="fw-card sec" style="padding:0;overflow:hidden">
+  <div class="fw-card sec" style="padding:0">
     ${list.length?`
+    <div class="tbl-inset">
     <table class="tbl tbl--stack tbl--alerts">
       <thead><tr>
         <th style="width:132px">Status</th><th>Why it opened</th>
@@ -2038,7 +2050,8 @@ function viewAlerts(){
             <td class="dim al-opened">${ago(a.at)}</td>
           </tr>`).join("")}
       </tbody>
-    </table>`:`
+    </table>
+    </div>`:`
     <div class="empty">
       <div class="dim" style="display:flex;justify-content:center;margin-bottom:12px">${I.inbox(32)}</div>
       <div class="t">Nothing needs a callback right now.</div>
@@ -2392,6 +2405,7 @@ function viewSurveyResponses(){
     </div>
   </div>
   ${rows.length?`<div class="fw-card" style="padding:0">
+    <div class="tbl-inset">
     <table class="tbl tbl--stack tbl--responses">
       <thead><tr><th>When</th><th>What they said</th><th>Area</th><th>Language</th><th></th></tr></thead>
       <tbody>
@@ -2409,6 +2423,7 @@ function viewSurveyResponses(){
           </tr>`).join("")}
       </tbody>
     </table>
+    </div>
   </div>`:`
     <div class="fw-card empty">
       <div class="dim" style="display:flex;justify-content:center;margin-bottom:12px">${I.inbox(32)}</div>
