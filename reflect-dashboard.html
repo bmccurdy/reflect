@@ -1119,8 +1119,6 @@ function viewAlerts(){
     : queueFilter==="resolved" ? all.filter(a=>a.status==="resolved")
     : all.filter(a=>a.status!=="resolved");
   const o = openCount();
-  const c = critCount();
-  const open = all.filter(a=>a.status!=="resolved");
 
   const tabs = [["open","Open",o],["resolved","Followed up",all.filter(a=>a.status==="resolved").length],["all","All",all.length]];
 
@@ -1138,30 +1136,6 @@ function viewAlerts(){
     </div>
   </div>
   ${staleBanner()}
-  <section class="fw-card">
-    <div>
-      <h2 class="t-h4">Needs a callback</h2>
-      <p class="t-subtle dim mt8">${o
-        ? `${o} open — ${c} critical. Oldest has been waiting ${ago(open.slice(-1)[0].at)}.`
-        : "Nothing open right now."}</p>
-    </div>
-    ${open.length?`<div class="mt24">
-      ${open.slice(0,3).map(a=>`
-        <button class="qcard" style="width:100%;text-align:left;cursor:pointer;border-radius:var(--r-lg)"
-                onclick="openAlert('${a.id}')">
-          <span style="color:${STATUS[a.status].color};padding-top:2px">${STATUS[a.status].icon(18)}</span>
-          <span style="flex:1">
-            <span class="t-pui" style="font-weight:700">${esc(a.reason)}</span>
-            <span class="qmeta">
-              <span class="mono">${a.unit}</span>
-              <span class="t-subtle dim">${esc(a.call)}</span>
-              <span class="t-subtle dim">${ago(a.at)}</span>
-            </span>
-          </span>
-          <span class="dim" style="padding-top:4px">${I.arrow(16)}</span>
-        </button>`).join("")}
-    </div>`:""}
-  </section>
   <div class="fw-card sec" style="padding:0;overflow:hidden">
     ${list.length?`
     <table class="tbl">
