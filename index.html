@@ -733,7 +733,12 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   .topbar .demo-switch{display:none}
   .nav-drawer-foot{display:block}
   .g-4,.g-3,.g-2{grid-template-columns:1fr}
-  .bento-funnel{grid-template-columns:1fr}
+  .bento-funnel{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .kpi{padding:12px;gap:6px;min-width:0}
+  .kpi-top{gap:8px}
+  .kpi-ico{width:28px;height:28px}
+  .kpi-label{font-size:13px;line-height:18px}
+  .kpi-foot{padding-top:8px;font-size:11px}
   .spot-split{grid-template-columns:1fr}
   .spot-split > div + div{border-left:none;padding-left:0;border-top:1px solid var(--border);padding-top:16px}
   .between{flex-direction:column;align-items:stretch;gap:12px}
@@ -744,7 +749,7 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   .bar-row{grid-template-columns:100px 1fr 48px}
   .score-kpis{grid-template-columns:1fr 1fr}
   .drawer{width:100vw;border-left:0}
-  .kpi-v{font-size:28px;line-height:32px}
+  .kpi-v{font-size:24px;line-height:28px}
   .fw-card{padding:16px}
   .kpi-spot{padding:16px}
 }
