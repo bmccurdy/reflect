@@ -216,7 +216,7 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
   font-size:14px;line-height:20px;margin-bottom:16px;
 }
 .stale-banner{
-  margin-bottom:16px;align-items:center;
+  margin-bottom:16px;padding: 8px 16px;align-items:center;
   background:color-mix(in srgb,var(--status-elevated) 10%,var(--card));
 }
 .stale-banner .fw-alert__icon{margin-top:0}
@@ -365,8 +365,10 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .mono{font-family:var(--font-mono);font-size:14px;font-weight:700}
 
 .fw-card-flush{padding:0;overflow:auto}
-.fw-card:has(> table.tbl),
+.tbl-inset{padding:0 16px 16px}
+.fw-card:has(table.tbl),
 .fw-card-flush:has(table.tbl){overflow-x:auto;-webkit-overflow-scrolling:touch}
+.fw-card:has(table.tbl--surveys){overflow:visible}
 .fw-card-head{
   padding:16px 24px;border-bottom:1px solid var(--border);
   display:flex;align-items:center;justify-content:space-between;gap:16px;
@@ -753,7 +755,7 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   .kpi-v{font-size:24px;line-height:28px}
   .fw-card{padding:16px}
   .fw-card.fw-card-flush{padding:0}
-  .fw-card:has(> table.tbl--stack),
+  .fw-card:has(table.tbl--stack),
   .fw-card-flush:has(table.tbl--stack),
   .tbl-wrap:has(.tbl--stack){overflow:visible}
   .fw-card-flush .fw-card-head{padding:16px}
@@ -774,6 +776,7 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
     border:0;padding:0;
     font-size:14px;line-height:20px;
   }
+  .tbl--encounters tbody tr{padding:16px 0}
   .tbl--encounters .enc-call{
     order:1;flex:1;min-width:0;
     font-size:16px;line-height:24px;
@@ -806,7 +809,7 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   .tbl--encounters .enc-mobile svg{display:none}
   .tbl--encounters .enc-mobile[data-mobile="yes"]::after{content:"Mobile"}
   .tbl--encounters .enc-mobile[data-mobile="no"]::after{content:"No mobile"}
-  .tbl--surveys tbody tr{align-items:flex-start}
+  .tbl--surveys tbody tr{align-items:flex-start;padding:16px 0}
   .tbl--surveys tbody tr::before{
     content:"";
     order:5;flex:0 0 100%;width:100%;height:0;
@@ -1895,6 +1898,7 @@ function viewTriggers(){
       </div>
       <div class="live-tag"><span class="live-dot" aria-hidden="true"></span> Live</div>
     </div>
+    <div class="tbl-inset">
     <table class="tbl tbl--stack tbl--encounters">
       <thead><tr>
         <th>Call #</th><th>Patient</th><th>Crew</th><th>Unit</th><th>Impression</th><th>Mobile</th><th>Status</th>
@@ -1914,6 +1918,7 @@ function viewTriggers(){
           </tr>`).join("")}
       </tbody>
     </table>
+    </div>
   </section>
 
   <div class="grid g-2 sec">
@@ -2177,6 +2182,7 @@ function viewSurveysIndex(){
     </div>
   </div>
   ${state.surveys.length?`<div class="fw-card" style="padding:0">
+    <div class="tbl-inset">
     <table class="tbl tbl--stack tbl--surveys">
       <thead><tr>
         <th class="fav"><span class="sr">Favorite</span></th>
@@ -2200,6 +2206,7 @@ function viewSurveysIndex(){
           </tr>`).join("")}
       </tbody>
     </table>
+    </div>
   </div>`:`
     <div class="fw-card empty">
       <div class="dim" style="display:flex;justify-content:center;margin-bottom:12px">${I.inbox(32)}</div>
