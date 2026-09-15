@@ -1364,6 +1364,7 @@ const state = {
   libraryFilter:"all",
   hideStale:false,
   navOpen:false,
+  scrollPreserve:null,
   survey:{ step:0, answers:{}, showDemo:false, demo:{} }
 };
 </script>
@@ -2314,7 +2315,7 @@ function viewSurveys(){
             return rows.map(l=>{
               const already = added.has(l.text.trim().toLowerCase());
               return `
-            <div class="qcard${already?" added":""}">
+            <div class="qcard${already?" added":""}" data-lib-id="${l.id}">
               <div style="flex:1;min-width:0">
                 <div class="t-pui">${esc(l.text)}</div>
                 <div class="qmeta">
@@ -2772,7 +2773,38 @@ let toastTimer;
 function toast(msg){
   state.toast = msg; render();
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>{ state.toast=null; render(); }, 2600);
+  toastTimer = setTimeout(()=>{
+    state.toast=null;
+    render();
+    state.scrollPreserve = null;
+  }, 2600);
+}
+
+/* Keep the Question library in view after a full re-render inserts a card above it. */
+function captureLibScroll(libId){
+  const el = document.querySelector(`[data-lib-id="${libId}"]`);
+  const list = document.querySelector(".lib-list");
+  const anchor = el || list;
+  state.scrollPreserve = {
+    libId,
+    anchorTop: anchor ? anchor.getBoundingClientRect().top : null,
+    libScroll: list ? list.scrollTop : 0
+  };
+}
+function restoreLibScroll(){
+  const sp = state.scrollPreserve;
+  if(!sp || sp.anchorTop == null) return;
+  const apply = ()=>{
+    if(state.scrollPreserve !== sp) return;
+    const el = document.querySelector(`[data-lib-id="${sp.libId}"]`) || document.querySelector(".lib-list");
+    if(!el) return;
+    const delta = el.getBoundingClientRect().top - sp.anchorTop;
+    if(Math.abs(delta) > 0.5) window.scrollBy(0, delta);
+    const list = document.querySelector(".lib-list");
+    if(list) list.scrollTop = sp.libScroll;
+  };
+  apply();
+  requestAnimationFrame(apply);
 }
 
 function blinkSend(id){
@@ -2850,6 +2882,7 @@ function addFromLib(id){
   if(!l) return;
   const already = qList().some(q=>q.text.trim().toLowerCase()===l.text.trim().toLowerCase());
   if(already){ toast("That question is already in this survey."); return; }
+  captureLibScroll(id);
   const qid = "q"+(++qn);
   qList().push({
     id: qid,
@@ -3093,6 +3126,7 @@ function render(){
   else body = viewOverview();
   root.innerHTML = shell(body);
   document.body.classList.toggle("nav-open", !!state.navOpen);
+  restoreLibScroll();
 }
 
 window.addEventListener("hashchange", ()=>{
@@ -3103,6 +3137,7 @@ window.addEventListener("hashchange", ()=>{
   state.previewSurvey = false;
   state.openResponse = null;
   state.navOpen = false;
+  state.scrollPreserve = null;
   render();
   if(!isPatientRoute(location.hash||"")) window.scrollTo({top:0});
 });
