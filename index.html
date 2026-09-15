@@ -222,6 +222,7 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .stale-banner .fw-alert__icon{margin-top:0}
 .stale-banner .fw-alert__desc{flex:1}
 .stale-banner__close{margin-left:auto;color:var(--muted-foreground)}
+.stale__action{margin-left:auto;flex-shrink:0}
 .dot{width:8px;height:8px;border-radius:var(--r-full);background:var(--status-elevated);flex:0 0 auto}
 
 .stat-cell{
@@ -490,6 +491,7 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   padding:20px 24px;display:flex;justify-content:space-between;gap:16px;align-items:flex-start;
 }
 .drawer-body{padding:24px}
+.drawer-body > :first-child{margin-top:0}
 
 .dialog-wrap{
   position:fixed;inset:0;z-index:55;display:grid;place-items:center;padding:24px;
@@ -512,7 +514,7 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 .kv dt{color:var(--muted-foreground)}
 .kv dd{margin:0}
 .quote{
-  border-left:3px solid var(--primary);padding:4px 0 4px 16px;margin:16px 0;
+  border-left:3px solid var(--primary);padding:4px 0 4px 16px;margin:0 0 16px;
   font-size:16px;line-height:28px;
 }
 .log{border-top:1px solid var(--border);margin-top:24px;padding-top:16px}
@@ -1987,7 +1989,7 @@ function drawer(id){
       <button class="iconbtn" onclick="closeAlert()" aria-label="Close">${I.x(18)}</button>
     </div>
     <div class="drawer-body">
-      <div class="quote">${esc(a.quote)}</div>
+      <div class="quote">“${esc(a.quote)}”</div>
       <div class="mt24" style="display:flex;flex-direction:column;gap:8px">
         ${sc("Respect",a.scores.respect)}${sc("Listening",a.scores.listening)}${sc("Comfort",a.scores.comfort)}
       </div>
@@ -2352,9 +2354,9 @@ function responseDrawer(ref){
       <button class="iconbtn" onclick="closeResponse()" aria-label="Close">${I.x(18)}</button>
     </div>
     <div class="drawer-body">
-      ${alert?`<div class="stale" style="margin-bottom:16px">
+      ${alert?`<div class="stale">
         ${I.flag(16)} Flagged as ${alert.status==="resolved"?"followed up":alert.status}.
-        <button class="fw-btn fw-btn--ghost fw-btn--sm" style="margin-left:8px" onclick="openAlertFromResponse('${alert.id}')">Open alert</button>
+        <button class="fw-btn fw-btn--primary fw-btn--sm stale__action" type="button" onclick="openAlertFromResponse('${alert.id}')">Open alert</button>
       </div>`:""}
       <dl class="kv">
         <dt>Language</dt><dd>${esc(r.lang||"—")}</dd>
