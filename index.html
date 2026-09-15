@@ -316,15 +316,6 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .kpi-spot--urgent .kpi-ico{color:var(--status-critical)}
 .kpi-spot--good .kpi-ico{color:var(--status-resolved)}
 .kpi-spot--good .kpi-delta{color:var(--status-resolved)}
-.bento-action{
-  color:inherit;text-decoration:none;cursor:pointer;
-  transition:border-color var(--dur-micro) var(--ease-out),
-             background-color var(--dur-micro) var(--ease-out);
-}
-.bento-action:hover{
-  border-color:var(--primary);
-  background:var(--surface-hover);
-}
 .spot-split{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1;align-items:center}
 .spot-split > div + div{border-left:1px solid var(--border);padding-left:16px}
 .kpi-spot--good .spot-split .kpi-v{color:var(--status-resolved)}
@@ -1412,7 +1403,7 @@ function viewOverview(){
   </section>
   </div>
   <div class="bento" aria-label="Open work">
-    <a href="#/alerts" class="fw-card kpi-spot kpi-spot--urgent bento-action" aria-label="52 urgent alerts. Open the queue.">
+    <section class="fw-card kpi-spot kpi-spot--urgent">
       <div class="kpi-top">
         <span class="kpi-ico">${I.phone(16)}</span>
         <div class="kpi-head">
@@ -1433,9 +1424,9 @@ function viewOverview(){
       </div>
       <div class="kpi-foot">
         <span class="row">${I.clock(14)} Waiting in queue</span>
-        <span class="fw-btn fw-btn--outline fw-btn--sm" aria-hidden="true">Open queue</span>
+        <a class="fw-btn fw-btn--primary fw-btn--sm" href="#/alerts">Open queue</a>
       </div>
-    </a>
+    </section>
     <section class="fw-card kpi-spot kpi-spot--good bento-quality">
       <div class="kpi-top">
         <span class="kpi-ico">${I.star(16)}</span>
