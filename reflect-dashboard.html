@@ -335,14 +335,28 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
   position:fixed;top:0;right:0;bottom:0;width:min(560px,100vw);z-index:51;
   background:var(--card);border-left:1px solid var(--border);
   box-shadow:var(--shadow-xl);overflow-y:auto;
-  animation:slideIn var(--dur-layout) var(--ease-out);
+  animation:slideIn var(--dur-page) var(--ease-out);
 }
-@keyframes slideIn{from{transform:translateX(24px);opacity:.6}}
+@keyframes slideIn{from{transform:translateX(100%);opacity:.6}}
 .drawer-head{
   position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--border);
   padding:20px 24px;display:flex;justify-content:space-between;gap:16px;align-items:flex-start;
+  animation:drawerDataIn var(--dur-page) var(--ease-out) both;
+  animation-delay:40ms;
 }
 .drawer-body{padding:24px}
+.drawer-body > *{
+  animation:drawerDataIn var(--dur-page) var(--ease-out) both;
+  animation-delay:calc(70ms + (var(--i,0) * 40ms));
+}
+.drawer-body > *:nth-child(1){--i:0}
+.drawer-body > *:nth-child(2){--i:1}
+.drawer-body > *:nth-child(3){--i:2}
+.drawer-body > *:nth-child(4){--i:3}
+.drawer-body > *:nth-child(5){--i:4}
+.drawer-body > *:nth-child(6){--i:5}
+.drawer-body > *:nth-child(7){--i:6}
+@keyframes drawerDataIn{from{opacity:0;transform:translateX(24px)}}
 
 .dialog-wrap{
   position:fixed;inset:0;z-index:55;display:grid;place-items:center;padding:24px;
@@ -649,7 +663,8 @@ html[data-theme="dark"] .phone-frame{background:#121417}
     animation-duration:80ms !important;animation-delay:0ms !important;
     transition-duration:80ms !important;
   }
-  .stagger>*,.p-view,.p-seal,.bar i{animation-name:fadeOnly !important}
+  .stagger>*,.p-view,.p-seal,.bar i,
+  .drawer,.drawer-head,.drawer-body > *{animation-name:fadeOnly !important}
   @keyframes fadeOnly{from{opacity:0}}
   .tbl tbody tr.resolving{animation-name:fadeOnly !important;animation-direction:reverse !important}
 }
