@@ -39,6 +39,10 @@ html[data-theme="dark"]{
   --status-normal:var(--muted-foreground);
   --status-inactive:var(--neutral-500);
 }
+html[data-theme="dark"] .shell,
+html[data-theme="dark"] .main{
+  background:var(--base-black);
+}
 
 *,*::before,*::after{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -259,6 +263,7 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
   display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
   margin-bottom:16px;
 }
+.bento-funnel-group{display:contents}
 .kpi{
   display:flex;flex-direction:column;gap:8px;
   background:var(--card);
@@ -1319,7 +1324,8 @@ function viewOverview(){
       : `Patient experience across ${AGENCY.name}, ${day(mins(43200))} to today.`}</p>
   </div>
   ${staleBanner()}
-  <section class="bento-funnel" aria-label="Survey funnel">
+  <div class="bento-funnel">
+  <section class="bento-funnel-group" aria-label="Survey funnel">
     <article class="kpi">
       <div class="kpi-top">
         <span class="kpi-ico">${I.send(16)}</span>
@@ -1362,7 +1368,7 @@ function viewOverview(){
       </div>
     </article>
   </section>
-  <section class="bento-funnel" aria-label="Current work">
+  <section class="bento-funnel-group" aria-label="Current work">
     <article class="kpi">
       <div class="kpi-top">
         <span class="kpi-ico">${I.alert(16)}</span>
@@ -1404,6 +1410,7 @@ function viewOverview(){
       </div>
     </article>
   </section>
+  </div>
   <div class="bento" aria-label="Open work">
     <a href="#/alerts" class="fw-card kpi-spot kpi-spot--urgent bento-action" aria-label="52 urgent alerts. Open the queue.">
       <div class="kpi-top">
