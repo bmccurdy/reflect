@@ -337,7 +337,7 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
   box-shadow:var(--shadow-xl);overflow-y:auto;
   animation:slideIn var(--dur-page) var(--ease-out);
 }
-@keyframes slideIn{from{transform:translateX(-100%);opacity:.6}}
+@keyframes slideIn{from{transform:translateX(100%);opacity:.6}}
 .drawer-head{
   position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--border);
   padding:20px 24px;display:flex;justify-content:space-between;gap:16px;align-items:flex-start;
@@ -356,7 +356,7 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .drawer-body > *:nth-child(5){--i:4}
 .drawer-body > *:nth-child(6){--i:5}
 .drawer-body > *:nth-child(7){--i:6}
-@keyframes drawerDataIn{from{opacity:0;transform:translateX(-24px)}}
+@keyframes drawerDataIn{from{opacity:0;transform:translateX(24px)}}
 
 .dialog-wrap{
   position:fixed;inset:0;z-index:55;display:grid;place-items:center;padding:24px;
