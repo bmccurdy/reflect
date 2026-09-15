@@ -390,6 +390,7 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
   background:var(--popover);color:var(--popover-foreground);
   border:1px solid var(--border);border-radius:var(--r-xl);
   box-shadow:var(--shadow-lg);
+  animation:pop var(--dur-layout) var(--ease-out);
 }
 .menu button{
   display:flex;align-items:center;gap:10px;width:100%;
@@ -402,7 +403,7 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .menu button.danger:hover{background:var(--status-critical-wash)}
 .menu-sep{height:1px;background:var(--border);margin:6px 4px}
 .tbl tbody tr.resolving{animation:resolveOut var(--dur-layout) var(--ease-out) forwards}
-@keyframes resolveOut{to{opacity:0;transform:translateX(12px)}}
+@keyframes resolveOut{to{opacity:0;transform:translateX(8px)}}
 .snip{color:var(--muted-foreground);font-size:14px;line-height:20px;max-width:420px}
 .mono{font-family:var(--font-mono);font-size:14px;font-weight:700}
 
@@ -575,8 +576,13 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   border:1px solid var(--border);border-radius:var(--r-lg);background:var(--card);
   color:var(--card-foreground);
   padding:16px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;
-  transition:border-color var(--dur-micro) var(--ease-out),box-shadow var(--dur-micro) var(--ease-out);
+  transition:border-color var(--dur-micro) var(--ease-out),
+             box-shadow var(--dur-micro) var(--ease-out),
+             background-color var(--dur-micro) var(--ease-out);
 }
+.qcard-out{animation:qcardOut var(--dur-layout) var(--ease-out) forwards;pointer-events:none}
+.qcard-in{animation:rise var(--dur-layout) var(--ease-out) both}
+@keyframes qcardOut{to{opacity:0;transform:translateY(-6px)}}
 .qcard:hover{border-color:var(--muted-foreground);box-shadow:var(--shadow-sm)}
 .qcard.locked{background:var(--muted)}
 .qcard-select{cursor:pointer}
@@ -615,6 +621,7 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   color:var(--muted-foreground);cursor:pointer;display:grid;place-items:center;
   transition:background-color var(--dur-micro) var(--ease-out),color var(--dur-micro) var(--ease-out);
 }
+.iconbtn svg{pointer-events:none}
 .iconbtn:hover{background:var(--accent);color:var(--accent-foreground)}
 .iconbtn[disabled]{opacity:.5;cursor:not-allowed}
 .phone-frame{
@@ -649,14 +656,36 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 .bar-row{display:grid;grid-template-columns:180px 1fr 56px;gap:12px;align-items:center;font-size:14px;line-height:20px}
 .bar{height:8px;border-radius:var(--r-full);background:var(--muted);overflow:hidden}
 .bar i{display:block;height:100%;border-radius:var(--r-full);background:var(--primary);
-  transform-origin:0 50%;
-  animation:grow var(--dur-page) var(--ease-out) both}
+  transform-origin:0 50%}
+html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
 @keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 .gap-flag{color:var(--status-elevated);font-weight:700}
 
 /* stagger entrance */
 .stagger>*{animation:rise var(--dur-page) var(--ease-out) both;animation-delay:calc(var(--i,0)*var(--stagger))}
-@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}}
+
+.toast{
+  position:fixed;bottom:24px;left:50%;z-index:60;margin:0;
+  display:flex;align-items:center;gap:8px;
+  padding:12px 16px;
+  background:var(--card);color:var(--foreground);
+  border:1px solid var(--border);border-radius:var(--r-lg);
+  box-shadow:var(--shadow-lg);
+  transform:translateX(-50%);
+  animation:toastIn var(--dur-layout) var(--ease-out);
+}
+@keyframes toastIn{
+  from{opacity:0;transform:translateX(-50%) translateY(8px)}
+}
+
+.topbar{view-transition-name:fw-topbar}
+.main{view-transition-name:fw-main}
+::view-transition-old(fw-main){animation:vtOut var(--dur-page) var(--ease-out) both}
+::view-transition-new(fw-main){animation:vtIn var(--dur-page) var(--ease-out) both}
+@keyframes vtOut{to{opacity:0}}
+@keyframes vtIn{from{opacity:0;transform:translateY(6px)}}
 
 /* Patient survey — kit tokens, larger tap targets */
 .patient{
@@ -741,14 +770,14 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   font-size:12px;line-height:20px;
 }
 .p-view{animation:pageTurn var(--dur-page) var(--ease-out) both}
-@keyframes pageTurn{from{opacity:0;transform:translateY(8px)}}
+@keyframes pageTurn{from{opacity:0;transform:translateY(6px)}}
 .p-seal{
   width:48px;height:48px;border-radius:var(--r-full);margin:0 auto 16px;
   display:grid;place-items:center;background:var(--accent);color:var(--primary);
   border:1px solid var(--border);
-  animation:seal 520ms var(--ease-spring) both 120ms;
+  animation:seal var(--dur-page) var(--ease-out) both;
 }
-@keyframes seal{from{opacity:0;transform:scale(.7)}}
+@keyframes seal{from{opacity:0;transform:scale(.96)}}
 
 /* utility */
 .mt8{margin-top:8px}.mt16{margin-top:16px}.mt24{margin-top:24px}.mt32{margin-top:32px}
@@ -1011,11 +1040,15 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
     animation-duration:80ms !important;animation-delay:0ms !important;
     transition-duration:80ms !important;
   }
-  .stagger>*,.p-view,.p-seal,.bar i{animation-name:fadeOnly !important}
+  .stagger>*,.p-view,.p-seal,.bar i,.toast,.menu,.qcard-in,.qcard-out{animation-name:fadeOnly !important}
   @keyframes fadeOnly{from{opacity:0}}
   .tbl tbody tr.resolving{animation-name:fadeOnly !important;animation-direction:reverse !important}
   .live-dot{animation:none}
   .nav-drawer{animation-name:fadeOnly}
+  .topbar,.main{view-transition-name:none}
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*){animation:none !important}
 }
 
 /* password gate — hobby fallback; not a substitute for Deployment Protection */
@@ -1397,6 +1430,7 @@ const state = {
   previewSurvey:false,
   previewQId:null,
   toast:null,
+  routeEnter:true,
   blinkSent:{},
   libraryFilter:"all",
   hideStale:false,
@@ -1535,9 +1569,7 @@ function shell(body){
   ${state.deleteSurvey?deleteConfirm(state.deleteSurvey):""}
   ${state.renameSurvey?renameDialog(state.renameSurvey):""}
   ${state.previewSurvey?surveyPreview():""}
-  ${state.toast?`<div class="stale" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-      background:var(--card);box-shadow:var(--shadow-lg);color:var(--foreground);margin:0;z-index:60"
-      role="status">${I.check(16)} ${esc(state.toast)}</div>`:""}`;
+  ${state.toast?`<div class="toast" role="status">${I.check(16)} ${esc(state.toast)}</div>`:""}`;
 }
 
 const staleBanner = () => state.hideStale ? "" : `
@@ -2324,7 +2356,7 @@ function viewSurveys(){
         </div>
         ${qs.length?qs.map((q,i)=>`
           <div class="qcard qcard-select ${q.locked?"locked":""} ${i===previewIdx?"selected":""}"
-            tabindex="0" aria-current="${i===previewIdx?"true":"false"}"
+            data-qid="${q.id}" tabindex="0" aria-current="${i===previewIdx?"true":"false"}"
             onclick="selectPreviewQ('${q.id}')" onkeydown="previewQKey(event,'${q.id}')">
             <span class="grip" aria-hidden="true">${q.locked?I.lock(16):I.grip(16)}</span>
             <div style="flex:1;min-width:0">
@@ -2342,7 +2374,7 @@ function viewSurveys(){
               <button class="iconbtn" aria-label="Move down" ${i===qs.length-1?"disabled":""} onclick="moveQ(${i},1)">${I.down(16)}</button>
               <button class="iconbtn" aria-label="Edit"   ${q.locked?"disabled":""}
                 onclick="${q.locked?"":`selectPreviewQ('${q.id}');toast('Editing isn\\'t wired up in this prototype')`}">${I.pencil(16)}</button>
-              <button class="iconbtn" aria-label="Remove" ${q.locked?"disabled":""} onclick="removeQ('${q.id}')">${I.trash(16)}</button>
+              <button class="iconbtn" aria-label="Remove" onclick="removeQ('${q.id}')">${I.trash(16)}</button>
             </div>
           </div>`).join("") : `<p class="t-subtle dim" style="margin-bottom:16px">No questions yet. Add one, or pick from the library.</p>`}
         <div class="addrow">
@@ -2811,6 +2843,34 @@ function viewPatient(){
    9. ACTIONS
    ============================================================ */
 function go(h){ location.hash = h; }
+function prefersReduce(){
+  return matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+function withViewTransition(fn){
+  if(typeof document.startViewTransition==="function" && !prefersReduce()){
+    document.startViewTransition(fn);
+  } else fn();
+}
+function withFlip(sel, mutate){
+  if(prefersReduce()){ mutate(); return; }
+  const first = new Map();
+  document.querySelectorAll(sel).forEach(el=>{
+    first.set(el.getAttribute("data-qid"), el.getBoundingClientRect());
+  });
+  mutate();
+  document.querySelectorAll(sel).forEach(el=>{
+    const id = el.getAttribute("data-qid");
+    const prev = first.get(id);
+    const last = el.getBoundingClientRect();
+    if(!prev){ el.classList.add("qcard-in"); return; }
+    const dy = prev.top - last.top;
+    if(Math.abs(dy)<1) return;
+    el.animate(
+      [{transform:`translateY(${dy}px)`},{transform:"translateY(0)"}],
+      {duration:180, easing:"cubic-bezier(.16,1,.3,1)"}
+    );
+  });
+}
 function dismissStale(){ state.hideStale = true; render(); }
 function toggleNav(){ state.navOpen = !state.navOpen; render(); }
 function closeNav(){ if(!state.navOpen) return; state.navOpen = false; render(); }
@@ -2824,11 +2884,12 @@ function setRole(r){ state.role = r; render(); }
 function toggleTheme(){
   state.theme = state.theme==="light" ? "dark" : "light";
   document.documentElement.setAttribute("data-theme", state.theme);
-  render();
+  withViewTransition(()=>render());
 }
 let toastTimer;
-function toast(msg){
-  state.toast = msg; render();
+function toast(msg, alreadyRendered){
+  state.toast = msg;
+  if(!alreadyRendered) render();
   clearTimeout(toastTimer);
   toastTimer = setTimeout(()=>{
     state.toast=null;
@@ -2894,7 +2955,7 @@ function logAndResolve(id){
   const row = document.getElementById("row-"+id);
   if(row && !matchMedia("(prefers-reduced-motion: reduce)").matches){
     row.classList.add("resolving");
-    setTimeout(()=>{ render(); toast("Marked followed up."); }, 240);
+    setTimeout(()=>{ render(); toast("Marked followed up."); }, 180);
   } else { render(); toast("Marked followed up."); }
 }
 function claim(id){
@@ -2905,21 +2966,32 @@ function claim(id){
 function moveQ(i,d){
   const q = qList(), j = i+d;
   if(j<0||j>=q.length) return;
-  [q[i],q[j]] = [q[j],q[i]];
-  state.previewQId = q[j].id;
-  render();
+  withFlip("[data-qid]", ()=>{
+    [q[i],q[j]] = [q[j],q[i]];
+    state.previewQId = q[j].id;
+    render();
+  });
 }
 function removeQ(id){
-  const sid = surveyIdFromHash() || "sv_post";
-  const qs = qList();
-  const i = qs.findIndex(q=>q.id===id);
-  state.surveyQuestions[sid] = qs.filter(q=>q.id!==id);
-  syncQuestionCount(sid);
-  if(state.previewQId===id){
-    const next = qs[i+1] || qs[i-1];
-    state.previewQId = next ? next.id : null;
-  }
-  render(); toast("Question removed.");
+  const apply = ()=>{
+    const sid = surveyIdFromHash() || "sv_post";
+    const qs = qList();
+    const i = qs.findIndex(q=>q.id===id);
+    if(i<0) return;
+    state.surveyQuestions[sid] = qs.filter(q=>q.id!==id);
+    syncQuestionCount(sid);
+    if(state.previewQId===id){
+      const next = qs[i+1] || qs[i-1];
+      state.previewQId = next ? next.id : null;
+    }
+    toast("Question removed.", true);
+    withFlip("[data-qid]", render);
+  };
+  const card = document.querySelector(`[data-qid="${id}"]`);
+  if(card && !prefersReduce() && !card.classList.contains("qcard-out")){
+    card.classList.add("qcard-out");
+    setTimeout(apply, 180);
+  } else apply();
 }
 let qn = 100;
 function addQ(type){
@@ -2932,7 +3004,8 @@ function addQ(type){
   });
   state.previewQId = id;
   syncQuestionCount(surveyIdFromHash() || "sv_post");
-  render(); toast("Question added.");
+  toast("Question added.", true);
+  withFlip("[data-qid]", render);
 }
 function addFromLib(id){
   const l = LIBRARY.find(x=>x.id===id);
@@ -2953,7 +3026,8 @@ function addFromLib(id){
   });
   state.previewQId = qid;
   syncQuestionCount(surveyIdFromHash() || "sv_post");
-  render(); toast("Added from library.");
+  toast("Added from library.", true);
+  withFlip("[data-qid]", render);
 }
 function setLibraryFilter(f){
   state.libraryFilter = f;
@@ -3211,12 +3285,16 @@ function render(){
   const h = location.hash || "#/";
   state.route = h;
   const root = document.getElementById("root");
+  const enter = !!state.routeEnter;
+  state.routeEnter = false;
+  document.documentElement.classList.toggle("is-route-enter", enter);
 
   if(isPatientRoute(h)){
     if(state.survey.step === undefined) state.survey.step = -1;
     state.navOpen = false;
     root.innerHTML = viewPatient();
     document.body.classList.remove("nav-open");
+    if(enter) requestAnimationFrame(()=>document.documentElement.classList.remove("is-route-enter"));
     return;
   }
   let body;
@@ -3231,6 +3309,7 @@ function render(){
   root.innerHTML = shell(body);
   document.body.classList.toggle("nav-open", !!state.navOpen);
   restoreLibScroll();
+  if(enter) requestAnimationFrame(()=>document.documentElement.classList.remove("is-route-enter"));
 }
 
 window.addEventListener("hashchange", ()=>{
@@ -3243,8 +3322,11 @@ window.addEventListener("hashchange", ()=>{
   state.openResponse = null;
   state.navOpen = false;
   state.scrollPreserve = null;
-  render();
-  if(!isPatientRoute(location.hash||"")) window.scrollTo({top:0});
+  state.routeEnter = true;
+  withViewTransition(()=>{
+    render();
+    if(!isPatientRoute(location.hash||"")) window.scrollTo({top:0});
+  });
 });
 window.addEventListener("keydown", e=>{
   if(e.key!=="Escape") return;
