@@ -401,6 +401,7 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .rule--out .rule-ico{color:var(--status-critical)}
 .icon-yes{color:var(--status-resolved)}
 .icon-no{color:var(--muted-foreground)}
+.tbl--encounters .enc-mobile{white-space:nowrap}
 .rule-head{margin-bottom:14px}
 .rule-head--in{color:var(--status-resolved)}
 .rule-head--out{color:var(--status-critical)}
@@ -745,7 +746,58 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   .drawer{width:100vw;border-left:0}
   .kpi-v{font-size:24px;line-height:28px}
   .fw-card{padding:16px}
+  .fw-card.fw-card-flush{padding:0}
+  .fw-card-flush:has(.tbl--encounters){overflow:visible}
+  .fw-card-flush .fw-card-head{padding:16px}
   .kpi-spot{padding:16px}
+  .tbl--encounters,
+  .tbl--encounters tbody{display:block;width:100%}
+  .tbl--encounters thead{
+    position:absolute;width:1px;height:1px;overflow:hidden;
+    clip:rect(0 0 0 0);
+  }
+  .tbl--encounters tbody tr{
+    display:flex;flex-wrap:wrap;align-items:center;
+    gap:4px 8px;padding:16px;
+    border-bottom:1px solid var(--border);
+  }
+  .tbl--encounters tbody tr:last-child{border-bottom:0}
+  .tbl--encounters td{
+    border:0;padding:0;
+    font-size:14px;line-height:20px;
+  }
+  .tbl--encounters .enc-call{
+    order:1;flex:1;min-width:0;
+    font-size:16px;line-height:24px;
+  }
+  .tbl--encounters .enc-status{order:2;flex:0 0 auto;margin-left:auto}
+  .tbl--encounters .enc-patient{
+    order:3;flex:1 1 100%;width:100%;
+    font-weight:600;font-size:16px;line-height:24px;
+  }
+  .tbl--encounters .enc-impression{order:4;flex:1 1 100%;width:100%}
+  .tbl--encounters .enc-crew,
+  .tbl--encounters .enc-unit,
+  .tbl--encounters .enc-mobile{
+    flex:0 0 auto;
+    color:var(--muted-foreground);
+    font-size:13px;line-height:20px;
+  }
+  .tbl--encounters .enc-crew{order:5}
+  .tbl--encounters .enc-unit{order:6}
+  .tbl--encounters .enc-mobile{order:7}
+  .tbl--encounters .enc-unit::before,
+  .tbl--encounters .enc-mobile::before{
+    content:"·";
+    margin-right:8px;
+    color:var(--muted-foreground);
+  }
+  .tbl--encounters .enc-mobile{
+    display:inline-flex;align-items:center;
+  }
+  .tbl--encounters .enc-mobile svg{display:none}
+  .tbl--encounters .enc-mobile[data-mobile="yes"]::after{content:"Mobile"}
+  .tbl--encounters .enc-mobile[data-mobile="no"]::after{content:"No mobile"}
 }
 
 @media (prefers-reduced-motion:reduce){
@@ -1687,22 +1739,22 @@ function viewTriggers(){
       </div>
       <div class="live-tag"><span class="live-dot" aria-hidden="true"></span> Live</div>
     </div>
-    <table class="tbl">
+    <table class="tbl tbl--encounters">
       <thead><tr>
         <th>Call #</th><th>Patient</th><th>Crew</th><th>Unit</th><th>Impression</th><th>Mobile</th><th>Status</th>
       </tr></thead>
       <tbody>
         ${TRIGGERS.map(t=>`
           <tr>
-            <td class="mono">${esc(t.call)}</td>
-            <td>${esc(t.patient)}</td>
-            <td class="dim">${esc(t.crew)}</td>
-            <td class="mono">${esc(t.unit)}</td>
-            <td>${esc(t.impression)}</td>
-            <td>${t.mobile
+            <td class="mono enc-call">${esc(t.call)}</td>
+            <td class="enc-patient">${esc(t.patient)}</td>
+            <td class="dim enc-crew">${esc(t.crew)}</td>
+            <td class="mono enc-unit">${esc(t.unit)}</td>
+            <td class="enc-impression">${esc(t.impression)}</td>
+            <td class="enc-mobile" data-mobile="${t.mobile?"yes":"no"}">${t.mobile
               ? `<span class="icon-yes" title="Mobile on record">${I.check(16)}<span class="sr">Yes</span></span>`
               : `<span class="icon-no" title="No mobile on record">${I.x(16)}<span class="sr">No</span></span>`}</td>
-            <td>${triggerStatusBadge(t.status)}</td>
+            <td class="enc-status">${triggerStatusBadge(t.status)}</td>
           </tr>`).join("")}
       </tbody>
     </table>
