@@ -101,14 +101,14 @@ a.fw-btn{text-decoration:none}
 }
 
 /* ---------- app shell ---------- */
-.shell{min-height:100vh;display:flex;flex-direction:column;background:var(--muted)}
+.shell{min-height:100vh;display:flex;flex-direction:column;background:var(--muted);min-width:0}
 .topbar{
   height:56px;flex:0 0 auto;display:flex;align-items:center;gap:16px;
   padding:0 24px;background:var(--fw-navy);color:var(--base-white);
   position:sticky;top:0;z-index:40;
 }
 .topbar :focus-visible{outline-color:var(--base-white)}
-.brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:-.01em;font-size:16px;color:var(--base-white)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:-.01em;font-size:16px;color:var(--base-white)}
 .brand-mark{
   width:24px;height:24px;display:block;flex:0 0 auto;
 }
@@ -116,7 +116,7 @@ a.fw-btn{text-decoration:none}
 .nav{display:flex;gap:4px;margin-left:8px}
 .nav a{
   display:flex;align-items:center;height:32px;padding:0 12px;
-  border-radius:var(--r-sm);font-size:14px;font-weight:700;
+  border-radius:var(--r-sm);font-size:14px;font-weight:500;
   color:color-mix(in srgb,var(--base-white) 72%,transparent);
   transition:background-color var(--dur-micro) var(--ease-out),color var(--dur-micro) var(--ease-out);
 }
@@ -135,7 +135,7 @@ a.fw-btn{text-decoration:none}
 .seg{display:flex;background:var(--neutral-200);border-radius:var(--r-md);padding:4px;gap:2px}
 .seg button{
   height:28px;padding:0 10px;border:0;background:transparent;border-radius:var(--r-sm);
-  font-size:13px;font-weight:700;color:var(--muted-foreground);cursor:pointer;
+  font-size:13px;font-weight:500;color:var(--muted-foreground);cursor:pointer;
   transition:all var(--dur-micro) var(--ease-out);
 }
 .seg button[aria-pressed="true"]{background:var(--background);color:var(--foreground);box-shadow:var(--shadow-sm)}
@@ -200,7 +200,7 @@ body.nav-open{overflow:hidden}
 html[data-theme="dark"] .seg{background:var(--neutral-900)}
 html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-white) 12%,transparent)}
 
-.main{flex:1;padding:32px 24px 96px;max-width:1280px;width:100%;margin:0 auto;background:var(--muted)}
+.main{flex:1;padding:32px 24px 96px;max-width:1280px;width:100%;margin:0 auto;background:var(--muted);overflow-x:clip;min-width:0}
 .page-head{margin-bottom:24px}
 .title-edit{display:flex;align-items:center;gap:8px;min-width:0;max-width:100%}
 .title-edit-hit{
@@ -300,11 +300,23 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
   padding:2px 8px;border-radius:var(--r-md);
 }
 
-.bento-funnel{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
-  margin-bottom:16px;
+.bento > *,
+.grid > *,
+.funnel-stats > *,
+.spot-split > *{min-width:0}
+.funnel-strip{margin-bottom:16px;overflow:hidden}
+.funnel-stats{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:0;margin-top:16px;
+  border-top:1px solid var(--border);
 }
-.bento-funnel-group{display:contents}
+.funnel-stats > div{padding:16px 16px 0 0;min-width:0}
+.funnel-stats > div + div{padding-left:16px;border-left:1px solid var(--border)}
+.funnel-stats .stat-k{
+  margin:0 0 6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+}
+.funnel-stats .kpi-v{font-size:28px;line-height:32px;font-weight:600;min-width:0}
+.funnel-stats .stat-sub{margin-top:8px}
 .kpi{
   display:flex;flex-direction:column;gap:8px;
   background:var(--card);
@@ -332,10 +344,11 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .kpi-v{
   font-size:32px;line-height:36px;font-weight:700;letter-spacing:-.02em;
   display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
+  min-width:0;
 }
 .kpi-foot{
   display:flex;align-items:center;justify-content:space-between;gap:8px;
-  margin-top:auto;
+  margin-top:auto;flex-wrap:wrap;
   padding-top:12px;border-top:1px solid var(--border);
   color:var(--muted-foreground);font-size:12px;line-height:16px;
 }
@@ -357,16 +370,16 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .kpi-spot--urgent .kpi-ico{color:var(--status-critical)}
 .kpi-spot--good .kpi-ico{color:var(--status-resolved)}
 .kpi-spot--good .kpi-delta{color:var(--status-resolved)}
-.spot-split{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1;align-items:center}
+.spot-split{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1;align-items:center;min-width:0}
 .spot-split > div + div{border-left:1px solid var(--border);padding-left:16px}
-.kpi-spot--good .spot-split .kpi-v{color:var(--status-resolved)}
+.al-meta{display:none;margin-top:8px;color:var(--muted-foreground);font-size:13px;line-height:20px}
 
 /* queue table */
 .tbl{width:100%;border-collapse:separate;border-spacing:0}
 .tbl thead tr{background:var(--surface-hover)}
 .tbl th{
   text-align:left;padding:12px 16px;height:48px;
-  font-size:16px;line-height:24px;font-weight:400;color:var(--muted-foreground);
+  font-size:14px;line-height:20px;font-weight:500;color:var(--muted-foreground);
   border-bottom:1px solid var(--border);white-space:nowrap;
   background:var(--surface-hover);
   position:sticky;top:56px;z-index:3;
@@ -591,7 +604,7 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 .log li:last-child{border-bottom:0}
 
 /* builder */
-.split{display:grid;grid-template-columns:1fr 400px;gap:24px;align-items:start}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,400px);gap:24px;align-items:start}
 .preview-col{align-self:stretch}
 .preview-sticky{
   position:sticky;top:72px;z-index:20;
@@ -831,18 +844,42 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
 @media (max-width:1080px){
   .split{grid-template-columns:1fr}
   .preview-col,.preview-sticky{position:static;align-self:auto;z-index:auto}
-  .g-4{grid-template-columns:repeat(2,1fr)}
-  .bento{grid-template-columns:1fr}
-  .bento-funnel{grid-template-columns:repeat(2,1fr)}
+  .g-4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g-2{grid-template-columns:minmax(0,1fr)}
+  .bento{grid-template-columns:minmax(0,1fr)}
+  .funnel-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .funnel-stats > div{padding:16px 16px 0 0}
+  .funnel-stats > div:nth-child(n+3){padding-top:16px;border-top:1px solid var(--border)}
+  .funnel-stats > div:nth-child(odd){padding-left:0;border-left:0}
+  .funnel-stats > div:nth-child(even){padding-left:16px;border-left:1px solid var(--border)}
   .score-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .tbl--alerts .al-meta{display:block}
+  .tbl--alerts th:nth-child(3),
+  .tbl--alerts th:nth-child(4),
+  .tbl--alerts th:nth-child(5),
+  .tbl--alerts .al-unit,
+  .tbl--alerts .al-assigned,
+  .tbl--alerts .al-opened{display:none !important}
 }
 @media (max-width:760px){
   .main{padding:24px 16px 80px}
   .topbar{padding:0 12px;gap:8px}
   .topbar .demo-switch{display:none}
   .nav-drawer-foot{display:block}
-  .g-4,.g-3,.g-2{grid-template-columns:1fr}
-  .bento-funnel{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .g-4,.g-3,.g-2{grid-template-columns:minmax(0,1fr)}
+  .funnel-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .spot-split{grid-template-columns:minmax(0,1fr);gap:12px}
+  .spot-split > div + div{border-left:0;padding-left:0;border-top:1px solid var(--border);padding-top:12px}
+  .kpi-spot .kpi-top{flex-wrap:wrap}
+  .page-head .row,.kpi-foot{flex-wrap:wrap}
+  .bar-row{
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:"label value" "bar bar";
+    gap:6px 12px;
+  }
+  .bar-row > :first-child{grid-area:label;min-width:0}
+  .bar-row .bar{grid-area:bar}
+  .bar-row > :last-child{grid-area:value}
   .kpi{padding:12px;gap:6px;min-width:0}
   .kpi-top{gap:8px}
   .kpi-ico{width:28px;height:28px}
@@ -857,7 +894,6 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
   .kv{grid-template-columns:1fr}
   .t-h1{font-size:34px;line-height:38px}
   .t-h2{font-size:24px;line-height:32px}
-  .bar-row{grid-template-columns:100px 1fr 48px}
   .score-kpis{grid-template-columns:1fr 1fr}
   .drawer{width:100%;max-width:100%;left:auto;right:0;border-left:0}
   .kpi-v{font-size:24px;line-height:28px}
@@ -1124,7 +1160,11 @@ async function gateHash(s){
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
   return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
 }
-function unlockGate(){ document.body.classList.remove("is-locked"); }
+function unlockGate(){
+  document.body.classList.remove("is-locked");
+  const gate = document.getElementById("gate");
+  if(gate) gate.remove();
+}
 if(sessionStorage.getItem(GATE_KEY)==="ok") unlockGate();
 document.getElementById("gate-form").addEventListener("submit", async e=>{
   e.preventDefault();
@@ -1217,12 +1257,12 @@ const SURVEYS = [
 ];
 
 const QUESTIONS = [
-  { id:"q1", text:"Providing Professional, compassionate, and personal care during your emergency is our priority. How well did we do?",
+  { id:"q1", text:"Providing professional, compassionate, and personal care during your emergency is our priority. How well did we do?",
     type:"choice", required:true, locked:false,
     options:["Exceptional","Good","Fine","Poor","Unacceptable"] },
   { id:"q2", text:"How likely are you to recommend our emergency services?",
     type:"choice", required:true, locked:false,
-    options:["Very Likely","Somewhat Likely","Not Sure","Not Likely","Definitely Not Likely"] },
+    options:["Very likely","Somewhat likely","Not sure","Not likely","Definitely not likely"] },
   { id:"q3", text:"Did you feel listened to by the crew?", type:"yesno", required:true, locked:true,
     lockNote:"Benchmark question — shared wording across participating agencies" },
   { id:"q4", text:"Did you feel cared for by the crew?", type:"yesno", required:true, locked:true,
@@ -1245,7 +1285,7 @@ const QUESTIONS_Q3 = [
   { id:"c1", text:"How safe do you feel calling 911 in this community?", type:"choice", required:true, locked:false,
     options:["Very safe","Mostly safe","Not sure","Mostly unsafe","Unsafe"] },
   { id:"c2", text:"How likely are you to recommend our emergency services?", type:"choice", required:true, locked:false,
-    options:["Very Likely","Somewhat Likely","Not Sure","Not Likely","Definitely Not Likely"] },
+    options:["Very likely","Somewhat likely","Not sure","Not likely","Definitely not likely"] },
   { id:"c3", text:"Do you trust our crews to treat people with respect?", type:"yesno", required:true, locked:true,
     lockNote:"Benchmark question — shared wording across participating agencies" },
   { id:"c4", text:"Do you feel crews in this community listen to the people they treat?", type:"yesno", required:true, locked:true,
@@ -1266,36 +1306,36 @@ const SURVEY_BANK = {
 const RESPONSES = {
   sv_post: [
     { id:"R-9911", at:mins(38), band:"75+", lang:"English", zone:"Manhasset", alert:"A-4471",
-      answers:{ q1:"Unacceptable", q2:"Definitely Not Likely", q3:"No", q4:"No",
+      answers:{ q1:"Unacceptable", q2:"Definitely not likely", q3:"No", q4:"No",
         q5:"", q6:"Nobody told me where we were going or what the medicine was. I asked twice. I'm 78 years old and I was scared the whole ride.", q7:"Yes" } },
     { id:"R-9910", at:mins(96), band:"55–64", lang:"English", zone:"Great Neck", alert:"A-4470",
-      answers:{ q1:"Poor", q2:"Not Likely", q3:"Yes", q4:"No",
+      answers:{ q1:"Poor", q2:"Not likely", q3:"Yes", q4:"No",
         q5:"The crew themselves were trying.", q6:"The stretcher slipped when they loaded me and nobody said sorry. My hip hurt worse after than before.", q7:"Yes" } },
     { id:"R-9908", at:mins(174), band:"45–54", lang:"Spanish", zone:"New Hyde Park", alert:"A-4468",
-      answers:{ q1:"Fine", q2:"Not Likely", q3:"Yes", q4:"Yes",
+      answers:{ q1:"Fine", q2:"Not likely", q3:"Yes", q4:"Yes",
         q5:"They were calm.", q6:"They were fine but it took a long time and I could not breathe. I would drive myself next time.", q7:"No" } },
     { id:"R-9907", at:mins(220), band:"35–44", lang:"English", zone:"Port Washington", alert:null,
-      answers:{ q1:"Exceptional", q2:"Very Likely", q3:"Yes", q4:"Yes",
+      answers:{ q1:"Exceptional", q2:"Very likely", q3:"Yes", q4:"Yes",
         q5:"They explained every step and asked if I was cold.", q6:"", q7:"No" } },
     { id:"R-9906", at:mins(320), band:"35–44", lang:"English", zone:"Manhasset", alert:"A-4465",
-      answers:{ q1:"Poor", q2:"Not Sure", q3:"No", q4:"No",
+      answers:{ q1:"Poor", q2:"Not sure", q3:"No", q4:"No",
         q5:"", q6:"Rushed. I felt like a task on a list.", q7:"No" } },
     { id:"R-9905", at:mins(480), band:"18–34", lang:"English", zone:"Great Neck", alert:null,
-      answers:{ q1:"Good", q2:"Somewhat Likely", q3:"Yes", q4:"Yes",
+      answers:{ q1:"Good", q2:"Somewhat likely", q3:"Yes", q4:"Yes",
         q5:"Got me there quickly.", q6:"A little loud in the back.", q7:"No" } },
     { id:"R-9904", at:mins(1180), band:"65–74", lang:"English", zone:"Great Neck", alert:"A-4459",
-      answers:{ q1:"Fine", q2:"Somewhat Likely", q3:"Yes", q4:"No",
+      answers:{ q1:"Fine", q2:"Somewhat likely", q3:"Yes", q4:"No",
         q5:"", q6:"I told them about my allergy three times.", q7:"Yes" } },
     { id:"R-9903", at:mins(1610), band:"35–44", lang:"English", zone:"New Hyde Park", alert:"A-4455",
-      answers:{ q1:"Good", q2:"Very Likely", q3:"Yes", q4:"Yes",
+      answers:{ q1:"Good", q2:"Very likely", q3:"Yes", q4:"Yes",
         q5:"Kind crew.", q6:"Freezing cold in the back and no blanket until I asked.", q7:"No" } },
     { id:"R-9902", at:mins(2100), band:"55–64", lang:"English", zone:"Manhasset", alert:null,
-      answers:{ q1:"Exceptional", q2:"Very Likely", q3:"Yes", q4:"Yes", q5:"Everything. Thank you.", q6:"", q7:"No" } },
+      answers:{ q1:"Exceptional", q2:"Very likely", q3:"Yes", q4:"Yes", q5:"Everything. Thank you.", q6:"", q7:"No" } },
     { id:"R-9901", at:mins(2900), band:"75+", lang:"English", zone:"Manhasset", alert:"A-4451",
-      answers:{ q1:"Fine", q2:"Not Likely", q3:"Yes", q4:"Yes",
+      answers:{ q1:"Fine", q2:"Not likely", q3:"Yes", q4:"Yes",
         q5:"The crew themselves were kind.", q6:"Long wait.", q7:"No" } },
     { id:"R-9899", at:mins(3600), band:"25–34", lang:"English", zone:"New Hyde Park", alert:null,
-      answers:{ q1:"Good", q2:"Very Likely", q3:"Yes", q4:"Yes", q5:"", q6:"", q7:"No" } }
+      answers:{ q1:"Good", q2:"Very likely", q3:"Yes", q4:"Yes", q5:"", q6:"", q7:"No" } }
   ],
   sv_notrans: [
     { id:"R-4404", at:mins(410), band:"25–34", lang:"English", zone:"Port Washington", alert:"A-4462",
@@ -1314,7 +1354,7 @@ const RESPONSES = {
 
 const LIBRARY = [
   { id:"lib1", category:"Care quality", text:"Providing professional, compassionate, and personal care during your emergency is our priority. How well did we do?", type:"choice", options:["Exceptional","Good","Fine","Poor","Unacceptable"], benchmark:true },
-  { id:"lib2", category:"Recommendation", text:"How likely are you to recommend our emergency services?", type:"choice", options:["Very Likely","Somewhat Likely","Not Sure","Not Likely","Definitely Not Likely"], benchmark:true },
+  { id:"lib2", category:"Recommendation", text:"How likely are you to recommend our emergency services?", type:"choice", options:["Very likely","Somewhat likely","Not sure","Not likely","Definitely not likely"], benchmark:true },
   { id:"lib3", category:"Communication", text:"Did you feel listened to by the crew?", type:"yesno", benchmark:false },
   { id:"lib4", category:"Care quality", text:"Did you feel cared for by the crew?", type:"yesno", benchmark:false },
   { id:"lib5", category:"Open feedback", text:"What did we do well?", type:"text", benchmark:false },
@@ -1546,12 +1586,20 @@ const critCount = () => state.alerts.filter(a=>a.status==="critical").length;
 function shell(body){
   const c = openCount();
   const compactNav = window.matchMedia("(max-width: 1199px)").matches;
-  const nav = [
+  const supervisorFirst = state.role==="supervisor";
+  const nav = supervisorFirst ? [
     ["#/","Overview"],
-    ["#/triggers","Triggers"],
-    ["#/surveys","Surveys"],
     ["#/alerts","Alerts"],
+    ["#/surveys","Surveys"],
     ["#/scorecard","Scorecard"],
+    ["#/triggers","Triggers"],
+    ["#/blink","Blink"]
+  ] : [
+    ["#/","Overview"],
+    ["#/surveys","Surveys"],
+    ["#/scorecard","Scorecard"],
+    ["#/alerts","Alerts"],
+    ["#/triggers","Triggers"],
     ["#/blink","Blink"]
   ];
   const navLinks = nav.map(([h,l])=>{
@@ -1626,139 +1674,90 @@ const staleBanner = () => state.hideStale ? "" : `
 /* ============================================================
    4. OVERVIEW (landing)
    ============================================================ */
-function viewOverview(){
-  const supervisorFirst = state.role==="supervisor";
-  const period = `${day(mins(43200))} – ${day(NOW)}`;
+function surveyPeriod(){
+  return `${day(mins(43200))} – ${day(NOW)}`;
+}
+function liveSurveyStats(){
+  const live = state.surveys.filter(s=>s.status==="Live");
+  const completed = live.reduce((n,s)=>n+s.responses,0);
+  const invited = live.reduce((n,s)=>n+s.sent,0);
+  const rate = invited ? Math.round(completed/invited*100) : 0;
+  return { live, completed, invited, rate };
+}
+function oldestOpenWait(){
   const open = state.alerts.filter(a=>a.status!=="resolved");
-  const oldest = open.reduce((a,b)=>a.at<b.at?a:b, open[0]);
-  const oldestWait = oldest ? ago(oldest.at).replace(" ago","") : "—";
-  const liveSurveys = state.surveys.filter(s=>s.status==="Live");
-  const responseN = liveSurveys.reduce((n,s)=>n+s.responses,0);
-  const sentN = liveSurveys.reduce((n,s)=>n+s.sent,0);
-  const responseRate = sentN ? Math.round(responseN/sentN*100) : 0;
-  const followedN = state.alerts.filter(a=>a.status==="resolved").length;
-
+  if(!open.length) return "—";
+  const oldest = open.reduce((a,b)=>a.at<b.at?a:b);
+  return ago(oldest.at).replace(" ago","");
+}
+function cardFunnel(){
+  const period = surveyPeriod();
+  const { live, completed, invited, rate } = liveSurveyStats();
+  const near = rate < 30;
+  const low = rate < 25;
+  const rateLabel = low ? "Low" : near ? "Near target" : "On target";
   return `
-  <div class="page-head">
-    <h1 class="t-h2">${supervisorFirst?"Supervisor Overview":"Reflect overview"}</h1>
-    <p class="t-p dim">${supervisorFirst
-      ? "Everything waiting on a supervisor, in one place."
-      : `Patient experience across ${AGENCY.name}, ${day(mins(43200))} to today.`}</p>
-  </div>
-  ${staleBanner()}
-  <div class="bento-funnel">
-  <section class="bento-funnel-group" aria-label="Survey funnel">
-    <article class="kpi">
-      <div class="kpi-top">
-        <span class="kpi-ico">${I.send(16)}</span>
-        <span class="kpi-label">Distributed</span>
+  <section class="fw-card funnel-strip" aria-labelledby="funnel-heading">
+    <h2 class="t-h4" id="funnel-heading">Survey response</h2>
+    <p class="t-subtle dim mt8">${live.length} live surveys · ${period}</p>
+    <div class="funnel-stats">
+      <div>
+        <div class="stat-k">Invited</div>
+        <div class="kpi-v">${invited.toLocaleString("en-US")}</div>
+        <p class="stat-sub">Invitations sent</p>
       </div>
-      <div class="kpi-v">14,101</div>
-      <div class="kpi-foot">
-        <span class="row">${I.calendar(14)} ${period}</span>
+      <div>
+        <div class="stat-k">Completed</div>
+        <div class="kpi-v">${completed.toLocaleString("en-US")}</div>
+        <p class="stat-sub">Of ${invited.toLocaleString("en-US")} invited</p>
       </div>
-    </article>
-    <article class="kpi">
-      <div class="kpi-top">
-        <span class="kpi-ico">${I.inbox(16)}</span>
-        <span class="kpi-label">Returned</span>
+      <div>
+        <div class="stat-k">Response rate</div>
+        <div class="kpi-v">${rate}%</div>
+        <p class="stat-sub"><span class="kpi-delta${near?" is-down":""}">${near?I.trendDown(14):I.trendUp(14)} ${rateLabel}</span> · Target 30%</p>
       </div>
-      <div class="kpi-v">2,327</div>
-      <div class="kpi-foot">
-        <span>Of 14,101 sent</span>
+      <div>
+        <div class="stat-k">Avg time</div>
+        <div class="kpi-v">10 min</div>
+        <p class="stat-sub">Per completed survey</p>
       </div>
-    </article>
-    <article class="kpi kpi--warn">
-      <div class="kpi-top">
-        <span class="kpi-ico">${I.chart(16)}</span>
-        <span class="kpi-label">Return rate</span>
-        <span class="kpi-delta is-down">${I.trendDown(14)} Low</span>
-      </div>
-      <div class="kpi-v">17%</div>
-      <div class="kpi-foot">
-        <span>Target 30%</span>
-      </div>
-    </article>
-    <article class="kpi">
-      <div class="kpi-top">
-        <span class="kpi-ico">${I.clock(16)}</span>
-        <span class="kpi-label">Avg time</span>
-      </div>
-      <div class="kpi-v">00:10:19</div>
-      <div class="kpi-foot">
-        <span>Per completed survey</span>
-      </div>
-    </article>
-  </section>
-  <section class="bento-funnel-group" aria-label="Current work">
-    <article class="kpi">
-      <div class="kpi-top">
-        <span class="kpi-ico">${I.alert(16)}</span>
-        <span class="kpi-label">Open alerts</span>
-      </div>
-      <div class="kpi-v">${openCount()}</div>
-      <div class="kpi-foot">
-        <span>${critCount()} critical</span>
-      </div>
-    </article>
-    <article class="kpi">
-      <div class="kpi-top">
-        <span class="kpi-ico">${I.checkCircle(16)}</span>
-        <span class="kpi-label">Followed up</span>
-      </div>
-      <div class="kpi-v">${followedN}</div>
-      <div class="kpi-foot">
-        <span>In the last 48 hours</span>
-      </div>
-    </article>
-    <article class="kpi">
-      <div class="kpi-top">
-        <span class="kpi-ico">${I.users(16)}</span>
-        <span class="kpi-label">Responses</span>
-      </div>
-      <div class="kpi-v">${responseN.toLocaleString("en-US")}</div>
-      <div class="kpi-foot">
-        <span>${liveSurveys.length} surveys live</span>
-      </div>
-    </article>
-    <article class="kpi">
-      <div class="kpi-top">
-        <span class="kpi-ico">${I.chart(16)}</span>
-        <span class="kpi-label">Response rate</span>
-      </div>
-      <div class="kpi-v">${responseRate}%</div>
-      <div class="kpi-foot">
-        <span>${sentN.toLocaleString("en-US")} invitations sent</span>
-      </div>
-    </article>
-  </section>
-  </div>
-  <div class="bento" aria-label="Open work">
-    <section class="fw-card kpi-spot kpi-spot--urgent">
+    </div>
+  </section>`;
+}
+function cardCallback(){
+  const open = openCount();
+  const crit = critCount();
+  const wait = oldestOpenWait();
+  const urgent = crit > 0;
+  return `
+    <section class="fw-card kpi-spot${urgent?" kpi-spot--urgent":""}">
       <div class="kpi-top">
         <span class="kpi-ico">${I.phone(16)}</span>
         <div class="kpi-head">
           <h2 class="t-h4">Needs a callback</h2>
           <p class="t-subtle dim">Open alerts waiting in the queue.</p>
         </div>
-        <span class="fw-badge fw-badge--destructive">Urgent</span>
+        ${urgent?`<span class="fw-badge fw-badge--destructive">Urgent</span>`:""}
       </div>
       <div class="spot-split">
         <div>
-          <div class="kpi-v">52</div>
+          <div class="kpi-v">${open}</div>
           <div class="stat-k">Open</div>
         </div>
         <div>
-          <div class="kpi-v">${oldestWait}</div>
+          <div class="kpi-v">${wait}</div>
           <div class="stat-k">Oldest wait</div>
         </div>
       </div>
       <div class="kpi-foot">
-        <span class="row">${I.clock(14)} Waiting in queue</span>
+        <span class="row">${I.clock(14)} ${crit} critical</span>
         <a class="fw-btn fw-btn--primary fw-btn--sm" href="#/alerts">Open queue</a>
       </div>
-    </section>
-    <section class="fw-card kpi-spot kpi-spot--good bento-quality">
+    </section>`;
+}
+function cardQuality(){
+  return `
+    <section class="fw-card kpi-spot bento-quality">
       <div class="kpi-top">
         <span class="kpi-ico">${I.star(16)}</span>
         <div class="kpi-head">
@@ -1778,11 +1777,12 @@ function viewOverview(){
         </div>
       </div>
       <div class="kpi-foot">
-        <span class="row">${I.calendar(14)} ${period}</span>
+        <span class="row">${I.calendar(14)} ${surveyPeriod()}</span>
       </div>
-    </section>
-  </div>
-  <div class="grid g-2 mt16" aria-label="Score charts">
+    </section>`;
+}
+function cardLowestScores(){
+  return `
     <section class="fw-card bento-lowest">
       <h2 class="t-h4">Where scores are lowest</h2>
       <p class="t-subtle dim mt8">Average respect + listening score, last 30 days. By area.</p>
@@ -1795,12 +1795,38 @@ function viewOverview(){
           <span style="text-align:right;font-weight:700">${z.score.toFixed(1)}</span>
         </div>`).join("")}
       </div>
-    </section>
+    </section>`;
+}
+
+function viewOverview(){
+  const supervisorFirst = state.role==="supervisor";
+  const work = supervisorFirst
+    ? `${cardCallback()}${cardQuality()}`
+    : `${cardQuality()}${cardCallback()}`;
+  const funnel = cardFunnel();
+  const charts = `
+  <div class="grid g-2 mt16" aria-label="Score charts">
+    ${cardLowestScores()}
     ${cardByDemographic()}
   </div>
-  <div class="mt16">
-    ${cardAlertsByUnit()}
-  </div>`;
+  <div class="mt16">${cardAlertsByUnit()}</div>`;
+
+  return `
+  <div class="page-head">
+    <h1 class="t-h2">${supervisorFirst?"Supervisor overview":"Reflect overview"}</h1>
+    <p class="t-p dim">${supervisorFirst
+      ? "Everything waiting on a supervisor, in one place."
+      : `Patient experience across ${AGENCY.name}, ${day(mins(43200))} to today.`}</p>
+  </div>
+  ${staleBanner()}
+  ${supervisorFirst?`
+  <div class="bento" aria-label="Open work">${work}</div>
+  ${charts}
+  <div class="mt16">${funnel}</div>`:`
+  ${funnel}
+  <div class="bento" aria-label="System health">${work}</div>
+  ${charts}`}
+`;
 }
 
 function viewScorecard(){
@@ -1810,7 +1836,7 @@ function viewScorecard(){
 
   return `
   <div class="page-head">
-    <div class="crumbs"><a href="#/">Reflect</a><span class="sep">/</span><span>Scorecard</span></div>
+    <div class="crumbs"><a href="#/">Overview</a><span class="sep">/</span><span>Scorecard</span></div>
     <div>
       <h1 class="t-h2">Employee scorecard</h1>
       <p class="t-p dim">FirstPass integration · ${day(mins(43200))} to ${day(NOW)}</p>
@@ -1948,7 +1974,7 @@ function viewBlink(){
 
   return `
   <div class="page-head">
-    <div class="crumbs"><a href="#/">Reflect</a><span class="sep">/</span><span>Blink</span></div>
+    <div class="crumbs"><a href="#/">Overview</a><span class="sep">/</span><span>Blink</span></div>
     <div>
       <h1 class="t-h2">Blink export</h1>
       <p class="t-p dim">Review patient commendations and send them to crew Blink boards.</p>
@@ -2000,7 +2026,7 @@ function triggerStatusBadge(k){
 function viewTriggers(){
   return `
   <div class="page-head">
-    <div class="crumbs"><a href="#/">Reflect</a><span class="sep">/</span><span>Triggers</span></div>
+    <div class="crumbs"><a href="#/">Overview</a><span class="sep">/</span><span>Triggers</span></div>
     <div>
       <h1 class="t-h2">Triggers</h1>
       <p class="t-p dim">Every qualifying encounter is identified and queued for a survey. No one has to send it by hand.</p>
@@ -2090,6 +2116,11 @@ function viewTriggers(){
    ============================================================ */
 let queueFilter = "open";
 function setFilter(f){ queueFilter = f; render(); }
+function alertRowKey(e,id){
+  if(e.key!=="Enter" && e.key!==" ") return;
+  e.preventDefault();
+  openAlert(id);
+}
 
 function viewAlerts(){
   const all = state.alerts;
@@ -2102,7 +2133,7 @@ function viewAlerts(){
 
   return `
   <div class="page-head">
-    <div class="crumbs"><a href="#/">Reflect</a><span class="sep">/</span><span>Alerts</span></div>
+    <div class="crumbs"><a href="#/">Overview</a><span class="sep">/</span><span>Alerts</span></div>
     <div class="between">
       <div>
         <h1 class="t-h2">Alerts</h1>
@@ -2124,11 +2155,15 @@ function viewAlerts(){
       </tr></thead>
       <tbody aria-live="polite">
         ${list.map(a=>`
-          <tr class="clickable" id="row-${a.id}" onclick="openAlert('${a.id}')">
+          <tr class="clickable" id="row-${a.id}" tabindex="0"
+            aria-label="${esc(a.reason)}"
+            onclick="openAlert('${a.id}')"
+            onkeydown="alertRowKey(event,'${a.id}')">
             <td class="al-status">${statusBadge(a.status)}</td>
             <td class="al-why">
               <div style="font-weight:700">${esc(a.reason)}</div>
               <div class="snip">${esc(a.quote)}</div>
+              <div class="al-meta">${a.unit} · ${esc(a.assigned)} · ${ago(a.at)}</div>
             </td>
             <td class="al-unit"><span class="mono">${a.unit}</span><div class="t-subtle dim">${esc(a.call)}</div></td>
             <td class="al-assigned${a.assigned==="Unassigned"?" dim":""}">${esc(a.assigned)}</td>
@@ -2271,7 +2306,7 @@ function viewSurveysIndex(){
   const drafts = state.surveys.filter(s=>s.status==="Draft").length;
   return `
   <div class="page-head">
-    <div class="crumbs"><a href="#/">Reflect</a><span class="sep">/</span><span>Surveys</span></div>
+    <div class="crumbs"><a href="#/">Overview</a><span class="sep">/</span><span>Surveys</span></div>
     <div class="between">
       <div>
         <h1 class="t-h2">Surveys</h1>
@@ -2325,7 +2360,7 @@ function viewSurveys(){
     : `${qs.length} questions · draft · not sent yet`;
   return `
   <div class="page-head">
-    <div class="crumbs"><a href="#/">Reflect</a><span class="sep">/</span><a href="#/surveys">Surveys</a>
+    <div class="crumbs"><a href="#/">Overview</a><span class="sep">/</span><a href="#/surveys">Surveys</a>
       <span class="sep">/</span><span>${esc(s.name)}</span></div>
     <div class="between">
       <div>
@@ -2497,7 +2532,7 @@ function viewSurveyResponses(){
   const total = s.responses;
   return `
   <div class="page-head">
-    <div class="crumbs"><a href="#/">Reflect</a><span class="sep">/</span><a href="#/surveys">Surveys</a>
+    <div class="crumbs"><a href="#/">Overview</a><span class="sep">/</span><a href="#/surveys">Surveys</a>
       <span class="sep">/</span><a href="#/surveys/${s.id}">${esc(s.name)}</a>
       <span class="sep">/</span><span>Responses</span></div>
     <div class="between">
@@ -2804,7 +2839,7 @@ function viewPatient(){
   if(S.step === total+1){
     const low = Object.entries(S.answers).some(([k,v])=>{
       if(k==="q1") return v==="Poor" || v==="Unacceptable";
-      if(k==="q2") return v==="Not Likely" || v==="Definitely Not Likely";
+      if(k==="q2") return v==="Not likely" || v==="Definitely not likely";
       if(k==="q3" || k==="q4") return v==="No";
       return false;
     });
