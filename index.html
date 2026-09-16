@@ -310,7 +310,7 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
   gap:0;margin-top:16px;
   border-top:1px solid var(--border);
 }
-.funnel-stats > div{padding:16px 16px 0 0;min-width:0}
+.funnel-stats > div{padding:16px 16px 16px 0;min-width:0}
 .funnel-stats > div + div{padding-left:16px;border-left:1px solid var(--border)}
 .funnel-stats .stat-k{
   margin:0 0 6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
@@ -348,7 +348,7 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 }
 .kpi-foot{
   display:flex;align-items:center;justify-content:space-between;gap:8px;
-  margin-top:auto;flex-wrap:wrap;
+  flex-wrap:wrap;
   padding-top:12px;border-top:1px solid var(--border);
   color:var(--muted-foreground);font-size:12px;line-height:16px;
 }
@@ -356,21 +356,26 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .bento{
   display:grid;
   grid-template-columns:1fr 1fr;
+  grid-template-rows:auto 1fr auto;
   gap:16px;
   align-items:stretch;
 }
 .kpi-spot{
-  display:flex;flex-direction:column;gap:16px;
-  padding:20px 24px;
+  display:grid;
+  grid-template-rows:subgrid;
+  grid-row:span 3;
+  gap:16px;
+  padding:0;
 }
-.bento .fw-card.kpi-spot{box-shadow:var(--shadow-sm)}
-.kpi-spot .kpi-top{align-items:flex-start}
+.bento .fw-card.kpi-spot{box-shadow:var(--shadow-sm);padding:0}
+.kpi-spot .kpi-top{align-items:flex-start;padding:20px 24px 0}
 .kpi-head{flex:1;min-width:0}
 .kpi-head .t-subtle{margin-top:4px}
 .kpi-spot--urgent .kpi-ico{color:var(--status-critical)}
 .kpi-spot--good .kpi-ico{color:var(--status-resolved)}
 .kpi-spot--good .kpi-delta{color:var(--status-resolved)}
-.spot-split{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1;align-items:center;min-width:0}
+.spot-split{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end;align-self:end;min-width:0;padding:0 24px}
+.kpi-spot .kpi-foot{padding:12px 24px 20px}
 .spot-split > div + div{border-left:1px solid var(--border);padding-left:16px}
 .al-meta{display:none;margin-top:8px;color:var(--muted-foreground);font-size:13px;line-height:20px}
 
@@ -845,13 +850,6 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
   .split{grid-template-columns:1fr}
   .preview-col,.preview-sticky{position:static;align-self:auto;z-index:auto}
   .g-4{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .g-2{grid-template-columns:minmax(0,1fr)}
-  .bento{grid-template-columns:minmax(0,1fr)}
-  .funnel-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .funnel-stats > div{padding:16px 16px 0 0}
-  .funnel-stats > div:nth-child(n+3){padding-top:16px;border-top:1px solid var(--border)}
-  .funnel-stats > div:nth-child(odd){padding-left:0;border-left:0}
-  .funnel-stats > div:nth-child(even){padding-left:16px;border-left:1px solid var(--border)}
   .score-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
   .tbl--alerts .al-meta{display:block}
   .tbl--alerts th:nth-child(3),
@@ -867,9 +865,16 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
   .topbar .demo-switch{display:none}
   .nav-drawer-foot{display:block}
   .g-4,.g-3,.g-2{grid-template-columns:minmax(0,1fr)}
+  .bento{grid-template-columns:minmax(0,1fr);grid-template-rows:none}
+  .kpi-spot{display:flex;flex-direction:column;grid-row:auto;padding:16px}
+  .bento .fw-card.kpi-spot{padding:16px}
+  .kpi-spot .kpi-top,
+  .kpi-spot .spot-split{padding:0;align-self:stretch}
+  .kpi-spot .kpi-foot{padding:8px 0 0}
   .funnel-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .spot-split{grid-template-columns:minmax(0,1fr);gap:12px}
-  .spot-split > div + div{border-left:0;padding-left:0;border-top:1px solid var(--border);padding-top:12px}
+  .funnel-stats > div:nth-child(n+3){padding-top:16px;border-top:1px solid var(--border)}
+  .funnel-stats > div:nth-child(odd){padding-left:0;border-left:0}
+  .funnel-stats > div:nth-child(even){padding-left:16px;border-left:1px solid var(--border)}
   .kpi-spot .kpi-top{flex-wrap:wrap}
   .page-head .row,.kpi-foot{flex-wrap:wrap}
   .bar-row{
@@ -1586,20 +1591,12 @@ const critCount = () => state.alerts.filter(a=>a.status==="critical").length;
 function shell(body){
   const c = openCount();
   const compactNav = window.matchMedia("(max-width: 1199px)").matches;
-  const supervisorFirst = state.role==="supervisor";
-  const nav = supervisorFirst ? [
+  const nav = [
     ["#/","Overview"],
-    ["#/alerts","Alerts"],
-    ["#/surveys","Surveys"],
-    ["#/scorecard","Scorecard"],
     ["#/triggers","Triggers"],
-    ["#/blink","Blink"]
-  ] : [
-    ["#/","Overview"],
     ["#/surveys","Surveys"],
-    ["#/scorecard","Scorecard"],
     ["#/alerts","Alerts"],
-    ["#/triggers","Triggers"],
+    ["#/scorecard","Scorecard"],
     ["#/blink","Blink"]
   ];
   const navLinks = nav.map(([h,l])=>{
@@ -1808,8 +1805,7 @@ function viewOverview(){
   <div class="grid g-2 mt16" aria-label="Score charts">
     ${cardLowestScores()}
     ${cardByDemographic()}
-  </div>
-  <div class="mt16">${cardAlertsByUnit()}</div>`;
+  </div>`;
 
   return `
   <div class="page-head">
@@ -1819,13 +1815,9 @@ function viewOverview(){
       : `Patient experience across ${AGENCY.name}, ${day(mins(43200))} to today.`}</p>
   </div>
   ${staleBanner()}
-  ${supervisorFirst?`
-  <div class="bento" aria-label="Open work">${work}</div>
-  ${charts}
-  <div class="mt16">${funnel}</div>`:`
   ${funnel}
-  <div class="bento" aria-label="System health">${work}</div>
-  ${charts}`}
+  <div class="bento" aria-label="${supervisorFirst?"Open work":"System health"}">${work}</div>
+  ${charts}
 `;
 }
 
@@ -2647,26 +2639,6 @@ function cardByDemographic(){
           </div>`;}).join("")}
       </div>
       <p class="t-detail dim mt16">Groups with fewer than 10 responses are hidden to protect anonymity.</p>
-    </section>`;
-}
-function cardAlertsByUnit(){
-  return `
-    <section class="fw-card">
-      <h2 class="t-h4">Alerts by unit</h2>
-      <p class="t-subtle dim mt8">Open versus followed up, this period.</p>
-      <div class="mt16">
-        <table class="tbl">
-          <thead><tr><th>Unit</th><th>Open</th><th>Followed up</th></tr></thead>
-          <tbody>
-            ${["M-12","E-7","M-3","M-8","E-2"].map(u=>{
-              const o = state.alerts.filter(a=>a.unit===u&&a.status!=="resolved").length;
-              const r = state.alerts.filter(a=>a.unit===u&&a.status==="resolved").length;
-              return `<tr><td><span class="mono">${u}</span></td>
-                <td>${o?`<span style="color:var(--status-elevated);font-weight:700">${o}</span>`:`<span class="dim">0</span>`}</td>
-                <td class="dim">${r}</td></tr>`;}).join("")}
-          </tbody>
-        </table>
-      </div>
     </section>`;
 }
 
