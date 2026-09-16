@@ -372,12 +372,12 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
   position:sticky;top:56px;z-index:3;
 }
 .tbl thead tr + tr th{top:104px}
-.tbl td{padding:12px 16px;font-size:16px;line-height:24px;border-bottom:1px solid var(--border);vertical-align:top}
-.tbl tbody tr:first-child td{padding-top:28px}
-.tbl tbody tr:last-child td{padding-bottom:28px;border-bottom:0}
-.tbl tbody tr{transition:background-color var(--dur-micro) var(--ease-out)}
-.tbl tbody tr:hover{background:var(--accent)}
-.tbl tbody tr.clickable{cursor:pointer}
+.tbl td{padding:16px;font-size:16px;line-height:24px;border-bottom:1px solid var(--border);vertical-align:top}
+.tbl tbody tr:last-child td{border-bottom:0}
+.tbl tbody tr.clickable{cursor:pointer;transition:background-color var(--dur-micro) var(--ease-out)}
+@media (hover:hover){
+  .tbl tbody tr.clickable:hover{background:var(--accent)}
+}
 .tbl .fav{width:52px;padding-left:12px;padding-right:0;vertical-align:middle}
 .tbl .morecol{width:52px;padding-left:8px;padding-right:12px;text-align:right;vertical-align:middle}
 .star-btn{color:var(--muted-foreground)}
@@ -528,19 +528,26 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 }
 @keyframes fade{from{opacity:0}}
 .drawer{
-  position:fixed;top:0;right:0;bottom:0;width:min(560px,100vw);z-index:51;
+  position:fixed;top:0;right:0;bottom:0;left:auto;
+  width:min(560px,100%);max-width:100%;z-index:51;
+  display:flex;flex-direction:column;
   background:var(--card);border-left:1px solid var(--border);
-  box-shadow:var(--shadow-xl);overflow-y:auto;
-  animation:slideIn var(--dur-page) var(--ease-out);
+  box-shadow:var(--shadow-xl);overflow:hidden;
+  transform:translate3d(100%,0,0);
+  transition:transform var(--dur-page) var(--ease-out);
 }
-@keyframes slideIn{from{transform:translateX(100%);opacity:.6}}
+.drawer.is-open{transform:translate3d(0,0,0)}
 .drawer-head{
-  position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--border);
+  position:relative;z-index:2;flex:0 0 auto;
+  background:var(--card);border-bottom:1px solid var(--border);
   padding:20px 24px;display:flex;justify-content:space-between;gap:16px;align-items:flex-start;
   animation:drawerDataIn var(--dur-page) var(--ease-out) both;
   animation-delay:40ms;
 }
-.drawer-body{padding:24px}
+.drawer-body{
+  flex:1 1 auto;min-height:0;padding:24px;
+  overflow-x:hidden;overflow-y:auto;
+}
 .drawer-body > :first-child{margin-top:0}
 .drawer-body > *{
   animation:drawerDataIn var(--dur-page) var(--ease-out) both;
@@ -553,7 +560,7 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 .drawer-body > *:nth-child(5){--i:4}
 .drawer-body > *:nth-child(6){--i:5}
 .drawer-body > *:nth-child(7){--i:6}
-@keyframes drawerDataIn{from{opacity:0;transform:translateX(24px)}}
+@keyframes drawerDataIn{from{opacity:0;transform:translate3d(24px,0,0)}}
 
 .dialog-wrap{
   position:fixed;inset:0;z-index:55;display:grid;place-items:center;padding:24px;
@@ -631,7 +638,20 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 }
 .lib-chip[aria-pressed="true"]:hover{background:var(--primary-hover);color:var(--primary-foreground)}
 .lib-list{margin-top:16px;max-height:360px;overflow-y:auto}
-.grip{color:var(--muted-foreground);cursor:grab;line-height:1;padding-top:2px}
+.grip{
+  color:var(--muted-foreground);cursor:grab;line-height:1;
+  padding:4px 2px;margin:-4px 0;flex-shrink:0;user-select:none;
+}
+.grip:active{cursor:grabbing}
+.qcard.is-dragging{opacity:.45}
+.qcard.drop-before,.qcard.drop-after{position:relative}
+.qcard.drop-before::before,
+.qcard.drop-after::after{
+  content:"";position:absolute;left:8px;right:8px;height:2px;
+  background:var(--primary);border-radius:1px;pointer-events:none;z-index:1;
+}
+.qcard.drop-before::before{top:-5px}
+.qcard.drop-after::after{bottom:-5px}
 .qmeta{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
 .qbtns{display:flex;gap:4px;margin-left:auto}
 .iconbtn{
@@ -839,7 +859,7 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
   .t-h2{font-size:24px;line-height:32px}
   .bar-row{grid-template-columns:100px 1fr 48px}
   .score-kpis{grid-template-columns:1fr 1fr}
-  .drawer{width:100vw;border-left:0}
+  .drawer{width:100%;max-width:100%;left:auto;right:0;border-left:0}
   .kpi-v{font-size:24px;line-height:28px}
   .fw-card{padding:16px}
   .fw-card.fw-card-flush{padding:0}
@@ -847,8 +867,6 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
   .fw-card-flush:has(table.tbl--stack),
   .tbl-wrap:has(.tbl--stack){overflow:visible}
   .tbl-inset{padding:0 16px 16px}
-  .tbl tbody tr:first-child td{padding-top:0}
-  .tbl tbody tr:last-child td{padding-bottom:0}
   .tbl--stack thead th{position:static;top:auto}
   .tbl--stack tbody tr:first-child td,
   .tbl--stack tbody tr:last-child td{padding-top:0;padding-bottom:0;border-bottom:0}
@@ -1059,7 +1077,8 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
     transition-duration:80ms !important;
   }
   .stagger>*,.p-view,.p-seal,.bar i,.toast,.menu,.qcard-in,.qcard-out,
-  .drawer,.drawer-head,.drawer-body > *{animation-name:fadeOnly !important}
+  .drawer-head,.drawer-body > *{animation-name:fadeOnly !important}
+  .drawer{transform:none;transition:none}
   @keyframes fadeOnly{from{opacity:0}}
   .tbl tbody tr.resolving{animation-name:fadeOnly !important;animation-direction:reverse !important}
   .live-dot{animation:none}
@@ -1441,12 +1460,15 @@ const state = {
   responses: Object.fromEntries(Object.entries(RESPONSES).map(([k,rows])=>[k, rows.map(r=>({...r, answers:{...r.answers}}))])),
   openAlert:null,
   openResponse:null,
+  drawerKey:null,
   deleteSurvey:null,
   renameSurvey:null,
   editingSurveyName:null,
   surveyMenu:null,
   previewSurvey:false,
   previewQId:null,
+  dragQId:null,
+  suppressQClick:false,
   toast:null,
   routeEnter:true,
   blinkSent:{},
@@ -2219,6 +2241,7 @@ function previewQIndex(){
   return i>=0 ? i : 0;
 }
 function selectPreviewQ(id){
+  if(state.suppressQClick || state.dragQId) return;
   if(state.previewQId===id) return;
   state.previewQId = id;
   render();
@@ -2350,8 +2373,10 @@ function viewSurveys(){
         ${qs.length?qs.map((q,i)=>`
           <div class="qcard qcard-select ${q.locked?"locked":""} ${i===previewIdx?"selected":""}"
             data-qid="${q.id}" tabindex="0" aria-current="${i===previewIdx?"true":"false"}"
-            onclick="selectPreviewQ('${q.id}')" onkeydown="previewQKey(event,'${q.id}')">
-            <span class="grip" aria-hidden="true">${q.locked?I.lock(16):I.grip(16)}</span>
+            onclick="selectPreviewQ('${q.id}')" onkeydown="previewQKey(event,'${q.id}')"
+            ondragover="qDragOver(event)" ondragenter="qDragEnter(event)" ondrop="qDrop(event)">
+            <span class="grip" draggable="true" aria-hidden="true"
+              ondragstart="qDragStart(event)" ondragend="qDragEnd()">${q.locked?I.lock(16):I.grip(16)}</span>
             <div style="flex:1;min-width:0">
               <div class="t-pui" style="font-weight:700">${esc(q.text)}</div>
               <div class="qmeta">
@@ -2484,7 +2509,7 @@ function viewSurveyResponses(){
             : `${total} collected`)
           : "None collected yet"} · ${esc(s.name)}</p>
       </div>
-      <a class="fw-btn fw-btn--outline" href="#/surveys/${s.id}">${I.pencil(16)} Edit survey</a>
+      <a class="fw-btn fw-btn--primary" href="#/surveys/${s.id}">${I.pencil(16)} Edit survey</a>
     </div>
   </div>
   ${rows.length?`<div class="fw-card" style="padding:0">
@@ -2839,6 +2864,31 @@ function go(h){ location.hash = h; }
 function prefersReduce(){
   return matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
+function drawerKey(){
+  if(state.openResponse) return `r:${state.openResponse.surveyId}:${state.openResponse.id}`;
+  if(state.openAlert) return `a:${state.openAlert}`;
+  return null;
+}
+function armDrawer(){
+  const el = document.querySelector(".drawer");
+  const key = drawerKey();
+  if(!el || !key){
+    state.drawerKey = null;
+    return;
+  }
+  const same = state.drawerKey === key;
+  state.drawerKey = key;
+  if(same || prefersReduce()){
+    el.classList.add("is-open");
+    return;
+  }
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      const live = document.querySelector(".drawer");
+      if(live) live.classList.add("is-open");
+    });
+  });
+}
 function withViewTransition(fn){
   if(typeof document.startViewTransition==="function" && !prefersReduce()){
     document.startViewTransition(fn);
@@ -2982,13 +3032,69 @@ function claim(id){
   a.assigned = "You"; render(); toast("Assigned to you.");
 }
 
-function moveQ(i,d){
-  const q = qList(), j = i+d;
-  if(j<0||j>=q.length) return;
+function moveQTo(from, to){
+  const q = qList();
+  if(from===to || from<0 || to<0 || from>=q.length || to>=q.length) return;
   withFlip("[data-qid]", ()=>{
-    [q[i],q[j]] = [q[j],q[i]];
-    state.previewQId = q[j].id;
+    const [item] = q.splice(from, 1);
+    q.splice(to, 0, item);
+    state.previewQId = item.id;
     render();
+  });
+}
+function moveQ(i,d){ moveQTo(i, i+d); }
+function qClearDropHints(except){
+  document.querySelectorAll(".qcard.drop-before,.qcard.drop-after").forEach(el=>{
+    if(el!==except) el.classList.remove("drop-before","drop-after");
+  });
+}
+function qDragStart(e){
+  const card = e.currentTarget.closest(".qcard");
+  if(!card){ e.preventDefault(); return; }
+  const id = card.getAttribute("data-qid");
+  const dt = e.dataTransfer;
+  if(dt){
+    dt.setData("text/plain", id);
+    dt.effectAllowed = "move";
+    try{ dt.setDragImage(card, 24, 24); }catch(_){}
+  }
+  card.classList.add("is-dragging");
+  state.dragQId = id;
+}
+function qDragEnter(e){ e.preventDefault(); }
+function qDragOver(e){
+  e.preventDefault();
+  if(e.dataTransfer) e.dataTransfer.dropEffect = "move";
+  const over = e.currentTarget;
+  qClearDropHints(over);
+  if(over.getAttribute("data-qid")===state.dragQId){
+    over.classList.remove("drop-before","drop-after");
+    return;
+  }
+  const mid = over.getBoundingClientRect();
+  const after = e.clientY > mid.top + mid.height/2;
+  over.classList.toggle("drop-after", after);
+  over.classList.toggle("drop-before", !after);
+}
+function qDrop(e){
+  e.preventDefault();
+  const fromId = (e.dataTransfer && e.dataTransfer.getData("text/plain")) || state.dragQId;
+  const over = e.currentTarget;
+  const q = qList();
+  const from = q.findIndex(x=>x.id===fromId);
+  let to = q.findIndex(x=>x.id===over.getAttribute("data-qid"));
+  if(from<0 || to<0) return;
+  const box = over.getBoundingClientRect();
+  if(e.clientY > box.top + box.height/2) to += 1;
+  if(from < to) to -= 1;
+  state.suppressQClick = true;
+  moveQTo(from, to);
+  requestAnimationFrame(()=>{ state.suppressQClick = false; });
+}
+function qDragEnd(){
+  state.dragQId = null;
+  document.querySelectorAll(".qcard").forEach(el=>{
+    el.classList.remove("is-dragging","drop-before","drop-after");
   });
 }
 function removeQ(id){
@@ -3328,6 +3434,7 @@ function render(){
   root.innerHTML = shell(body);
   document.body.classList.toggle("nav-open", !!state.navOpen);
   restoreLibScroll();
+  armDrawer();
   if(enter) requestAnimationFrame(()=>document.documentElement.classList.remove("is-route-enter"));
 }
 
