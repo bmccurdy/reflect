@@ -315,7 +315,6 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .funnel-stats .stat-k{
   margin:0 0 6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
 }
-.funnel-stats .kpi-v{font-size:28px;line-height:32px;font-weight:600;min-width:0}
 .funnel-stats .stat-sub{margin-top:8px}
 .kpi{
   display:flex;flex-direction:column;gap:8px;
@@ -342,7 +341,7 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 }
 .kpi-delta.is-down{color:var(--status-elevated)}
 .kpi-v{
-  font-size:32px;line-height:36px;font-weight:700;letter-spacing:-.02em;
+  font-size:28px;line-height:32px;font-weight:600;
   display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
   min-width:0;
 }
@@ -377,6 +376,7 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .spot-split{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end;align-self:end;min-width:0;padding:0 24px}
 .kpi-spot .kpi-foot{padding:12px 24px 20px}
 .spot-split > div + div{border-left:1px solid var(--border);padding-left:16px}
+.al-reason{font-weight:700}
 .al-meta{display:none;margin-top:8px;color:var(--muted-foreground);font-size:13px;line-height:20px}
 
 /* queue table */
@@ -901,7 +901,6 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
   .t-h2{font-size:24px;line-height:32px}
   .score-kpis{grid-template-columns:1fr 1fr}
   .drawer{width:100%;max-width:100%;left:auto;right:0;border-left:0}
-  .kpi-v{font-size:24px;line-height:28px}
   .fw-card{padding:16px}
   .fw-card.fw-card-flush{padding:0}
   .fw-card:has(table.tbl--stack),
@@ -1039,16 +1038,28 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
     margin-right:8px;
     color:var(--muted-foreground);
   }
-  .tbl--alerts tbody tr{align-items:flex-start;padding:16px 0}
-  .tbl--alerts .al-status{order:1;flex:1;min-width:0}
+  .tbl--alerts tbody tr{align-items:flex-start;padding:16px 0;gap:8px 12px}
+  .tbl--alerts .al-why{display:contents}
+  .tbl--alerts .al-reason{
+    order:1;flex:1 1 0;min-width:0;
+    font-size:16px;line-height:24px;font-weight:600;
+  }
+  .tbl--alerts .al-status{
+    order:2;flex:0 0 auto;margin-left:auto;
+    text-align:right;padding-top:2px;
+  }
   .tbl--alerts .al-opened{
     order:2;flex:0 0 auto;margin-left:auto;
     font-size:13px;line-height:20px;padding-top:2px;
   }
-  .tbl--alerts .al-why{
-    order:3;flex:1 1 100%;width:100%;
+  .tbl--alerts .al-why .snip{
+    order:3;flex:1 1 100%;width:100%;max-width:none;
+    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;
+    overflow:hidden;
   }
-  .tbl--alerts .al-why .snip{max-width:none}
+  .tbl--alerts .al-meta{
+    order:4;flex:1 1 100%;width:100%;margin-top:0;
+  }
   .tbl--alerts .al-unit,
   .tbl--alerts .al-assigned{
     flex:0 0 auto;
@@ -1518,7 +1529,7 @@ const state = {
   routeEnter:true,
   blinkSent:{},
   libraryFilter:"all",
-  hideStale:false,
+  hideStale:true,
   navOpen:false,
   scrollPreserve:null,
   survey:{ step:0, answers:{}, showDemo:false, demo:{} }
@@ -2153,7 +2164,7 @@ function viewAlerts(){
             onkeydown="alertRowKey(event,'${a.id}')">
             <td class="al-status">${statusBadge(a.status)}</td>
             <td class="al-why">
-              <div style="font-weight:700">${esc(a.reason)}</div>
+              <div class="al-reason">${esc(a.reason)}</div>
               <div class="snip">${esc(a.quote)}</div>
               <div class="al-meta">${a.unit} · ${esc(a.assigned)} · ${ago(a.at)}</div>
             </td>
