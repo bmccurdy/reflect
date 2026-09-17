@@ -196,7 +196,7 @@ a.fw-btn{text-decoration:none}
 .nav-drawer-foot .brand-sub{display:block;margin-bottom:12px;color:var(--muted-foreground)}
 .nav-drawer-foot .seg{width:100%}
 .nav-drawer-foot .seg button{flex:1}
-body.nav-open{overflow:hidden}
+body.nav-open,body.drawer-open{overflow:hidden}
 html[data-theme="dark"] .seg{background:var(--neutral-900)}
 html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-white) 12%,transparent)}
 
@@ -238,6 +238,40 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .title-edit-cancel.iconbtn{color:var(--muted-foreground)}
 .crumbs{display:flex;gap:8px;align-items:center;font-size:14px;line-height:20px;color:var(--muted-foreground);margin-bottom:8px}
 .crumbs .sep{opacity:.5}
+.page-back{
+  display:none;
+  align-items:center;gap:4px;
+  min-height:44px;margin:0 0 4px;padding:0;
+  min-width:0;max-width:100%;
+  font-size:14px;line-height:20px;font-weight:500;color:var(--primary);
+  text-decoration:none;border-radius:var(--r-sm);
+}
+.page-back:hover{text-decoration:underline}
+.drawer-back{
+  display:none;
+  align-items:center;gap:4px;
+  margin:0 0 4px -8px;padding:0 8px;
+  min-height:44px;border:0;background:transparent;
+  font:inherit;font-size:14px;line-height:20px;font-weight:500;
+  color:var(--primary);cursor:pointer;border-radius:var(--r-sm);
+}
+.drawer-back:hover{background:var(--surface-hover)}
+.rs-filters{margin-top:16px}
+.rs-filters button{white-space:nowrap}
+.rs-more{padding:8px 16px 16px;text-align:center}
+.rs-excerpt{
+  color:var(--foreground);font-size:16px;line-height:24px;font-weight:600;
+  max-width:42rem;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;
+  overflow:hidden;
+}
+.rs-call{
+  display:inline-flex;align-items:center;gap:6px;
+  margin-top:6px;color:var(--foreground);font-weight:500;
+}
+.rs-go{width:40px;text-align:right;vertical-align:middle;color:var(--muted-foreground)}
+.rs-meta{display:none}
+.rs-flags{white-space:nowrap}
 .row{display:flex;align-items:center;gap:12px}
 .between{display:flex;align-items:flex-start;justify-content:space-between;gap:24px}
 .page-head .between > div:first-child{flex:1 1 auto;min-width:0}
@@ -326,14 +360,6 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
   min-height:0;
 }
 .kpi-top{display:flex;align-items:center;gap:10px}
-.kpi-ico{
-  width:32px;height:32px;flex:0 0 auto;
-  display:grid;place-items:center;
-  border-radius:var(--r-md);
-  background:var(--muted);color:var(--primary);
-  border:1px solid var(--border);
-}
-.kpi--warn .kpi-ico{color:var(--status-elevated)}
 .kpi-label{flex:1;font-size:16px;line-height:24px;font-weight:600}
 .kpi-delta{
   display:inline-flex;align-items:center;gap:4px;
@@ -370,8 +396,6 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .kpi-spot .kpi-top{align-items:flex-start;padding:20px 24px 0}
 .kpi-head{flex:1;min-width:0}
 .kpi-head .t-subtle{margin-top:4px}
-.kpi-spot--urgent .kpi-ico{color:var(--status-critical)}
-.kpi-spot--good .kpi-ico{color:var(--status-resolved)}
 .kpi-spot--good .kpi-delta{color:var(--status-resolved)}
 .spot-split{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end;align-self:end;min-width:0;padding:0 24px}
 .kpi-spot .kpi-foot{padding:12px 24px 20px}
@@ -393,6 +417,7 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .tbl td{padding:16px;font-size:16px;line-height:24px;border-bottom:1px solid var(--border);vertical-align:top}
 .tbl tbody tr:last-child td{border-bottom:0}
 .tbl tbody tr.clickable{cursor:pointer;transition:background-color var(--dur-micro) var(--ease-out)}
+.tbl tbody tr.clickable:active{background:var(--accent)}
 @media (hover:hover){
   .tbl tbody tr.clickable:hover{background:var(--accent)}
 }
@@ -541,13 +566,13 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 
 /* drawer */
 .scrim{
-  position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:50;
+  position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:90;
   animation:fade var(--dur-layout) var(--ease-out);
 }
 @keyframes fade{from{opacity:0}}
 .drawer{
   position:fixed;top:0;right:0;bottom:0;left:auto;
-  width:min(560px,100%);max-width:100%;z-index:51;
+  width:min(560px,100%);max-width:100%;z-index:91;
   display:flex;flex-direction:column;
   background:var(--card);border-left:1px solid var(--border);
   box-shadow:var(--shadow-xl);overflow:hidden;
@@ -555,12 +580,25 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   transition:transform var(--dur-page) var(--ease-out);
 }
 .drawer.is-open{transform:translate3d(0,0,0)}
+.drawer.is-paging{transition:none}
+.drawer.is-paging .drawer-head,
+.drawer.is-paging .drawer-body > *{animation:none}
 .drawer-head{
   position:relative;z-index:2;flex:0 0 auto;
   background:var(--card);border-bottom:1px solid var(--border);
   padding:20px 24px;display:flex;justify-content:space-between;gap:16px;align-items:flex-start;
   animation:drawerDataIn var(--dur-page) var(--ease-out) both;
   animation-delay:40ms;
+}
+.drawer-foot{
+  flex:0 0 auto;display:flex;align-items:center;gap:8px;
+  padding:12px 24px;
+  border-top:1px solid var(--border);background:var(--card);
+}
+.drawer-foot .fw-btn{flex:1}
+.drawer-pos{
+  flex:0 0 auto;min-width:4.5rem;text-align:center;
+  font-size:13px;line-height:20px;color:var(--muted-foreground);
 }
 .drawer-body{
   flex:1 1 auto;min-height:0;padding:24px;
@@ -671,6 +709,7 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 .qcard.drop-before::before{top:-5px}
 .qcard.drop-after::after{bottom:-5px}
 .qmeta{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.qcard-body{flex:1;min-width:0}
 .qbtns{display:flex;gap:4px;margin-left:auto}
 .iconbtn{
   width:32px;height:32px;border:0;background:transparent;border-radius:var(--r-sm);
@@ -860,7 +899,7 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
   .tbl--alerts .al-opened{display:none !important}
 }
 @media (max-width:760px){
-  .main{padding:24px 16px 80px}
+  .main{padding:24px 16px 120px}
   .topbar{padding:0 12px;gap:8px}
   .topbar .demo-switch{display:none}
   .nav-drawer-foot{display:block}
@@ -877,6 +916,15 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
   .funnel-stats > div:nth-child(even){padding-left:16px;border-left:1px solid var(--border)}
   .kpi-spot .kpi-top{flex-wrap:wrap}
   .page-head .row,.kpi-foot{flex-wrap:wrap}
+  .page-actions{width:100%}
+  .page-actions .fw-btn{flex:1 1 calc(50% - 8px)}
+  .page-actions .fw-btn--primary{flex:1 1 100%}
+  .qcard{flex-wrap:wrap}
+  .qcard-body{flex:1 1 0}
+  .qcard .qbtns{
+    flex:1 1 100%;width:100%;margin-left:0;padding-left:28px;
+    justify-content:flex-end;
+  }
   .bar-row{
     grid-template-columns:minmax(0,1fr) auto;
     grid-template-areas:"label value" "bar bar";
@@ -887,7 +935,6 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
   .bar-row > :last-child{grid-area:value}
   .kpi{padding:12px;gap:6px;min-width:0}
   .kpi-top{gap:8px}
-  .kpi-ico{width:28px;height:28px}
   .kpi-label{font-size:13px;line-height:18px}
   .kpi-foot{padding-top:8px;font-size:11px}
   .between{flex-direction:column;align-items:stretch;gap:12px}
@@ -895,6 +942,19 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
     flex-direction:row;align-items:flex-start;gap:12px;
   }
   .between--inline .fw-badge{flex:0 0 auto}
+  .page-head:has(.page-back) .crumbs{display:none}
+  .page-back{display:inline-flex}
+  .page-head .rs-edit{display:none}
+  .rs-filters{width:100%}
+  .rs-filters button{flex:1;padding:0 6px}
+  .drawer-back{display:flex}
+  .drawer--response .drawer-x{display:none}
+  .drawer-head{padding:12px 16px 16px;padding-top:max(12px,env(safe-area-inset-top))}
+  .drawer-body{padding:16px;padding-bottom:max(16px,env(safe-area-inset-bottom))}
+  .drawer-foot{padding:12px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+  .drawer-foot .fw-btn{min-height:44px}
+  .drawer--response .stale{flex-wrap:wrap;align-items:flex-start}
+  .drawer--response .stale__action{margin-left:0;margin-top:8px}
   .fw-card-head{flex-wrap:wrap}
   .kv{grid-template-columns:1fr}
   .t-h1{font-size:34px;line-height:38px}
@@ -1002,41 +1062,27 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
   .tbl--surveys .sv-responses[data-live="no"] + .sv-rate[data-empty="yes"] + .sv-updated::before{
     content:none;margin:0;
   }
-  .tbl--responses tbody tr{align-items:flex-start;padding:16px 0}
-  .tbl--responses .rs-when{
-    order:1;flex:1;min-width:0;
-    font-size:13px;line-height:20px;
-  }
-  .tbl--responses .rs-id{
-    order:2;flex:0 0 auto;margin-left:auto;
-    font-size:13px;line-height:20px;
-  }
+  .tbl--responses tbody tr{align-items:flex-start;padding:16px 0;gap:8px 12px}
   .tbl--responses .rs-quote{
-    order:3;flex:1 1 100%;width:100%;
+    order:1;flex:1 1 0;min-width:0;
   }
-  .tbl--responses .rs-quote .snip{max-width:none}
+  .tbl--responses .rs-excerpt{max-width:none}
+  .tbl--responses .rs-flags{
+    order:2;flex:0 0 auto;margin-left:auto;
+    text-align:right;padding-top:2px;
+  }
+  .tbl--responses .rs-flags:empty{display:none}
+  .tbl--responses .rs-go{
+    order:3;flex:0 0 auto;width:auto;align-self:flex-start;padding-top:4px;
+  }
+  .tbl--responses .rs-when,
   .tbl--responses .rs-area,
-  .tbl--responses .rs-lang{
-    flex:0 0 auto;
+  .tbl--responses .rs-lang{display:none !important}
+  .tbl--responses .rs-meta{
+    display:block;
+    order:4;flex:1 1 100%;width:100%;
     color:var(--muted-foreground);
     font-size:13px;line-height:20px;
-  }
-  .tbl--responses .rs-area{
-    order:4;
-    display:inline-flex;flex-wrap:wrap;align-items:baseline;
-  }
-  .tbl--responses .rs-area .t-detail{display:inline}
-  .tbl--responses .rs-area .t-detail:empty{display:none}
-  .tbl--responses .rs-area .t-detail:not(:empty)::before{
-    content:"·";
-    margin:0 8px;
-    color:var(--muted-foreground);
-  }
-  .tbl--responses .rs-lang{order:5}
-  .tbl--responses .rs-lang::before{
-    content:"·";
-    margin-right:8px;
-    color:var(--muted-foreground);
   }
   .tbl--alerts tbody tr{align-items:flex-start;padding:16px 0;gap:8px 12px}
   .tbl--alerts .al-why{display:contents}
@@ -1054,7 +1100,7 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
   }
   .tbl--alerts .al-why .snip{
     order:3;flex:1 1 100%;width:100%;max-width:none;
-    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;
+    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;
     overflow:hidden;
   }
   .tbl--alerts .al-meta{
@@ -1351,6 +1397,20 @@ const RESPONSES = {
       answers:{ q1:"Fine", q2:"Not likely", q3:"Yes", q4:"Yes",
         q5:"The crew themselves were kind.", q6:"Long wait.", q7:"No" } },
     { id:"R-9899", at:mins(3600), band:"25–34", lang:"English", zone:"New Hyde Park", alert:null,
+      answers:{ q1:"Good", q2:"Very likely", q3:"Yes", q4:"Yes", q5:"", q6:"", q7:"No" } },
+    { id:"R-9898", at:mins(4200), band:"45–54", lang:"English", zone:"Port Washington", alert:null,
+      answers:{ q1:"Good", q2:"Somewhat likely", q3:"Yes", q4:"Yes",
+        q5:"Quick and kind.", q6:"", q7:"No" } },
+    { id:"R-9897", at:mins(5100), band:"65–74", lang:"Spanish", zone:"Manhasset", alert:null,
+      answers:{ q1:"Fine", q2:"Not sure", q3:"Yes", q4:"No",
+        q5:"", q6:"I did not understand the questions they asked in the ambulance.", q7:"Yes" } },
+    { id:"R-9896", at:mins(6000), band:"18–34", lang:"English", zone:"Great Neck", alert:null,
+      answers:{ q1:"Exceptional", q2:"Very likely", q3:"Yes", q4:"Yes",
+        q5:"They let my sister ride along.", q6:"", q7:"No" } },
+    { id:"R-9895", at:mins(7200), band:"55–64", lang:"English", zone:"New Hyde Park", alert:null,
+      answers:{ q1:"Poor", q2:"Not likely", q3:"No", q4:"Yes",
+        q5:"", q6:"Drove too fast. I was already scared.", q7:"No" } },
+    { id:"R-9894", at:mins(8400), band:"75+", lang:"English", zone:"Manhasset", alert:null,
       answers:{ q1:"Good", q2:"Very likely", q3:"Yes", q4:"Yes", q5:"", q6:"", q7:"No" } }
   ],
   sv_notrans: [
@@ -1363,7 +1423,11 @@ const RESPONSES = {
     { id:"R-4401", at:mins(2200), band:"75+", lang:"English", zone:"Manhasset", alert:null,
       answers:{ n1:"Yes", n2:"Yes", n3:"Yes", n4:"No" } },
     { id:"R-4400", at:mins(3100), band:"35–44", lang:"English", zone:"Manhasset", alert:null,
-      answers:{ n1:"No", n2:"Yes", n3:"Yes", n4:"No" } }
+      answers:{ n1:"No", n2:"Yes", n3:"Yes", n4:"No" } },
+    { id:"R-4399", at:mins(4000), band:"18–34", lang:"English", zone:"Great Neck", alert:null,
+      answers:{ n1:"Yes", n2:"Yes", n3:"Yes", n4:"Yes" } },
+    { id:"R-4398", at:mins(5200), band:"55–64", lang:"Spanish", zone:"New Hyde Park", alert:null,
+      answers:{ n1:"No", n2:"No", n3:"No", n4:"Yes" } }
   ],
   sv_q3: []
 };
@@ -1516,6 +1580,8 @@ const state = {
   responses: Object.fromEntries(Object.entries(RESPONSES).map(([k,rows])=>[k, rows.map(r=>({...r, answers:{...r.answers}}))])),
   openAlert:null,
   openResponse:null,
+  responseFilter:"all",
+  responseLimit:11,
   drawerKey:null,
   deleteSurvey:null,
   renameSurvey:null,
@@ -1564,6 +1630,8 @@ const I = {
   grip:       s=>ic('<circle cx="9" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="18" r="1"/>',s),
   x:          s=>ic('<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',s),
   arrow:      s=>ic('<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',s),
+  chevronLeft:s=>ic('<path d="m15 18-6-6 6-6"/>',s),
+  chevronRight:s=>ic('<path d="m9 18 6-6-6-6"/>',s),
   users:      s=>ic('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/>',s),
   userPlus:   s=>ic('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/>',s),
   chart:      s=>ic('<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>',s),
@@ -1740,7 +1808,6 @@ function cardCallback(){
   return `
     <section class="fw-card kpi-spot${urgent?" kpi-spot--urgent":""}">
       <div class="kpi-top">
-        <span class="kpi-ico">${I.phone(16)}</span>
         <div class="kpi-head">
           <h2 class="t-h4">Needs a callback</h2>
           <p class="t-subtle dim">Open alerts waiting in the queue.</p>
@@ -1767,7 +1834,6 @@ function cardQuality(){
   return `
     <section class="fw-card kpi-spot bento-quality">
       <div class="kpi-top">
-        <span class="kpi-ico">${I.star(16)}</span>
         <div class="kpi-head">
           <h2 class="t-h4">Quality</h2>
           <p class="t-subtle dim">Patient scores this period.</p>
@@ -2365,6 +2431,7 @@ function viewSurveys(){
   <div class="page-head">
     <div class="crumbs"><a href="#/">Overview</a><span class="sep">/</span><a href="#/surveys">Surveys</a>
       <span class="sep">/</span><span>${esc(s.name)}</span></div>
+    <a class="page-back" href="#/surveys">${I.chevronLeft(16)} Surveys</a>
     <div class="between">
       <div>
         ${state.editingSurveyName===s.id?`
@@ -2390,7 +2457,7 @@ function viewSurveys(){
         </h1>`}
         <p class="t-p dim">${meta}</p>
       </div>
-      <div class="row" style="gap:8px">
+      <div class="row page-actions" style="gap:8px">
         ${s.status==="Live"?`<a class="fw-btn fw-btn--outline" href="#/surveys/${s.id}/responses">${I.inbox(16)} Responses</a>`:""}
         <button class="fw-btn fw-btn--outline" onclick="openSurveyPreview()">
           ${I.eye(16)} Preview</button>
@@ -2415,7 +2482,7 @@ function viewSurveys(){
             ondragover="qDragOver(event)" ondragenter="qDragEnter(event)" ondrop="qDrop(event)">
             <span class="grip" draggable="true" aria-hidden="true"
               ondragstart="qDragStart(event)" ondragend="qDragEnd()">${q.locked?I.lock(16):I.grip(16)}</span>
-            <div style="flex:1;min-width:0">
+            <div class="qcard-body">
               <div class="t-pui" style="font-weight:700">${esc(q.text)}</div>
               <div class="qmeta">
                 <span class="fw-badge fw-badge--secondary">${TYPE_LABEL[q.type]}</span>
@@ -2461,7 +2528,7 @@ function viewSurveys(){
               const already = added.has(l.text.trim().toLowerCase());
               return `
             <div class="qcard${already?" added":""}" data-lib-id="${l.id}">
-              <div style="flex:1;min-width:0">
+              <div class="qcard-body">
                 <div class="t-pui">${esc(l.text)}</div>
                 <div class="qmeta">
                   <span class="fw-badge fw-badge--secondary">${esc(l.category)}</span>
@@ -2519,64 +2586,208 @@ function viewSurveys(){
   </div>`;
 }
 
-function responseSummary(r, qs){
-  const texts = qs.filter(q=>q.type==="text").map(q=>r.answers[q.id]).filter(v=>v);
-  if(texts.length) return texts[0];
+const RESPONSE_PAGE = 11;
+
+function questionLabel(q){
+  const t = q.text || "";
+  if(/call you/i.test(t)) return "Wants a call";
+  if(/recommend/i.test(t)) return "Recommend us";
+  if(/how well did we do/i.test(t)) return "Care quality";
+  if(/listen(?:ed)? to why you didn/i.test(t)) return "Listened about staying";
+  if(/feel listened/i.test(t)) return "Felt listened to";
+  if(/cared for/i.test(t)) return "Felt cared for";
+  if(/do well|did well/i.test(t)) return "What we did well";
+  if(/done better|do better/i.test(t)) return "What we could do better";
+  if(/if you stayed/i.test(t)) return "Explained staying risks";
+  if(/how safe/i.test(t)) return "Feel safe calling 911";
+  if(/trust our crews/i.test(t)) return "Trust crews to be respectful";
+  if(/when to call 911/i.test(t)) return "Know when to call 911";
+  if(/used our service/i.test(t)) return "Used us in the last year";
+  if(/language a barrier/i.test(t)) return "Language is a barrier";
+  if(/community'?s EMS do well/i.test(t)) return "What EMS does well";
+  if(/should we do better/i.test(t)) return "What we should do better";
+  if(t.length<=56) return t;
+  const cut = t.lastIndexOf(" ", 53);
+  return t.slice(0, cut>20?cut:53) + "…";
+}
+function responseWantsCall(r, qs){
+  const q = qs.find(x=>x.type==="yesno" && /call you/i.test(x.text));
+  return !!(q && String(r.answers[q.id]||"").toLowerCase()==="yes");
+}
+function isNegativeAnswer(q, v){
+  if(v===undefined || v==="") return false;
+  const s = String(v).toLowerCase();
+  if(q.type==="yesno"){
+    if(/call you/i.test(q.text)) return false;
+    if(/barrier|unsafe/i.test(q.text)) return s==="yes";
+    return s==="no";
+  }
+  if(q.type==="choice"){
+    const opts = q.options || [];
+    const idx = opts.findIndex(o=>o===v);
+    if(idx<0) return /poor|unacceptable|not likely|definitely not|unsafe/i.test(s);
+    if(opts.length>=5) return idx>=opts.length-2;
+    if(opts.length>=4) return idx>=opts.length-1;
+    return false;
+  }
+  return false;
+}
+function responseQuote(r, qs){
+  const texts = qs.filter(q=>q.type==="text" && r.answers[q.id]);
+  const better = texts.find(q=>/better/i.test(q.text));
+  if(better) return String(r.answers[better.id]);
+  const other = texts.find(q=>!/do well|did well/i.test(q.text));
+  if(other) return String(r.answers[other.id]);
+  return texts[0] ? String(r.answers[texts[0].id]) : "";
+}
+function responseExcerpt(r, qs){
+  const quote = responseQuote(r, qs);
+  if(quote) return quote;
+  const negatives = qs.filter(q=>isNegativeAnswer(q, r.answers[q.id]));
+  if(negatives.length){
+    return negatives.map(q=>`${questionLabel(q)}: ${r.answers[q.id]}`).join(" · ");
+  }
+  if(responseWantsCall(r, qs)) return "Asked for a call";
   const first = qs.find(q=>r.answers[q.id]);
-  return first ? r.answers[first.id] : "No answers";
+  if(first) return `${questionLabel(first)}: ${r.answers[first.id]}`;
+  return "No answers";
+}
+function responseTitle(r, qs, alert){
+  if(alert) return alert.reason;
+  if(responseWantsCall(r, qs)) return "Asked for a call";
+  return "Survey response";
+}
+function loadedResponses(id){
+  return responsesFor(id).slice().sort((a,b)=>b.at-a.at);
+}
+function filteredResponses(id, qs){
+  const loaded = loadedResponses(id);
+  if(state.responseFilter==="flagged") return loaded.filter(r=>r.alert);
+  if(state.responseFilter==="callback") return loaded.filter(r=>responseWantsCall(r, qs));
+  return loaded;
+}
+function setResponseFilter(f){
+  state.responseFilter = f;
+  state.responseLimit = RESPONSE_PAGE;
+  render();
+}
+function showOlderResponses(){
+  state.responseLimit += RESPONSE_PAGE;
+  render();
+}
+function responseRowKey(e, surveyId, id){
+  if(e.key!=="Enter" && e.key!==" ") return;
+  e.preventDefault();
+  openResponse(surveyId, id);
+}
+function responseNeighbors(ref){
+  const qs = state.surveyQuestions[ref.surveyId] || [];
+  const list = filteredResponses(ref.surveyId, qs).slice(0, state.responseLimit);
+  const i = list.findIndex(x=>x.id===ref.id);
+  return {
+    prev: i>0 ? list[i-1] : null,
+    next: i>=0 && i<list.length-1 ? list[i+1] : null,
+    index: i,
+    total: list.length
+  };
+}
+function focusResponseDrawer(){
+  const drawer = document.querySelector(".drawer--response");
+  if(!drawer) return;
+  const back = drawer.querySelector(".drawer-back");
+  const close = drawer.querySelector(".drawer-x");
+  if(back && getComputedStyle(back).display!=="none") back.focus();
+  else if(close) close.focus();
 }
 
 function viewSurveyResponses(){
   const s = currentSurvey();
   if(!s) return viewSurveysIndex();
   const qs = qList();
-  const rows = responsesFor(s.id).slice().sort((a,b)=>b.at-a.at);
-  const shown = rows.length;
+  const loaded = loadedResponses(s.id);
+  const flaggedN = loaded.filter(r=>r.alert).length;
+  const callN = loaded.filter(r=>responseWantsCall(r, qs)).length;
+  const filtered = filteredResponses(s.id, qs);
+  const visible = filtered.slice(0, state.responseLimit);
   const total = s.responses;
+  const hasMoreLoaded = filtered.length > visible.length;
+  const hasMoreProduct = state.responseFilter==="all" && loaded.length < total;
+  const filter = state.responseFilter;
+  const subtitle = !total ? "None collected yet"
+    : filter==="flagged" ? `${filtered.length} flagged`
+    : filter==="callback" ? `${filtered.length} asked for a call`
+    : (visible.length<total ? `${visible.length} of ${total}` : `${total} collected`);
+  const tabs = [
+    ["all","All", loaded.length],
+    ["flagged","Flagged", flaggedN],
+    ["callback","Call", callN]
+  ];
+  const emptyFilter = loaded.length && !visible.length;
   return `
   <div class="page-head">
     <div class="crumbs"><a href="#/">Overview</a><span class="sep">/</span><a href="#/surveys">Surveys</a>
       <span class="sep">/</span><a href="#/surveys/${s.id}">${esc(s.name)}</a>
       <span class="sep">/</span><span>Responses</span></div>
+    <a class="page-back" href="#/surveys/${s.id}">${I.chevronLeft(16)} ${esc(s.name)}</a>
     <div class="between">
       <div>
         <h1 class="t-h2">Responses</h1>
-        <p class="t-p dim">${total
-          ? (shown<total
-            ? `Showing ${shown} most recent of ${total}`
-            : `${total} collected`)
-          : "None collected yet"} · ${esc(s.name)}</p>
+        ${total?`<p class="t-p dim">${subtitle}</p>`:""}
       </div>
-      <a class="fw-btn fw-btn--primary" href="#/surveys/${s.id}">${I.pencil(16)} Edit survey</a>
+      ${s.status==="Live" && loaded.length?`<a class="fw-btn fw-btn--outline rs-edit" href="#/surveys/${s.id}">${I.pencil(16)} Edit survey</a>`:""}
     </div>
+    ${loaded.length?`<div class="seg rs-filters" role="group" aria-label="Filter responses">
+      ${tabs.map(([k,l,n])=>`<button aria-pressed="${filter===k}" aria-label="${k==="callback"?"Wants a call":l}, ${n}" onclick="setResponseFilter('${k}')">${l} (${n})</button>`).join("")}
+    </div>`:""}
   </div>
-  ${rows.length?`<div class="fw-card" style="padding:0">
+  ${visible.length?`<div class="fw-card fw-card-flush">
     <div class="tbl-inset">
     <table class="tbl tbl--stack tbl--responses">
-      <thead><tr><th>When</th><th>What they said</th><th>Area</th><th>Language</th><th></th></tr></thead>
+      <thead><tr><th>What they said</th><th>Status</th><th>When</th><th>Area</th><th>Language</th><th></th></tr></thead>
       <tbody>
-        ${rows.map(r=>`
-          <tr class="clickable" onclick="openResponse('${s.id}','${r.id}')">
-            <td class="dim rs-when" style="white-space:nowrap">${ago(r.at)}</td>
+        ${visible.map(r=>{
+          const excerpt = responseExcerpt(r, qs);
+          const call = responseWantsCall(r, qs);
+          const alert = r.alert && state.alerts.find(a=>a.id===r.alert);
+          const meta = [ago(r.at), r.zone, r.band, r.lang].filter(Boolean).join(" · ");
+          const aria = [excerpt, ago(r.at), r.zone, alert?"Flagged":"", call?"Asked for a call":""].filter(Boolean).join(". ");
+          return `
+          <tr class="clickable" id="row-${r.id}" tabindex="0"
+            aria-label="${esc(aria)}"
+            onclick="openResponse('${s.id}','${r.id}')"
+            onkeydown="responseRowKey(event,'${s.id}','${r.id}')">
             <td class="rs-quote">
-              <div class="snip">${esc(responseSummary(r, qs))}</div>
-              ${r.alert?`<div class="mt8">${statusBadge(state.alerts.find(a=>a.id===r.alert)?.status || "elevated")}
-                <span class="t-detail dim">Alert ${r.alert}</span></div>`:""}
+              <div class="rs-excerpt">${esc(excerpt)}</div>
+              ${call && excerpt!=="Asked for a call"?`<div class="rs-call t-detail">${I.phone(12)} Asked for a call</div>`:""}
             </td>
+            <td class="rs-flags">${alert?statusBadge(alert.status):""}</td>
+            <td class="dim rs-when" style="white-space:nowrap">${ago(r.at)}</td>
             <td class="rs-area">${esc(r.zone||"—")}<div class="t-detail dim">${esc(r.band||"")}</div></td>
             <td class="dim rs-lang">${esc(r.lang||"—")}</td>
-            <td class="mono dim rs-id">${r.id}</td>
-          </tr>`).join("")}
+            <td class="rs-meta">${esc(meta)}</td>
+            <td class="rs-go" aria-hidden="true">${I.chevronRight(16)}</td>
+          </tr>`;
+        }).join("")}
       </tbody>
     </table>
     </div>
-  </div>`:`
+    ${hasMoreLoaded?`<div class="rs-more">
+      <button class="fw-btn fw-btn--outline" type="button" onclick="showOlderResponses()">Show older</button>
+    </div>`: hasMoreProduct?`<p class="t-detail dim rs-more">Showing the ${visible.length} most recent. Older responses aren't in this prototype.</p>`:""}
+  </div>`: emptyFilter?`<div class="fw-card empty">
+      <div class="dim" style="display:flex;justify-content:center;margin-bottom:12px">${I.inbox(32)}</div>
+      <div class="t">No matches.</div>
+      <div class="s t-p">${filter==="flagged"
+        ? "Nothing in this set is flagged."
+        : "Nobody in this set asked for a call."}</div>
+    </div>`:`
     <div class="fw-card empty">
       <div class="dim" style="display:flex;justify-content:center;margin-bottom:12px">${I.inbox(32)}</div>
       <div class="t">No responses yet.</div>
       <div class="s t-p">${s.status==="Draft"
         ? "This draft hasn't been sent, so nothing has come in."
         : "Invitations are out. New answers will show up here."}</div>
+      <a class="fw-btn fw-btn--primary mt16" href="#/surveys/${s.id}">${I.pencil(16)} Edit survey</a>
     </div>`}`;
 }
 
@@ -2586,45 +2797,85 @@ function responseDrawer(ref){
   if(!s || !r) return "";
   const qs = state.surveyQuestions[ref.surveyId] || [];
   const alert = r.alert && state.alerts.find(a=>a.id===r.alert);
+  const call = responseWantsCall(r, qs);
+  const quote = responseQuote(r, qs);
+  const title = responseTitle(r, qs, alert);
+  const meta = [ago(r.at), r.zone, r.band, r.lang].filter(Boolean).join(" · ");
+  const badge = alert
+    ? statusBadge(alert.status)
+    : (call
+      ? `<span class="fw-badge fw-badge--outline">${I.phone(12)} Asked for a call</span>`
+      : `<span class="fw-badge fw-badge--outline">Response</span>`);
+  const nav = responseNeighbors(ref);
   return `
   <div class="scrim" onclick="closeResponse()"></div>
-  <aside class="drawer" role="dialog" aria-modal="true" aria-label="Response ${r.id}">
+  <aside class="drawer drawer--response${isResponsePaging()?" is-open is-paging":""}" role="dialog" aria-modal="true" aria-labelledby="response-title">
     <div class="drawer-head">
       <div>
-        ${alert?statusBadge(alert.status):`<span class="fw-badge fw-badge--outline">Response</span>`}
-        <h2 class="t-h4 mt8">${esc(s.name)}</h2>
-        <p class="t-subtle dim">Response <span class="mono">${r.id}</span> · ${ago(r.at)} · ${esc(r.zone||"")} · ${esc(r.band||"")}</p>
+        <button type="button" class="drawer-back" onclick="closeResponse()">${I.chevronLeft(16)} Responses</button>
+        ${badge}
+        <h2 class="t-h4 mt8" id="response-title">${esc(title)}</h2>
+        <p class="t-subtle dim">${esc(meta)}</p>
       </div>
-      <button class="iconbtn" onclick="closeResponse()" aria-label="Close">${I.x(18)}</button>
+      <button class="iconbtn drawer-x" onclick="closeResponse()" aria-label="Close">${I.x(18)}</button>
     </div>
     <div class="drawer-body">
       ${alert?`<div class="stale">
-        ${I.flag(16)} Flagged as ${alert.status==="resolved"?"followed up":alert.status}.
+        ${I.flag(16)} Flagged as ${alert.status==="resolved"?"followed up":alert.status}.${call?" They asked for a call.":""}
         <button class="fw-btn fw-btn--primary fw-btn--sm stale__action" type="button" onclick="openAlertFromResponse('${alert.id}')">Open alert</button>
-      </div>`:""}
-      <dl class="kv">
-        <dt>Language</dt><dd>${esc(r.lang||"—")}</dd>
-        <dt>Area</dt><dd>${esc(r.zone||"—")}</dd>
-        <dt>Age band</dt><dd>${esc(r.band||"—")}</dd>
-      </dl>
-      <div class="mt24">
-        ${qs.map(q=>{
+      </div>`: call?`<div class="stale">${I.phone(16)} They asked for a call.</div>`:""}
+      ${quote?`<div class="quote">“${esc(quote)}”</div>`:""}
+      <div class="${quote||alert||call?"mt24":""}">
+        ${qs.filter(q=>!(quote && String(r.answers[q.id]||"")===quote)).map(q=>{
           const v = r.answers[q.id];
           const empty = v===undefined || v==="";
           return `<div class="ans">
-            <div class="t-subtle dim">${esc(q.text)}</div>
+            <div class="t-subtle dim">${esc(questionLabel(q))}</div>
             <div class="t-pui" style="font-weight:700;margin-top:4px">${empty?`<span class="dim">Skipped</span>`:esc(String(v))}</div>
           </div>`;
         }).join("")}
       </div>
     </div>
+    ${nav.total>1?`<div class="drawer-foot">
+      <button class="fw-btn fw-btn--outline drawer-prev" type="button" ${nav.prev?"":"disabled"}
+        onclick="openResponseNeighbor('prev')">${I.chevronLeft(16)} Previous</button>
+      <span class="drawer-pos" aria-live="polite">${nav.index+1} of ${nav.total}</span>
+      <button class="fw-btn fw-btn--outline drawer-next" type="button" ${nav.next?"":"disabled"}
+        onclick="openResponseNeighbor('next')">Next ${I.chevronRight(16)}</button>
+    </div>`:""}
   </aside>`;
 }
 function openResponse(surveyId, id){
   state.openResponse = { surveyId, id };
   render();
+  requestAnimationFrame(focusResponseDrawer);
 }
-function closeResponse(){ state.openResponse = null; render(); }
+function openResponseNeighbor(dir){
+  const ref = state.openResponse;
+  if(!ref) return;
+  const nav = responseNeighbors(ref);
+  const target = dir==="next" ? nav.next : nav.prev;
+  if(!target) return;
+  state.openResponse = { surveyId: ref.surveyId, id: target.id };
+  render();
+  requestAnimationFrame(()=>{
+    const body = document.querySelector(".drawer--response .drawer-body");
+    if(body) body.scrollTop = 0;
+    const sel = dir==="next" ? ".drawer-next" : ".drawer-prev";
+    const btn = document.querySelector(sel);
+    if(btn && !btn.disabled) btn.focus();
+    else focusResponseDrawer();
+  });
+}
+function closeResponse(){
+  const id = state.openResponse && state.openResponse.id;
+  state.openResponse = null;
+  render();
+  requestAnimationFrame(()=>{
+    const row = id && document.getElementById("row-"+id);
+    if(row) row.focus();
+  });
+}
 function openAlertFromResponse(id){
   state.openResponse = null;
   state.openAlert = id;
@@ -2887,6 +3138,12 @@ function drawerKey(){
   if(state.openAlert) return `a:${state.openAlert}`;
   return null;
 }
+function isResponsePaging(){
+  const prev = state.drawerKey;
+  const key = drawerKey();
+  return !!(prev && key && prev.startsWith("r:") && key.startsWith("r:") &&
+    prev.split(":")[1]===key.split(":")[1] && prev!==key);
+}
 function armDrawer(){
   const el = document.querySelector(".drawer");
   const key = drawerKey();
@@ -2894,12 +3151,16 @@ function armDrawer(){
     state.drawerKey = null;
     return;
   }
-  const same = state.drawerKey === key;
+  const prev = state.drawerKey;
+  const same = prev === key;
+  const paging = isResponsePaging();
   state.drawerKey = key;
-  if(same || prefersReduce()){
+  if(same || prefersReduce() || paging){
+    el.classList.toggle("is-paging", !!paging);
     el.classList.add("is-open");
     return;
   }
+  el.classList.remove("is-paging");
   requestAnimationFrame(()=>{
     requestAnimationFrame(()=>{
       const live = document.querySelector(".drawer");
@@ -3436,7 +3697,7 @@ function render(){
     if(state.survey.step === undefined) state.survey.step = -1;
     state.navOpen = false;
     root.innerHTML = viewPatient();
-    document.body.classList.remove("nav-open");
+    document.body.classList.remove("nav-open","drawer-open");
     if(enter) requestAnimationFrame(()=>document.documentElement.classList.remove("is-route-enter"));
     return;
   }
@@ -3451,6 +3712,7 @@ function render(){
   else body = viewOverview();
   root.innerHTML = shell(body);
   document.body.classList.toggle("nav-open", !!state.navOpen);
+  document.body.classList.toggle("drawer-open", !!(state.openAlert||state.openResponse));
   restoreLibScroll();
   armDrawer();
   if(enter) requestAnimationFrame(()=>document.documentElement.classList.remove("is-route-enter"));
@@ -3464,6 +3726,8 @@ window.addEventListener("hashchange", ()=>{
   state.surveyMenu = null;
   state.previewSurvey = false;
   state.openResponse = null;
+  state.responseFilter = "all";
+  state.responseLimit = RESPONSE_PAGE;
   state.navOpen = false;
   state.scrollPreserve = null;
   state.routeEnter = true;
@@ -3473,6 +3737,14 @@ window.addEventListener("hashchange", ()=>{
   });
 });
 window.addEventListener("keydown", e=>{
+  if(state.openResponse && (e.key==="ArrowLeft" || e.key==="ArrowRight") && !e.metaKey && !e.ctrlKey && !e.altKey){
+    const tag = ((e.target && e.target.tagName) || "").toLowerCase();
+    if(tag!=="input" && tag!=="textarea" && tag!=="select"){
+      e.preventDefault();
+      openResponseNeighbor(e.key==="ArrowRight"?"next":"prev");
+      return;
+    }
+  }
   if(e.key!=="Escape") return;
   if(state.navOpen){ closeNav(); return; }
   if(state.previewSurvey){ closeSurveyPreview(); return; }
