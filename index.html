@@ -1156,6 +1156,8 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
   .tbl--ops .op-sys-avg{order:8}
   .tbl--ops .op-calls::after,
   .tbl--ops .op-sys-calls::after{content:" calls"}
+  .tbl--ops .op-calls[data-n="1"]::after,
+  .tbl--ops .op-sys-calls[data-n="1"]::after{content:" call"}
   .tbl--ops .op-avg::before,
   .tbl--ops .op-sys-avg::before{
     content:"·";
@@ -1192,6 +1194,7 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
   .tbl--protos .proto-calls{order:4}
   .tbl--protos .proto-sys{order:5}
   .tbl--protos .proto-calls::after{content:" calls"}
+  .tbl--protos .proto-calls[data-n="1"]::after{content:" call"}
   .tbl--protos .proto-sys::before{
     content:"System · ";
     color:var(--muted-foreground);
@@ -2061,9 +2064,9 @@ function viewScorecard(){
             <tr>
               <td class="op-metric">${esc(r.metric)}</td>
               <td class="comp op-comp comp--${r.tone}">${esc(r.comp)}</td>
-              <td class="op-calls">${r.calls}</td>
+              <td class="op-calls" data-n="${r.calls}">${r.calls}</td>
               <td class="dim op-avg">${esc(r.avg)}</td>
-              <td class="dim op-sys-calls">${esc(r.sysCalls)}</td>
+              <td class="dim op-sys-calls" data-n="${String(r.sysCalls).replace(/,/g,"")}">${esc(r.sysCalls)}</td>
               <td class="dim op-sys-avg">${esc(r.sysAvg)}</td>
             </tr>`).join("")}
         </tbody>
@@ -2083,7 +2086,7 @@ function viewScorecard(){
             <tr>
               <td class="proto-name">${esc(r.name)}</td>
               <td class="comp proto-ind comp--${r.tone}">${esc(r.ind)}</td>
-              <td class="proto-calls">${r.calls}</td>
+              <td class="proto-calls" data-n="${r.calls}">${r.calls}</td>
               <td class="dim proto-sys">${esc(r.sys)}</td>
             </tr>`).join("")}
         </tbody>
