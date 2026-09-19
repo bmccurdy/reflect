@@ -833,38 +833,45 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
 @keyframes vtOut{to{opacity:0}}
 @keyframes vtIn{from{opacity:0;transform:translateY(6px)}}
 
-/* Patient survey — kit tokens, larger tap targets */
+/* Patient survey — letter surface. --p-* stays scoped here. */
 .patient{
-  min-height:100vh;background:var(--muted);color:var(--foreground);
+  --p-paper:var(--neutral-50);
+  --p-ink:var(--foreground);
+  --p-ink-muted:var(--muted-foreground);
+  --p-rule:var(--border);
+  min-height:100vh;background:var(--p-paper);color:var(--p-ink);
   display:flex;flex-direction:column;align-items:center;
-  padding:24px 16px 48px;
+  padding:32px 24px 64px;
 }
-.patient--embed{min-height:0;padding:16px}
+html[data-theme="dark"] .patient{
+  --p-paper:var(--neutral-900);
+}
+.patient--embed{min-height:0;padding:20px 16px 28px}
 .patient--embed .p-opt,
 .patient--embed .p-scale-btn{pointer-events:none}
 .p-wrap{width:100%;max-width:520px}
 .p-lock{
   display:flex;align-items:center;gap:8px;justify-content:center;
-  color:var(--muted-foreground);font-size:12px;line-height:20px;margin-bottom:16px;
+  color:var(--p-ink-muted);font-size:12px;line-height:20px;margin-bottom:24px;
 }
-.p-card.fw-card{padding:28px 24px}
-.patient--embed .p-card.fw-card{padding:20px 16px;box-shadow:none}
-.p-progress{display:flex;gap:6px;margin-bottom:16px}
+.p-card{padding:0;background:transparent;border:0;box-shadow:none;border-radius:0;overflow-x:clip}
+.p-card.p-done{text-align:center}
+.p-progress{display:flex;gap:6px;margin-bottom:20px}
 .p-progress i{
-  height:4px;flex:1;border-radius:var(--r-full);background:var(--border);
+  height:4px;flex:1;border-radius:var(--r-full);background:var(--p-rule);
   transition:background-color var(--dur-layout) var(--ease-out);
 }
 .p-progress i.done{background:var(--primary)}
 .p-progress i.now{background:var(--foreground)}
 .p-step{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.patient .dim{color:var(--p-ink-muted)}
 
 .p-opts{display:flex;flex-direction:column;gap:8px;margin-top:20px}
 .p-opt{
   display:flex;align-items:center;gap:12px;width:100%;min-height:48px;
   padding:12px 16px;text-align:left;cursor:pointer;appearance:none;
-  background:var(--card);border:1px solid var(--border);border-radius:var(--r-md);
-  background:var(--card);border:1px solid var(--border);border-radius:var(--r-md);
-  font-size:16px;line-height:24px;color:var(--foreground);
+  background:var(--p-paper);border:1px solid var(--p-rule);border-radius:var(--r-md);
+  font-size:16px;line-height:24px;color:inherit;
   transition:border-color var(--dur-micro) var(--ease-out),
              background-color var(--dur-micro) var(--ease-out),
              box-shadow var(--dur-micro) var(--ease-out);
@@ -888,7 +895,7 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
 .p-scale{display:flex;gap:8px;margin-top:20px}
 .p-scale-btn{
   flex:1;min-height:56px;border-radius:var(--r-md);cursor:pointer;appearance:none;
-  border:1px solid var(--border);background:var(--card);color:var(--foreground);
+  border:1px solid var(--p-rule);background:var(--p-paper);color:inherit;
   font-size:16px;font-weight:600;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
   transition:border-color var(--dur-micro) var(--ease-out),
@@ -912,11 +919,19 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
 .p-back{margin-top:12px;min-height:0;height:auto;padding:0}
 .p-fieldset{border:0;padding:0;margin:16px 0 0}
 .p-foot{
-  margin-top:24px;text-align:center;color:var(--muted-foreground);
+  margin-top:32px;text-align:center;color:var(--p-ink-muted);
   font-size:12px;line-height:20px;
 }
-.p-view{animation:pageTurn var(--dur-page) var(--ease-out) both}
-@keyframes pageTurn{from{opacity:0;transform:translateY(6px)}}
+.p-view--in-fwd,.p-view--in-back{opacity:0}
+.p-view--in-fwd{animation:pInFwd var(--dur-slow) var(--ease-out) both}
+.p-view--in-back{animation:pInBack var(--dur-slow) var(--ease-out) both}
+.p-view--out-fwd,.p-view--out-back{pointer-events:none}
+.p-view--out-fwd{animation:pOutFwd var(--dur-base) var(--ease-out) both}
+.p-view--out-back{animation:pOutBack var(--dur-base) var(--ease-out) both}
+@keyframes pInFwd{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+@keyframes pInBack{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:none}}
+@keyframes pOutFwd{from{opacity:1;transform:none}to{opacity:0;transform:translateX(-16px)}}
+@keyframes pOutBack{from{opacity:1;transform:none}to{opacity:0;transform:translateX(16px)}}
 .p-seal{
   width:48px;height:48px;border-radius:var(--r-full);margin:0 auto 16px;
   display:grid;place-items:center;background:var(--accent);color:var(--primary);
@@ -1261,7 +1276,7 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
     animation-duration:80ms !important;animation-delay:0ms !important;
     transition-duration:80ms !important;
   }
-  .stagger>*,.p-view,.p-seal,.bar i,.toast,.menu,.qcard-in,.qcard-out,
+  .stagger>*,.p-view,.p-view--in-fwd,.p-view--in-back,.p-seal,.bar i,.toast,.menu,.qcard-in,.qcard-out,
   .drawer-head,.drawer-body > *{animation-name:fadeOnly !important}
   .drawer{transform:none;transition:none}
   @keyframes fadeOnly{from{opacity:0}}
@@ -1675,6 +1690,8 @@ const state = {
   navOpen:false,
   scrollPreserve:null,
   scorecardCrew:0,
+  pSlide:"fwd",
+  pBusy:false,
   survey:{ step:0, answers:{}, showDemo:false, demo:{} }
 };
 </script>
@@ -3026,6 +3043,9 @@ function cardByDemographic(){
 /* ============================================================
    8. PATIENT SURVEY
    ============================================================ */
+function pViewTag(){
+  return `<div class="p-view p-view--in-${state.pSlide==="back"?"back":"fwd"}">`;
+}
 function pProgress(total, idx){
   return `<div class="p-progress" role="progressbar" aria-valuemin="1" aria-valuemax="${total}" aria-valuenow="${Math.min(idx+1,total)}">
     ${Array.from({length:total},(_,i)=>`<i class="${i<idx?"done":i===idx?"now":""}"></i>`).join("")}
@@ -3039,12 +3059,9 @@ function pChoice(labelHtml, {pressed=false, onclick}={}){
   return `<div class="p-opt"><span class="p-tick" aria-hidden="true"></span>${labelHtml}</div>`;
 }
 function pQuestionHead(q, idx, total){
-  return `${pProgress(total, idx)}
-    <div class="p-step">
-      <span class="t-detail dim">Question ${idx+1} of ${total}</span>
-      ${q.required?"":`<span class="fw-badge fw-badge--secondary">Optional</span>`}
-    </div>
-    <h1 class="t-h3 mt8">${esc(q.text)}</h1>
+  const opt = q.required ? "" : `<div class="p-step"><span class="fw-badge fw-badge--secondary">Optional</span></div>`;
+  return `${pProgress(total, idx)}${opt}
+    <h1 class="t-h3${opt?" mt8":""}">${esc(q.text)}</h1>
     ${q.help?`<p class="t-body dim mt8">${esc(q.help)}</p>`:""}`;
 }
 function pQuestionFields(q, {interactive=false, val}={}){
@@ -3091,7 +3108,7 @@ function patientPreview(){
   if(!q){
     return `<div class="patient patient--embed">
       <div class="p-wrap">
-        <div class="fw-card fw-card--flat p-card">
+        <div class="p-card">
           <p class="t-body dim">Add a question to see the patient preview.</p>
         </div>
       </div>
@@ -3099,7 +3116,7 @@ function patientPreview(){
   }
   return `<div class="patient patient--embed">
     <div class="p-wrap">
-      <div class="fw-card fw-card--flat p-card">
+      <div class="p-card">
         ${pQuestionHead(q, idx, qs.length)}
         ${pQuestionFields(q)}
       </div>
@@ -3116,8 +3133,8 @@ function viewPatient(){
   if(S.step === -1){
     return `<div class="patient"><div class="p-wrap">
       <div class="p-lock">${I.lock(12)} Private — only ${AGENCY.name} sees this</div>
-      <div class="fw-card p-card">
-        <div class="p-view">
+      <div class="p-card">
+        ${pViewTag()}
         <h1 class="t-h2">A few questions about your ride with ${AGENCY.name}.</h1>
         <p class="t-body dim mt16">${total} questions, about a minute. Skip anything you'd rather not answer,
           and stop whenever you want.</p>
@@ -3139,8 +3156,8 @@ function viewPatient(){
   if(S.step === total){
     return `<div class="patient"><div class="p-wrap">
       <div class="p-lock">${I.lock(12)} Private — only ${AGENCY.name} sees this</div>
-      <div class="fw-card p-card">
-        <div class="p-view">
+      <div class="p-card">
+        ${pViewTag()}
         ${pProgress(total, total)}
         <div class="p-step">
           <span class="fw-badge fw-badge--secondary">Optional</span>
@@ -3197,8 +3214,8 @@ function viewPatient(){
       return false;
     });
     return `<div class="patient"><div class="p-wrap">
-      <div class="fw-card p-card" style="text-align:center">
-        <div class="p-view">
+      <div class="p-card p-done">
+        ${pViewTag()}
         <div class="p-seal">${I.check(22)}</div>
         <h1 class="t-h2">Thank you — that's genuinely useful.</h1>
         <p class="t-body dim mt16">Someone at ${AGENCY.name} will read this. You don't need to do anything else.</p>
@@ -3224,8 +3241,8 @@ function viewPatient(){
 
   return `<div class="patient"><div class="p-wrap">
     <div class="p-lock">${I.lock(12)} Private — only ${AGENCY.name} sees this</div>
-    <div class="fw-card p-card">
-      <div class="p-view">
+    <div class="p-card">
+      ${pViewTag()}
       ${pQuestionHead(q, S.step, total)}
       ${pQuestionFields(q, {interactive:true, val})}
       <div class="p-actions">
@@ -3744,7 +3761,35 @@ function confirmDeleteSurvey(){
 }
 
 /* patient survey */
-function pStart(){ state.survey.step = 0; render(); scrollTop(); }
+function pTurn(dir, mutate){
+  if(state.pBusy) return;
+  const view = document.querySelector(".p-view");
+  const jump = ()=>{
+    const stage = document.querySelector(".preview-stage");
+    if(stage) stage.scrollTop = 0;
+    else window.scrollTo(0, 0);
+  };
+  const apply = ()=>{
+    mutate();
+    state.pSlide = dir;
+    render();
+    jump();
+    state.pBusy = false;
+  };
+  if(prefersReduce() || !view){ apply(); return; }
+  state.pBusy = true;
+  let done = false;
+  const finish = ()=>{
+    if(done) return;
+    done = true;
+    apply();
+  };
+  view.classList.remove("p-view--in-fwd","p-view--in-back");
+  view.classList.add(dir==="back" ? "p-view--out-back" : "p-view--out-fwd");
+  view.addEventListener("animationend", e=>{ if(e.target===view) finish(); });
+  setTimeout(finish, 220);
+}
+function pStart(){ pTurn("fwd", ()=>{ state.survey.step = 0; }); }
 function pAnswer(id,v,el){
   state.survey.answers[id] = v;
   const group = el && el.closest(".p-opts, .p-scale");
@@ -3759,11 +3804,11 @@ function pAnswer(id,v,el){
 }
 function pText(id,v){ state.survey.answers[id] = v;
   const c = document.querySelector(".p-count"); if(c) c.textContent = v.length + " of 600"; }
-function pNext(){ state.survey.step++; render(); scrollTop(); }
-function pSkip(){ state.survey.step++; render(); scrollTop(); }
-function pBack(){ state.survey.step = Math.max(-1, state.survey.step-1); render(); scrollTop(); }
+function pNext(){ pTurn("fwd", ()=>{ state.survey.step++; }); }
+function pSkip(){ pTurn("fwd", ()=>{ state.survey.step++; }); }
+function pBack(){ pTurn("back", ()=>{ state.survey.step = Math.max(-1, state.survey.step-1); }); }
 function pDemo(k,v){ state.survey.demo[k] = v; }
-function pFinish(){ state.survey.step = qList().length+1; render(); scrollTop(); }
+function pFinish(){ pTurn("fwd", ()=>{ state.survey.step = qList().length+1; }); }
 function scrollTop(){
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const stage = document.querySelector(".preview-stage");
