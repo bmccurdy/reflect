@@ -338,7 +338,7 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .grid > *,
 .funnel-stats > *,
 .spot-split > *{min-width:0}
-.funnel-strip{margin-bottom:16px;overflow:hidden}
+.funnel-strip{margin:16px 0 0;overflow:hidden}
 .funnel-stats{
   display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
   gap:0;margin-top:16px;
@@ -370,6 +370,12 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
   font-size:28px;line-height:32px;font-weight:600;
   display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
   min-width:0;
+}
+.kpi-v--lead{
+  font-size:48px;line-height:48px;font-weight:700;letter-spacing:-.012em;
+}
+.funnel-stats .kpi-v{
+  font-size:20px;line-height:28px;font-weight:600;
 }
 .kpi-foot{
   display:flex;align-items:center;justify-content:space-between;gap:8px;
@@ -957,6 +963,7 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
   .fw-card-head{flex-wrap:wrap}
   .kv{grid-template-columns:1fr}
   .t-h1{font-size:34px;line-height:38px}
+  .kpi-v--lead{font-size:34px;line-height:38px}
   .t-h2{font-size:24px;line-height:32px}
   .score-head .crumbs{display:none}
   .drawer{width:100%;max-width:100%;left:auto;right:0;border-left:0}
@@ -1861,7 +1868,7 @@ function cardFunnel(){
     </div>
   </section>`;
 }
-function cardCallback(){
+function cardCallback({lead=false}={}){
   const open = openCount();
   const crit = critCount();
   const wait = oldestOpenWait();
@@ -1877,7 +1884,7 @@ function cardCallback(){
       </div>
       <div class="spot-split">
         <div>
-          <div class="kpi-v">${open}</div>
+          <div class="kpi-v${lead?" kpi-v--lead":""}">${open}</div>
           <div class="stat-k">Open</div>
         </div>
         <div>
@@ -1891,7 +1898,7 @@ function cardCallback(){
       </div>
     </section>`;
 }
-function cardQuality(){
+function cardQuality({lead=false}={}){
   return `
     <section class="fw-card kpi-spot bento-quality">
       <div class="kpi-top">
@@ -1903,7 +1910,7 @@ function cardQuality(){
       </div>
       <div class="spot-split">
         <div>
-          <div class="kpi-v">96%</div>
+          <div class="kpi-v${lead?" kpi-v--lead":""}">96%</div>
           <div class="stat-k">Recommended</div>
         </div>
         <div>
@@ -1936,8 +1943,8 @@ function cardLowestScores(){
 function viewOverview(){
   const supervisorFirst = state.role==="supervisor";
   const work = supervisorFirst
-    ? `${cardCallback()}${cardQuality()}`
-    : `${cardQuality()}${cardCallback()}`;
+    ? `${cardCallback({lead:true})}${cardQuality()}`
+    : `${cardQuality({lead:true})}${cardCallback()}`;
   const funnel = cardFunnel();
   const charts = `
   <div class="grid g-2 mt16" aria-label="Score charts">
@@ -1953,8 +1960,8 @@ function viewOverview(){
       : `Patient experience across ${AGENCY.name}, ${day(mins(43200))} to today.`}</p>
   </div>
   ${staleBanner()}
-  ${funnel}
   <div class="bento" aria-label="${supervisorFirst?"Open work":"System health"}">${work}</div>
+  ${funnel}
   ${charts}
 `;
 }
