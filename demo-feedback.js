@@ -224,7 +224,7 @@
     :focus-visible { outline: 2px solid #2563EB; outline-offset: 2px; }
     :focus:not(:focus-visible) { outline: none; }
 
-    .tab, .pill, .scrim, .panel { pointer-events: auto; }
+    .tab, .scrim, .panel { pointer-events: auto; }
 
     .tab {
       position: fixed;
@@ -256,41 +256,12 @@
       letter-spacing: .02em;
       font-weight: 600;
     }
-    .tab .demo {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: .04em;
-      color: #A3A3A3;
-      border: 1px solid #525252;
-      border-radius: 4px;
-      padding: 5px 3px;
-    }
-
-    .pill {
-      position: fixed;
-      right: 16px;
-      bottom: 16px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      height: 36px;
-      padding: 0 14px;
-      border: 1px solid rgba(255,255,255,.18);
-      border-radius: 999px;
-      background: rgba(26,29,34,.72);
-      color: #E8E5E0;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: .01em;
-      cursor: pointer;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 8px 20px rgba(0,0,0,.28);
-      transition: background-color 160ms cubic-bezier(.22,1,.36,1);
-    }
-    .pill:hover { background: rgba(26,29,34,.88); }
-    .pill .dot {
-      width: 6px; height: 6px; border-radius: 999px;
-      background: #D4A05A; flex: 0 0 auto;
+    .tab-ico {
+      width: 16px;
+      height: 16px;
+      flex: none;
+      display: block;
+      transform: rotate(90deg);
     }
 
     .scrim {
@@ -316,7 +287,6 @@
       overflow-y: auto;
     }
     .panel.enter { animation: sweepIn 280ms cubic-bezier(.22,1,.36,1) both; }
-    .panel.patient { right: 16px; bottom: 60px; }
 
     .head {
       display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
@@ -404,10 +374,10 @@
 
     @media (prefers-reduced-motion: reduce) {
       .scrim, .panel.enter { animation: none; }
-      .tab, .pill, .chip, .send { transition: none; }
+      .tab, .chip, .send { transition: none; }
     }
     @media (max-width: 520px) {
-      .panel, .panel.patient {
+      .panel {
         left: 16px;
         right: 44px;
         width: auto;
@@ -422,6 +392,13 @@
       <path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`;
   }
 
+  function messageIcon() {
+    return `<svg class="tab-ico" width="16" height="16" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+      aria-hidden="true">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`;
+  }
+
   function render(opts) {
     const animate = !!(opts && opts.animate);
     const ctx = pageContext();
@@ -429,15 +406,9 @@
     const placeholder = PLACEHOLDERS[state.about] || PLACEHOLDERS.screen;
     const canSend = state.note.trim().length > 0 && !state.sending;
 
-    const trigger = patient
-      ? `<button class="pill" data-trigger type="button"
-          aria-expanded="${state.open}" aria-controls="df-panel"
-          aria-haspopup="dialog" aria-label="Prototype feedback">
-          <span class="dot" aria-hidden="true"></span> Prototype feedback
-        </button>`
-      : `<button class="tab" data-trigger type="button"
+    const trigger = `<button class="tab" data-trigger type="button"
           aria-expanded="${state.open}" aria-controls="df-panel" aria-haspopup="dialog">
-          <span class="tab-label"><span class="demo">Demo</span> Feedback</span>
+          <span class="tab-label">${messageIcon()} Feedback</span>
         </button>`;
 
     let body = "";
@@ -482,7 +453,7 @@
       ${trigger}
       ${state.open ? `
         <div class="scrim" data-scrim></div>
-        <div class="panel ${patient ? "patient" : "staff"}${animate ? " enter" : ""}" id="df-panel" role="dialog"
+        <div class="panel${animate ? " enter" : ""}" id="df-panel" role="dialog"
           aria-modal="true" aria-labelledby="df-title">
           <div class="head">
             <div>
