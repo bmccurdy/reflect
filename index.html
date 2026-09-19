@@ -854,7 +854,7 @@ html[data-theme="dark"] .patient{
   display:flex;align-items:center;gap:8px;justify-content:center;
   color:var(--p-ink-muted);font-size:12px;line-height:20px;margin-bottom:24px;
 }
-.p-card{padding:0;background:transparent;border:0;box-shadow:none;border-radius:0;overflow-x:clip}
+.p-card{padding:0;background:transparent;border:0;box-shadow:none;border-radius:0}
 .p-card.p-done{text-align:center}
 .p-progress{display:flex;gap:6px;margin-bottom:20px}
 .p-progress i{
@@ -918,6 +918,27 @@ html[data-theme="dark"] .patient{
 .p-cta .p-next{align-self:stretch}
 .p-back{margin-top:12px;min-height:0;height:auto;padding:0}
 .p-fieldset{border:0;padding:0;margin:16px 0 0}
+.patient .fw-select__trigger{
+  min-height:48px;height:48px;padding:0 40px 0 12px;
+  background:var(--p-paper);color:inherit;
+}
+.patient .fw-select__trigger:focus,
+.patient .fw-select__trigger:focus-visible{
+  box-shadow:none;
+  outline:2px solid var(--ring);
+  outline-offset:2px;
+}
+.patient .fw-select__chevron{
+  right:12px;color:var(--p-ink-muted);
+  transition:transform var(--dur-micro) var(--ease-out);
+}
+.patient .fw-select.is-open .fw-select__chevron{
+  transform:translateY(-50%) rotate(180deg);
+}
+.patient .fw-select__opt{
+  min-height:44px;padding:10px 12px;font-size:16px;line-height:24px;
+}
+.patient .fw-select__menu{max-height:min(360px,60vh)}
 .p-foot{
   margin-top:32px;text-align:center;color:var(--p-ink-muted);
   font-size:12px;line-height:20px;
@@ -1692,6 +1713,8 @@ const state = {
   scorecardCrew:0,
   pSlide:"fwd",
   pBusy:false,
+  pSelectOpen:null,
+  pSelectActive:0,
   survey:{ step:0, answers:{}, showDemo:false, demo:{} }
 };
 </script>
@@ -3046,6 +3069,54 @@ function cardByDemographic(){
 function pViewTag(){
   return `<div class="p-view p-view--in-${state.pSlide==="back"?"back":"fwd"}">`;
 }
+const P_DEMO = {
+  age:{
+    id:"p-age", label:"Your age",
+    options:["18–24","25–34","35–44","45–54","55–64","65–74","75 or older"]
+  },
+  lang:{
+    id:"p-lang", label:"The language you're most comfortable in",
+    options:["English","Spanish","Vietnamese","Tagalog","Arabic","Another language"]
+  },
+  eth:{
+    id:"p-eth", label:"How you describe your race or ethnicity",
+    options:["American Indian or Alaska Native","Asian","Black or African American",
+      "Hispanic or Latino","Middle Eastern or North African",
+      "Native Hawaiian or Pacific Islander","White","More than one"]
+  }
+};
+const P_DEMO_BLANK = "Prefer not to say";
+function pSelectValues(key){ return [""].concat(P_DEMO[key].options); }
+function pSelectField(key){
+  const spec = P_DEMO[key];
+  const values = pSelectValues(key);
+  const val = state.survey.demo[key] || "";
+  const open = state.pSelectOpen===key;
+  const active = Math.min(values.length-1, Math.max(0, state.pSelectActive|0));
+  const shown = val || P_DEMO_BLANK;
+  return `<div class="fw-field p-fieldset">
+    <span class="fw-label" id="${spec.id}-label">${esc(spec.label)}</span>
+    <div class="fw-select${open?" is-open":""}">
+      <button type="button" class="fw-select__trigger" id="${spec.id}"
+        aria-haspopup="listbox" aria-expanded="${open}"
+        aria-labelledby="${spec.id}-label ${spec.id}"
+        aria-controls="${spec.id}-list"
+        ${open?`aria-activedescendant="${spec.id}-opt-${active}"`:""}
+        onclick="pSelectToggle('${key}',event)"
+        onkeydown="pSelectKey('${key}',event)">${esc(shown)}</button>
+      <span class="fw-select__chevron">${I.down(16)}</span>
+      ${open?`<div class="fw-select__menu" id="${spec.id}-list" role="listbox" aria-labelledby="${spec.id}-label">
+        ${values.map((o,i)=>{
+          const selected = val===o;
+          return `<div class="fw-select__opt" role="option" id="${spec.id}-opt-${i}"
+            data-value="${esc(o)}" aria-selected="${selected}"${i===active?" data-active":""}
+            onmousedown="event.preventDefault()"
+            onclick="pSelectPick('${key}',this)">${esc(o||P_DEMO_BLANK)}${selected?I.check(16):""}</div>`;
+        }).join("")}
+      </div>`:""}
+    </div>
+  </div>`;
+}
 function pProgress(total, idx){
   return `<div class="p-progress" role="progressbar" aria-valuemin="1" aria-valuemax="${total}" aria-valuenow="${Math.min(idx+1,total)}">
     ${Array.from({length:total},(_,i)=>`<i class="${i<idx?"done":i===idx?"now":""}"></i>`).join("")}
@@ -3166,32 +3237,9 @@ function viewPatient(){
         <p class="t-body dim mt8">We ask so we can check whether some people get a worse experience than others.
           You can send your answers without filling any of this in.</p>
 
-        <div class="fw-field p-fieldset">
-          <label class="fw-label" for="p-age">Your age</label>
-          <select class="fw-input" id="p-age" onchange="pDemo('age',this.value)">
-            <option value="">Prefer not to say</option>
-            ${["18–24","25–34","35–44","45–54","55–64","65–74","75 or older"].map(o=>
-              `<option ${S.demo.age===o?"selected":""}>${o}</option>`).join("")}
-          </select>
-        </div>
-        <div class="fw-field p-fieldset">
-          <label class="fw-label" for="p-lang">The language you're most comfortable in</label>
-          <select class="fw-input" id="p-lang" onchange="pDemo('lang',this.value)">
-            <option value="">Prefer not to say</option>
-            ${["English","Spanish","Vietnamese","Tagalog","Arabic","Another language"].map(o=>
-              `<option ${S.demo.lang===o?"selected":""}>${o}</option>`).join("")}
-          </select>
-        </div>
-        <div class="fw-field p-fieldset">
-          <label class="fw-label" for="p-eth">How you describe your race or ethnicity</label>
-          <select class="fw-input" id="p-eth" onchange="pDemo('eth',this.value)">
-            <option value="">Prefer not to say</option>
-            ${["American Indian or Alaska Native","Asian","Black or African American",
-               "Hispanic or Latino","Middle Eastern or North African",
-               "Native Hawaiian or Pacific Islander","White","More than one"].map(o=>
-              `<option ${S.demo.eth===o?"selected":""}>${o}</option>`).join("")}
-          </select>
-        </div>
+        ${pSelectField("age")}
+        ${pSelectField("lang")}
+        ${pSelectField("eth")}
 
         <div class="p-actions">
           <div class="p-cta">
@@ -3772,6 +3820,7 @@ function pTurn(dir, mutate){
   const apply = ()=>{
     mutate();
     state.pSlide = dir;
+    state.pSelectOpen = null;
     render();
     jump();
     state.pBusy = false;
@@ -3808,6 +3857,55 @@ function pNext(){ pTurn("fwd", ()=>{ state.survey.step++; }); }
 function pSkip(){ pTurn("fwd", ()=>{ state.survey.step++; }); }
 function pBack(){ pTurn("back", ()=>{ state.survey.step = Math.max(-1, state.survey.step-1); }); }
 function pDemo(k,v){ state.survey.demo[k] = v; }
+function pSelectToggle(key, e){
+  if(e){ e.preventDefault(); e.stopPropagation(); }
+  state.pSelectOpen = state.pSelectOpen===key ? null : key;
+  if(state.pSelectOpen){
+    const values = pSelectValues(key);
+    const val = state.survey.demo[key] || "";
+    const i = values.indexOf(val);
+    state.pSelectActive = i<0 ? 0 : i;
+  }
+  render();
+  document.getElementById(P_DEMO[key].id)?.focus();
+}
+function pSelectPick(key, el){
+  pDemo(key, el.getAttribute("data-value") || "");
+  state.pSelectOpen = null;
+  render();
+  const btn = document.getElementById(P_DEMO[key].id);
+  if(btn) btn.focus();
+}
+function pSelectKey(key, e){
+  const open = state.pSelectOpen===key;
+  const values = pSelectValues(key);
+  if(e.key==="Escape"){
+    if(open){ e.preventDefault(); state.pSelectOpen = null; render(); document.getElementById(P_DEMO[key].id)?.focus(); }
+    return;
+  }
+  if(e.key==="ArrowDown" || e.key==="ArrowUp"){
+    e.preventDefault();
+    if(!open){ pSelectToggle(key, e); return; }
+    const delta = e.key==="ArrowDown" ? 1 : -1;
+    state.pSelectActive = (state.pSelectActive + delta + values.length) % values.length;
+    render();
+    return;
+  }
+  if(e.key==="Home" || e.key==="End"){
+    if(!open) return;
+    e.preventDefault();
+    state.pSelectActive = e.key==="Home" ? 0 : values.length-1;
+    render();
+    return;
+  }
+  if((e.key==="Enter" || e.key===" ") && open){
+    e.preventDefault();
+    pDemo(key, values[state.pSelectActive] || "");
+    state.pSelectOpen = null;
+    render();
+    document.getElementById(P_DEMO[key].id)?.focus();
+  }
+}
 function pFinish(){ pTurn("fwd", ()=>{ state.survey.step = qList().length+1; }); }
 function scrollTop(){
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -3862,6 +3960,12 @@ function render(){
     state.navOpen = false;
     root.innerHTML = viewPatient();
     document.body.classList.remove("nav-open","drawer-open");
+    if(state.pSelectOpen && P_DEMO[state.pSelectOpen]){
+      const btn = document.getElementById(P_DEMO[state.pSelectOpen].id);
+      if(btn) btn.focus();
+      const active = document.querySelector(".fw-select__opt[data-active]");
+      if(active) active.scrollIntoView({block:"nearest"});
+    }
     if(enter) requestAnimationFrame(()=>document.documentElement.classList.remove("is-route-enter"));
     return;
   }
@@ -3910,6 +4014,7 @@ window.addEventListener("keydown", e=>{
     }
   }
   if(e.key!=="Escape") return;
+  if(state.pSelectOpen){ state.pSelectOpen = null; render(); return; }
   if(state.navOpen){ closeNav(); return; }
   if(state.previewSurvey){ closeSurveyPreview(); return; }
   if(state.renameSurvey){ closeRenameSurvey(); return; }
@@ -3918,6 +4023,12 @@ window.addEventListener("keydown", e=>{
   if(state.deleteSurvey){ closeDeleteSurvey(); return; }
   if(state.openResponse){ closeResponse(); return; }
   if(state.openAlert){ closeAlert(); }
+});
+window.addEventListener("mousedown", e=>{
+  if(!state.pSelectOpen) return;
+  if(e.target.closest(".fw-select")) return;
+  state.pSelectOpen = null;
+  render();
 });
 window.matchMedia("(max-width: 1199px)").addEventListener("change", ev=>{
   if(!ev.matches) state.navOpen = false;
