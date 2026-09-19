@@ -408,7 +408,7 @@
 
     const trigger = `<button class="tab" data-trigger type="button"
           aria-expanded="${state.open}" aria-controls="df-panel" aria-haspopup="dialog">
-          <span class="tab-label">${messageIcon()} Feedback</span>
+          <span class="tab-label">Feedback ${messageIcon()}</span>
         </button>`;
 
     let body = "";
