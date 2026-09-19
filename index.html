@@ -132,18 +132,6 @@ a.fw-btn{text-decoration:none}
 
 /* demo-only affordance — see docs/decisions.md #1 */
 .demo-switch{display:flex;align-items:center;gap:8px}
-.demo-patient{color:color-mix(in srgb,var(--base-white) 80%,transparent);height:28px;padding:0 10px;flex:0 0 auto}
-.demo-patient:hover{color:var(--base-white);background:color-mix(in srgb,var(--base-white) 12%,transparent)}
-@media (max-width:760px){
-  .topbar .demo-patient{padding:0 8px;font-size:13px}
-}
-.nav-drawer-foot .demo-patient{
-  width:100%;margin-top:8px;height:40px;justify-content:center;
-  color:var(--foreground);
-  border:1px solid var(--border);
-  background:var(--card);
-}
-.nav-drawer-foot .demo-patient:hover{background:var(--surface-hover);color:var(--foreground)}
 .seg{display:flex;background:var(--neutral-200);border-radius:var(--r-md);padding:4px;gap:2px}
 .seg button{
   height:28px;padding:0 10px;border:0;background:transparent;border-radius:var(--r-sm);
@@ -1837,7 +1825,6 @@ function shell(body){
       <button aria-pressed="${state.role==="supervisor"}" onclick="setRole('supervisor')">Supervisor</button>
       <button aria-pressed="${state.role==="leadership"}" onclick="setRole('leadership')">Leadership</button>
     </div>`;
-  const patientBtn = `<button class="fw-btn fw-btn--ghost fw-btn--sm demo-patient" type="button" onclick="setRole('patient')">Patient survey</button>`;
   return `
   <div class="shell">
     ${state.surveyMenu?`<div class="menu-catch" onclick="closeSurveyMenu()"></div>`:""}
@@ -1855,7 +1842,6 @@ function shell(body){
       <div class="nav-drawer-foot">
         <div class="brand-sub">${AGENCY.name}</div>
         ${roleSwitch}
-        ${patientBtn}
       </div>
     </aside>`:""}
     <header class="topbar">
@@ -1874,7 +1860,6 @@ function shell(body){
         <span class="brand-sub">${AGENCY.name}</span>
         ${roleSwitch}
       </div>
-      ${patientBtn}
       <button class="iconbtn" onclick="toggleTheme()" aria-label="Switch theme">
         ${state.theme==="light"?I.moon(18):I.sun(18)}
       </button>
@@ -3464,18 +3449,9 @@ function onNavLink(h){
   if(same) return;
 }
 function setRole(r){
-  if(r==="patient"){
-    state.role = "patient";
-    state.navOpen = false;
-    state.survey = { step:-1, answers:{}, showDemo:false, demo:{} };
-    if(isPatientRoute(location.hash||"")) render();
-    else go("#/s/sv_post");
-    return;
-  }
-  const fromPatient = isPatientRoute(location.hash||"");
+  if(r!=="supervisor" && r!=="leadership") return;
   state.role = r;
-  if(fromPatient) go("#/");
-  else render();
+  render();
 }
 function toggleTheme(){
   state.theme = state.theme==="light" ? "dark" : "light";
@@ -4029,25 +4005,8 @@ function render(){
   document.documentElement.classList.toggle("is-route-enter", enter);
 
   if(isPatientRoute(h)){
-    state.role = "patient";
-    if(state.survey.step === undefined) state.survey.step = -1;
-    state.navOpen = false;
-    root.innerHTML = viewPatient();
-    document.body.classList.remove("nav-open","drawer-open");
-    const pView = document.querySelector(".p-view");
-    if(pView && (pView.classList.contains("p-view--in-fwd") || pView.classList.contains("p-view--in-back"))){
-      pView.addEventListener("animationend", e=>{
-        if(e.target!==pView) return;
-        pView.classList.remove("p-view--in-fwd","p-view--in-back");
-      }, {once:true});
-    }
-    if(state.pSelectOpen && P_DEMO[state.pSelectOpen]){
-      const btn = document.getElementById(P_DEMO[state.pSelectOpen].id);
-      if(btn) btn.focus();
-      const active = document.querySelector(".fw-select__opt[data-active]");
-      if(active) active.scrollIntoView({block:"nearest"});
-    }
-    if(enter) requestAnimationFrame(()=>document.documentElement.classList.remove("is-route-enter"));
+    if(state.role==="patient") state.role = "supervisor";
+    go("#/surveys");
     return;
   }
   let body;
