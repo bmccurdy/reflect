@@ -338,7 +338,7 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .grid > *,
 .funnel-stats > *,
 .spot-split > *{min-width:0}
-.funnel-strip{margin-bottom:16px;overflow:hidden}
+.funnel-strip{margin:16px 0 0;overflow:hidden}
 .funnel-stats{
   display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
   gap:0;margin-top:16px;
@@ -370,6 +370,12 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
   font-size:28px;line-height:32px;font-weight:600;
   display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
   min-width:0;
+}
+.kpi-v--lead{
+  font-size:48px;line-height:48px;font-weight:700;letter-spacing:-.012em;
+}
+.funnel-stats .kpi-v{
+  font-size:20px;line-height:28px;font-weight:600;
 }
 .kpi-foot{
   display:flex;align-items:center;justify-content:space-between;gap:8px;
@@ -522,9 +528,54 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 .comp--warn{color:var(--status-elevated)}
 .comp--bad{color:var(--status-critical)}
 .score-meter{height:5px;margin:8px 0}
-.row-current{background:var(--status-resolved-wash)}
-.row-current .crew-name{color:var(--status-resolved)}
-.crew-name{font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.score-split{
+  display:grid;
+  grid-template-columns:minmax(240px,28%) minmax(0,1fr);
+  gap:24px;
+  align-items:start;
+}
+.score-index{
+  position:sticky;top:72px;z-index:2;
+  min-width:0;
+}
+.score-detail{min-width:0}
+.crew-list{margin:0;padding:8px;list-style:none}
+.crew-item{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-areas:"name unit" "meta meta";
+  align-items:baseline;
+  column-gap:12px;
+  row-gap:4px;
+  width:100%;
+  margin:0;
+  padding:12px;
+  border:1px solid transparent;
+  border-radius:var(--r-md);
+  background:transparent;
+  color:inherit;
+  text-align:left;
+  cursor:pointer;
+  transition:background-color var(--dur-micro) var(--ease-out),
+             border-color var(--dur-micro) var(--ease-out);
+}
+.crew-item:hover{background:var(--surface-hover)}
+.crew-item[aria-current="true"]{
+  background:var(--accent);
+  border-color:var(--primary);
+}
+.crew-item[aria-current="true"]:hover{background:var(--accent)}
+.crew-item-name{grid-area:name;font-weight:700;font-size:16px;line-height:24px}
+.crew-item-unit{
+  grid-area:unit;
+  font-family:var(--font-mono);font-size:13px;line-height:20px;font-weight:700;
+  color:var(--muted-foreground);
+}
+.crew-item-meta{
+  grid-area:meta;
+  font-size:13px;line-height:20px;
+  color:var(--muted-foreground);
+}
 .flag-hot{color:var(--status-critical);font-weight:700}
 .score-empty{padding:8px 0 4px}
 
@@ -782,38 +833,45 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
 @keyframes vtOut{to{opacity:0}}
 @keyframes vtIn{from{opacity:0;transform:translateY(6px)}}
 
-/* Patient survey — kit tokens, larger tap targets */
+/* Patient survey — letter surface. --p-* stays scoped here. */
 .patient{
-  min-height:100vh;background:var(--muted);color:var(--foreground);
+  --p-paper:var(--neutral-50);
+  --p-ink:var(--foreground);
+  --p-ink-muted:var(--muted-foreground);
+  --p-rule:var(--border);
+  min-height:100vh;background:var(--p-paper);color:var(--p-ink);
   display:flex;flex-direction:column;align-items:center;
-  padding:24px 16px 48px;
+  padding:32px 24px 64px;
 }
-.patient--embed{min-height:0;padding:16px}
+html[data-theme="dark"] .patient{
+  --p-paper:var(--neutral-900);
+}
+.patient--embed{min-height:0;padding:20px 16px 28px}
 .patient--embed .p-opt,
 .patient--embed .p-scale-btn{pointer-events:none}
 .p-wrap{width:100%;max-width:520px}
 .p-lock{
   display:flex;align-items:center;gap:8px;justify-content:center;
-  color:var(--muted-foreground);font-size:12px;line-height:20px;margin-bottom:16px;
+  color:var(--p-ink-muted);font-size:12px;line-height:20px;margin-bottom:24px;
 }
-.p-card.fw-card{padding:28px 24px}
-.patient--embed .p-card.fw-card{padding:20px 16px;box-shadow:none}
-.p-progress{display:flex;gap:6px;margin-bottom:16px}
+.p-card{padding:0;background:transparent;border:0;box-shadow:none;border-radius:0}
+.p-card.p-done{text-align:center}
+.p-progress{display:flex;gap:6px;margin-bottom:20px}
 .p-progress i{
-  height:4px;flex:1;border-radius:var(--r-full);background:var(--border);
+  height:4px;flex:1;border-radius:var(--r-full);background:var(--p-rule);
   transition:background-color var(--dur-layout) var(--ease-out);
 }
 .p-progress i.done{background:var(--primary)}
 .p-progress i.now{background:var(--foreground)}
 .p-step{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.patient .dim{color:var(--p-ink-muted)}
 
 .p-opts{display:flex;flex-direction:column;gap:8px;margin-top:20px}
 .p-opt{
   display:flex;align-items:center;gap:12px;width:100%;min-height:48px;
   padding:12px 16px;text-align:left;cursor:pointer;appearance:none;
-  background:var(--card);border:1px solid var(--border);border-radius:var(--r-md);
-  background:var(--card);border:1px solid var(--border);border-radius:var(--r-md);
-  font-size:16px;line-height:24px;color:var(--foreground);
+  background:var(--p-paper);border:1px solid var(--p-rule);border-radius:var(--r-md);
+  font-size:16px;line-height:24px;color:inherit;
   transition:border-color var(--dur-micro) var(--ease-out),
              background-color var(--dur-micro) var(--ease-out),
              box-shadow var(--dur-micro) var(--ease-out);
@@ -837,7 +895,7 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
 .p-scale{display:flex;gap:8px;margin-top:20px}
 .p-scale-btn{
   flex:1;min-height:56px;border-radius:var(--r-md);cursor:pointer;appearance:none;
-  border:1px solid var(--border);background:var(--card);color:var(--foreground);
+  border:1px solid var(--p-rule);background:var(--p-paper);color:inherit;
   font-size:16px;font-weight:600;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
   transition:border-color var(--dur-micro) var(--ease-out),
@@ -860,12 +918,41 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
 .p-cta .p-next{align-self:stretch}
 .p-back{margin-top:12px;min-height:0;height:auto;padding:0}
 .p-fieldset{border:0;padding:0;margin:16px 0 0}
+.patient .fw-select__trigger{
+  min-height:48px;height:48px;padding:0 40px 0 12px;
+  background:var(--p-paper);color:inherit;
+}
+.patient .fw-select__trigger:focus,
+.patient .fw-select__trigger:focus-visible{
+  box-shadow:none;
+  outline:2px solid var(--ring);
+  outline-offset:2px;
+}
+.patient .fw-select__chevron{
+  right:12px;color:var(--p-ink-muted);
+  transition:transform var(--dur-micro) var(--ease-out);
+}
+.patient .fw-select.is-open .fw-select__chevron{
+  transform:translateY(-50%) rotate(180deg);
+}
+.patient .fw-select__opt{
+  min-height:44px;padding:10px 12px;font-size:16px;line-height:24px;
+}
+.patient .fw-select__menu{max-height:min(360px,60vh)}
 .p-foot{
-  margin-top:24px;text-align:center;color:var(--muted-foreground);
+  margin-top:32px;text-align:center;color:var(--p-ink-muted);
   font-size:12px;line-height:20px;
 }
-.p-view{animation:pageTurn var(--dur-page) var(--ease-out) both}
-@keyframes pageTurn{from{opacity:0;transform:translateY(6px)}}
+.p-view--in-fwd,.p-view--in-back{opacity:0}
+.p-view--in-fwd{animation:pInFwd var(--dur-slow) var(--ease-out) both}
+.p-view--in-back{animation:pInBack var(--dur-slow) var(--ease-out) both}
+.p-view--out-fwd,.p-view--out-back{pointer-events:none}
+.p-view--out-fwd{animation:pOutFwd var(--dur-base) var(--ease-out) both}
+.p-view--out-back{animation:pOutBack var(--dur-base) var(--ease-out) both}
+@keyframes pInFwd{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+@keyframes pInBack{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:none}}
+@keyframes pOutFwd{from{opacity:1;transform:none}to{opacity:0;transform:translateX(-16px)}}
+@keyframes pOutBack{from{opacity:1;transform:none}to{opacity:0;transform:translateX(16px)}}
 .p-seal{
   width:48px;height:48px;border-radius:var(--r-full);margin:0 auto 16px;
   display:grid;place-items:center;background:var(--accent);color:var(--primary);
@@ -887,6 +974,8 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
 }
 @media (max-width:1080px){
   .split{grid-template-columns:1fr}
+  .score-split{grid-template-columns:minmax(0,1fr)}
+  .score-index{position:static;z-index:auto}
   .preview-col,.preview-sticky{position:static;align-self:auto;z-index:auto}
   .g-4{grid-template-columns:repeat(2,minmax(0,1fr))}
   .tbl--alerts .al-meta{display:block}
@@ -957,6 +1046,7 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
   .fw-card-head{flex-wrap:wrap}
   .kv{grid-template-columns:1fr}
   .t-h1{font-size:34px;line-height:38px}
+  .kpi-v--lead{font-size:34px;line-height:38px}
   .t-h2{font-size:24px;line-height:32px}
   .score-head .crumbs{display:none}
   .drawer{width:100%;max-width:100%;left:auto;right:0;border-left:0}
@@ -1200,44 +1290,6 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
     color:var(--muted-foreground);
   }
 
-  .tbl--crew tbody tr{align-items:flex-start;padding:12px 0;gap:4px 8px}
-  .tbl--crew tbody tr::before{
-    content:"";
-    order:3;flex:0 0 100%;width:100%;height:0;
-  }
-  .tbl--crew .crew-member{
-    order:1;flex:1;min-width:0;
-    font-size:16px;line-height:24px;
-  }
-  .tbl--crew .crew-unit{
-    order:2;flex:0 0 auto;margin-left:auto;
-    font-size:13px;line-height:20px;color:var(--muted-foreground);
-  }
-  .tbl--crew .crew-surveys,
-  .tbl--crew .crew-q1,
-  .tbl--crew .crew-rec,
-  .tbl--crew .crew-commend,
-  .tbl--crew .crew-flags{
-    flex:0 0 auto;
-    font-size:13px;line-height:20px;
-  }
-  .tbl--crew .crew-surveys{order:4}
-  .tbl--crew .crew-q1{order:5}
-  .tbl--crew .crew-rec{order:6}
-  .tbl--crew .crew-commend{order:7}
-  .tbl--crew .crew-flags{order:8}
-  .tbl--crew .crew-surveys::after{content:" surveys"}
-  .tbl--crew .crew-q1::before,
-  .tbl--crew .crew-rec::before,
-  .tbl--crew .crew-commend::before,
-  .tbl--crew .crew-flags::before{
-    content:"·";
-    margin-right:8px;
-    color:var(--muted-foreground);
-  }
-  .tbl--crew .crew-q1::after{content:" avg"}
-  .tbl--crew .crew-commend::after{content:" commendations"}
-  .tbl--crew .crew-flags::after{content:" flags"}
 }
 
 @media (prefers-reduced-motion:reduce){
@@ -1245,7 +1297,7 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
     animation-duration:80ms !important;animation-delay:0ms !important;
     transition-duration:80ms !important;
   }
-  .stagger>*,.p-view,.p-seal,.bar i,.toast,.menu,.qcard-in,.qcard-out,
+  .stagger>*,.p-view,.p-view--in-fwd,.p-view--in-back,.p-seal,.bar i,.toast,.menu,.qcard-in,.qcard-out,
   .drawer-head,.drawer-body > *{animation-name:fadeOnly !important}
   .drawer{transform:none;transition:none}
   @keyframes fadeOnly{from{opacity:0}}
@@ -1659,6 +1711,10 @@ const state = {
   navOpen:false,
   scrollPreserve:null,
   scorecardCrew:0,
+  pSlide:"fwd",
+  pBusy:false,
+  pSelectOpen:null,
+  pSelectActive:0,
   survey:{ step:0, answers:{}, showDemo:false, demo:{} }
 };
 </script>
@@ -1861,7 +1917,7 @@ function cardFunnel(){
     </div>
   </section>`;
 }
-function cardCallback(){
+function cardCallback({lead=false}={}){
   const open = openCount();
   const crit = critCount();
   const wait = oldestOpenWait();
@@ -1877,7 +1933,7 @@ function cardCallback(){
       </div>
       <div class="spot-split">
         <div>
-          <div class="kpi-v">${open}</div>
+          <div class="kpi-v${lead?" kpi-v--lead":""}">${open}</div>
           <div class="stat-k">Open</div>
         </div>
         <div>
@@ -1891,7 +1947,7 @@ function cardCallback(){
       </div>
     </section>`;
 }
-function cardQuality(){
+function cardQuality({lead=false}={}){
   return `
     <section class="fw-card kpi-spot bento-quality">
       <div class="kpi-top">
@@ -1903,7 +1959,7 @@ function cardQuality(){
       </div>
       <div class="spot-split">
         <div>
-          <div class="kpi-v">96%</div>
+          <div class="kpi-v${lead?" kpi-v--lead":""}">96%</div>
           <div class="stat-k">Recommended</div>
         </div>
         <div>
@@ -1936,8 +1992,8 @@ function cardLowestScores(){
 function viewOverview(){
   const supervisorFirst = state.role==="supervisor";
   const work = supervisorFirst
-    ? `${cardCallback()}${cardQuality()}`
-    : `${cardQuality()}${cardCallback()}`;
+    ? `${cardCallback({lead:true})}${cardQuality()}`
+    : `${cardQuality({lead:true})}${cardCallback()}`;
   const funnel = cardFunnel();
   const charts = `
   <div class="grid g-2 mt16" aria-label="Score charts">
@@ -1953,8 +2009,8 @@ function viewOverview(){
       : `Patient experience across ${AGENCY.name}, ${day(mins(43200))} to today.`}</p>
   </div>
   ${staleBanner()}
-  ${funnel}
   <div class="bento" aria-label="${supervisorFirst?"Open work":"System health"}">${work}</div>
+  ${funnel}
   ${charts}
 `;
 }
@@ -1994,17 +2050,15 @@ function selectScorecardCrew(i){
   state.scorecardCrew = idx;
   render();
   requestAnimationFrame(()=>{
-    document.getElementById("score-hero")?.scrollIntoView({behavior:"smooth", block:"start"});
+    if(!window.matchMedia("(max-width: 1080px)").matches) return;
+    document.getElementById("score-hero")?.scrollIntoView({
+      behavior: prefersReduce()?"auto":"smooth", block:"start"
+    });
   });
-}
-function scorecardCrewKey(e, i){
-  if(e.key==="Enter" || e.key===" "){ e.preventDefault(); selectScorecardCrew(i); }
 }
 
 function viewScorecard(){
   const selected = SCORECARD_CREW[state.scorecardCrew] || SCORECARD_CREW[0];
-  const scoreClass = v => v>=4.3?"comp--good":v>=4.0?"comp--ok":"comp--warn";
-  const recClass = n => n>=75?"comp--good":n>=65?"comp--ok":"comp--warn";
   const surveyRows = scorecardSurveyRows(selected);
   const hasOps = Array.isArray(selected.ops) && selected.ops.length;
   const hasProtos = Array.isArray(selected.protos) && selected.protos.length;
@@ -2018,113 +2072,111 @@ function viewScorecard(){
     </div>
   </div>
 
-  <section class="fw-card fw-card-flush" id="score-hero">
-    <div class="score-hero fw-navy">
-      <span class="fw-avatar fw-avatar--lg" aria-hidden="true">${selected.initials}</span>
-      <div>
-        <div class="score-hero-name">${esc(selected.name)}</div>
-        <div class="score-hero-meta">${esc(selected.role)} · ${esc(selected.unit)} · ${esc(AGENCY.name)}</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="fw-card sec">
-    <h2 class="t-h4">Patient survey results</h2>
-    <p class="t-subtle dim mt8">${esc(selected.name)} vs. ${esc(AGENCY.name)} average · last 30 days</p>
-    <div class="grid g-2 mt16">
-      ${surveyRows.map(h=>`
-        <div class="stat-cell stat-cell--accent" style="--stat-accent:${h.accent}">
-          <div class="stat-k">${esc(h.k)}</div>
-          <div class="stat-v" style="color:${h.accent}">${esc(h.v)}</div>
-          ${h.meter?`<span class="bar score-meter"><i style="width:${h.pct}%;background:${h.accent}"></i></span>`:""}
-          <div class="stat-sub">${esc(h.sub)}</div>
-        </div>`).join("")}
-    </div>
-  </section>
-
-  <section class="fw-card sec">
-    <h2 class="t-h4">Operations</h2>
-    ${hasOps?`
-    <div class="tbl-wrap mt16">
-      <table class="tbl tbl--stack tbl--ops">
-        <thead>
-          <tr>
-            <th>Metric</th>
-            <th class="group" colspan="3">Individual</th>
-            <th class="group group-sys" colspan="2">System</th>
-          </tr>
-          <tr>
-            <th></th>
-            <th>Comp %</th><th>Calls</th><th>Avg time</th>
-            <th>Calls</th><th>Avg time</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${selected.ops.map(r=>`
-            <tr>
-              <td class="op-metric">${esc(r.metric)}</td>
-              <td class="comp op-comp comp--${r.tone}">${esc(r.comp)}</td>
-              <td class="op-calls" data-n="${r.calls}">${r.calls}</td>
-              <td class="dim op-avg">${esc(r.avg)}</td>
-              <td class="dim op-sys-calls" data-n="${String(r.sysCalls).replace(/,/g,"")}">${esc(r.sysCalls)}</td>
-              <td class="dim op-sys-avg">${esc(r.sysAvg)}</td>
-            </tr>`).join("")}
-        </tbody>
-      </table>
-    </div>`:`
-    <p class="t-subtle dim score-empty mt16">Operations metrics for this crew member aren’t in the prototype yet.</p>`}
-  </section>
-
-  <section class="fw-card sec">
-    <h2 class="t-h4">FirstPass protocols</h2>
-    ${hasProtos?`
-    <div class="tbl-wrap mt16">
-      <table class="tbl tbl--stack tbl--protos">
-        <thead><tr><th>Protocol</th><th>Individual %</th><th>Calls</th><th>System %</th></tr></thead>
-        <tbody>
-          ${selected.protos.map(r=>`
-            <tr>
-              <td class="proto-name">${esc(r.name)}</td>
-              <td class="comp proto-ind comp--${r.tone}">${esc(r.ind)}</td>
-              <td class="proto-calls" data-n="${r.calls}">${r.calls}</td>
-              <td class="dim proto-sys">${esc(r.sys)}</td>
-            </tr>`).join("")}
-        </tbody>
-      </table>
-    </div>`:`
-    <p class="t-subtle dim score-empty mt16">Protocol compliance for this crew member isn’t in the prototype yet.</p>`}
-  </section>
-
-  <section class="fw-card sec">
-    <h2 class="t-h4">All crew · last 30 days</h2>
-    <p class="t-subtle dim mt8">Select a crew member to update the scorecard above.</p>
-    <div class="tbl-wrap mt16">
-      <table class="tbl tbl--stack tbl--crew">
-        <thead><tr>
-          <th>Crew member</th><th>Unit</th><th>Surveys</th><th>Avg Q1</th><th>% Recommend</th><th>Commendations</th><th>Flags</th>
-        </tr></thead>
-        <tbody>
+  <div class="score-split">
+    <aside class="score-index" aria-label="Crew">
+      <section class="fw-card fw-card-flush">
+        <div class="fw-card-head">
+          <div>
+            <h2 class="t-h4">Crew</h2>
+            <p class="t-subtle dim mt8">Last 30 days. Select a name to see their scorecard.</p>
+          </div>
+        </div>
+        <ul class="crew-list">
           ${SCORECARD_CREW.map((c,i)=>`
-            <tr class="clickable${i===state.scorecardCrew?" row-current":""}"
-              tabindex="0" role="button"
-              aria-pressed="${i===state.scorecardCrew?"true":"false"}"
-              aria-label="View scorecard for ${esc(c.name)}"
-              onclick="selectScorecardCrew(${i})"
-              onkeydown="scorecardCrewKey(event,${i})">
-              <td class="crew-member">
-                <span class="crew-name">${esc(c.name)}${i===state.scorecardCrew?I.starFill(14):""}</span>
-              </td>
-              <td class="mono crew-unit">${esc(c.unit)}</td>
-              <td class="crew-surveys">${c.surveys}</td>
-              <td class="comp crew-q1 ${scoreClass(c.q1)}">${c.q1.toFixed(1)}</td>
-              <td class="comp crew-rec ${recClass(c.rec)}">${c.rec}%</td>
-              <td class="crew-commend">${c.commend}</td>
-              <td class="crew-flags${c.flags>=4?" flag-hot":""}">${c.flags}</td>
-            </tr>`).join("")}
-        </tbody>
-      </table>
+            <li>
+              <button type="button" class="crew-item"
+                ${i===state.scorecardCrew?`aria-current="true"`:""}
+                aria-label="View scorecard for ${esc(c.name)}"
+                onclick="selectScorecardCrew(${i})">
+                <span class="crew-item-name">${esc(c.name)}</span>
+                <span class="crew-item-unit">${esc(c.unit)}</span>
+                <span class="crew-item-meta">${c.surveys} survey${c.surveys===1?"":"s"}
+                  · <span class="${c.flags>=4?"flag-hot":""}">${c.flags} flag${c.flags===1?"":"s"}</span></span>
+              </button>
+            </li>`).join("")}
+        </ul>
+      </section>
+    </aside>
+
+    <div class="score-detail">
+      <section class="fw-card fw-card-flush" id="score-hero">
+        <div class="score-hero fw-navy">
+          <span class="fw-avatar fw-avatar--lg" aria-hidden="true">${selected.initials}</span>
+          <div>
+            <div class="score-hero-name">${esc(selected.name)}</div>
+            <div class="score-hero-meta">${esc(selected.role)} · ${esc(selected.unit)} · ${esc(AGENCY.name)}</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="fw-card sec">
+        <h2 class="t-h4">Patient survey results</h2>
+        <p class="t-subtle dim mt8">${esc(selected.name)} vs. ${esc(AGENCY.name)} average · last 30 days</p>
+        <div class="grid g-2 mt16">
+          ${surveyRows.map(h=>`
+            <div class="stat-cell stat-cell--accent" style="--stat-accent:${h.accent}">
+              <div class="stat-k">${esc(h.k)}</div>
+              <div class="stat-v" style="color:${h.accent}">${esc(h.v)}</div>
+              ${h.meter?`<span class="bar score-meter"><i style="width:${h.pct}%;background:${h.accent}"></i></span>`:""}
+              <div class="stat-sub">${esc(h.sub)}</div>
+            </div>`).join("")}
+        </div>
+      </section>
+
+      <section class="fw-card sec">
+        <h2 class="t-h4">Operations</h2>
+        ${hasOps?`
+        <div class="tbl-wrap mt16">
+          <table class="tbl tbl--stack tbl--ops">
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th class="group" colspan="3">Individual</th>
+                <th class="group group-sys" colspan="2">System</th>
+              </tr>
+              <tr>
+                <th></th>
+                <th>Comp %</th><th>Calls</th><th>Avg time</th>
+                <th>Calls</th><th>Avg time</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${selected.ops.map(r=>`
+                <tr>
+                  <td class="op-metric">${esc(r.metric)}</td>
+                  <td class="comp op-comp comp--${r.tone}">${esc(r.comp)}</td>
+                  <td class="op-calls" data-n="${r.calls}">${r.calls}</td>
+                  <td class="dim op-avg">${esc(r.avg)}</td>
+                  <td class="dim op-sys-calls" data-n="${String(r.sysCalls).replace(/,/g,"")}">${esc(r.sysCalls)}</td>
+                  <td class="dim op-sys-avg">${esc(r.sysAvg)}</td>
+                </tr>`).join("")}
+            </tbody>
+          </table>
+        </div>`:`
+        <p class="t-subtle dim score-empty mt16">Operations metrics for this crew member aren’t in the prototype yet.</p>`}
+      </section>
+
+      <section class="fw-card sec">
+        <h2 class="t-h4">FirstPass protocols</h2>
+        ${hasProtos?`
+        <div class="tbl-wrap mt16">
+          <table class="tbl tbl--stack tbl--protos">
+            <thead><tr><th>Protocol</th><th>Individual %</th><th>Calls</th><th>System %</th></tr></thead>
+            <tbody>
+              ${selected.protos.map(r=>`
+                <tr>
+                  <td class="proto-name">${esc(r.name)}</td>
+                  <td class="comp proto-ind comp--${r.tone}">${esc(r.ind)}</td>
+                  <td class="proto-calls" data-n="${r.calls}">${r.calls}</td>
+                  <td class="dim proto-sys">${esc(r.sys)}</td>
+                </tr>`).join("")}
+            </tbody>
+          </table>
+        </div>`:`
+        <p class="t-subtle dim score-empty mt16">Protocol compliance for this crew member isn’t in the prototype yet.</p>`}
+      </section>
     </div>
-  </section>`;
+  </div>`;
 }
 
 function viewBlink(){
@@ -3014,6 +3066,57 @@ function cardByDemographic(){
 /* ============================================================
    8. PATIENT SURVEY
    ============================================================ */
+function pViewTag(){
+  return `<div class="p-view p-view--in-${state.pSlide==="back"?"back":"fwd"}">`;
+}
+const P_DEMO = {
+  age:{
+    id:"p-age", label:"Your age",
+    options:["18–24","25–34","35–44","45–54","55–64","65–74","75 or older"]
+  },
+  lang:{
+    id:"p-lang", label:"The language you're most comfortable in",
+    options:["English","Spanish","Vietnamese","Tagalog","Arabic","Another language"]
+  },
+  eth:{
+    id:"p-eth", label:"How you describe your race or ethnicity",
+    options:["American Indian or Alaska Native","Asian","Black or African American",
+      "Hispanic or Latino","Middle Eastern or North African",
+      "Native Hawaiian or Pacific Islander","White","More than one"]
+  }
+};
+const P_DEMO_BLANK = "Prefer not to say";
+function pSelectValues(key){ return [""].concat(P_DEMO[key].options); }
+function pSelectField(key){
+  const spec = P_DEMO[key];
+  const values = pSelectValues(key);
+  const val = state.survey.demo[key] || "";
+  const open = state.pSelectOpen===key;
+  const active = Math.min(values.length-1, Math.max(0, state.pSelectActive|0));
+  const shown = val || P_DEMO_BLANK;
+  return `<div class="fw-field p-fieldset">
+    <span class="fw-label" id="${spec.id}-label">${esc(spec.label)}</span>
+    <div class="fw-select${open?" is-open":""}">
+      <button type="button" class="fw-select__trigger" id="${spec.id}"
+        aria-haspopup="listbox" aria-expanded="${open}"
+        aria-labelledby="${spec.id}-label ${spec.id}"
+        aria-controls="${spec.id}-list"
+        ${open?`aria-activedescendant="${spec.id}-opt-${active}"`:""}
+        onclick="pSelectToggle('${key}',event)"
+        onkeydown="pSelectKey('${key}',event)">${esc(shown)}</button>
+      <span class="fw-select__chevron">${I.down(16)}</span>
+      ${open?`<div class="fw-select__menu" id="${spec.id}-list" role="listbox" aria-labelledby="${spec.id}-label">
+        ${values.map((o,i)=>{
+          const selected = val===o;
+          return `<div class="fw-select__opt" role="option" id="${spec.id}-opt-${i}"
+            data-value="${esc(o)}" aria-selected="${selected}"${i===active?" data-active":""}
+            onmousedown="event.preventDefault()"
+            onclick="pSelectPick('${key}',this)">${esc(o||P_DEMO_BLANK)}${selected?I.check(16):""}</div>`;
+        }).join("")}
+      </div>`:""}
+    </div>
+  </div>`;
+}
 function pProgress(total, idx){
   return `<div class="p-progress" role="progressbar" aria-valuemin="1" aria-valuemax="${total}" aria-valuenow="${Math.min(idx+1,total)}">
     ${Array.from({length:total},(_,i)=>`<i class="${i<idx?"done":i===idx?"now":""}"></i>`).join("")}
@@ -3027,12 +3130,9 @@ function pChoice(labelHtml, {pressed=false, onclick}={}){
   return `<div class="p-opt"><span class="p-tick" aria-hidden="true"></span>${labelHtml}</div>`;
 }
 function pQuestionHead(q, idx, total){
-  return `${pProgress(total, idx)}
-    <div class="p-step">
-      <span class="t-detail dim">Question ${idx+1} of ${total}</span>
-      ${q.required?"":`<span class="fw-badge fw-badge--secondary">Optional</span>`}
-    </div>
-    <h1 class="t-h3 mt8">${esc(q.text)}</h1>
+  const opt = q.required ? "" : `<div class="p-step"><span class="fw-badge fw-badge--secondary">Optional</span></div>`;
+  return `${pProgress(total, idx)}${opt}
+    <h1 class="t-h3${opt?" mt8":""}">${esc(q.text)}</h1>
     ${q.help?`<p class="t-body dim mt8">${esc(q.help)}</p>`:""}`;
 }
 function pQuestionFields(q, {interactive=false, val}={}){
@@ -3079,7 +3179,7 @@ function patientPreview(){
   if(!q){
     return `<div class="patient patient--embed">
       <div class="p-wrap">
-        <div class="fw-card fw-card--flat p-card">
+        <div class="p-card">
           <p class="t-body dim">Add a question to see the patient preview.</p>
         </div>
       </div>
@@ -3087,7 +3187,7 @@ function patientPreview(){
   }
   return `<div class="patient patient--embed">
     <div class="p-wrap">
-      <div class="fw-card fw-card--flat p-card">
+      <div class="p-card">
         ${pQuestionHead(q, idx, qs.length)}
         ${pQuestionFields(q)}
       </div>
@@ -3104,8 +3204,8 @@ function viewPatient(){
   if(S.step === -1){
     return `<div class="patient"><div class="p-wrap">
       <div class="p-lock">${I.lock(12)} Private — only ${AGENCY.name} sees this</div>
-      <div class="fw-card p-card">
-        <div class="p-view">
+      <div class="p-card">
+        ${pViewTag()}
         <h1 class="t-h2">A few questions about your ride with ${AGENCY.name}.</h1>
         <p class="t-body dim mt16">${total} questions, about a minute. Skip anything you'd rather not answer,
           and stop whenever you want.</p>
@@ -3127,8 +3227,8 @@ function viewPatient(){
   if(S.step === total){
     return `<div class="patient"><div class="p-wrap">
       <div class="p-lock">${I.lock(12)} Private — only ${AGENCY.name} sees this</div>
-      <div class="fw-card p-card">
-        <div class="p-view">
+      <div class="p-card">
+        ${pViewTag()}
         ${pProgress(total, total)}
         <div class="p-step">
           <span class="fw-badge fw-badge--secondary">Optional</span>
@@ -3137,32 +3237,9 @@ function viewPatient(){
         <p class="t-body dim mt8">We ask so we can check whether some people get a worse experience than others.
           You can send your answers without filling any of this in.</p>
 
-        <div class="fw-field p-fieldset">
-          <label class="fw-label" for="p-age">Your age</label>
-          <select class="fw-input" id="p-age" onchange="pDemo('age',this.value)">
-            <option value="">Prefer not to say</option>
-            ${["18–24","25–34","35–44","45–54","55–64","65–74","75 or older"].map(o=>
-              `<option ${S.demo.age===o?"selected":""}>${o}</option>`).join("")}
-          </select>
-        </div>
-        <div class="fw-field p-fieldset">
-          <label class="fw-label" for="p-lang">The language you're most comfortable in</label>
-          <select class="fw-input" id="p-lang" onchange="pDemo('lang',this.value)">
-            <option value="">Prefer not to say</option>
-            ${["English","Spanish","Vietnamese","Tagalog","Arabic","Another language"].map(o=>
-              `<option ${S.demo.lang===o?"selected":""}>${o}</option>`).join("")}
-          </select>
-        </div>
-        <div class="fw-field p-fieldset">
-          <label class="fw-label" for="p-eth">How you describe your race or ethnicity</label>
-          <select class="fw-input" id="p-eth" onchange="pDemo('eth',this.value)">
-            <option value="">Prefer not to say</option>
-            ${["American Indian or Alaska Native","Asian","Black or African American",
-               "Hispanic or Latino","Middle Eastern or North African",
-               "Native Hawaiian or Pacific Islander","White","More than one"].map(o=>
-              `<option ${S.demo.eth===o?"selected":""}>${o}</option>`).join("")}
-          </select>
-        </div>
+        ${pSelectField("age")}
+        ${pSelectField("lang")}
+        ${pSelectField("eth")}
 
         <div class="p-actions">
           <div class="p-cta">
@@ -3185,8 +3262,8 @@ function viewPatient(){
       return false;
     });
     return `<div class="patient"><div class="p-wrap">
-      <div class="fw-card p-card" style="text-align:center">
-        <div class="p-view">
+      <div class="p-card p-done">
+        ${pViewTag()}
         <div class="p-seal">${I.check(22)}</div>
         <h1 class="t-h2">Thank you — that's genuinely useful.</h1>
         <p class="t-body dim mt16">Someone at ${AGENCY.name} will read this. You don't need to do anything else.</p>
@@ -3212,8 +3289,8 @@ function viewPatient(){
 
   return `<div class="patient"><div class="p-wrap">
     <div class="p-lock">${I.lock(12)} Private — only ${AGENCY.name} sees this</div>
-    <div class="fw-card p-card">
-      <div class="p-view">
+    <div class="p-card">
+      ${pViewTag()}
       ${pQuestionHead(q, S.step, total)}
       ${pQuestionFields(q, {interactive:true, val})}
       <div class="p-actions">
@@ -3732,7 +3809,36 @@ function confirmDeleteSurvey(){
 }
 
 /* patient survey */
-function pStart(){ state.survey.step = 0; render(); scrollTop(); }
+function pTurn(dir, mutate){
+  if(state.pBusy) return;
+  const view = document.querySelector(".p-view");
+  const jump = ()=>{
+    const stage = document.querySelector(".preview-stage");
+    if(stage) stage.scrollTop = 0;
+    else window.scrollTo(0, 0);
+  };
+  const apply = ()=>{
+    mutate();
+    state.pSlide = dir;
+    state.pSelectOpen = null;
+    render();
+    jump();
+    state.pBusy = false;
+  };
+  if(prefersReduce() || !view){ apply(); return; }
+  state.pBusy = true;
+  let done = false;
+  const finish = ()=>{
+    if(done) return;
+    done = true;
+    apply();
+  };
+  view.classList.remove("p-view--in-fwd","p-view--in-back");
+  view.classList.add(dir==="back" ? "p-view--out-back" : "p-view--out-fwd");
+  view.addEventListener("animationend", e=>{ if(e.target===view) finish(); });
+  setTimeout(finish, 220);
+}
+function pStart(){ pTurn("fwd", ()=>{ state.survey.step = 0; }); }
 function pAnswer(id,v,el){
   state.survey.answers[id] = v;
   const group = el && el.closest(".p-opts, .p-scale");
@@ -3747,11 +3853,60 @@ function pAnswer(id,v,el){
 }
 function pText(id,v){ state.survey.answers[id] = v;
   const c = document.querySelector(".p-count"); if(c) c.textContent = v.length + " of 600"; }
-function pNext(){ state.survey.step++; render(); scrollTop(); }
-function pSkip(){ state.survey.step++; render(); scrollTop(); }
-function pBack(){ state.survey.step = Math.max(-1, state.survey.step-1); render(); scrollTop(); }
+function pNext(){ pTurn("fwd", ()=>{ state.survey.step++; }); }
+function pSkip(){ pTurn("fwd", ()=>{ state.survey.step++; }); }
+function pBack(){ pTurn("back", ()=>{ state.survey.step = Math.max(-1, state.survey.step-1); }); }
 function pDemo(k,v){ state.survey.demo[k] = v; }
-function pFinish(){ state.survey.step = qList().length+1; render(); scrollTop(); }
+function pSelectToggle(key, e){
+  if(e){ e.preventDefault(); e.stopPropagation(); }
+  state.pSelectOpen = state.pSelectOpen===key ? null : key;
+  if(state.pSelectOpen){
+    const values = pSelectValues(key);
+    const val = state.survey.demo[key] || "";
+    const i = values.indexOf(val);
+    state.pSelectActive = i<0 ? 0 : i;
+  }
+  render();
+  document.getElementById(P_DEMO[key].id)?.focus();
+}
+function pSelectPick(key, el){
+  pDemo(key, el.getAttribute("data-value") || "");
+  state.pSelectOpen = null;
+  render();
+  const btn = document.getElementById(P_DEMO[key].id);
+  if(btn) btn.focus();
+}
+function pSelectKey(key, e){
+  const open = state.pSelectOpen===key;
+  const values = pSelectValues(key);
+  if(e.key==="Escape"){
+    if(open){ e.preventDefault(); state.pSelectOpen = null; render(); document.getElementById(P_DEMO[key].id)?.focus(); }
+    return;
+  }
+  if(e.key==="ArrowDown" || e.key==="ArrowUp"){
+    e.preventDefault();
+    if(!open){ pSelectToggle(key, e); return; }
+    const delta = e.key==="ArrowDown" ? 1 : -1;
+    state.pSelectActive = (state.pSelectActive + delta + values.length) % values.length;
+    render();
+    return;
+  }
+  if(e.key==="Home" || e.key==="End"){
+    if(!open) return;
+    e.preventDefault();
+    state.pSelectActive = e.key==="Home" ? 0 : values.length-1;
+    render();
+    return;
+  }
+  if((e.key==="Enter" || e.key===" ") && open){
+    e.preventDefault();
+    pDemo(key, values[state.pSelectActive] || "");
+    state.pSelectOpen = null;
+    render();
+    document.getElementById(P_DEMO[key].id)?.focus();
+  }
+}
+function pFinish(){ pTurn("fwd", ()=>{ state.survey.step = qList().length+1; }); }
 function scrollTop(){
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const stage = document.querySelector(".preview-stage");
@@ -3805,6 +3960,12 @@ function render(){
     state.navOpen = false;
     root.innerHTML = viewPatient();
     document.body.classList.remove("nav-open","drawer-open");
+    if(state.pSelectOpen && P_DEMO[state.pSelectOpen]){
+      const btn = document.getElementById(P_DEMO[state.pSelectOpen].id);
+      if(btn) btn.focus();
+      const active = document.querySelector(".fw-select__opt[data-active]");
+      if(active) active.scrollIntoView({block:"nearest"});
+    }
     if(enter) requestAnimationFrame(()=>document.documentElement.classList.remove("is-route-enter"));
     return;
   }
@@ -3853,6 +4014,7 @@ window.addEventListener("keydown", e=>{
     }
   }
   if(e.key!=="Escape") return;
+  if(state.pSelectOpen){ state.pSelectOpen = null; render(); return; }
   if(state.navOpen){ closeNav(); return; }
   if(state.previewSurvey){ closeSurveyPreview(); return; }
   if(state.renameSurvey){ closeRenameSurvey(); return; }
@@ -3861,6 +4023,12 @@ window.addEventListener("keydown", e=>{
   if(state.deleteSurvey){ closeDeleteSurvey(); return; }
   if(state.openResponse){ closeResponse(); return; }
   if(state.openAlert){ closeAlert(); }
+});
+window.addEventListener("mousedown", e=>{
+  if(!state.pSelectOpen) return;
+  if(e.target.closest(".fw-select")) return;
+  state.pSelectOpen = null;
+  render();
 });
 window.matchMedia("(max-width: 1199px)").addEventListener("change", ev=>{
   if(!ev.matches) state.navOpen = false;
