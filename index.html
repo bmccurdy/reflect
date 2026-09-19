@@ -528,9 +528,54 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 .comp--warn{color:var(--status-elevated)}
 .comp--bad{color:var(--status-critical)}
 .score-meter{height:5px;margin:8px 0}
-.row-current{background:var(--status-resolved-wash)}
-.row-current .crew-name{color:var(--status-resolved)}
-.crew-name{font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.score-split{
+  display:grid;
+  grid-template-columns:minmax(240px,28%) minmax(0,1fr);
+  gap:24px;
+  align-items:start;
+}
+.score-index{
+  position:sticky;top:72px;z-index:2;
+  min-width:0;
+}
+.score-detail{min-width:0}
+.crew-list{margin:0;padding:8px;list-style:none}
+.crew-item{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-areas:"name unit" "meta meta";
+  align-items:baseline;
+  column-gap:12px;
+  row-gap:4px;
+  width:100%;
+  margin:0;
+  padding:12px;
+  border:1px solid transparent;
+  border-radius:var(--r-md);
+  background:transparent;
+  color:inherit;
+  text-align:left;
+  cursor:pointer;
+  transition:background-color var(--dur-micro) var(--ease-out),
+             border-color var(--dur-micro) var(--ease-out);
+}
+.crew-item:hover{background:var(--surface-hover)}
+.crew-item[aria-current="true"]{
+  background:var(--accent);
+  border-color:var(--primary);
+}
+.crew-item[aria-current="true"]:hover{background:var(--accent)}
+.crew-item-name{grid-area:name;font-weight:700;font-size:16px;line-height:24px}
+.crew-item-unit{
+  grid-area:unit;
+  font-family:var(--font-mono);font-size:13px;line-height:20px;font-weight:700;
+  color:var(--muted-foreground);
+}
+.crew-item-meta{
+  grid-area:meta;
+  font-size:13px;line-height:20px;
+  color:var(--muted-foreground);
+}
 .flag-hot{color:var(--status-critical);font-weight:700}
 .score-empty{padding:8px 0 4px}
 
@@ -893,6 +938,8 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
 }
 @media (max-width:1080px){
   .split{grid-template-columns:1fr}
+  .score-split{grid-template-columns:minmax(0,1fr)}
+  .score-index{position:static;z-index:auto}
   .preview-col,.preview-sticky{position:static;align-self:auto;z-index:auto}
   .g-4{grid-template-columns:repeat(2,minmax(0,1fr))}
   .tbl--alerts .al-meta{display:block}
@@ -1207,44 +1254,6 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
     color:var(--muted-foreground);
   }
 
-  .tbl--crew tbody tr{align-items:flex-start;padding:12px 0;gap:4px 8px}
-  .tbl--crew tbody tr::before{
-    content:"";
-    order:3;flex:0 0 100%;width:100%;height:0;
-  }
-  .tbl--crew .crew-member{
-    order:1;flex:1;min-width:0;
-    font-size:16px;line-height:24px;
-  }
-  .tbl--crew .crew-unit{
-    order:2;flex:0 0 auto;margin-left:auto;
-    font-size:13px;line-height:20px;color:var(--muted-foreground);
-  }
-  .tbl--crew .crew-surveys,
-  .tbl--crew .crew-q1,
-  .tbl--crew .crew-rec,
-  .tbl--crew .crew-commend,
-  .tbl--crew .crew-flags{
-    flex:0 0 auto;
-    font-size:13px;line-height:20px;
-  }
-  .tbl--crew .crew-surveys{order:4}
-  .tbl--crew .crew-q1{order:5}
-  .tbl--crew .crew-rec{order:6}
-  .tbl--crew .crew-commend{order:7}
-  .tbl--crew .crew-flags{order:8}
-  .tbl--crew .crew-surveys::after{content:" surveys"}
-  .tbl--crew .crew-q1::before,
-  .tbl--crew .crew-rec::before,
-  .tbl--crew .crew-commend::before,
-  .tbl--crew .crew-flags::before{
-    content:"·";
-    margin-right:8px;
-    color:var(--muted-foreground);
-  }
-  .tbl--crew .crew-q1::after{content:" avg"}
-  .tbl--crew .crew-commend::after{content:" commendations"}
-  .tbl--crew .crew-flags::after{content:" flags"}
 }
 
 @media (prefers-reduced-motion:reduce){
@@ -2001,17 +2010,15 @@ function selectScorecardCrew(i){
   state.scorecardCrew = idx;
   render();
   requestAnimationFrame(()=>{
-    document.getElementById("score-hero")?.scrollIntoView({behavior:"smooth", block:"start"});
+    if(!window.matchMedia("(max-width: 1080px)").matches) return;
+    document.getElementById("score-hero")?.scrollIntoView({
+      behavior: prefersReduce()?"auto":"smooth", block:"start"
+    });
   });
-}
-function scorecardCrewKey(e, i){
-  if(e.key==="Enter" || e.key===" "){ e.preventDefault(); selectScorecardCrew(i); }
 }
 
 function viewScorecard(){
   const selected = SCORECARD_CREW[state.scorecardCrew] || SCORECARD_CREW[0];
-  const scoreClass = v => v>=4.3?"comp--good":v>=4.0?"comp--ok":"comp--warn";
-  const recClass = n => n>=75?"comp--good":n>=65?"comp--ok":"comp--warn";
   const surveyRows = scorecardSurveyRows(selected);
   const hasOps = Array.isArray(selected.ops) && selected.ops.length;
   const hasProtos = Array.isArray(selected.protos) && selected.protos.length;
@@ -2025,113 +2032,111 @@ function viewScorecard(){
     </div>
   </div>
 
-  <section class="fw-card fw-card-flush" id="score-hero">
-    <div class="score-hero fw-navy">
-      <span class="fw-avatar fw-avatar--lg" aria-hidden="true">${selected.initials}</span>
-      <div>
-        <div class="score-hero-name">${esc(selected.name)}</div>
-        <div class="score-hero-meta">${esc(selected.role)} · ${esc(selected.unit)} · ${esc(AGENCY.name)}</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="fw-card sec">
-    <h2 class="t-h4">Patient survey results</h2>
-    <p class="t-subtle dim mt8">${esc(selected.name)} vs. ${esc(AGENCY.name)} average · last 30 days</p>
-    <div class="grid g-2 mt16">
-      ${surveyRows.map(h=>`
-        <div class="stat-cell stat-cell--accent" style="--stat-accent:${h.accent}">
-          <div class="stat-k">${esc(h.k)}</div>
-          <div class="stat-v" style="color:${h.accent}">${esc(h.v)}</div>
-          ${h.meter?`<span class="bar score-meter"><i style="width:${h.pct}%;background:${h.accent}"></i></span>`:""}
-          <div class="stat-sub">${esc(h.sub)}</div>
-        </div>`).join("")}
-    </div>
-  </section>
-
-  <section class="fw-card sec">
-    <h2 class="t-h4">Operations</h2>
-    ${hasOps?`
-    <div class="tbl-wrap mt16">
-      <table class="tbl tbl--stack tbl--ops">
-        <thead>
-          <tr>
-            <th>Metric</th>
-            <th class="group" colspan="3">Individual</th>
-            <th class="group group-sys" colspan="2">System</th>
-          </tr>
-          <tr>
-            <th></th>
-            <th>Comp %</th><th>Calls</th><th>Avg time</th>
-            <th>Calls</th><th>Avg time</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${selected.ops.map(r=>`
-            <tr>
-              <td class="op-metric">${esc(r.metric)}</td>
-              <td class="comp op-comp comp--${r.tone}">${esc(r.comp)}</td>
-              <td class="op-calls" data-n="${r.calls}">${r.calls}</td>
-              <td class="dim op-avg">${esc(r.avg)}</td>
-              <td class="dim op-sys-calls" data-n="${String(r.sysCalls).replace(/,/g,"")}">${esc(r.sysCalls)}</td>
-              <td class="dim op-sys-avg">${esc(r.sysAvg)}</td>
-            </tr>`).join("")}
-        </tbody>
-      </table>
-    </div>`:`
-    <p class="t-subtle dim score-empty mt16">Operations metrics for this crew member aren’t in the prototype yet.</p>`}
-  </section>
-
-  <section class="fw-card sec">
-    <h2 class="t-h4">FirstPass protocols</h2>
-    ${hasProtos?`
-    <div class="tbl-wrap mt16">
-      <table class="tbl tbl--stack tbl--protos">
-        <thead><tr><th>Protocol</th><th>Individual %</th><th>Calls</th><th>System %</th></tr></thead>
-        <tbody>
-          ${selected.protos.map(r=>`
-            <tr>
-              <td class="proto-name">${esc(r.name)}</td>
-              <td class="comp proto-ind comp--${r.tone}">${esc(r.ind)}</td>
-              <td class="proto-calls" data-n="${r.calls}">${r.calls}</td>
-              <td class="dim proto-sys">${esc(r.sys)}</td>
-            </tr>`).join("")}
-        </tbody>
-      </table>
-    </div>`:`
-    <p class="t-subtle dim score-empty mt16">Protocol compliance for this crew member isn’t in the prototype yet.</p>`}
-  </section>
-
-  <section class="fw-card sec">
-    <h2 class="t-h4">All crew · last 30 days</h2>
-    <p class="t-subtle dim mt8">Select a crew member to update the scorecard above.</p>
-    <div class="tbl-wrap mt16">
-      <table class="tbl tbl--stack tbl--crew">
-        <thead><tr>
-          <th>Crew member</th><th>Unit</th><th>Surveys</th><th>Avg Q1</th><th>% Recommend</th><th>Commendations</th><th>Flags</th>
-        </tr></thead>
-        <tbody>
+  <div class="score-split">
+    <aside class="score-index" aria-label="Crew">
+      <section class="fw-card fw-card-flush">
+        <div class="fw-card-head">
+          <div>
+            <h2 class="t-h4">Crew</h2>
+            <p class="t-subtle dim mt8">Last 30 days. Select a name to see their scorecard.</p>
+          </div>
+        </div>
+        <ul class="crew-list">
           ${SCORECARD_CREW.map((c,i)=>`
-            <tr class="clickable${i===state.scorecardCrew?" row-current":""}"
-              tabindex="0" role="button"
-              aria-pressed="${i===state.scorecardCrew?"true":"false"}"
-              aria-label="View scorecard for ${esc(c.name)}"
-              onclick="selectScorecardCrew(${i})"
-              onkeydown="scorecardCrewKey(event,${i})">
-              <td class="crew-member">
-                <span class="crew-name">${esc(c.name)}${i===state.scorecardCrew?I.starFill(14):""}</span>
-              </td>
-              <td class="mono crew-unit">${esc(c.unit)}</td>
-              <td class="crew-surveys">${c.surveys}</td>
-              <td class="comp crew-q1 ${scoreClass(c.q1)}">${c.q1.toFixed(1)}</td>
-              <td class="comp crew-rec ${recClass(c.rec)}">${c.rec}%</td>
-              <td class="crew-commend">${c.commend}</td>
-              <td class="crew-flags${c.flags>=4?" flag-hot":""}">${c.flags}</td>
-            </tr>`).join("")}
-        </tbody>
-      </table>
+            <li>
+              <button type="button" class="crew-item"
+                ${i===state.scorecardCrew?`aria-current="true"`:""}
+                aria-label="View scorecard for ${esc(c.name)}"
+                onclick="selectScorecardCrew(${i})">
+                <span class="crew-item-name">${esc(c.name)}</span>
+                <span class="crew-item-unit">${esc(c.unit)}</span>
+                <span class="crew-item-meta">${c.surveys} survey${c.surveys===1?"":"s"}
+                  · <span class="${c.flags>=4?"flag-hot":""}">${c.flags} flag${c.flags===1?"":"s"}</span></span>
+              </button>
+            </li>`).join("")}
+        </ul>
+      </section>
+    </aside>
+
+    <div class="score-detail">
+      <section class="fw-card fw-card-flush" id="score-hero">
+        <div class="score-hero fw-navy">
+          <span class="fw-avatar fw-avatar--lg" aria-hidden="true">${selected.initials}</span>
+          <div>
+            <div class="score-hero-name">${esc(selected.name)}</div>
+            <div class="score-hero-meta">${esc(selected.role)} · ${esc(selected.unit)} · ${esc(AGENCY.name)}</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="fw-card sec">
+        <h2 class="t-h4">Patient survey results</h2>
+        <p class="t-subtle dim mt8">${esc(selected.name)} vs. ${esc(AGENCY.name)} average · last 30 days</p>
+        <div class="grid g-2 mt16">
+          ${surveyRows.map(h=>`
+            <div class="stat-cell stat-cell--accent" style="--stat-accent:${h.accent}">
+              <div class="stat-k">${esc(h.k)}</div>
+              <div class="stat-v" style="color:${h.accent}">${esc(h.v)}</div>
+              ${h.meter?`<span class="bar score-meter"><i style="width:${h.pct}%;background:${h.accent}"></i></span>`:""}
+              <div class="stat-sub">${esc(h.sub)}</div>
+            </div>`).join("")}
+        </div>
+      </section>
+
+      <section class="fw-card sec">
+        <h2 class="t-h4">Operations</h2>
+        ${hasOps?`
+        <div class="tbl-wrap mt16">
+          <table class="tbl tbl--stack tbl--ops">
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th class="group" colspan="3">Individual</th>
+                <th class="group group-sys" colspan="2">System</th>
+              </tr>
+              <tr>
+                <th></th>
+                <th>Comp %</th><th>Calls</th><th>Avg time</th>
+                <th>Calls</th><th>Avg time</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${selected.ops.map(r=>`
+                <tr>
+                  <td class="op-metric">${esc(r.metric)}</td>
+                  <td class="comp op-comp comp--${r.tone}">${esc(r.comp)}</td>
+                  <td class="op-calls" data-n="${r.calls}">${r.calls}</td>
+                  <td class="dim op-avg">${esc(r.avg)}</td>
+                  <td class="dim op-sys-calls" data-n="${String(r.sysCalls).replace(/,/g,"")}">${esc(r.sysCalls)}</td>
+                  <td class="dim op-sys-avg">${esc(r.sysAvg)}</td>
+                </tr>`).join("")}
+            </tbody>
+          </table>
+        </div>`:`
+        <p class="t-subtle dim score-empty mt16">Operations metrics for this crew member aren’t in the prototype yet.</p>`}
+      </section>
+
+      <section class="fw-card sec">
+        <h2 class="t-h4">FirstPass protocols</h2>
+        ${hasProtos?`
+        <div class="tbl-wrap mt16">
+          <table class="tbl tbl--stack tbl--protos">
+            <thead><tr><th>Protocol</th><th>Individual %</th><th>Calls</th><th>System %</th></tr></thead>
+            <tbody>
+              ${selected.protos.map(r=>`
+                <tr>
+                  <td class="proto-name">${esc(r.name)}</td>
+                  <td class="comp proto-ind comp--${r.tone}">${esc(r.ind)}</td>
+                  <td class="proto-calls" data-n="${r.calls}">${r.calls}</td>
+                  <td class="dim proto-sys">${esc(r.sys)}</td>
+                </tr>`).join("")}
+            </tbody>
+          </table>
+        </div>`:`
+        <p class="t-subtle dim score-empty mt16">Protocol compliance for this crew member isn’t in the prototype yet.</p>`}
+      </section>
     </div>
-  </section>`;
+  </div>`;
 }
 
 function viewBlink(){
