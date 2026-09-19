@@ -63,7 +63,7 @@ h1,h2,h3,h4,p{margin:0}
 ul{margin:0;padding:0;list-style:none}
 
 /* ---------- type scale ---------- */
-.t-h1{font-size:48px;line-height:48px;font-weight:700;letter-spacing:-.012em}
+.t-h1{font-size:36px;line-height:40px;font-weight:700;letter-spacing:-.01em}
 .t-h2{font-size:30px;line-height:36px;font-weight:600;letter-spacing:-.0075em}
 .t-h3{font-size:24px;line-height:32px;font-weight:600;letter-spacing:-.006em}
 .t-h4{font-size:20px;line-height:28px;font-weight:600;letter-spacing:-.005em}
@@ -132,6 +132,18 @@ a.fw-btn{text-decoration:none}
 
 /* demo-only affordance — see docs/decisions.md #1 */
 .demo-switch{display:flex;align-items:center;gap:8px}
+.demo-patient{color:color-mix(in srgb,var(--base-white) 80%,transparent);height:28px;padding:0 10px;flex:0 0 auto}
+.demo-patient:hover{color:var(--base-white);background:color-mix(in srgb,var(--base-white) 12%,transparent)}
+@media (max-width:760px){
+  .topbar .demo-patient{padding:0 8px;font-size:13px}
+}
+.nav-drawer-foot .demo-patient{
+  width:100%;margin-top:8px;height:40px;justify-content:center;
+  color:var(--foreground);
+  border:1px solid var(--border);
+  background:var(--card);
+}
+.nav-drawer-foot .demo-patient:hover{background:var(--surface-hover);color:var(--foreground)}
 .seg{display:flex;background:var(--neutral-200);border-radius:var(--r-md);padding:4px;gap:2px}
 .seg button{
   height:28px;padding:0 10px;border:0;background:transparent;border-radius:var(--r-sm);
@@ -147,14 +159,14 @@ a.fw-btn{text-decoration:none}
 .iconbtn.nav-toggle{display:none}
 
 .nav-scrim{
-  position:fixed;inset:0;z-index:80;
+  position:fixed;inset:56px 0 0;z-index:80;
   background:var(--overlay);
   opacity:0;pointer-events:none;
   transition:opacity var(--dur-base) var(--ease-out);
 }
 .nav-scrim.is-open{opacity:1;pointer-events:auto}
 .nav-drawer{
-  position:fixed;top:0;left:0;bottom:0;z-index:81;
+  position:fixed;top:56px;left:0;bottom:0;z-index:81;
   width:min(320px,86vw);
   display:flex;flex-direction:column;
   background:var(--card);color:var(--foreground);
@@ -165,14 +177,7 @@ a.fw-btn{text-decoration:none}
   transition:transform var(--dur-slow) var(--ease-out);
 }
 .nav-drawer.is-open{transform:translateX(0);pointer-events:auto}
-.nav-drawer-head{
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
-  height:56px;padding:0 12px 0 16px;flex:0 0 auto;
-  background:var(--fw-navy);color:var(--base-white);
-}
-.nav-drawer-head .brand{color:var(--base-white)}
-.nav-drawer-head .iconbtn{color:color-mix(in srgb,var(--base-white) 80%,transparent)}
-.nav-drawer-head .iconbtn:hover{background:color-mix(in srgb,var(--base-white) 12%,transparent);color:var(--base-white)}
+.nav-drawer-head{display:none}
 .nav-drawer-links{
   display:flex;flex-direction:column;gap:4px;
   padding:12px;margin:0;flex:1;overflow:auto;
@@ -191,6 +196,7 @@ a.fw-btn{text-decoration:none}
 }
 .nav-drawer-foot{
   display:none;
+  flex-direction:column;
   padding:16px;border-top:1px solid var(--border);
 }
 .nav-drawer-foot .brand-sub{display:block;margin-bottom:12px;color:var(--muted-foreground)}
@@ -219,6 +225,9 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .title-edit-hit:focus-visible .title-edit-pen{opacity:1}
 @media (hover:none){
   .title-edit-pen{opacity:1}
+  .iconbtn,.topbar .iconbtn.nav-toggle{
+    width:44px;height:44px;
+  }
 }
 .title-edit-input{
   width:min(36rem,100%);max-width:100%;
@@ -372,7 +381,7 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
   min-width:0;
 }
 .kpi-v--lead{
-  font-size:48px;line-height:48px;font-weight:700;letter-spacing:-.012em;
+  font-size:36px;line-height:40px;font-weight:700;letter-spacing:-.01em;
 }
 .funnel-stats .kpi-v{
   font-size:20px;line-height:28px;font-weight:600;
@@ -430,8 +439,8 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .tbl .fav{width:52px;padding-left:12px;padding-right:0;vertical-align:middle}
 .tbl .morecol{width:52px;padding-left:8px;padding-right:12px;text-align:right;vertical-align:middle}
 .star-btn{color:var(--muted-foreground)}
-.star-btn:hover{color:var(--status-elevated)}
-.star-btn[aria-pressed="true"]{color:var(--status-elevated)}
+.star-btn:hover{color:var(--primary)}
+.star-btn[aria-pressed="true"]{color:var(--primary)}
 
 .menu-catch{position:fixed;inset:0;z-index:28}
 .menu-wrap{position:relative;display:inline-flex}
@@ -508,13 +517,15 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .score-hero{
   display:flex;align-items:center;gap:14px;
   padding:16px 24px;
+  background:var(--card);
+  border-bottom:1px solid var(--border);
 }
 .score-hero .fw-avatar{
-  background:color-mix(in srgb,var(--base-white) 20%,transparent);
-  color:var(--base-white);
+  background:var(--accent);
+  color:var(--primary);
 }
 .score-hero-name{font-size:16px;line-height:24px;font-weight:700}
-.score-hero-meta{font-size:12px;line-height:16px;color:color-mix(in srgb,var(--base-white) 72%,transparent)}
+.score-hero-meta{font-size:12px;line-height:16px;color:var(--muted-foreground)}
 .stat-cell--accent{border-top:3px solid var(--stat-accent,var(--primary))}
 .stat-cell--accent .stat-k{margin-top:0;margin-bottom:4px}
 .stat-sub{font-size:12px;line-height:16px;color:var(--muted-foreground);margin-top:6px}
@@ -647,6 +658,8 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   border-top:1px solid var(--border);background:var(--card);
 }
 .drawer-foot .fw-btn{flex:1}
+.drawer-foot--alert{flex-wrap:wrap}
+.drawer-foot--alert .fw-btn{flex:1 1 auto}
 .drawer-pos{
   flex:0 0 auto;min-width:4.5rem;text-align:center;
   font-size:13px;line-height:20px;color:var(--muted-foreground);
@@ -812,19 +825,7 @@ html.is-route-enter .bar i{animation:grow var(--dur-page) var(--ease-out) both}
 @keyframes rise{from{opacity:0;transform:translateY(6px)}}
 @keyframes pop{from{opacity:0;transform:translateY(6px)}}
 
-.toast{
-  position:fixed;bottom:24px;left:50%;z-index:60;margin:0;
-  display:flex;align-items:center;gap:8px;
-  padding:12px 16px;
-  background:var(--card);color:var(--foreground);
-  border:1px solid var(--border);border-radius:var(--r-lg);
-  box-shadow:var(--shadow-lg);
-  transform:translateX(-50%);
-  animation:toastIn var(--dur-layout) var(--ease-out);
-}
-@keyframes toastIn{
-  from{opacity:0;transform:translateX(-50%) translateY(8px)}
-}
+.fw-toaster{z-index:200}
 
 .topbar{view-transition-name:fw-topbar}
 .main{view-transition-name:fw-main}
@@ -913,9 +914,9 @@ html[data-theme="dark"] .patient{
 .p-fields .fw-textarea{min-height:120px}
 .p-count{margin-top:8px;text-align:right}
 
-.p-actions{display:flex;gap:12px;align-items:flex-start;margin-top:24px}
-.p-cta{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0}
-.p-cta .p-next{align-self:stretch}
+.p-actions{display:flex;gap:12px;align-items:flex-start;margin-top:24px;width:100%}
+.p-cta{flex:1;display:flex;flex-direction:column;align-items:stretch;min-width:0}
+.p-cta .p-next,.p-actions > .p-next{align-self:stretch;width:100%}
 .p-back{margin-top:12px;min-height:0;height:auto;padding:0}
 .p-fieldset{border:0;padding:0;margin:16px 0 0}
 .patient .fw-select__trigger{
@@ -943,6 +944,14 @@ html[data-theme="dark"] .patient{
   margin-top:32px;text-align:center;color:var(--p-ink-muted);
   font-size:12px;line-height:20px;
 }
+.p-demo{
+  width:100%;max-width:520px;margin:0 0 20px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:8px 12px;
+  border:1px dashed var(--border);border-radius:var(--r-md);
+  background:var(--card);color:var(--muted-foreground);
+  font-size:13px;line-height:20px;
+}
 .p-view--in-fwd,.p-view--in-back{opacity:0}
 .p-view--in-fwd{animation:pInFwd var(--dur-slow) var(--ease-out) both}
 .p-view--in-back{animation:pInBack var(--dur-slow) var(--ease-out) both}
@@ -969,28 +978,21 @@ html[data-theme="dark"] .patient{
 @media (max-width:1199px){
   .iconbtn.nav-toggle{display:grid}
   .topbar .nav{display:none}
-  .brand-sub{display:none}
+  .topbar .brand-sub{display:none}
   .topbar{padding:0 16px;gap:8px}
+  .topbar .demo-switch{display:none}
+  .nav-drawer-foot{display:flex}
 }
 @media (max-width:1080px){
   .split{grid-template-columns:1fr}
   .score-split{grid-template-columns:minmax(0,1fr)}
   .score-index{position:static;z-index:auto}
+  .score-index .crew-list{max-height:min(300px,42vh);overflow:auto}
   .preview-col,.preview-sticky{position:static;align-self:auto;z-index:auto}
-  .g-4{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .tbl--alerts .al-meta{display:block}
-  .tbl--alerts th:nth-child(3),
-  .tbl--alerts th:nth-child(4),
-  .tbl--alerts th:nth-child(5),
-  .tbl--alerts .al-unit,
-  .tbl--alerts .al-assigned,
-  .tbl--alerts .al-opened{display:none !important}
-}
-@media (max-width:760px){
   .main{padding:24px 16px 120px}
   .topbar{padding:0 12px;gap:8px}
   .topbar .demo-switch{display:none}
-  .nav-drawer-foot{display:block}
+  .nav-drawer-foot{display:flex}
   .g-4,.g-3,.g-2{grid-template-columns:minmax(0,1fr)}
   .bento{grid-template-columns:minmax(0,1fr);grid-template-rows:none}
   .kpi-spot{display:flex;flex-direction:column;grid-row:auto;padding:16px}
@@ -1030,7 +1032,7 @@ html[data-theme="dark"] .patient{
     flex-direction:row;align-items:flex-start;gap:12px;
   }
   .between--inline .fw-badge{flex:0 0 auto}
-  .page-head:has(.page-back) .crumbs{display:none}
+  .crumbs{display:none}
   .page-back{display:inline-flex}
   .page-head .rs-edit{display:none}
   .rs-filters{width:100%}
@@ -1048,8 +1050,6 @@ html[data-theme="dark"] .patient{
   .t-h1{font-size:34px;line-height:38px}
   .kpi-v--lead{font-size:34px;line-height:38px}
   .t-h2{font-size:24px;line-height:32px}
-  .score-head .crumbs{display:none}
-  .drawer{width:100%;max-width:100%;left:auto;right:0;border-left:0}
   .fw-card{padding:16px}
   .fw-card.fw-card-flush{padding:0}
   .fw-card:has(table.tbl--stack),
@@ -1292,10 +1292,30 @@ html[data-theme="dark"] .patient{
 
 }
 
+@media (max-width:760px){
+  .iconbtn,.topbar .iconbtn.nav-toggle{
+    width:44px;height:44px;
+  }
+  .drawer{width:100%;max-width:100%;left:auto;right:0;border-left:0}
+  .stale-banner,.drawer--response .stale{
+    flex-wrap:wrap;align-items:flex-start;
+  }
+  .stale-banner .stale-banner__close{margin-left:auto}
+}
+
+@media (max-height:500px) and (max-width:1080px){
+  .bento{grid-template-columns:minmax(0,1fr);grid-template-rows:none}
+  .patient{padding:16px 20px 24px}
+  .p-actions{
+    position:sticky;bottom:0;padding:12px 0 max(12px,env(safe-area-inset-bottom));
+    background:var(--p-paper);
+  }
+}
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{
-    animation-duration:80ms !important;animation-delay:0ms !important;
-    transition-duration:80ms !important;
+    animation:none !important;animation-delay:0ms !important;
+    transition:none !important;
   }
   .stagger>*,.p-view,.p-view--in-fwd,.p-view--in-back,.p-seal,.bar i,.toast,.menu,.qcard-in,.qcard-out,
   .drawer-head,.drawer-body > *{animation-name:fadeOnly !important}
@@ -1323,17 +1343,29 @@ body:not(.is-locked) #gate{display:none}
   border:1px solid var(--border);border-radius:var(--r-xl);
   box-shadow:var(--shadow-lg);padding:24px;
 }
-.gate-err{color:var(--destructive);font-size:14px;line-height:20px;margin-top:12px;min-height:20px}
+.gate-kicker{
+  font-size:12px;line-height:20px;font-weight:500;color:var(--muted-foreground);
+}
+.gate-title{margin-top:8px}
+.gate-label{font-weight:600;display:block;margin:20px 0 8px}
+.gate-submit{width:100%;margin-top:16px}
+.gate-brand{
+  display:flex;align-items:center;gap:10px;margin-bottom:16px;
+}
+.gate-brand img{width:32px;height:32px;display:block}
 </style>
 </head>
 <body class="is-locked">
 <div id="gate" class="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title">
-  <form class="gate-card" id="gate-form">
-    <p class="t-detail dim" style="font-weight:700;letter-spacing:.08em;text-transform:uppercase">Reflect</p>
-    <h1 class="t-h4" id="gate-title" style="margin-top:8px">Enter the password to view this prototype</h1>
-    <label class="t-subtle" style="font-weight:700;display:block;margin:20px 0 8px" for="gate-pass">Password</label>
+    <form class="gate-card" id="gate-form">
+    <div class="gate-brand">
+      <img src="logo.png" width="32" height="32" alt="">
+      <p class="gate-kicker">FirstWatch · Reflect</p>
+    </div>
+    <h1 class="t-h4 gate-title" id="gate-title">Enter the password to view this prototype</h1>
+    <label class="t-subtle gate-label" for="gate-pass">Password</label>
     <input class="fw-input" id="gate-pass" type="password" autocomplete="current-password" required>
-    <button class="fw-btn fw-btn--primary" type="submit" style="width:100%;margin-top:16px">Continue</button>
+    <button class="fw-btn fw-btn--primary gate-submit" type="submit">Continue</button>
     <p class="gate-err" id="gate-err" role="alert"></p>
   </form>
 </div>
@@ -1801,10 +1833,11 @@ function shell(body){
       l==="Alerts"&&c?`<span class="count" aria-label="${c} open">${c}</span>`:""}</a>`;
   }).join("");
   const roleSwitch = `
-    <div class="seg" role="group" aria-label="View as role">
+    <div class="seg" role="group" aria-label="View as">
       <button aria-pressed="${state.role==="supervisor"}" onclick="setRole('supervisor')">Supervisor</button>
       <button aria-pressed="${state.role==="leadership"}" onclick="setRole('leadership')">Leadership</button>
     </div>`;
+  const patientBtn = `<button class="fw-btn fw-btn--ghost fw-btn--sm demo-patient" type="button" onclick="setRole('patient')">Patient survey</button>`;
   return `
   <div class="shell">
     ${state.surveyMenu?`<div class="menu-catch" onclick="closeSurveyMenu()"></div>`:""}
@@ -1822,6 +1855,7 @@ function shell(body){
       <div class="nav-drawer-foot">
         <div class="brand-sub">${AGENCY.name}</div>
         ${roleSwitch}
+        ${patientBtn}
       </div>
     </aside>`:""}
     <header class="topbar">
@@ -1840,6 +1874,7 @@ function shell(body){
         <span class="brand-sub">${AGENCY.name}</span>
         ${roleSwitch}
       </div>
+      ${patientBtn}
       <button class="iconbtn" onclick="toggleTheme()" aria-label="Switch theme">
         ${state.theme==="light"?I.moon(18):I.sun(18)}
       </button>
@@ -1851,7 +1886,7 @@ function shell(body){
   ${state.deleteSurvey?deleteConfirm(state.deleteSurvey):""}
   ${state.renameSurvey?renameDialog(state.renameSurvey):""}
   ${state.previewSurvey?surveyPreview():""}
-  ${state.toast?`<div class="toast" role="status">${I.check(16)} ${esc(state.toast)}</div>`:""}`;
+  ${state.toast?`<div class="fw-toaster" role="status"><div class="fw-toast fw-toast--success"><span class="fw-toast__icon">${I.check(16)}</span><p class="fw-toast__title">${esc(state.toast)}</p></div></div>`:""}`;
 }
 
 const staleBanner = () => state.hideStale ? "" : `
@@ -1969,6 +2004,7 @@ function cardQuality({lead=false}={}){
       </div>
       <div class="kpi-foot">
         <span class="row">${I.calendar(14)} ${surveyPeriod()}</span>
+        <a class="fw-btn fw-btn--outline fw-btn--sm" href="#/scorecard">View scorecard</a>
       </div>
     </section>`;
 }
@@ -2016,11 +2052,11 @@ function viewOverview(){
 }
 
 function scorecardSurveyRows(c){
-  const q1Tone = c.q1>=4.3?"var(--status-resolved)":c.q1>=4.0?"var(--primary)":"var(--status-elevated)";
-  const recTone = c.rec>=75?"var(--primary)":c.rec>=65?"var(--status-elevated)":"var(--status-critical)";
-  const listenTone = (c.listen??0)>=80?"var(--status-resolved)":"var(--status-elevated)";
-  const careTone = (c.care??0)>=80?"var(--status-resolved)":"var(--status-elevated)";
-  const flagTone = c.flags<=3?"var(--status-resolved)":"var(--status-elevated)";
+  const q1Tone = c.q1>=4.0?"var(--primary)":"var(--status-elevated)";
+  const recTone = c.rec>=65?"var(--primary)":"var(--status-elevated)";
+  const listenTone = (c.listen??0)>=80?"var(--primary)":"var(--status-elevated)";
+  const careTone = (c.care??0)>=80?"var(--primary)":"var(--status-elevated)";
+  const flagTone = c.flags<=3?"var(--primary)":"var(--status-elevated)";
   const rows = [
     { k:"Avg care rating (Q1)", v:`${c.q1.toFixed(1)} / 5`, sub:"Agency avg: 4.2 / 5",
       pct:Math.round(c.q1/5*100), accent:q1Tone, meter:true },
@@ -2067,8 +2103,8 @@ function viewScorecard(){
   <div class="page-head score-head">
     <div class="crumbs"><a href="#/">Overview</a><span class="sep">/</span><span>Scorecard</span></div>
     <div>
-      <h1 class="t-h2">Employee scorecard</h1>
-      <p class="t-p dim">Last 30 days · FirstPass</p>
+      <h1 class="t-h2">Crew scorecard</h1>
+      <p class="t-p dim">Last 30 days · operations and patient feedback for each crew member</p>
     </div>
   </div>
 
@@ -2100,7 +2136,7 @@ function viewScorecard(){
 
     <div class="score-detail">
       <section class="fw-card fw-card-flush" id="score-hero">
-        <div class="score-hero fw-navy">
+        <div class="score-hero">
           <span class="fw-avatar fw-avatar--lg" aria-hidden="true">${selected.initials}</span>
           <div>
             <div class="score-hero-name">${esc(selected.name)}</div>
@@ -2116,7 +2152,7 @@ function viewScorecard(){
           ${surveyRows.map(h=>`
             <div class="stat-cell stat-cell--accent" style="--stat-accent:${h.accent}">
               <div class="stat-k">${esc(h.k)}</div>
-              <div class="stat-v" style="color:${h.accent}">${esc(h.v)}</div>
+              <div class="stat-v">${esc(h.v)}</div>
               ${h.meter?`<span class="bar score-meter"><i style="width:${h.pct}%;background:${h.accent}"></i></span>`:""}
               <div class="stat-sub">${esc(h.sub)}</div>
             </div>`).join("")}
@@ -2221,7 +2257,7 @@ function viewBlink(){
             <div class="commend-by">— ${esc(c.patient)}, patient</div>
             <div class="commend-actions">
               <button class="fw-btn fw-btn--primary fw-btn--sm" onclick="blinkSend('${c.id}')">${I.arrow(14)} Send to Blink</button>
-              <button class="fw-btn fw-btn--outline fw-btn--sm" onclick="toast('Editing isn\\'t wired up in this prototype')">Edit</button>
+              <button class="fw-btn fw-btn--outline fw-btn--sm" type="button" disabled title="Not in this prototype">Edit</button>
             </div>
           </article>`).join(""):`
           <div class="fw-card blink-empty">
@@ -2452,13 +2488,6 @@ function drawer(id){
           What happened on the callback?</label>
         <textarea class="fw-input" id="note-${a.id}"
           placeholder="Who you reached, what they said, anything you changed."></textarea>
-        <div class="row mt16" style="gap:8px;flex-wrap:wrap">
-          <button class="fw-btn fw-btn--primary" onclick="logAndResolve('${a.id}')">
-            ${I.checkCircle(16)} Log and mark followed up</button>
-          <button class="fw-btn fw-btn--outline" onclick="logOnly('${a.id}')">Log without closing</button>
-          <button class="fw-btn fw-btn--ghost" onclick="claim('${a.id}')"
-            ${a.assigned!=="Unassigned"?"disabled":""}>${I.userPlus(16)} Assign to me</button>
-        </div>
       </div>`:`
       <div class="stale mt24" style="background:var(--status-resolved-wash);color:var(--status-resolved);
            border-color:currentColor;margin-bottom:0">
@@ -2473,6 +2502,13 @@ function drawer(id){
           :`<p class="t-subtle dim">Nothing logged yet.</p>`}
       </div>
     </div>
+    ${a.status!=="resolved"?`<div class="drawer-foot drawer-foot--alert">
+      <button class="fw-btn fw-btn--primary" onclick="logAndResolve('${a.id}')">
+        ${I.checkCircle(16)} Log and mark followed up</button>
+      <button class="fw-btn fw-btn--outline" onclick="logOnly('${a.id}')">Log without closing</button>
+      <button class="fw-btn fw-btn--ghost" onclick="claim('${a.id}')"
+        ${a.assigned!=="Unassigned"?"disabled":""}>${I.userPlus(16)} Assign to me</button>
+    </div>`:""}
   </aside>`;
 }
 </script>
@@ -2646,7 +2682,7 @@ function viewSurveys(){
               <div class="qmeta">
                 <span class="fw-badge fw-badge--secondary">${TYPE_LABEL[q.type]}</span>
                 ${q.required?`<span class="fw-badge fw-badge--outline">Required</span>`:`<span class="t-detail dim">Optional</span>`}
-                ${q.locked?`<span class="fw-badge fw-badge--warning">${I.lock(12)}Benchmark</span>`:""}
+                ${q.locked?`<span class="fw-badge fw-badge--outline">${I.lock(12)}Benchmark</span>`:""}
               </div>
               ${q.locked?`<p class="t-subtle dim mt8">${esc(q.lockNote)}</p>`:""}
               ${q.help?`<p class="t-subtle dim mt8">${esc(q.help)}</p>`:""}
@@ -2654,9 +2690,8 @@ function viewSurveys(){
             <div class="qbtns" onclick="event.stopPropagation()">
               <button class="iconbtn" aria-label="Move up"   ${i===0?"disabled":""} onclick="moveQ(${i},-1)">${I.up(16)}</button>
               <button class="iconbtn" aria-label="Move down" ${i===qs.length-1?"disabled":""} onclick="moveQ(${i},1)">${I.down(16)}</button>
-              <button class="iconbtn" aria-label="Edit"   ${q.locked?"disabled":""}
-                onclick="${q.locked?"":`selectPreviewQ('${q.id}');toast('Editing isn\\'t wired up in this prototype')`}">${I.pencil(16)}</button>
-              <button class="iconbtn" aria-label="Remove" onclick="removeQ('${q.id}')">${I.trash(16)}</button>
+              <button class="iconbtn" aria-label="Edit" title="${q.locked?"Benchmark questions can't be edited":"Not in this prototype"}" disabled>${I.pencil(16)}</button>
+              <button class="iconbtn" aria-label="Remove" ${q.locked?"disabled title=\"Benchmark questions can't be removed\"":"onclick=\"removeQ('"+q.id+"')\""}>${I.trash(16)}</button>
             </div>
           </div>`).join("") : `<p class="t-subtle dim" style="margin-bottom:16px">No questions yet. Add one, or pick from the library.</p>`}
         <div class="addrow">
@@ -2692,7 +2727,7 @@ function viewSurveys(){
                 <div class="qmeta">
                   <span class="fw-badge fw-badge--secondary">${esc(l.category)}</span>
                   <span class="fw-badge fw-badge--outline">${TYPE_LABEL[l.type]||l.type}</span>
-                  ${l.benchmark?`<span class="fw-badge fw-badge--warning">${I.lock(12)}Benchmark</span>`:""}
+                  ${l.benchmark?`<span class="fw-badge fw-badge--outline">${I.lock(12)}Benchmark</span>`:""}
                 </div>
               </div>
               <button class="fw-btn fw-btn--${already?"outline":"primary"} fw-btn--sm"
@@ -2713,7 +2748,7 @@ function viewSurveys(){
               across participating agencies. You keep your own questions alongside them. Leaving the benchmark
               means ${locked===1?"that question becomes":"those questions become"} editable and your agency drops out of comparison.`
               : "This survey isn't in the benchmark. Add the shared questions if you want results compared across agencies."}</p>
-            <button class="fw-btn fw-btn--outline fw-btn--sm mt16" onclick="toast('Benchmark settings aren\'t wired up in this prototype')">
+            <button class="fw-btn fw-btn--outline fw-btn--sm mt16" type="button" disabled title="Not in this prototype">
               Benchmark settings</button>
           </div>
         </div>
@@ -3067,7 +3102,17 @@ function cardByDemographic(){
    8. PATIENT SURVEY
    ============================================================ */
 function pViewTag(){
-  return `<div class="p-view p-view--in-${state.pSlide==="back"?"back":"fwd"}">`;
+  const slide = state.pSlide;
+  state.pSlide = null;
+  const cls = slide==="back" ? " p-view--in-back" : slide==="fwd" ? " p-view--in-fwd" : "";
+  return `<div class="p-view${cls}">`;
+}
+function pDemoBar(){
+  if(state.previewSurvey) return "";
+  return `<div class="p-demo">
+    <span>Patient view · demo</span>
+    <button class="fw-btn fw-btn--outline fw-btn--sm" type="button" onclick="setRole('supervisor')">Back to staff</button>
+  </div>`;
 }
 const P_DEMO = {
   age:{
@@ -3203,6 +3248,7 @@ function viewPatient(){
   if(S.step === -1 || S.step === undefined) S.step = -1;
   if(S.step === -1){
     return `<div class="patient"><div class="p-wrap">
+      ${pDemoBar()}
       <div class="p-lock">${I.lock(12)} Private — only ${AGENCY.name} sees this</div>
       <div class="p-card">
         ${pViewTag()}
@@ -3215,7 +3261,9 @@ function viewPatient(){
             Nothing here changes your bill or your care.</p>
         </div>
         <div class="p-actions">
-          <button class="fw-btn fw-btn--primary fw-btn--lg p-next" onclick="pStart()">Start</button>
+          <div class="p-cta">
+            <button class="fw-btn fw-btn--primary fw-btn--lg p-next" onclick="pStart()">Start</button>
+          </div>
         </div>
         </div>
       </div>
@@ -3226,6 +3274,7 @@ function viewPatient(){
   /* demographics */
   if(S.step === total){
     return `<div class="patient"><div class="p-wrap">
+      ${pDemoBar()}
       <div class="p-lock">${I.lock(12)} Private — only ${AGENCY.name} sees this</div>
       <div class="p-card">
         ${pViewTag()}
@@ -3262,6 +3311,7 @@ function viewPatient(){
       return false;
     });
     return `<div class="patient"><div class="p-wrap">
+      ${pDemoBar()}
       <div class="p-card p-done">
         ${pViewTag()}
         <div class="p-seal">${I.check(22)}</div>
@@ -3288,6 +3338,7 @@ function viewPatient(){
   const answered = val !== undefined && val !== "";
 
   return `<div class="patient"><div class="p-wrap">
+    ${pDemoBar()}
     <div class="p-lock">${I.lock(12)} Private — only ${AGENCY.name} sees this</div>
     <div class="p-card">
       ${pViewTag()}
@@ -3412,7 +3463,20 @@ function onNavLink(h){
   closeNav();
   if(same) return;
 }
-function setRole(r){ state.role = r; render(); }
+function setRole(r){
+  if(r==="patient"){
+    state.role = "patient";
+    state.navOpen = false;
+    state.survey = { step:-1, answers:{}, showDemo:false, demo:{} };
+    if(isPatientRoute(location.hash||"")) render();
+    else go("#/s/sv_post");
+    return;
+  }
+  const fromPatient = isPatientRoute(location.hash||"");
+  state.role = r;
+  if(fromPatient) go("#/");
+  else render();
+}
 function toggleTheme(){
   state.theme = state.theme==="light" ? "dark" : "light";
   document.documentElement.setAttribute("data-theme", state.theme);
@@ -3566,6 +3630,7 @@ function removeQ(id){
     const qs = qList();
     const i = qs.findIndex(q=>q.id===id);
     if(i<0) return;
+    if(qs[i].locked){ toast("Benchmark questions can't be removed."); return; }
     state.surveyQuestions[sid] = qs.filter(q=>q.id!==id);
     syncQuestionCount(sid);
     if(state.previewQId===id){
@@ -3857,6 +3922,18 @@ function pNext(){ pTurn("fwd", ()=>{ state.survey.step++; }); }
 function pSkip(){ pTurn("fwd", ()=>{ state.survey.step++; }); }
 function pBack(){ pTurn("back", ()=>{ state.survey.step = Math.max(-1, state.survey.step-1); }); }
 function pDemo(k,v){ state.survey.demo[k] = v; }
+function pSelectPaint(focusKey){
+  Object.keys(P_DEMO).forEach(k=>{
+    const btn = document.getElementById(P_DEMO[k].id);
+    const field = btn && btn.closest(".fw-field");
+    if(!field) return;
+    const tpl = document.createElement("template");
+    tpl.innerHTML = pSelectField(k).trim();
+    field.replaceWith(tpl.content.firstElementChild);
+  });
+  if(focusKey) document.getElementById(P_DEMO[focusKey].id)?.focus();
+  if(state.pSelectOpen) document.querySelector(".fw-select__opt[data-active]")?.scrollIntoView({block:"nearest"});
+}
 function pSelectToggle(key, e){
   if(e){ e.preventDefault(); e.stopPropagation(); }
   state.pSelectOpen = state.pSelectOpen===key ? null : key;
@@ -3866,21 +3943,18 @@ function pSelectToggle(key, e){
     const i = values.indexOf(val);
     state.pSelectActive = i<0 ? 0 : i;
   }
-  render();
-  document.getElementById(P_DEMO[key].id)?.focus();
+  pSelectPaint(key);
 }
 function pSelectPick(key, el){
   pDemo(key, el.getAttribute("data-value") || "");
   state.pSelectOpen = null;
-  render();
-  const btn = document.getElementById(P_DEMO[key].id);
-  if(btn) btn.focus();
+  pSelectPaint(key);
 }
 function pSelectKey(key, e){
   const open = state.pSelectOpen===key;
   const values = pSelectValues(key);
   if(e.key==="Escape"){
-    if(open){ e.preventDefault(); state.pSelectOpen = null; render(); document.getElementById(P_DEMO[key].id)?.focus(); }
+    if(open){ e.preventDefault(); state.pSelectOpen = null; pSelectPaint(key); }
     return;
   }
   if(e.key==="ArrowDown" || e.key==="ArrowUp"){
@@ -3888,22 +3962,21 @@ function pSelectKey(key, e){
     if(!open){ pSelectToggle(key, e); return; }
     const delta = e.key==="ArrowDown" ? 1 : -1;
     state.pSelectActive = (state.pSelectActive + delta + values.length) % values.length;
-    render();
+    pSelectPaint(key);
     return;
   }
   if(e.key==="Home" || e.key==="End"){
     if(!open) return;
     e.preventDefault();
     state.pSelectActive = e.key==="Home" ? 0 : values.length-1;
-    render();
+    pSelectPaint(key);
     return;
   }
   if((e.key==="Enter" || e.key===" ") && open){
     e.preventDefault();
     pDemo(key, values[state.pSelectActive] || "");
     state.pSelectOpen = null;
-    render();
-    document.getElementById(P_DEMO[key].id)?.focus();
+    pSelectPaint(key);
   }
 }
 function pFinish(){ pTurn("fwd", ()=>{ state.survey.step = qList().length+1; }); }
@@ -3956,10 +4029,18 @@ function render(){
   document.documentElement.classList.toggle("is-route-enter", enter);
 
   if(isPatientRoute(h)){
+    state.role = "patient";
     if(state.survey.step === undefined) state.survey.step = -1;
     state.navOpen = false;
     root.innerHTML = viewPatient();
     document.body.classList.remove("nav-open","drawer-open");
+    const pView = document.querySelector(".p-view");
+    if(pView && (pView.classList.contains("p-view--in-fwd") || pView.classList.contains("p-view--in-back"))){
+      pView.addEventListener("animationend", e=>{
+        if(e.target!==pView) return;
+        pView.classList.remove("p-view--in-fwd","p-view--in-back");
+      }, {once:true});
+    }
     if(state.pSelectOpen && P_DEMO[state.pSelectOpen]){
       const btn = document.getElementById(P_DEMO[state.pSelectOpen].id);
       if(btn) btn.focus();
@@ -3987,7 +4068,10 @@ function render(){
 }
 
 window.addEventListener("hashchange", ()=>{
-  if(!isPatientRoute(location.hash||"")) state.openAlert = null;
+  if(!isPatientRoute(location.hash||"")){
+    state.openAlert = null;
+    if(state.role==="patient") state.role = "supervisor";
+  }
   state.deleteSurvey = null;
   state.renameSurvey = null;
   state.editingSurveyName = null;
@@ -4014,7 +4098,7 @@ window.addEventListener("keydown", e=>{
     }
   }
   if(e.key!=="Escape") return;
-  if(state.pSelectOpen){ state.pSelectOpen = null; render(); return; }
+  if(state.pSelectOpen){ state.pSelectOpen = null; pSelectPaint(); return; }
   if(state.navOpen){ closeNav(); return; }
   if(state.previewSurvey){ closeSurveyPreview(); return; }
   if(state.renameSurvey){ closeRenameSurvey(); return; }
@@ -4028,7 +4112,7 @@ window.addEventListener("mousedown", e=>{
   if(!state.pSelectOpen) return;
   if(e.target.closest(".fw-select")) return;
   state.pSelectOpen = null;
-  render();
+  pSelectPaint();
 });
 window.matchMedia("(max-width: 1199px)").addEventListener("change", ev=>{
   if(!ev.matches) state.navOpen = false;

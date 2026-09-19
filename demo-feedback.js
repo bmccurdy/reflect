@@ -253,16 +253,16 @@
       writing-mode: vertical-rl;
       text-orientation: mixed;
       transform: rotate(180deg);
-      letter-spacing: .08em;
+      letter-spacing: .02em;
+      font-weight: 600;
     }
     .tab .demo {
-      font-size: 9px;
-      font-weight: 900;
-      letter-spacing: .12em;
-      text-transform: uppercase;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .04em;
       color: #A3A3A3;
-      border: 1px dashed #525252;
-      border-radius: 3px;
+      border: 1px solid #525252;
+      border-radius: 4px;
       padding: 5px 3px;
     }
 
@@ -323,7 +323,7 @@
       margin-bottom: 12px;
     }
     .kicker {
-      font-size: 10px; font-weight: 900; letter-spacing: .1em;
+      font-size: 11px; font-weight: 600; letter-spacing: .06em;
       text-transform: uppercase; color: #737373; margin-bottom: 4px;
     }
     h2 { margin: 0; font-size: 18px; line-height: 24px; font-weight: 700; letter-spacing: -.01em; }
@@ -350,7 +350,7 @@
     .chip {
       height: 32px; padding: 0 12px; border-radius: 999px; cursor: pointer;
       border: 1px solid #D4D4D4; background: #fff; color: #171717;
-      font-size: 13px; font-weight: 700;
+      font-size: 13px; font-weight: 500;
       transition: background-color 160ms cubic-bezier(.22,1,.36,1), border-color 160ms cubic-bezier(.22,1,.36,1);
     }
     .chip:hover { background: #F0F9FF; border-color: #0284C7; color: #0369A1; }
