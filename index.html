@@ -502,6 +502,21 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .rule-head--out{color:var(--status-critical)}
 .timing{align-items:flex-start;gap:16px}
 
+.score-head{margin-bottom:8px}
+.score-hero-dock{
+  position:sticky;top:56px;z-index:6;
+  background:var(--muted);
+  padding-top:16px;padding-bottom:24px;
+}
+.score-hero-dock + .sec{margin-top:0}
+.score-hero-dock:has(.is-open){z-index:8}
+.score-detail .tbl-wrap,
+.score-detail .fw-card:has(table.tbl){overflow:hidden}
+.score-detail .tbl th,
+.tbl.tbl--ops th,
+.tbl.tbl--ops thead tr + tr th{
+  position:static;top:auto;z-index:auto;
+}
 .score-hero{
   display:flex;flex-direction:row;align-items:center;gap:14px;
   padding:16px 24px;
@@ -538,8 +553,10 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   align-items:start;
 }
 .score-index{
-  position:sticky;top:72px;z-index:2;
+  position:sticky;top:56px;z-index:2;
   min-width:0;
+  padding-top:16px;
+  background:var(--muted);
 }
 .score-detail{min-width:0}
 .crew-list{margin:0;padding:8px;list-style:none}
@@ -2248,12 +2265,14 @@ function viewScorecard(){
     </aside>
 
     <div class="score-detail">
+      <div class="score-hero-dock">
       <section class="fw-card score-hero" id="score-hero">
         <div class="score-hero-static">
           ${scoreHeroIdentity(selected)}
         </div>
         ${scoreCrewSelect(selected)}
       </section>
+      </div>
 
       <section class="fw-card sec">
         <h2 class="t-h4">Patient survey results</h2>
