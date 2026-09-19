@@ -510,8 +510,14 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
   background:var(--accent);
   color:var(--primary);
 }
+.score-hero-static{
+  display:flex;flex-direction:row;align-items:center;gap:14px;
+  min-width:0;
+}
+.score-hero-copy{min-width:0}
 .score-hero-name{font-size:16px;line-height:24px;font-weight:700}
 .score-hero-meta{font-size:12px;line-height:16px;color:var(--muted-foreground)}
+.score-crew-select{display:none}
 .stat-cell--accent{border-top:3px solid var(--stat-accent,var(--primary))}
 .stat-cell--accent .stat-k{margin-top:0;margin-bottom:4px}
 .stat-sub{font-size:12px;line-height:16px;color:var(--muted-foreground);margin-top:6px}
@@ -972,8 +978,43 @@ html[data-theme="dark"] .patient{
 @media (max-width:1080px){
   .split{grid-template-columns:1fr}
   .score-split{grid-template-columns:minmax(0,1fr)}
-  .score-index{position:static;z-index:auto}
-  .score-index .crew-list{max-height:min(300px,42vh);overflow:auto}
+  .score-index{display:none}
+  .score-hero-static{display:none}
+  .score-crew-select{display:block;width:100%}
+  .fw-card.score-hero{padding:0;overflow:visible}
+  .score-hero-trigger{
+    width:100%;height:auto;min-height:44px;
+    padding:16px 44px 16px 16px;
+    border:0;background:transparent;box-shadow:none;
+    display:flex;align-items:center;gap:14px;
+    border-radius:inherit;
+  }
+  .score-hero-trigger:focus,
+  .score-hero-trigger:focus-visible{
+    box-shadow:none;
+    outline:2px solid var(--ring);
+    outline-offset:-2px;
+  }
+  .score-crew-select .fw-select__chevron{
+    right:16px;
+    transition:transform var(--dur-micro) var(--ease-out);
+  }
+  .score-crew-select.is-open .fw-select__chevron{
+    transform:translateY(-50%) rotate(180deg);
+  }
+  .score-crew-opt{
+    min-height:44px;align-items:flex-start;gap:10px;padding:10px 12px;
+  }
+  .score-crew-opt-copy{
+    display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;
+  }
+  .score-crew-opt-name{font-weight:600;font-size:14px;line-height:20px}
+  .score-crew-opt-unit{
+    font-family:var(--font-mono);font-weight:700;font-size:13px;
+    color:var(--muted-foreground);margin-left:8px;
+  }
+  .score-crew-opt-meta{font-size:13px;line-height:20px;color:var(--muted-foreground)}
+  .score-crew-select .fw-select__menu{max-height:min(360px,50vh)}
   .preview-col,.preview-sticky{position:static;align-self:auto;z-index:auto}
   .main{padding:24px 16px 120px}
   .topbar{padding:0 12px;gap:8px}
@@ -1729,6 +1770,8 @@ const state = {
   navOpen:false,
   scrollPreserve:null,
   scorecardCrew:0,
+  crewSelectOpen:false,
+  crewSelectActive:0,
   pSlide:"fwd",
   pBusy:false,
   pSelectOpen:null,
@@ -2063,16 +2106,103 @@ function scorecardSurveyRows(c){
   return rows;
 }
 
+function scoreHeroIdentity(c){
+  return `<span class="fw-avatar fw-avatar--lg" aria-hidden="true">${esc(c.initials)}</span>
+    <div class="score-hero-copy">
+      <div class="score-hero-name">${esc(c.name)}</div>
+      <div class="score-hero-meta">${esc(c.role)} · ${esc(c.unit)} · ${esc(AGENCY.name)}</div>
+    </div>`;
+}
+function scoreCrewSelect(selected){
+  const open = !!state.crewSelectOpen;
+  const active = Math.min(SCORECARD_CREW.length-1, Math.max(0, state.crewSelectActive|0));
+  return `<div class="fw-select score-crew-select${open?" is-open":""}">
+    <button type="button" class="fw-select__trigger score-hero-trigger" id="score-crew-trigger"
+      aria-haspopup="listbox" aria-expanded="${open}"
+      aria-controls="score-crew-list"
+      aria-label="Crew member"
+      ${open?`aria-activedescendant="score-crew-opt-${active}"`:""}
+      onclick="crewSelectToggle(event)"
+      onkeydown="crewSelectKey(event)">
+      ${scoreHeroIdentity(selected)}
+    </button>
+    <span class="fw-select__chevron" aria-hidden="true">${I.down(16)}</span>
+    ${open?`<div class="fw-select__menu" id="score-crew-list" role="listbox" aria-label="Crew">
+      ${SCORECARD_CREW.map((c,i)=>{
+        const on = i===state.scorecardCrew;
+        const surveys = c.surveys+" survey"+(c.surveys===1?"":"s");
+        const flags = c.flags+" flag"+(c.flags===1?"":"s");
+        return `<div class="fw-select__opt score-crew-opt" role="option" id="score-crew-opt-${i}"
+          aria-selected="${on}"${i===active?" data-active":""}
+          onmousedown="event.preventDefault()"
+          onclick="crewSelectPick(${i})">
+          <span class="fw-avatar fw-avatar--sm" aria-hidden="true">${esc(c.initials)}</span>
+          <span class="score-crew-opt-copy">
+            <span class="score-crew-opt-name">${esc(c.name)} <span class="score-crew-opt-unit">${esc(c.unit)}</span></span>
+            <span class="score-crew-opt-meta">${surveys} · <span class="${c.flags>=4?"flag-hot":""}">${flags}</span></span>
+          </span>
+          ${on?I.check(16):""}
+        </div>`;
+      }).join("")}
+    </div>`:""}
+  </div>`;
+}
+function crewSelectPaint(focus){
+  const wrap = document.querySelector(".score-crew-select");
+  if(!wrap) return;
+  const selected = SCORECARD_CREW[state.scorecardCrew] || SCORECARD_CREW[0];
+  const tpl = document.createElement("template");
+  tpl.innerHTML = scoreCrewSelect(selected).trim();
+  wrap.replaceWith(tpl.content.firstElementChild);
+  if(focus!==false) document.getElementById("score-crew-trigger")?.focus();
+  if(state.crewSelectOpen) document.querySelector(".score-crew-opt[data-active]")?.scrollIntoView({block:"nearest"});
+}
+function crewSelectToggle(e){
+  if(e){ e.preventDefault(); e.stopPropagation(); }
+  state.crewSelectOpen = !state.crewSelectOpen;
+  if(state.crewSelectOpen) state.crewSelectActive = state.scorecardCrew;
+  crewSelectPaint();
+}
+function crewSelectPick(i){
+  state.crewSelectOpen = false;
+  selectScorecardCrew(i);
+}
+function crewSelectKey(e){
+  const open = !!state.crewSelectOpen;
+  const n = SCORECARD_CREW.length;
+  if(e.key==="Escape"){
+    if(open){ e.preventDefault(); state.crewSelectOpen = false; crewSelectPaint(); }
+    return;
+  }
+  if(e.key==="ArrowDown" || e.key==="ArrowUp"){
+    e.preventDefault();
+    if(!open){ crewSelectToggle(e); return; }
+    const delta = e.key==="ArrowDown" ? 1 : -1;
+    state.crewSelectActive = (state.crewSelectActive + delta + n) % n;
+    crewSelectPaint();
+    return;
+  }
+  if(e.key==="Home" || e.key==="End"){
+    if(!open) return;
+    e.preventDefault();
+    state.crewSelectActive = e.key==="Home" ? 0 : n-1;
+    crewSelectPaint();
+    return;
+  }
+  if((e.key==="Enter" || e.key===" ") && open){
+    e.preventDefault();
+    crewSelectPick(state.crewSelectActive);
+  }
+}
 function selectScorecardCrew(i){
   const idx = Number(i);
   if(!Number.isInteger(idx) || idx<0 || idx>=SCORECARD_CREW.length) return;
   state.scorecardCrew = idx;
+  state.crewSelectOpen = false;
   render();
   requestAnimationFrame(()=>{
     if(!window.matchMedia("(max-width: 1080px)").matches) return;
-    document.getElementById("score-hero")?.scrollIntoView({
-      behavior: prefersReduce()?"auto":"smooth", block:"start"
-    });
+    document.getElementById("score-crew-trigger")?.focus();
   });
 }
 
@@ -2119,11 +2249,10 @@ function viewScorecard(){
 
     <div class="score-detail">
       <section class="fw-card score-hero" id="score-hero">
-        <span class="fw-avatar fw-avatar--lg" aria-hidden="true">${selected.initials}</span>
-        <div>
-          <div class="score-hero-name">${esc(selected.name)}</div>
-          <div class="score-hero-meta">${esc(selected.role)} · ${esc(selected.unit)} · ${esc(AGENCY.name)}</div>
+        <div class="score-hero-static">
+          ${scoreHeroIdentity(selected)}
         </div>
+        ${scoreCrewSelect(selected)}
       </section>
 
       <section class="fw-card sec">
@@ -4037,6 +4166,7 @@ window.addEventListener("hashchange", ()=>{
   state.responseLimit = RESPONSE_PAGE;
   state.navOpen = false;
   state.scrollPreserve = null;
+  state.crewSelectOpen = false;
   state.routeEnter = true;
   withViewTransition(()=>{
     render();
@@ -4054,6 +4184,7 @@ window.addEventListener("keydown", e=>{
   }
   if(e.key!=="Escape") return;
   if(state.pSelectOpen){ state.pSelectOpen = null; pSelectPaint(); return; }
+  if(state.crewSelectOpen){ state.crewSelectOpen = false; crewSelectPaint(); return; }
   if(state.navOpen){ closeNav(); return; }
   if(state.previewSurvey){ closeSurveyPreview(); return; }
   if(state.renameSurvey){ closeRenameSurvey(); return; }
@@ -4064,14 +4195,23 @@ window.addEventListener("keydown", e=>{
   if(state.openAlert){ closeAlert(); }
 });
 window.addEventListener("mousedown", e=>{
-  if(!state.pSelectOpen) return;
-  if(e.target.closest(".fw-select")) return;
-  state.pSelectOpen = null;
-  pSelectPaint();
+  if(state.pSelectOpen && !e.target.closest(".fw-select")){
+    state.pSelectOpen = null;
+    pSelectPaint();
+  }
+  if(state.crewSelectOpen && !e.target.closest(".score-crew-select")){
+    state.crewSelectOpen = false;
+    crewSelectPaint(false);
+  }
 });
 window.matchMedia("(max-width: 1199px)").addEventListener("change", ev=>{
   if(!ev.matches) state.navOpen = false;
   if(!isPatientRoute(location.hash||"#/")) render();
+});
+window.matchMedia("(max-width: 1080px)").addEventListener("change", ev=>{
+  if(ev.matches || !state.crewSelectOpen) return;
+  state.crewSelectOpen = false;
+  if((location.hash||"#/")==="#/scorecard") render();
 });
 state.survey.step = -1;
 render();
