@@ -4003,11 +4003,7 @@ function confirmDeleteSurvey(){
 function pTurn(dir, mutate){
   if(state.pBusy) return;
   const view = document.querySelector(".p-view");
-  const jump = ()=>{
-    const stage = document.querySelector(".preview-stage");
-    if(stage) stage.scrollTop = 0;
-    else window.scrollTo(0, 0);
-  };
+  const jump = ()=>scrollPageTop();
   const apply = ()=>{
     mutate();
     state.pSlide = dir;
