@@ -2532,9 +2532,9 @@ function viewAlerts(){
         <h1 class="t-h2">Alerts</h1>
         <p class="t-p dim">Survey answers that need a person to follow up.</p>
       </div>
-      <div class="seg" role="group" aria-label="Filter alerts">
-        ${tabs.map(([k,l,n])=>`<button aria-pressed="${queueFilter===k}" onclick="setFilter('${k}')">${l} (${n})</button>`).join("")}
-      </div>
+    </div>
+    <div class="seg rs-filters" role="group" aria-label="Filter alerts">
+      ${tabs.map(([k,l,n])=>`<button aria-pressed="${queueFilter===k}" onclick="setFilter('${k}')">${l} (${n})</button>`).join("")}
     </div>
   </div>
   ${staleBanner()}
