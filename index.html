@@ -3534,8 +3534,14 @@ function armDrawer(){
 }
 function withViewTransition(fn){
   if(typeof document.startViewTransition==="function" && !prefersReduce()){
-    document.startViewTransition(fn);
-  } else fn();
+    return document.startViewTransition(fn);
+  }
+  fn();
+  return null;
+}
+function afterViewTransition(vt, fn){
+  if(vt && vt.finished) vt.finished.then(fn, fn);
+  else requestAnimationFrame(fn);
 }
 function withFlip(sel, mutate){
   if(prefersReduce()){ mutate(); return; }
@@ -3590,7 +3596,7 @@ function onNavLink(h){
   const cur = location.hash || "#/";
   const same = h==="#/surveys" ? cur.startsWith("#/surveys") : cur===h;
   closeNav();
-  if(same) return;
+  if(same){ scrollPageTop(); return; }
 }
 function setRole(r){
   if(r!=="supervisor" && r!=="leadership") return;
@@ -4100,6 +4106,16 @@ function pSelectKey(key, e){
   }
 }
 function pFinish(){ pTurn("fwd", ()=>{ state.survey.step = qList().length+1; }); }
+function scrollPageTop(){
+  const stage = document.querySelector(".preview-stage");
+  if(stage){
+    stage.scrollTop = 0;
+    return;
+  }
+  window.scrollTo(0, 0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+}
 function scrollTop(){
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const stage = document.querySelector(".preview-stage");
@@ -4187,10 +4203,10 @@ window.addEventListener("hashchange", ()=>{
   state.scrollPreserve = null;
   state.crewSelectOpen = false;
   state.routeEnter = true;
-  withViewTransition(()=>{
-    render();
-    if(!isPatientRoute(location.hash||"")) window.scrollTo({top:0});
-  });
+  const vt = withViewTransition(()=>render());
+  /* Scroll after the transition finishes — scrolling inside the update
+     callback is often undone when the browser restores the old position. */
+  if(!isPatientRoute(location.hash||"")) afterViewTransition(vt, scrollPageTop);
 });
 window.addEventListener("keydown", e=>{
   if(state.openResponse && (e.key==="ArrowLeft" || e.key==="ArrowRight") && !e.metaKey && !e.ctrlKey && !e.altKey){
@@ -4232,8 +4248,10 @@ window.matchMedia("(max-width: 1080px)").addEventListener("change", ev=>{
   state.crewSelectOpen = false;
   if((location.hash||"#/")==="#/scorecard") render();
 });
+history.scrollRestoration = "manual";
 state.survey.step = -1;
 render();
+scrollPageTop();
 </script>
 <!-- Demo feedback: delete this tag to turn it off. Hide for a session with ?feedback=off -->
 <script src="demo-feedback.js"
