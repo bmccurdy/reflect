@@ -465,7 +465,7 @@
   --muted: var(--neutral-800); /* @kind color */
   --popover-foreground: var(--base-white); /* @kind color */
   --popover: var(--neutral-900); /* @kind color */
-  --primary-foreground: var(--neutral-800); /* @kind color */
+  --primary-foreground: var(--base-white); /* @kind color */
   --primary-hover: var(--firstwatch-400); /* @kind color */
   --primary: var(--firstwatch-500); /* @kind color */
   --ring: var(--blue-600); /* @kind color */
