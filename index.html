@@ -427,10 +427,10 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .tbl .fav{width:52px;padding-left:12px;padding-right:0;vertical-align:middle}
 .tbl .morecol{width:52px;padding-left:8px;padding-right:12px;text-align:right;vertical-align:middle}
 .star-btn{color:var(--muted-foreground)}
-.star-btn:hover{color:var(--primary)}
-.star-btn[aria-pressed="true"]{color:var(--primary)}
+.star-btn:hover{color:var(--fw-gold)}
+.star-btn[aria-pressed="true"]{color:var(--fw-gold)}
+.star-btn[aria-pressed="true"]:hover{color:var(--fw-gold-light)}
 
-.menu-catch{position:fixed;inset:0;z-index:28}
 .menu-wrap{position:relative;display:inline-flex}
 .menu-wrap.open{z-index:31}
 .tbl .morecol:has(.menu-wrap.open){position:relative;z-index:31}
@@ -1911,7 +1911,6 @@ function shell(body){
     </div>`;
   return `
   <div class="shell">
-    ${state.surveyMenu?`<div class="menu-catch" onclick="closeSurveyMenu()"></div>`:""}
     ${compactNav?`<div class="nav-scrim${state.navOpen?" is-open":""}" onclick="closeNav()"></div>
     <aside class="nav-drawer${state.navOpen?" is-open":""}" id="app-nav" role="dialog" aria-modal="true"
       aria-label="Menu" aria-hidden="${state.navOpen?"false":"true"}" ${state.navOpen?"":"inert"}>
@@ -4103,8 +4102,8 @@ function duplicateSurvey(id){
 function surveyRowMenu(s){
   const open = state.surveyMenu===s.id;
   return `<div class="menu-wrap${open?" open":""}" onclick="event.stopPropagation()">
-    <button class="iconbtn" aria-label="More actions" aria-haspopup="menu" aria-expanded="${open}"
-      onclick="toggleSurveyMenu('${s.id}')">${I.more(18)}</button>
+    <button type="button" class="iconbtn" aria-label="More actions" aria-haspopup="menu" aria-expanded="${open}"
+      onclick="toggleSurveyMenu('${s.id}',event)">${I.more(18)}</button>
     ${open?`<div class="menu" role="menu">
       <button type="button" role="menuitem" onclick="toggleStar('${s.id}')">${I.star(16)} ${s.starred?"Unstar":"Star"}</button>
       <div class="menu-sep"></div>
@@ -4115,11 +4114,12 @@ function surveyRowMenu(s){
     </div>`:""}
   </div>`;
 }
-function toggleSurveyMenu(id){
+function toggleSurveyMenu(id, e){
+  if(e) e.stopPropagation();
   state.surveyMenu = state.surveyMenu===id ? null : id;
   render();
 }
-function closeSurveyMenu(){ state.surveyMenu = null; render(); }
+function closeSurveyMenu(){ if(!state.surveyMenu) return; state.surveyMenu = null; render(); }
 function toggleStar(id){
   const s = state.surveys.find(x=>x.id===id);
   if(!s) return;
@@ -4535,6 +4535,10 @@ window.addEventListener("keydown", e=>{
   if(state.openAlert){ closeAlert(); }
 });
 window.addEventListener("mousedown", e=>{
+  if(state.surveyMenu && !e.target.closest(".menu-wrap")){
+    state.surveyMenu = null;
+    render();
+  }
   if(state.pSelectOpen && !e.target.closest(".fw-select")){
     state.pSelectOpen = null;
     pSelectPaint();
