@@ -2243,10 +2243,12 @@ function crewSelectKey(e){
 function selectScorecardCrew(i){
   const idx = Number(i);
   if(!Number.isInteger(idx) || idx<0 || idx>=SCORECARD_CREW.length) return;
+  const changed = state.scorecardCrew !== idx;
   state.scorecardCrew = idx;
   state.crewSelectOpen = false;
   render();
   requestAnimationFrame(()=>{
+    if(changed) scrollPageTop();
     if(!window.matchMedia("(max-width: 1080px)").matches) return;
     document.getElementById("score-crew-trigger")?.focus();
   });
