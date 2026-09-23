@@ -985,7 +985,8 @@ html[data-theme="dark"] .patient{
 }
 .patient--embed .p-lang{margin-bottom:16px}
 .patient--embed .p-lang-btn{pointer-events:auto}
-.p-view--in-fwd,.p-view--in-back{opacity:0}
+/* Opacity lives only in keyframes + fill-mode. A static opacity:0 here
+   left the preview blank on mobile when the entrance animation never ran. */
 .p-view--in-fwd{animation:pInFwd var(--dur-slow) var(--ease-out) both}
 .p-view--in-back{animation:pInBack var(--dur-slow) var(--ease-out) both}
 .p-view--out-fwd,.p-view--out-back{pointer-events:none}
@@ -1387,8 +1388,11 @@ html[data-theme="dark"] .patient{
   }
   .stagger>*,.p-view,.p-view--in-fwd,.p-view--in-back,.p-seal,.bar i,.toast,.menu,.qcard-in,.qcard-out,
   .drawer-head,.drawer-body > *{animation-name:fadeOnly !important}
+  /* Base rule sets opacity:0 before the slide-in animation; if motion is
+     reduced the animation may never run, so force the final visible state. */
+  .p-view--in-fwd,.p-view--in-back,.p-view--out-fwd,.p-view--out-back{opacity:1;transform:none}
   .drawer{transform:none;transition:none}
-  @keyframes fadeOnly{from{opacity:0}}
+  @keyframes fadeOnly{from{opacity:0}to{opacity:1}}
   .tbl tbody tr.resolving{animation-name:fadeOnly !important;animation-direction:reverse !important}
   .live-dot{animation:none}
   .topbar,.main{view-transition-name:none}
@@ -1814,7 +1818,7 @@ const state = {
   scorecardCrew:0,
   crewSelectOpen:false,
   crewSelectActive:0,
-  pSlide:"fwd",
+  pSlide:null,
   pBusy:false,
   pSelectOpen:null,
   pSelectActive:0,
@@ -4439,6 +4443,10 @@ function openSurveyPreview(){
   if(!qList().length){ toast("Add a question first."); return; }
   const locale = state.survey.locale || "en";
   state.survey = { step:-1, answers:{}, showDemo:false, demo:{}, locale };
+  /* Skip entrance slide — overlay fade covers open, and the slide can
+     leave .p-view at opacity:0 on mobile when the animation never fires. */
+  state.pSlide = null;
+  state.pBusy = false;
   state.previewSurvey = true;
   state.previewEnter = true;
   render();
