@@ -807,8 +807,8 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   position:fixed;inset:0;z-index:56;
   display:flex;flex-direction:column;
   background:var(--muted);
-  animation:fade var(--dur-layout) var(--ease-out);
 }
+.preview-overlay.is-enter{animation:fade var(--dur-layout) var(--ease-out)}
 .preview-bar{
   flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;
   padding:10px 16px;background:var(--card);color:var(--card-foreground);
@@ -818,6 +818,7 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 .preview-bar .s{font-size:13px;line-height:20px;font-weight:400;color:var(--muted-foreground)}
 .preview-stage{flex:1;overflow-y:auto}
 .preview-stage .patient{min-height:100%;padding-top:32px}
+.preview-stage .p-view{will-change:opacity,transform}
 
 /* leadership */
 .bars{display:flex;flex-direction:column;gap:12px;margin-top:16px}
@@ -961,6 +962,29 @@ html[data-theme="dark"] .patient{
   background:var(--card);color:var(--muted-foreground);
   font-size:13px;line-height:20px;
 }
+.p-lang{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin:0 0 20px;flex-wrap:wrap;
+  color:var(--p-ink-muted);
+}
+.p-lang-btns{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.p-lang-btn{
+  appearance:none;cursor:pointer;
+  min-height:36px;padding:6px 12px;
+  border:1px solid var(--p-rule);border-radius:var(--r-md);
+  background:var(--p-paper);color:inherit;
+  font-size:13px;line-height:20px;font-weight:500;
+  transition:border-color var(--dur-micro) var(--ease-out),
+             background-color var(--dur-micro) var(--ease-out),
+             box-shadow var(--dur-micro) var(--ease-out);
+}
+.p-lang-btn:hover{background:var(--accent);border-color:var(--muted-foreground)}
+.p-lang-btn[aria-pressed="true"]{
+  border-color:var(--primary);background:var(--accent);
+  box-shadow:0 0 0 1px var(--primary);font-weight:600;color:var(--p-ink);
+}
+.patient--embed .p-lang{margin-bottom:16px}
+.patient--embed .p-lang-btn{pointer-events:auto}
 .p-view--in-fwd,.p-view--in-back{opacity:0}
 .p-view--in-fwd{animation:pInFwd var(--dur-slow) var(--ease-out) both}
 .p-view--in-back{animation:pInBack var(--dur-slow) var(--ease-out) both}
@@ -1776,6 +1800,7 @@ const state = {
   editingSurveyName:null,
   surveyMenu:null,
   previewSurvey:false,
+  previewEnter:false,
   previewQId:null,
   dragQId:null,
   suppressQClick:false,
@@ -1793,7 +1818,7 @@ const state = {
   pBusy:false,
   pSelectOpen:null,
   pSelectActive:0,
-  survey:{ step:0, answers:{}, showDemo:false, demo:{} }
+  survey:{ step:0, answers:{}, showDemo:false, demo:{}, locale:"en" }
 };
 </script>
 <script>
@@ -1841,7 +1866,8 @@ const I = {
   calendar:   s=>ic('<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',s),
   trendUp:    s=>ic('<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',s),
   trendDown:  s=>ic('<polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/>',s),
-  menu:       s=>ic('<line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/>',s)
+  menu:       s=>ic('<line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/>',s),
+  globe:      s=>ic('<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 1 0 20 14.5 14.5 0 0 1 0-20"/><path d="M2 12h20"/>',s)
 };
 
 const STATUS = {
@@ -3230,6 +3256,235 @@ function cardByDemographic(){
 /* ============================================================
    8. PATIENT SURVEY
    ============================================================ */
+/* Patient UI locale only. Answers stay English for staff review. */
+const P_LOCALES = [
+  { id:"en", native:"English", staff:"English" },
+  { id:"es", native:"Español", staff:"Spanish" }
+];
+const P_UI = {
+  en:{
+    language:"Language",
+    optional:"Optional",
+    private:"Private — only {agency} sees this",
+    introTitle:"A few questions about your ride with {agency}.",
+    introBody:"{n} questions, about a minute. Skip anything you'd rather not answer, and stop whenever you want.",
+    introAlert:"Your answers go to a supervisor, not to the crew who treated you. Nothing here changes your bill or your care.",
+    start:"Start",
+    next:"Next",
+    almostDone:"Almost done",
+    back:"Back",
+    skip:"Skip",
+    needAnswer:"Pick an answer to keep going, or close the page if you'd rather not.",
+    demoTitle:"Three questions about you — only if you want.",
+    demoBody:"We ask so we can check whether some people get a worse experience than others. You can send your answers without filling any of this in.",
+    send:"Send my answers",
+    thanksTitle:"Thank you — that's genuinely useful.",
+    thanksBody:"Someone at {agency} will read this. You don't need to do anything else.",
+    thanksLow:"You told us something went wrong. A supervisor will see this today and may call you if you left a number. We can't promise a particular outcome, but this doesn't disappear into a spreadsheet — a person reads it.",
+    thanksOk:"If you think of something later, the link in your message stays open for 14 days.",
+    closePage:"You can close this page.",
+    previewEmpty:"Add a question to see the patient preview.",
+    yes:"Yes",
+    no:"No",
+    preferNot:"Prefer not to say",
+    textPlaceholder:"Type your answer…",
+    charCount:"{n} of 600",
+    ageLabel:"Your age",
+    langLabel:"The language you're most comfortable in",
+    ethLabel:"How you describe your race or ethnicity",
+    footRef:"Reflect · {agency} · reference {ref}",
+    foot:"Reflect · {agency}",
+    demoBar:"Patient view · demo",
+    backStaff:"Back to staff",
+    previewCapQ:"Question {n} of {total} — what the patient sees",
+    previewCap:"Live preview — what the patient sees"
+  },
+  es:{
+    language:"Idioma",
+    optional:"Opcional",
+    private:"Privado — solo {agency} ve esto",
+    introTitle:"Algunas preguntas sobre su viaje con {agency}.",
+    introBody:"{n} preguntas, cerca de un minuto. Puede saltar lo que no quiera responder y detenerse cuando guste.",
+    introAlert:"Sus respuestas van a un supervisor, no a la tripulación que lo atendió. Nada aquí cambia su factura ni su atención.",
+    start:"Comenzar",
+    next:"Siguiente",
+    almostDone:"Casi listo",
+    back:"Atrás",
+    skip:"Saltar",
+    needAnswer:"Elija una respuesta para continuar, o cierre la página si prefiere no hacerlo.",
+    demoTitle:"Tres preguntas sobre usted — solo si quiere.",
+    demoBody:"Las hacemos para ver si algunas personas tienen una peor experiencia que otras. Puede enviar sus respuestas sin completar esto.",
+    send:"Enviar mis respuestas",
+    thanksTitle:"Gracias — eso es de mucha ayuda.",
+    thanksBody:"Alguien en {agency} leerá esto. No necesita hacer nada más.",
+    thanksLow:"Nos dijo que algo salió mal. Un supervisor lo verá hoy y puede llamarlo si dejó un número. No prometemos un resultado particular, pero esto no desaparece en una hoja de cálculo — una persona lo lee.",
+    thanksOk:"Si piensa en algo después, el enlace de su mensaje sigue abierto 14 días.",
+    closePage:"Puede cerrar esta página.",
+    previewEmpty:"Agregue una pregunta para ver la vista previa del paciente.",
+    yes:"Sí",
+    no:"No",
+    preferNot:"Prefiero no decir",
+    textPlaceholder:"Escriba su respuesta…",
+    charCount:"{n} de 600",
+    ageLabel:"Su edad",
+    langLabel:"El idioma en el que se siente más cómodo",
+    ethLabel:"Cómo describe su raza o etnia",
+    footRef:"Reflect · {agency} · referencia {ref}",
+    foot:"Reflect · {agency}",
+    demoBar:"Vista del paciente · demo",
+    backStaff:"Volver al personal",
+    previewCapQ:"Pregunta {n} de {total} — lo que ve el paciente",
+    previewCap:"Vista previa en vivo — lo que ve el paciente"
+  }
+};
+const P_OPT_I18N = {
+  es:{
+    "Exceptional":"Excepcional",
+    "Good":"Buena",
+    "Fine":"Aceptable",
+    "Poor":"Mala",
+    "Unacceptable":"Inaceptable",
+    "Very likely":"Muy probable",
+    "Somewhat likely":"Algo probable",
+    "Not sure":"No estoy seguro",
+    "Not likely":"Poco probable",
+    "Definitely not likely":"Definitivamente no",
+    "Very safe":"Muy seguro",
+    "Mostly safe":"En su mayoría seguro",
+    "Mostly unsafe":"En su mayoría inseguro",
+    "Unsafe":"Inseguro",
+    "Excellent":"Excelente",
+    "Fair":"Regular",
+    "English":"Inglés",
+    "Spanish":"Español",
+    "Vietnamese":"Vietnamita",
+    "Tagalog":"Tagalo",
+    "Arabic":"Árabe",
+    "Another language":"Otro idioma",
+    "American Indian or Alaska Native":"Indígena americano o nativo de Alaska",
+    "Asian":"Asiático",
+    "Black or African American":"Negro o afroamericano",
+    "Hispanic or Latino":"Hispano o latino",
+    "Middle Eastern or North African":"De Medio Oriente o norte de África",
+    "Native Hawaiian or Pacific Islander":"Nativo de Hawái o de las islas del Pacífico",
+    "White":"Blanco",
+    "More than one":"Más de una",
+    "18–24":"18–24",
+    "25–34":"25–34",
+    "35–44":"35–44",
+    "45–54":"45–54",
+    "55–64":"55–64",
+    "65–74":"65–74",
+    "75 or older":"75 o más"
+  }
+};
+const P_TEXT_I18N = {
+  es:{
+    "Providing professional, compassionate, and personal care during your emergency is our priority. How well did we do?":
+      "Brindar atención profesional, compasiva y personal durante su emergencia es nuestra prioridad. ¿Qué tan bien lo hicimos?",
+    "How likely are you to recommend our emergency services?":
+      "¿Qué tan probable es que recomiende nuestros servicios de emergencia?",
+    "Did you feel listened to by the crew?":
+      "¿Sintió que la tripulación lo escuchó?",
+    "Did you feel cared for by the crew?":
+      "¿Sintió que la tripulación cuidó de usted?",
+    "What did we do well?":
+      "¿Qué hicimos bien?",
+    "What could we have done better?":
+      "¿Qué podríamos haber hecho mejor?",
+    "Would you like us to call you?":
+      "¿Le gustaría que lo llamemos?",
+    "Did the crew listen to why you didn't want to go to the hospital?":
+      "¿La tripulación escuchó por qué no quería ir al hospital?",
+    "Did someone explain what could happen if you stayed?":
+      "¿Alguien le explicó qué podría pasar si se quedaba?",
+    "How safe do you feel calling 911 in this community?":
+      "¿Qué tan seguro se siente al llamar al 911 en esta comunidad?",
+    "Do you trust our crews to treat people with respect?":
+      "¿Confía en que nuestras tripulaciones traten a las personas con respeto?",
+    "Do you feel crews in this community listen to the people they treat?":
+      "¿Siente que las tripulaciones de esta comunidad escuchan a las personas que atienden?",
+    "Do you know when to call 911 instead of driving yourself?":
+      "¿Sabe cuándo llamar al 911 en lugar de ir por su cuenta?",
+    "Have you or someone close to you used our service in the last year?":
+      "¿Usted o alguien cercano usó nuestro servicio en el último año?",
+    "Is language a barrier when you call for help?":
+      "¿El idioma es una barrera cuando pide ayuda?",
+    "What does this community's EMS do well?":
+      "¿Qué hace bien el EMS de esta comunidad?",
+    "What should we do better?":
+      "¿Qué deberíamos mejorar?",
+    "Did the crew explain what they were doing during treatment?":
+      "¿La tripulación le explicó lo que hacía durante el tratamiento?",
+    "Were you given information about what to expect after your care?":
+      "¿Le dieron información sobre qué esperar después de su atención?",
+    "Did the crew treat you with dignity and respect?":
+      "¿La tripulación lo trató con dignidad y respeto?",
+    "How would you rate the crew's response time?":
+      "¿Cómo calificaría el tiempo de respuesta de la tripulación?",
+    "How would you rate the overall professionalism of the crew?":
+      "¿Cómo calificaría el profesionalismo general de la tripulación?",
+    "Were you kept comfortable during transport?":
+      "¿Lo mantuvieron cómodo durante el transporte?",
+    "Did the crew speak with you in your preferred language or make efforts to communicate clearly?":
+      "¿La tripulación habló con usted en su idioma preferido o hizo esfuerzos por comunicarse con claridad?",
+    "Would you like to recognize a crew member by name?":
+      "¿Le gustaría reconocer a un miembro de la tripulación por nombre?",
+    "Is there anything else you would like to share about your experience?":
+      "¿Hay algo más que le gustaría compartir sobre su experiencia?",
+    "Was your pain managed as well as you expected?":
+      "¿Se manejó su dolor tan bien como esperaba?",
+    "Did someone explain what would happen at the hospital?":
+      "¿Alguien le explicó qué pasaría en el hospital?",
+    "Was the ambulance clean?":
+      "¿La ambulancia estaba limpia?",
+    "Did you have a way to reach us afterward if you had questions?":
+      "¿Tuvo una forma de contactarnos después si tenía preguntas?"
+  }
+};
+
+function pLocale(){ return state.survey.locale || "en"; }
+function pT(key, vars){
+  const pack = P_UI[pLocale()] || P_UI.en;
+  let s = pack[key] ?? P_UI.en[key] ?? key;
+  if(vars){
+    Object.keys(vars).forEach(k=>{
+      s = s.replace(new RegExp("\\{"+k+"\\}","g"), String(vars[k]));
+    });
+  }
+  return s;
+}
+function pTx(text){
+  if(!text) return text;
+  const loc = pLocale();
+  if(loc==="en") return text;
+  return (P_TEXT_I18N[loc] && P_TEXT_I18N[loc][text]) || text;
+}
+function pTo(opt){
+  if(opt==null || opt==="") return opt;
+  const loc = pLocale();
+  if(loc==="en") return opt;
+  return (P_OPT_I18N[loc] && P_OPT_I18N[loc][opt]) || opt;
+}
+function pLocaleMeta(){ return P_LOCALES.find(l=>l.id===pLocale()) || P_LOCALES[0]; }
+function pSetLocale(id){
+  if(!P_LOCALES.some(l=>l.id===id)) return;
+  if(state.survey.locale===id) return;
+  state.survey.locale = id;
+  state.pSelectOpen = null;
+  pPaint();
+}
+function pLangSwitch(){
+  const loc = pLocale();
+  return `<div class="p-lang" role="group" aria-label="${esc(pT("language"))}">
+    <span aria-hidden="true">${I.globe(16)}</span>
+    <div class="p-lang-btns">
+      ${P_LOCALES.map(l=>`
+        <button type="button" class="p-lang-btn" data-locale="${l.id}" aria-pressed="${loc===l.id}"
+          onclick="pSetLocale('${l.id}')">${esc(l.native)}</button>`).join("")}
+    </div>
+  </div>`;
+}
 function pViewTag(){
   const slide = state.pSlide;
   state.pSlide = null;
@@ -3239,27 +3494,26 @@ function pViewTag(){
 function pDemoBar(){
   if(state.previewSurvey) return "";
   return `<div class="p-demo">
-    <span>Patient view · demo</span>
-    <button class="fw-btn fw-btn--outline fw-btn--sm" type="button" onclick="setRole('supervisor')">Back to staff</button>
+    <span>${esc(pT("demoBar"))}</span>
+    <button class="fw-btn fw-btn--outline fw-btn--sm" type="button" onclick="setRole('supervisor')">${esc(pT("backStaff"))}</button>
   </div>`;
 }
 const P_DEMO = {
   age:{
-    id:"p-age", label:"Your age",
+    id:"p-age", labelKey:"ageLabel",
     options:["18–24","25–34","35–44","45–54","55–64","65–74","75 or older"]
   },
   lang:{
-    id:"p-lang", label:"The language you're most comfortable in",
+    id:"p-lang", labelKey:"langLabel",
     options:["English","Spanish","Vietnamese","Tagalog","Arabic","Another language"]
   },
   eth:{
-    id:"p-eth", label:"How you describe your race or ethnicity",
+    id:"p-eth", labelKey:"ethLabel",
     options:["American Indian or Alaska Native","Asian","Black or African American",
       "Hispanic or Latino","Middle Eastern or North African",
       "Native Hawaiian or Pacific Islander","White","More than one"]
   }
 };
-const P_DEMO_BLANK = "Prefer not to say";
 function pSelectValues(key){ return [""].concat(P_DEMO[key].options); }
 function pSelectField(key){
   const spec = P_DEMO[key];
@@ -3267,9 +3521,11 @@ function pSelectField(key){
   const val = state.survey.demo[key] || "";
   const open = state.pSelectOpen===key;
   const active = Math.min(values.length-1, Math.max(0, state.pSelectActive|0));
-  const shown = val || P_DEMO_BLANK;
+  const blank = pT("preferNot");
+  const shown = val ? pTo(val) : blank;
+  const label = pT(spec.labelKey);
   return `<div class="fw-field p-fieldset">
-    <span class="fw-label" id="${spec.id}-label">${esc(spec.label)}</span>
+    <span class="fw-label" id="${spec.id}-label">${esc(label)}</span>
     <div class="fw-select${open?" is-open":""}">
       <button type="button" class="fw-select__trigger" id="${spec.id}"
         aria-haspopup="listbox" aria-expanded="${open}"
@@ -3282,10 +3538,11 @@ function pSelectField(key){
       ${open?`<div class="fw-select__menu" id="${spec.id}-list" role="listbox" aria-labelledby="${spec.id}-label">
         ${values.map((o,i)=>{
           const selected = val===o;
+          const labelOpt = o ? pTo(o) : blank;
           return `<div class="fw-select__opt" role="option" id="${spec.id}-opt-${i}"
             data-value="${esc(o)}" aria-selected="${selected}"${i===active?" data-active":""}
             onmousedown="event.preventDefault()"
-            onclick="pSelectPick('${key}',this)">${esc(o||P_DEMO_BLANK)}${selected?I.check(16):""}</div>`;
+            onclick="pSelectPick('${key}',this)">${esc(labelOpt)}${selected?I.check(16):""}</div>`;
         }).join("")}
       </div>`:""}
     </div>
@@ -3304,24 +3561,25 @@ function pChoice(labelHtml, {pressed=false, onclick}={}){
   return `<div class="p-opt"><span class="p-tick" aria-hidden="true"></span>${labelHtml}</div>`;
 }
 function pQuestionHead(q, idx, total){
-  const opt = q.required ? "" : `<div class="p-step"><span class="fw-badge fw-badge--secondary">Optional</span></div>`;
+  const opt = q.required ? "" : `<div class="p-step"><span class="fw-badge fw-badge--secondary">${esc(pT("optional"))}</span></div>`;
   return `${pProgress(total, idx)}${opt}
-    <h1 class="t-h3${opt?" mt8":""}">${esc(q.text)}</h1>
-    ${q.help?`<p class="t-body dim mt8">${esc(q.help)}</p>`:""}`;
+    <h1 class="t-h3${opt?" mt8":""}">${esc(pTx(q.text))}</h1>
+    ${q.help?`<p class="t-body dim mt8">${esc(pTx(q.help))}</p>`:""}`;
 }
 function pQuestionFields(q, {interactive=false, val}={}){
   const group = interactive ? "radiogroup" : "group";
+  const aria = esc(pTx(q.text));
   if(q.type==="yesno"){
-    return `<div class="p-opts" role="${group}" aria-label="${esc(q.text)}">
-      ${["Yes","No"].map(o=>pChoice(o,{
-        pressed: interactive && val===o,
-        onclick: interactive ? `pAnswer('${q.id}','${o}',this)` : null
+    return `<div class="p-opts" role="${group}" aria-label="${aria}">
+      ${[["Yes",pT("yes")],["No",pT("no")]].map(([value,label])=>pChoice(esc(label),{
+        pressed: interactive && val===value,
+        onclick: interactive ? `pAnswer('${q.id}','${value}',this)` : null
       })).join("")}
     </div>`;
   }
   if(q.type==="choice"){
-    return `<div class="p-opts" role="${group}" aria-label="${esc(q.text)}">
-      ${(q.options||[]).map(o=>pChoice(esc(o),{
+    return `<div class="p-opts" role="${group}" aria-label="${aria}">
+      ${(q.options||[]).map(o=>pChoice(esc(pTo(o)),{
         pressed: interactive && val===o,
         onclick: interactive ? `pAnswer('${q.id}',${esc(JSON.stringify(o))},this)` : null
       })).join("")}
@@ -3329,20 +3587,21 @@ function pQuestionFields(q, {interactive=false, val}={}){
   }
   if(q.type==="scale"){
     const tag = interactive ? "button" : "div";
-    return `<div class="p-scale" role="${group}" aria-label="${esc(q.text)}">
+    return `<div class="p-scale" role="${group}" aria-label="${aria}">
       ${[1,2,3,4,5].map(n=>{
         const on = interactive && Number(val)===n;
         const attrs = interactive
           ? `type="button" aria-pressed="${on}" onclick="pAnswer('${q.id}',${n},this)"`
           : "";
-        const label = (q.labels && q.labels[n-1]) ? `<span>${esc(q.labels[n-1])}</span>` : "";
+        const raw = (q.labels && q.labels[n-1]) || "";
+        const label = raw ? `<span>${esc(pTo(raw))}</span>` : "";
         return `<${tag} class="p-scale-btn" ${attrs}>${n}${label}</${tag}>`;
       }).join("")}
     </div>`;
   }
   return `<div class="p-fields">
-    <textarea class="fw-input fw-textarea"${interactive?` id="ptext" maxlength="600" oninput="pText('${q.id}',this.value)"`:` readonly tabindex="-1"`} placeholder="Type your answer…">${interactive&&val?esc(val):""}</textarea>
-    ${interactive?`<p class="t-detail dim p-count">${(val||"").length} of 600</p>`:""}
+    <textarea class="fw-input fw-textarea"${interactive?` id="ptext" maxlength="600" oninput="pText('${q.id}',this.value)"`:` readonly tabindex="-1"`} placeholder="${esc(pT("textPlaceholder"))}">${interactive&&val?esc(val):""}</textarea>
+    ${interactive?`<p class="t-detail dim p-count">${esc(pT("charCount",{n:(val||"").length}))}</p>`:""}
   </div>`;
 }
 
@@ -3351,16 +3610,18 @@ function patientPreview(){
   const idx = previewQIndex();
   const q = idx>=0 ? qs[idx] : null;
   if(!q){
-    return `<div class="patient patient--embed">
+    return `<div class="patient patient--embed" lang="${esc(pLocale())}">
       <div class="p-wrap">
+        ${pLangSwitch()}
         <div class="p-card">
-          <p class="t-body dim">Add a question to see the patient preview.</p>
+          <p class="t-body dim">${esc(pT("previewEmpty"))}</p>
         </div>
       </div>
     </div>`;
   }
-  return `<div class="patient patient--embed">
+  return `<div class="patient patient--embed" lang="${esc(pLocale())}">
     <div class="p-wrap">
+      ${pLangSwitch()}
       <div class="p-card">
         ${pQuestionHead(q, idx, qs.length)}
         ${pQuestionFields(q)}
@@ -3372,62 +3633,62 @@ function patientPreview(){
 function viewPatient(){
   const S = state.survey, qs = qList();
   const total = qs.length;
+  const agency = AGENCY.name;
 
   /* intro */
   if(S.step === -1 || S.step === undefined) S.step = -1;
   if(S.step === -1){
-    return `<div class="patient"><div class="p-wrap">
+    return `<div class="patient" lang="${esc(pLocale())}"><div class="p-wrap">
       ${pDemoBar()}
-      <div class="p-lock">${I.lock(12)} Private — only ${AGENCY.name} sees this</div>
-      <div class="p-card">
-        ${pViewTag()}
-        <h1 class="t-h2">A few questions about your ride with ${AGENCY.name}.</h1>
-        <p class="t-body dim mt16">${total} questions, about a minute. Skip anything you'd rather not answer,
-          and stop whenever you want.</p>
-        <div class="fw-alert fw-alert--info mt16">
-          <span class="fw-alert__icon">${I.shield(20)}</span>
-          <p class="fw-alert__desc">Your answers go to a supervisor, not to the crew who treated you.
-            Nothing here changes your bill or your care.</p>
-        </div>
-        <div class="p-actions">
-          <div class="p-cta">
-            <button class="fw-btn fw-btn--primary fw-btn--lg p-next" onclick="pStart()">Start</button>
+      ${pLangSwitch()}
+      ${pViewTag()}
+        <div class="p-lock">${I.lock(12)} ${esc(pT("private",{agency}))}</div>
+        <div class="p-card">
+          <h1 class="t-h2">${esc(pT("introTitle",{agency}))}</h1>
+          <p class="t-body dim mt16">${esc(pT("introBody",{n:total}))}</p>
+          <div class="fw-alert fw-alert--info mt16">
+            <span class="fw-alert__icon">${I.shield(20)}</span>
+            <p class="fw-alert__desc">${esc(pT("introAlert"))}</p>
+          </div>
+          <div class="p-actions">
+            <div class="p-cta">
+              <button class="fw-btn fw-btn--primary fw-btn--lg p-next" onclick="pStart()">${esc(pT("start"))}</button>
+            </div>
           </div>
         </div>
-        </div>
+        <p class="p-foot">${esc(pT("footRef",{agency, ref:"9F3C1A"}))}</p>
       </div>
-      <p class="p-foot">Reflect · ${AGENCY.name} · reference ${"9F3C1A"}</p>
     </div></div>`;
   }
 
   /* demographics */
   if(S.step === total){
-    return `<div class="patient"><div class="p-wrap">
+    return `<div class="patient" lang="${esc(pLocale())}"><div class="p-wrap">
       ${pDemoBar()}
-      <div class="p-lock">${I.lock(12)} Private — only ${AGENCY.name} sees this</div>
-      <div class="p-card">
-        ${pViewTag()}
-        ${pProgress(total, total)}
-        <div class="p-step">
-          <span class="fw-badge fw-badge--secondary">Optional</span>
-        </div>
-        <h1 class="t-h3 mt8">Three questions about you — only if you want.</h1>
-        <p class="t-body dim mt8">We ask so we can check whether some people get a worse experience than others.
-          You can send your answers without filling any of this in.</p>
+      ${pLangSwitch()}
+      ${pViewTag()}
+        <div class="p-lock">${I.lock(12)} ${esc(pT("private",{agency}))}</div>
+        <div class="p-card">
+          ${pProgress(total, total)}
+          <div class="p-step">
+            <span class="fw-badge fw-badge--secondary">${esc(pT("optional"))}</span>
+          </div>
+          <h1 class="t-h3 mt8">${esc(pT("demoTitle"))}</h1>
+          <p class="t-body dim mt8">${esc(pT("demoBody"))}</p>
 
-        ${pSelectField("age")}
-        ${pSelectField("lang")}
-        ${pSelectField("eth")}
+          ${pSelectField("age")}
+          ${pSelectField("lang")}
+          ${pSelectField("eth")}
 
-        <div class="p-actions">
-          <div class="p-cta">
-            <button class="fw-btn fw-btn--primary fw-btn--lg p-next" onclick="pFinish()">Send my answers</button>
-            <button class="fw-btn fw-btn--link p-back" onclick="pBack()">Back</button>
+          <div class="p-actions">
+            <div class="p-cta">
+              <button class="fw-btn fw-btn--primary fw-btn--lg p-next" onclick="pFinish()">${esc(pT("send"))}</button>
+              <button class="fw-btn fw-btn--link p-back" onclick="pBack()">${esc(pT("back"))}</button>
+            </div>
           </div>
         </div>
-        </div>
+        <p class="p-foot">${esc(pT("foot",{agency}))}</p>
       </div>
-      <p class="p-foot">Reflect · ${AGENCY.name}</p>
     </div></div>`;
   }
 
@@ -3439,25 +3700,24 @@ function viewPatient(){
       if(k==="q3" || k==="q4") return v==="No";
       return false;
     });
-    return `<div class="patient"><div class="p-wrap">
+    return `<div class="patient" lang="${esc(pLocale())}"><div class="p-wrap">
       ${pDemoBar()}
-      <div class="p-card p-done">
-        ${pViewTag()}
-        <div class="p-seal">${I.check(22)}</div>
-        <h1 class="t-h2">Thank you — that's genuinely useful.</h1>
-        <p class="t-body dim mt16">Someone at ${AGENCY.name} will read this. You don't need to do anything else.</p>
-        ${low?`<div class="fw-alert fw-alert--warning mt16" style="text-align:left">
-          <span class="fw-alert__icon">${I.info(20)}</span>
-          <p class="fw-alert__desc">You told us something went wrong. A supervisor will see this today and may call you
-            if you left a number. We can't promise a particular outcome, but this doesn't disappear
-            into a spreadsheet — a person reads it.</p>
-        </div>`:`<div class="fw-alert fw-alert--info mt16" style="text-align:left">
-          <span class="fw-alert__icon">${I.info(20)}</span>
-          <p class="fw-alert__desc">If you think of something later, the link in your message stays open for 14 days.</p>
-        </div>`}
+      ${pLangSwitch()}
+      ${pViewTag()}
+        <div class="p-card p-done">
+          <div class="p-seal">${I.check(22)}</div>
+          <h1 class="t-h2">${esc(pT("thanksTitle"))}</h1>
+          <p class="t-body dim mt16">${esc(pT("thanksBody",{agency}))}</p>
+          ${low?`<div class="fw-alert fw-alert--warning mt16" style="text-align:left">
+            <span class="fw-alert__icon">${I.info(20)}</span>
+            <p class="fw-alert__desc">${esc(pT("thanksLow"))}</p>
+          </div>`:`<div class="fw-alert fw-alert--info mt16" style="text-align:left">
+            <span class="fw-alert__icon">${I.info(20)}</span>
+            <p class="fw-alert__desc">${esc(pT("thanksOk"))}</p>
+          </div>`}
         </div>
+        <p class="p-foot">${esc(pT("closePage"))}</p>
       </div>
-      <p class="p-foot">You can close this page.</p>
     </div></div>`;
   }
 
@@ -3466,28 +3726,29 @@ function viewPatient(){
   const val = S.answers[q.id];
   const answered = val !== undefined && val !== "";
 
-  return `<div class="patient"><div class="p-wrap">
+  return `<div class="patient" lang="${esc(pLocale())}"><div class="p-wrap">
     ${pDemoBar()}
-    <div class="p-lock">${I.lock(12)} Private — only ${AGENCY.name} sees this</div>
-    <div class="p-card">
-      ${pViewTag()}
-      ${pQuestionHead(q, S.step, total)}
-      ${pQuestionFields(q, {interactive:true, val})}
-      <div class="p-actions">
-        <div class="p-cta">
-          <button class="fw-btn fw-btn--primary fw-btn--lg p-next" ${q.required&&!answered?"disabled":""} onclick="pNext()">
-            ${S.step===total-1?"Almost done":"Next"}</button>
-          ${S.step>0?`<button class="fw-btn fw-btn--link p-back" onclick="pBack()">Back</button>`:""}
+    ${pLangSwitch()}
+    ${pViewTag()}
+      <div class="p-lock">${I.lock(12)} ${esc(pT("private",{agency}))}</div>
+      <div class="p-card">
+        ${pQuestionHead(q, S.step, total)}
+        ${pQuestionFields(q, {interactive:true, val})}
+        <div class="p-actions">
+          <div class="p-cta">
+            <button class="fw-btn fw-btn--primary fw-btn--lg p-next" ${q.required&&!answered?"disabled":""} onclick="pNext()">
+              ${esc(S.step===total-1?pT("almostDone"):pT("next"))}</button>
+            ${S.step>0?`<button class="fw-btn fw-btn--link p-back" onclick="pBack()">${esc(pT("back"))}</button>`:""}
+          </div>
+          ${q.required?"":`<button class="fw-btn fw-btn--ghost" onclick="pSkip()">${esc(pT("skip"))}</button>`}
         </div>
-        ${q.required?"":`<button class="fw-btn fw-btn--ghost" onclick="pSkip()">Skip</button>`}
+        ${q.required&&!answered?`<p class="t-body dim mt16" data-need-answer>${esc(pT("needAnswer"))}</p>`:""}
       </div>
-      ${q.required&&!answered?`<p class="t-body dim mt16" data-need-answer>Pick an answer to keep going,
-        or close the page if you'd rather not.</p>`:""}
-      </div>
+      <p class="p-foot">${esc(pT("foot",{agency}))}</p>
     </div>
-    <p class="p-foot">Reflect · ${AGENCY.name}</p>
   </div></div>`;
 }
+
 </script>
 <script>
 /* ============================================================
@@ -4000,9 +4261,41 @@ function confirmDeleteSurvey(){
 }
 
 /* patient survey */
+function pUpdatePreviewBar(){
+  const sub = document.querySelector(".preview-overlay .preview-bar .s");
+  if(!sub) return;
+  const s = currentSurvey();
+  const name = s ? s.name : "Survey";
+  sub.textContent = `${name} · ${pLocaleMeta().staff} · answers aren't stored`;
+}
+function pPaint(){
+  const stage = document.querySelector(".preview-stage");
+  if(!(state.previewSurvey && stage)){
+    render();
+    return;
+  }
+  pUpdatePreviewBar();
+  const html = viewPatient();
+  const tmp = document.createElement("div");
+  tmp.innerHTML = html.trim();
+  const nextPatient = tmp.firstElementChild;
+  const nextView = nextPatient && nextPatient.querySelector(".p-view");
+  const curPatient = stage.querySelector(".patient");
+  const curView = curPatient && curPatient.querySelector(".p-view");
+  if(curPatient && nextPatient && curView && nextView){
+    curPatient.setAttribute("lang", nextPatient.getAttribute("lang") || "en");
+    const loc = pLocale();
+    curPatient.querySelectorAll(".p-lang-btn").forEach(btn=>{
+      btn.setAttribute("aria-pressed", btn.getAttribute("data-locale")===loc ? "true" : "false");
+    });
+    curView.replaceWith(nextView);
+    return;
+  }
+  stage.innerHTML = html;
+}
 function pTurn(dir, mutate){
   if(state.pBusy) return;
-  const view = document.querySelector(".p-view");
+  const view = document.querySelector(".preview-stage .p-view") || document.querySelector(".p-view");
   const jump = ()=>{
     const stage = document.querySelector(".preview-stage");
     if(stage) stage.scrollTop = 0;
@@ -4012,7 +4305,7 @@ function pTurn(dir, mutate){
     mutate();
     state.pSlide = dir;
     state.pSelectOpen = null;
-    render();
+    pPaint();
     jump();
     state.pBusy = false;
   };
@@ -4026,7 +4319,7 @@ function pTurn(dir, mutate){
   };
   view.classList.remove("p-view--in-fwd","p-view--in-back");
   view.classList.add(dir==="back" ? "p-view--out-back" : "p-view--out-fwd");
-  view.addEventListener("animationend", e=>{ if(e.target===view) finish(); });
+  view.addEventListener("animationend", e=>{ if(e.target===view) finish(); }, {once:true});
   setTimeout(finish, 220);
 }
 function pStart(){ pTurn("fwd", ()=>{ state.survey.step = 0; }); }
@@ -4043,7 +4336,7 @@ function pAnswer(id,v,el){
   if(hint) hint.remove();
 }
 function pText(id,v){ state.survey.answers[id] = v;
-  const c = document.querySelector(".p-count"); if(c) c.textContent = v.length + " of 600"; }
+  const c = document.querySelector(".p-count"); if(c) c.textContent = pT("charCount",{n:v.length}); }
 function pNext(){ pTurn("fwd", ()=>{ state.survey.step++; }); }
 function pSkip(){ pTurn("fwd", ()=>{ state.survey.step++; }); }
 function pBack(){ pTurn("back", ()=>{ state.survey.step = Math.max(-1, state.survey.step-1); }); }
@@ -4127,12 +4420,15 @@ function scrollTop(){
 function surveyPreview(){
   const s = currentSurvey();
   const name = s ? s.name : "Survey";
+  const lang = pLocaleMeta();
+  const enter = state.previewEnter ? " is-enter" : "";
+  state.previewEnter = false;
   return `
-  <div class="preview-overlay" role="dialog" aria-modal="true" aria-labelledby="preview-title">
+  <div class="preview-overlay${enter}" role="dialog" aria-modal="true" aria-labelledby="preview-title">
     <div class="preview-bar">
       <div>
         <div class="t" id="preview-title">Patient preview</div>
-        <div class="s">${esc(name)} · answers aren't stored</div>
+        <div class="s">${esc(name)} · ${esc(lang.staff)} · answers aren't stored</div>
       </div>
       <button class="fw-btn fw-btn--outline fw-btn--sm" onclick="closeSurveyPreview()">${I.x(16)} Close</button>
     </div>
@@ -4141,13 +4437,22 @@ function surveyPreview(){
 }
 function openSurveyPreview(){
   if(!qList().length){ toast("Add a question first."); return; }
-  state.survey = { step:-1, answers:{}, showDemo:false, demo:{} };
+  const locale = state.survey.locale || "en";
+  state.survey = { step:-1, answers:{}, showDemo:false, demo:{}, locale };
   state.previewSurvey = true;
+  state.previewEnter = true;
   render();
+  const overlay = document.querySelector(".preview-overlay");
+  if(overlay){
+    const clear = ()=>overlay.classList.remove("is-enter");
+    overlay.addEventListener("animationend", clear, {once:true});
+    setTimeout(clear, 300);
+  }
 }
 function closeSurveyPreview(){
+  const locale = state.survey.locale || "en";
   state.previewSurvey = false;
-  state.survey = { step:-1, answers:{}, showDemo:false, demo:{} };
+  state.survey = { step:-1, answers:{}, showDemo:false, demo:{}, locale };
   render();
 }
 
