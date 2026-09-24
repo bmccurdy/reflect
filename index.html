@@ -733,6 +733,16 @@ button.num-link{
   margin-bottom:16px;
 }
 .dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:24px;flex-wrap:wrap}
+.dialog--edit-q{width:min(520px,100%)}
+.edit-q-switch{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  margin-top:16px;padding:12px 14px;
+  border:1px solid var(--border);border-radius:var(--r-lg);
+  background:var(--muted);
+}
+.edit-q-switch .t-subtle{margin:0}
+.edit-q-field{margin-top:16px}
+.edit-q-field label{font-weight:700;display:block;margin-bottom:8px}
 .kv{display:grid;grid-template-columns:132px 1fr;gap:8px 16px;font-size:14px;line-height:20px}
 .kv dt{color:var(--muted-foreground)}
 .kv dd{margin:0}
@@ -1871,6 +1881,7 @@ const state = {
   drawerKey:null,
   deleteSurvey:null,
   renameSurvey:null,
+  editQuestion:null,
   editingSurveyName:null,
   surveyMenu:null,
   previewSurvey:false,
@@ -2020,6 +2031,7 @@ function shell(body){
   ${state.openTrigger?triggerDrawer(state.openTrigger):""}
   ${state.deleteSurvey?deleteConfirm(state.deleteSurvey):""}
   ${state.renameSurvey?renameDialog(state.renameSurvey):""}
+  ${state.editQuestion?editQuestionDialog(state.editQuestion):""}
   ${state.previewSurvey?surveyPreview():""}
   ${state.toast?`<div class="fw-toaster" role="status"><div class="fw-toast fw-toast--success"><span class="fw-toast__icon">${I.check(16)}</span><p class="fw-toast__title">${esc(state.toast)}</p></div></div>`:""}`;
 }
@@ -2732,7 +2744,7 @@ function viewAlerts(){
     <div class="tbl-inset">
     <table class="tbl tbl--stack tbl--alerts">
       <thead><tr>
-        <th style="width:132px">Status</th><th>Why it opened</th>
+        <th style="width:132px">Status</th><th>Reason</th>
         <th style="width:96px">Unit</th><th style="width:132px">Assigned</th><th style="width:104px">Opened</th>
       </tr></thead>
       <tbody aria-live="polite">
@@ -2988,7 +3000,7 @@ function viewSurveys(){
         <div class="between between--inline" style="margin-bottom:16px">
           <div>
             <h2 class="t-h4">Questions</h2>
-            <p class="t-subtle dim mt8">Drag to reorder. Benchmark questions can't be edited.</p>
+            <p class="t-subtle dim mt8">Drag to reorder. Edit wording and required with the pencil. Benchmark questions can't be edited.</p>
           </div>
           <span class="fw-badge fw-badge--outline">${qs.filter(q=>q.required).length} required</span>
         </div>
@@ -3012,8 +3024,9 @@ function viewSurveys(){
             <div class="qbtns" onclick="event.stopPropagation()">
               <button class="iconbtn" aria-label="Move up"   ${i===0?"disabled":""} onclick="moveQ(${i},-1)">${I.up(16)}</button>
               <button class="iconbtn" aria-label="Move down" ${i===qs.length-1?"disabled":""} onclick="moveQ(${i},1)">${I.down(16)}</button>
-              <button class="iconbtn" aria-label="Edit" title="${q.locked?"Benchmark questions can't be edited":"Not in this prototype"}" disabled>${I.pencil(16)}</button>
-              <button class="iconbtn" aria-label="Remove" ${q.locked?"disabled title=\"Benchmark questions can't be removed\"":"onclick=\"removeQ('"+q.id+"')\""}>${I.trash(16)}</button>
+              <button class="iconbtn" aria-label="Edit" title="${q.locked?"Benchmark questions can't be edited":"Edit question"}"
+                ${q.locked?"disabled":`onclick="openEditQuestion('${q.id}')"`}>${I.pencil(16)}</button>
+              <button class="iconbtn" aria-label="Remove" title="Remove question" onclick="removeQ('${q.id}')">${I.trash(16)}</button>
             </div>
           </div>`).join("") : `<p class="t-subtle dim" style="margin-bottom:16px">No questions yet. Add one, or pick from the library.</p>`}
         <div class="addrow">
@@ -3606,9 +3619,96 @@ const P_TEXT_I18N = {
     "Was the ambulance clean?":
       "¿La ambulancia estaba limpia?",
     "Did you have a way to reach us afterward if you had questions?":
-      "¿Tuvo una forma de contactarnos después si tenía preguntas?"
+      "¿Tuvo una forma de contactarnos después si tenía preguntas?",
+    "Untitled question":
+      "Pregunta sin título",
+    "Option one":
+      "Opción uno",
+    "Option two":
+      "Opción dos"
   }
 };
+
+function translateToEs(text){
+  if(text==null || text==="") return text;
+  const t = String(text).trim();
+  if(!t) return t;
+  if(P_TEXT_I18N.es && P_TEXT_I18N.es[t]) return P_TEXT_I18N.es[t];
+  if(P_OPT_I18N.es && P_OPT_I18N.es[t]) return P_OPT_I18N.es[t];
+  /* Prototype phrase-level fallback for staff-authored copy. */
+  let s = t;
+  const phrases = [
+    [/^Untitled question$/i, "Pregunta sin título"],
+    [/^Option one$/i, "Opción uno"],
+    [/^Option two$/i, "Opción dos"],
+    [/^Option three$/i, "Opción tres"],
+    [/^Would you like us to call you\?$/i, "¿Le gustaría que lo llamemos?"],
+    [/^What did we do well\?$/i, "¿Qué hicimos bien?"],
+    [/^What could we have done better\?$/i, "¿Qué podríamos haber hecho mejor?"],
+    [/\bHow well did we do\b/gi, "qué tan bien lo hicimos"],
+    [/\bHow likely are you\b/gi, "qué tan probable es que"],
+    [/\bWould you like\b/gi, "le gustaría"],
+    [/\bDid you feel\b/gi, "sintió que"],
+    [/\bDid the crew\b/gi, "la tripulación"],
+    [/\bthe crew\b/gi, "la tripulación"],
+    [/\byour emergency\b/gi, "su emergencia"],
+    [/\bemergency services\b/gi, "servicios de emergencia"],
+    [/\bto recommend\b/gi, "recomiende"],
+    [/\blistened to\b/gi, "lo escuchó"],
+    [/\bcared for\b/gi, "cuidó de usted"],
+    [/\bcall you\b/gi, "llamarlo"],
+    [/\bPlease describe\b/gi, "Describa"],
+    [/\bTell us\b/gi, "Cuéntenos"],
+    [/\bHow would you rate\b/gi, "Cómo calificaría"],
+    [/\bIs there anything else\b/gi, "Hay algo más"],
+    [/\byou would like to share\b/gi, "que le gustaría compartir"],
+    [/\babout your experience\b/gi, "sobre su experiencia"],
+    [/\bYes\b/g, "Sí"],
+    [/\bNo\b/g, "No"]
+  ];
+  phrases.forEach(([re, rep])=>{ s = s.replace(re, rep); });
+  s = s.replace(/\s+/g, " ").trim();
+  if(/\?$/.test(t) && !/[¿?]/.test(s.slice(0,1))){
+    s = "¿" + s.replace(/\?$/, "") + "?";
+  }
+  if(s === t && /[A-Za-z]/.test(t)){
+    /* Last resort so every new question still has an ES string patients can see. */
+    s = /\?$/.test(t) ? ("¿" + t.replace(/\?$/, "") + "?") : t;
+  }
+  return s;
+}
+function ensureQuestionEs(q, {force=false}={}){
+  if(!q) return q;
+  if(force || !q.textEs) q.textEs = translateToEs(q.text);
+  if(q.help && (force || !q.helpEs)) q.helpEs = translateToEs(q.help);
+  if(q.options){
+    if(force || !q.optionsEs || q.optionsEs.length!==q.options.length){
+      q.optionsEs = q.options.map(o=>translateToEs(o));
+    }
+  } else {
+    delete q.optionsEs;
+  }
+  if(q.labels){
+    if(force || !q.labelsEs || q.labelsEs.length!==q.labels.length){
+      q.labelsEs = q.labels.map(l=>l ? translateToEs(l) : "");
+    }
+  } else {
+    delete q.labelsEs;
+  }
+  if(q.text && q.textEs){
+    if(!P_TEXT_I18N.es) P_TEXT_I18N.es = {};
+    P_TEXT_I18N.es[q.text] = q.textEs;
+  }
+  if(q.options && q.optionsEs){
+    if(!P_OPT_I18N.es) P_OPT_I18N.es = {};
+    q.options.forEach((o,i)=>{ if(o && q.optionsEs[i]) P_OPT_I18N.es[o] = q.optionsEs[i]; });
+  }
+  if(q.labels && q.labelsEs){
+    if(!P_OPT_I18N.es) P_OPT_I18N.es = {};
+    q.labels.forEach((l,i)=>{ if(l && q.labelsEs[i]) P_OPT_I18N.es[l] = q.labelsEs[i]; });
+  }
+  return q;
+}
 
 function pLocale(){ return state.survey.locale || "en"; }
 function pT(key, vars){
@@ -3621,17 +3721,26 @@ function pT(key, vars){
   }
   return s;
 }
-function pTx(text){
+function pTx(text, q){
   if(!text) return text;
   const loc = pLocale();
   if(loc==="en") return text;
+  if(q && q.textEs) return q.textEs;
   return (P_TEXT_I18N[loc] && P_TEXT_I18N[loc][text]) || text;
 }
-function pTo(opt){
+function pTo(opt, q, idx){
   if(opt==null || opt==="") return opt;
   const loc = pLocale();
   if(loc==="en") return opt;
+  if(q && Array.isArray(q.optionsEs) && idx!=null && q.optionsEs[idx]) return q.optionsEs[idx];
+  if(q && Array.isArray(q.labelsEs) && idx!=null && q.labelsEs[idx]) return q.labelsEs[idx];
   return (P_OPT_I18N[loc] && P_OPT_I18N[loc][opt]) || opt;
+}
+function pHelp(q){
+  if(!q || !q.help) return "";
+  const loc = pLocale();
+  if(loc!=="en" && q.helpEs) return q.helpEs;
+  return pTx(q.help);
 }
 function pLocaleMeta(){ return P_LOCALES.find(l=>l.id===pLocale()) || P_LOCALES[0]; }
 function pSetLocale(id){
@@ -3730,12 +3839,12 @@ function pChoice(labelHtml, {pressed=false, onclick}={}){
 function pQuestionHead(q, idx, total){
   const opt = q.required ? "" : `<div class="p-step"><span class="fw-badge fw-badge--secondary">${esc(pT("optional"))}</span></div>`;
   return `${pProgress(total, idx)}${opt}
-    <h1 class="t-h3${opt?" mt8":""}">${esc(pTx(q.text))}</h1>
-    ${q.help?`<p class="t-body dim mt8">${esc(pTx(q.help))}</p>`:""}`;
+    <h1 class="t-h3${opt?" mt8":""}">${esc(pTx(q.text, q))}</h1>
+    ${q.help?`<p class="t-body dim mt8">${esc(pHelp(q))}</p>`:""}`;
 }
 function pQuestionFields(q, {interactive=false, val}={}){
   const group = interactive ? "radiogroup" : "group";
-  const aria = esc(pTx(q.text));
+  const aria = esc(pTx(q.text, q));
   if(q.type==="yesno"){
     return `<div class="p-opts" role="${group}" aria-label="${aria}">
       ${[["Yes",pT("yes")],["No",pT("no")]].map(([value,label])=>pChoice(esc(label),{
@@ -3746,7 +3855,7 @@ function pQuestionFields(q, {interactive=false, val}={}){
   }
   if(q.type==="choice"){
     return `<div class="p-opts" role="${group}" aria-label="${aria}">
-      ${(q.options||[]).map(o=>pChoice(esc(pTo(o)),{
+      ${(q.options||[]).map((o,i)=>pChoice(esc(pTo(o, q, i)),{
         pressed: interactive && val===o,
         onclick: interactive ? `pAnswer('${q.id}',${esc(JSON.stringify(o))},this)` : null
       })).join("")}
@@ -3761,7 +3870,7 @@ function pQuestionFields(q, {interactive=false, val}={}){
           ? `type="button" aria-pressed="${on}" onclick="pAnswer('${q.id}',${n},this)"`
           : "";
         const raw = (q.labels && q.labels[n-1]) || "";
-        const label = raw ? `<span>${esc(pTo(raw))}</span>` : "";
+        const label = raw ? `<span>${esc(pTo(raw, q, n-1))}</span>` : "";
         return `<${tag} class="p-scale-btn" ${attrs}>${n}${label}</${tag}>`;
       }).join("")}
     </div>`;
@@ -4188,7 +4297,6 @@ function removeQ(id){
     const qs = qList();
     const i = qs.findIndex(q=>q.id===id);
     if(i<0) return;
-    if(qs[i].locked){ toast("Benchmark questions can't be removed."); return; }
     state.surveyQuestions[sid] = qs.filter(q=>q.id!==id);
     syncQuestionCount(sid);
     if(state.previewQId===id){
@@ -4207,12 +4315,14 @@ function removeQ(id){
 let qn = 100;
 function addQ(type){
   const id = "q"+(++qn);
-  qList().push({
+  const q = {
     id, type, required:false, locked:false,
-    text:"New question — click the pencil to write it",
+    text:"Untitled question",
     options: type==="choice" ? ["Option one","Option two"] : undefined,
     labels:  type==="scale"  ? ["Poor","","","","Excellent"] : undefined
-  });
+  };
+  ensureQuestionEs(q, {force:true});
+  qList().push(q);
   state.previewQId = id;
   syncQuestionCount(surveyIdFromHash() || "sv_post");
   toast("Question added.", true);
@@ -4225,7 +4335,7 @@ function addFromLib(id){
   if(already){ toast("That question is already in this survey."); return; }
   captureLibScroll(id);
   const qid = "q"+(++qn);
-  qList().push({
+  const q = {
     id: qid,
     text: l.text,
     type: l.type,
@@ -4234,7 +4344,9 @@ function addFromLib(id){
     lockNote: l.benchmark ? "Benchmark question — shared wording across participating agencies" : undefined,
     options: l.options ? [...l.options] : undefined,
     labels: l.type==="scale" ? ["Poor","","","","Excellent"] : undefined
-  });
+  };
+  ensureQuestionEs(q, {force:true});
+  qList().push(q);
   state.previewQId = qid;
   syncQuestionCount(surveyIdFromHash() || "sv_post");
   toast("Added from library.", true);
@@ -4318,6 +4430,145 @@ function renameDialog(id){
       </div>
     </div>
   </div>`;
+}
+
+function editQuestionDialog(id){
+  const q = qList().find(x=>x.id===id);
+  if(!q || q.locked) return "";
+  ensureQuestionEs(q);
+  const opts = (q.options||[]).join("\n");
+  const optsEs = (q.optionsEs||[]).join("\n");
+  const scaleLo = q.labels && q.labels[0] != null ? q.labels[0] : "Poor";
+  const scaleHi = q.labels && q.labels[4] != null ? q.labels[4] : "Excellent";
+  const scaleLoEs = q.labelsEs && q.labelsEs[0] != null ? q.labelsEs[0] : translateToEs(scaleLo);
+  const scaleHiEs = q.labelsEs && q.labelsEs[4] != null ? q.labelsEs[4] : translateToEs(scaleHi);
+  return `
+  <div class="scrim" style="z-index:54"></div>
+  <div class="dialog-wrap" onclick="closeEditQuestion()">
+    <div class="dialog dialog--edit-q" role="dialog" aria-modal="true" aria-labelledby="edit-q-title"
+      onclick="event.stopPropagation()">
+      <h2 class="t-h4" id="edit-q-title">Edit question</h2>
+      <p class="t-subtle dim mt8">${esc(TYPE_LABEL[q.type]||q.type)}</p>
+      <div class="edit-q-field">
+        <label class="t-subtle" for="edit-q-text">Question (English)</label>
+        <textarea class="fw-input" id="edit-q-text" rows="3">${esc(q.text)}</textarea>
+      </div>
+      <div class="edit-q-field">
+        <label class="t-subtle" for="edit-q-text-es">Question (Spanish)</label>
+        <textarea class="fw-input" id="edit-q-text-es" rows="3">${esc(q.textEs||"")}</textarea>
+        <p class="t-detail dim mt8">Shown when the patient picks Español. Auto-generated when you add or change the English text.</p>
+      </div>
+      <div class="edit-q-switch">
+        <div>
+          <div class="t-subtle" style="font-weight:700">Required</div>
+          <p class="t-detail dim mt8" style="margin:4px 0 0">Patients must answer before continuing.</p>
+        </div>
+        <input class="fw-switch" type="checkbox" id="edit-q-required" ${q.required?"checked":""}
+          aria-label="Required">
+      </div>
+      ${q.type==="choice"?`
+      <div class="edit-q-field">
+        <label class="t-subtle" for="edit-q-options">Options (English)</label>
+        <textarea class="fw-input" id="edit-q-options" rows="5">${esc(opts)}</textarea>
+        <p class="t-detail dim mt8">One option per line.</p>
+      </div>
+      <div class="edit-q-field">
+        <label class="t-subtle" for="edit-q-options-es">Options (Spanish)</label>
+        <textarea class="fw-input" id="edit-q-options-es" rows="5">${esc(optsEs)}</textarea>
+        <p class="t-detail dim mt8">One option per line, matching the English list.</p>
+      </div>`:""}
+      ${q.type==="scale"?`
+      <div class="edit-q-field">
+        <label class="t-subtle" for="edit-q-scale-lo">Low label (1) — English</label>
+        <input class="fw-input" id="edit-q-scale-lo" value="${esc(scaleLo)}">
+      </div>
+      <div class="edit-q-field">
+        <label class="t-subtle" for="edit-q-scale-lo-es">Low label (1) — Spanish</label>
+        <input class="fw-input" id="edit-q-scale-lo-es" value="${esc(scaleLoEs)}">
+      </div>
+      <div class="edit-q-field">
+        <label class="t-subtle" for="edit-q-scale-hi">High label (5) — English</label>
+        <input class="fw-input" id="edit-q-scale-hi" value="${esc(scaleHi)}">
+      </div>
+      <div class="edit-q-field">
+        <label class="t-subtle" for="edit-q-scale-hi-es">High label (5) — Spanish</label>
+        <input class="fw-input" id="edit-q-scale-hi-es" value="${esc(scaleHiEs)}">
+      </div>`:""}
+      <div class="dialog-actions">
+        <button class="fw-btn fw-btn--outline" type="button" onclick="closeEditQuestion()">Cancel</button>
+        <button class="fw-btn fw-btn--primary" type="button" onclick="confirmEditQuestion()">Save question</button>
+      </div>
+    </div>
+  </div>`;
+}
+function openEditQuestion(id){
+  const q = qList().find(x=>x.id===id);
+  if(!q || q.locked){
+    toast("Benchmark questions can't be edited.");
+    return;
+  }
+  state.editQuestion = id;
+  state.previewQId = id;
+  render();
+  requestAnimationFrame(()=>{
+    const input = document.getElementById("edit-q-text");
+    if(input){ input.focus(); input.select(); }
+  });
+}
+function closeEditQuestion(){
+  state.editQuestion = null;
+  render();
+}
+function confirmEditQuestion(){
+  const id = state.editQuestion;
+  if(!id) return;
+  const q = qList().find(x=>x.id===id);
+  if(!q || q.locked){ state.editQuestion = null; render(); return; }
+  const textEl = document.getElementById("edit-q-text");
+  const textEsEl = document.getElementById("edit-q-text-es");
+  const reqEl = document.getElementById("edit-q-required");
+  const text = ((textEl && textEl.value) || "").trim();
+  if(!text){ toast("Write the question text."); if(textEl) textEl.focus(); return; }
+  const prevText = q.text;
+  const prevEs = q.textEs;
+  q.text = text;
+  q.required = !!(reqEl && reqEl.checked);
+  let textEs = ((textEsEl && textEsEl.value) || "").trim();
+  if(!textEs || (text!==prevText && textEs===prevEs)){
+    textEs = translateToEs(text);
+  }
+  q.textEs = textEs || translateToEs(text);
+  if(q.type==="choice"){
+    const optsEl = document.getElementById("edit-q-options");
+    const optsEsEl = document.getElementById("edit-q-options-es");
+    const lines = ((optsEl && optsEl.value) || "").split(/\n/).map(s=>s.trim()).filter(Boolean);
+    if(lines.length<2){ toast("Add at least two options."); if(optsEl) optsEl.focus(); return; }
+    q.options = lines;
+    let linesEs = ((optsEsEl && optsEsEl.value) || "").split(/\n/).map(s=>s.trim()).filter(Boolean);
+    if(linesEs.length!==lines.length){
+      linesEs = lines.map(o=>translateToEs(o));
+    }
+    q.optionsEs = linesEs;
+  }
+  if(q.type==="scale"){
+    const lo = document.getElementById("edit-q-scale-lo");
+    const hi = document.getElementById("edit-q-scale-hi");
+    const loEs = document.getElementById("edit-q-scale-lo-es");
+    const hiEs = document.getElementById("edit-q-scale-hi-es");
+    const loT = ((lo && lo.value) || "").trim() || "Poor";
+    const hiT = ((hi && hi.value) || "").trim() || "Excellent";
+    q.labels = [loT, "", "", "", hiT];
+    const loEsT = ((loEs && loEs.value) || "").trim() || translateToEs(loT);
+    const hiEsT = ((hiEs && hiEs.value) || "").trim() || translateToEs(hiT);
+    q.labelsEs = [loEsT, "", "", "", hiEsT];
+  }
+  ensureQuestionEs(q, {force:false});
+  const sid = surveyIdFromHash();
+  const s = sid && state.surveys.find(x=>x.id===sid);
+  if(s) s.updated = NOW;
+  state.editQuestion = null;
+  render();
+  toast("Question updated.");
 }
 function applySurveyName(id, raw){
   const name = (raw || "").trim();
@@ -4672,6 +4923,7 @@ window.addEventListener("hashchange", ()=>{
   }
   state.deleteSurvey = null;
   state.renameSurvey = null;
+  state.editQuestion = null;
   state.editingSurveyName = null;
   state.surveyMenu = null;
   state.previewSurvey = false;
@@ -4703,6 +4955,7 @@ window.addEventListener("keydown", e=>{
   if(state.navOpen){ closeNav(); return; }
   if(state.previewSurvey){ closeSurveyPreview(); return; }
   if(state.renameSurvey){ closeRenameSurvey(); return; }
+  if(state.editQuestion){ closeEditQuestion(); return; }
   if(state.editingSurveyName){ cancelInlineRename(); return; }
   if(state.surveyMenu){ closeSurveyMenu(); return; }
   if(state.deleteSurvey){ closeDeleteSurvey(); return; }
