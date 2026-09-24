@@ -1619,8 +1619,8 @@ const ALERTS = [
 ];
 
 const SURVEYS = [
-  { id:"sv_post", name:"Post-transport experience", status:"Live", triggerId:"#7741", questions:7, responses:84, rate:31, sent:271, updated:mins(4320) },
-  { id:"sv_notrans", name:"Refused transport follow-up", status:"Live", triggerId:"#7738", questions:4, responses:19, rate:22, sent:86, updated:mins(11400) },
+  { id:"sv_post", name:"Post-transport experience", status:"Live", triggerId:"43063", questions:7, responses:84, rate:31, sent:271, updated:mins(4320) },
+  { id:"sv_notrans", name:"Refused transport follow-up", status:"Live", triggerId:"47738", questions:4, responses:19, rate:22, sent:86, updated:mins(11400) },
   { id:"sv_q3", name:"Q3 community perception", status:"Draft", triggerId:null, questions:9, responses:0, rate:0, sent:0, updated:mins(220) }
 ];
 
@@ -1789,12 +1789,12 @@ const ZONES = [
 ];
 
 const TRIGGERS = [
-  { call:"#7741", patient:"M. Rodriguez, 54", crew:"Gilligan / Smith", unit:"M-12", impression:"Chest pain", mobile:true, status:"sent" },
-  { call:"#7738", patient:"C. Jean-Baptiste, 67", crew:"Baptiste / Lee", unit:"M-7", impression:"Syncope", mobile:true, status:"sent" },
-  { call:"#7735", patient:"A. Nguyen, 41", crew:"Hernandez / Williams", unit:"M-3", impression:"Fall / injury", mobile:true, status:"pending" },
-  { call:"#7732", patient:"L. Okafor, 29", crew:"Gilligan / Smith", unit:"M-12", impression:"Respiratory", mobile:true, status:"alert" },
-  { call:"#7729", patient:"E. Santos, 73", crew:"Sanchez / Tran", unit:"M-19", impression:"CVA / stroke", mobile:false, status:"excluded" },
-  { call:"#7727", patient:"P. Alvarez, 38", crew:"Baptiste / Lee", unit:"M-7", impression:"Abdominal pain", mobile:true, status:"sent" }
+  { call:"43063", patient:"M. Rodriguez, 54", crew:"Gilligan / Smith", unit:"M-12", impression:"Chest pain", mobile:true, status:"sent" },
+  { call:"47738", patient:"C. Jean-Baptiste, 67", crew:"Baptiste / Lee", unit:"M-7", impression:"Syncope", mobile:true, status:"sent" },
+  { call:"47735", patient:"A. Nguyen, 41", crew:"Hernandez / Williams", unit:"M-3", impression:"Fall / injury", mobile:true, status:"pending" },
+  { call:"47732", patient:"L. Okafor, 29", crew:"Gilligan / Smith", unit:"M-12", impression:"Respiratory", mobile:true, status:"alert" },
+  { call:"47729", patient:"E. Santos, 73", crew:"Sanchez / Tran", unit:"M-19", impression:"CVA / stroke", mobile:false, status:"excluded" },
+  { call:"47727", patient:"P. Alvarez, 38", crew:"Baptiste / Lee", unit:"M-7", impression:"Abdominal pain", mobile:true, status:"sent" }
 ];
 const TRIGGER_STATUS = {
   sent:{ label:"Survey sent", cls:"fw-badge fw-badge--success" },
@@ -1847,19 +1847,19 @@ const SCORECARD_CREW = [
 ];
 
 const COMMENDATIONS = [
-  { id:"b1", crew:"Gilligan / Smith", unit:"M-12", call:"#7741",
+  { id:"b1", crew:"Gilligan / Smith", unit:"M-12", call:"43063",
     text:"The crew were absolutely wonderful. They kept me calm the entire time and explained everything that was happening. I couldn't have asked for better care.",
     patient:"M. Rodriguez", sent:false },
-  { id:"b2", crew:"Baptiste / Lee", unit:"M-7", call:"#7738",
+  { id:"b2", crew:"Baptiste / Lee", unit:"M-7", call:"47738",
     text:"Muy profesionales y amables. Me hicieron sentir segura durante todo el traslado. Gracias a los dos.",
     patient:"C. Jean-Baptiste", lang:"Spanish", sent:false },
-  { id:"b3", crew:"Hernandez / Williams", unit:"M-3", call:"#7735",
+  { id:"b3", crew:"Hernandez / Williams", unit:"M-3", call:"47735",
     text:"Antonio and William treated my father like a king. Very kind, very caring. We are so grateful.",
     patient:"A. Nguyen", sent:false },
-  { id:"b4", crew:"Sanchez / Tran", unit:"M-19", call:"#7698",
+  { id:"b4", crew:"Sanchez / Tran", unit:"M-19", call:"47698",
     text:"Crew was calm and professional, stellar patient care. Thank you!",
     patient:"F. Delgado", sent:true },
-  { id:"b5", crew:"Baptiste / Lee", unit:"M-7", call:"#7727",
+  { id:"b5", crew:"Baptiste / Lee", unit:"M-7", call:"47727",
     text:"Smooth drive, caring, kind and compassionate crew. Thank you!",
     patient:"P. Alvarez", sent:true }
 ];
@@ -3619,96 +3619,9 @@ const P_TEXT_I18N = {
     "Was the ambulance clean?":
       "¿La ambulancia estaba limpia?",
     "Did you have a way to reach us afterward if you had questions?":
-      "¿Tuvo una forma de contactarnos después si tenía preguntas?",
-    "Untitled question":
-      "Pregunta sin título",
-    "Option one":
-      "Opción uno",
-    "Option two":
-      "Opción dos"
+      "¿Tuvo una forma de contactarnos después si tenía preguntas?"
   }
 };
-
-function translateToEs(text){
-  if(text==null || text==="") return text;
-  const t = String(text).trim();
-  if(!t) return t;
-  if(P_TEXT_I18N.es && P_TEXT_I18N.es[t]) return P_TEXT_I18N.es[t];
-  if(P_OPT_I18N.es && P_OPT_I18N.es[t]) return P_OPT_I18N.es[t];
-  /* Prototype phrase-level fallback for staff-authored copy. */
-  let s = t;
-  const phrases = [
-    [/^Untitled question$/i, "Pregunta sin título"],
-    [/^Option one$/i, "Opción uno"],
-    [/^Option two$/i, "Opción dos"],
-    [/^Option three$/i, "Opción tres"],
-    [/^Would you like us to call you\?$/i, "¿Le gustaría que lo llamemos?"],
-    [/^What did we do well\?$/i, "¿Qué hicimos bien?"],
-    [/^What could we have done better\?$/i, "¿Qué podríamos haber hecho mejor?"],
-    [/\bHow well did we do\b/gi, "qué tan bien lo hicimos"],
-    [/\bHow likely are you\b/gi, "qué tan probable es que"],
-    [/\bWould you like\b/gi, "le gustaría"],
-    [/\bDid you feel\b/gi, "sintió que"],
-    [/\bDid the crew\b/gi, "la tripulación"],
-    [/\bthe crew\b/gi, "la tripulación"],
-    [/\byour emergency\b/gi, "su emergencia"],
-    [/\bemergency services\b/gi, "servicios de emergencia"],
-    [/\bto recommend\b/gi, "recomiende"],
-    [/\blistened to\b/gi, "lo escuchó"],
-    [/\bcared for\b/gi, "cuidó de usted"],
-    [/\bcall you\b/gi, "llamarlo"],
-    [/\bPlease describe\b/gi, "Describa"],
-    [/\bTell us\b/gi, "Cuéntenos"],
-    [/\bHow would you rate\b/gi, "Cómo calificaría"],
-    [/\bIs there anything else\b/gi, "Hay algo más"],
-    [/\byou would like to share\b/gi, "que le gustaría compartir"],
-    [/\babout your experience\b/gi, "sobre su experiencia"],
-    [/\bYes\b/g, "Sí"],
-    [/\bNo\b/g, "No"]
-  ];
-  phrases.forEach(([re, rep])=>{ s = s.replace(re, rep); });
-  s = s.replace(/\s+/g, " ").trim();
-  if(/\?$/.test(t) && !/[¿?]/.test(s.slice(0,1))){
-    s = "¿" + s.replace(/\?$/, "") + "?";
-  }
-  if(s === t && /[A-Za-z]/.test(t)){
-    /* Last resort so every new question still has an ES string patients can see. */
-    s = /\?$/.test(t) ? ("¿" + t.replace(/\?$/, "") + "?") : t;
-  }
-  return s;
-}
-function ensureQuestionEs(q, {force=false}={}){
-  if(!q) return q;
-  if(force || !q.textEs) q.textEs = translateToEs(q.text);
-  if(q.help && (force || !q.helpEs)) q.helpEs = translateToEs(q.help);
-  if(q.options){
-    if(force || !q.optionsEs || q.optionsEs.length!==q.options.length){
-      q.optionsEs = q.options.map(o=>translateToEs(o));
-    }
-  } else {
-    delete q.optionsEs;
-  }
-  if(q.labels){
-    if(force || !q.labelsEs || q.labelsEs.length!==q.labels.length){
-      q.labelsEs = q.labels.map(l=>l ? translateToEs(l) : "");
-    }
-  } else {
-    delete q.labelsEs;
-  }
-  if(q.text && q.textEs){
-    if(!P_TEXT_I18N.es) P_TEXT_I18N.es = {};
-    P_TEXT_I18N.es[q.text] = q.textEs;
-  }
-  if(q.options && q.optionsEs){
-    if(!P_OPT_I18N.es) P_OPT_I18N.es = {};
-    q.options.forEach((o,i)=>{ if(o && q.optionsEs[i]) P_OPT_I18N.es[o] = q.optionsEs[i]; });
-  }
-  if(q.labels && q.labelsEs){
-    if(!P_OPT_I18N.es) P_OPT_I18N.es = {};
-    q.labels.forEach((l,i)=>{ if(l && q.labelsEs[i]) P_OPT_I18N.es[l] = q.labelsEs[i]; });
-  }
-  return q;
-}
 
 function pLocale(){ return state.survey.locale || "en"; }
 function pT(key, vars){
@@ -3721,26 +3634,17 @@ function pT(key, vars){
   }
   return s;
 }
-function pTx(text, q){
+function pTx(text){
   if(!text) return text;
   const loc = pLocale();
   if(loc==="en") return text;
-  if(q && q.textEs) return q.textEs;
   return (P_TEXT_I18N[loc] && P_TEXT_I18N[loc][text]) || text;
 }
-function pTo(opt, q, idx){
+function pTo(opt){
   if(opt==null || opt==="") return opt;
   const loc = pLocale();
   if(loc==="en") return opt;
-  if(q && Array.isArray(q.optionsEs) && idx!=null && q.optionsEs[idx]) return q.optionsEs[idx];
-  if(q && Array.isArray(q.labelsEs) && idx!=null && q.labelsEs[idx]) return q.labelsEs[idx];
   return (P_OPT_I18N[loc] && P_OPT_I18N[loc][opt]) || opt;
-}
-function pHelp(q){
-  if(!q || !q.help) return "";
-  const loc = pLocale();
-  if(loc!=="en" && q.helpEs) return q.helpEs;
-  return pTx(q.help);
 }
 function pLocaleMeta(){ return P_LOCALES.find(l=>l.id===pLocale()) || P_LOCALES[0]; }
 function pSetLocale(id){
@@ -3839,12 +3743,12 @@ function pChoice(labelHtml, {pressed=false, onclick}={}){
 function pQuestionHead(q, idx, total){
   const opt = q.required ? "" : `<div class="p-step"><span class="fw-badge fw-badge--secondary">${esc(pT("optional"))}</span></div>`;
   return `${pProgress(total, idx)}${opt}
-    <h1 class="t-h3${opt?" mt8":""}">${esc(pTx(q.text, q))}</h1>
-    ${q.help?`<p class="t-body dim mt8">${esc(pHelp(q))}</p>`:""}`;
+    <h1 class="t-h3${opt?" mt8":""}">${esc(pTx(q.text))}</h1>
+    ${q.help?`<p class="t-body dim mt8">${esc(pTx(q.help))}</p>`:""}`;
 }
 function pQuestionFields(q, {interactive=false, val}={}){
   const group = interactive ? "radiogroup" : "group";
-  const aria = esc(pTx(q.text, q));
+  const aria = esc(pTx(q.text));
   if(q.type==="yesno"){
     return `<div class="p-opts" role="${group}" aria-label="${aria}">
       ${[["Yes",pT("yes")],["No",pT("no")]].map(([value,label])=>pChoice(esc(label),{
@@ -3855,7 +3759,7 @@ function pQuestionFields(q, {interactive=false, val}={}){
   }
   if(q.type==="choice"){
     return `<div class="p-opts" role="${group}" aria-label="${aria}">
-      ${(q.options||[]).map((o,i)=>pChoice(esc(pTo(o, q, i)),{
+      ${(q.options||[]).map(o=>pChoice(esc(pTo(o)),{
         pressed: interactive && val===o,
         onclick: interactive ? `pAnswer('${q.id}',${esc(JSON.stringify(o))},this)` : null
       })).join("")}
@@ -3870,7 +3774,7 @@ function pQuestionFields(q, {interactive=false, val}={}){
           ? `type="button" aria-pressed="${on}" onclick="pAnswer('${q.id}',${n},this)"`
           : "";
         const raw = (q.labels && q.labels[n-1]) || "";
-        const label = raw ? `<span>${esc(pTo(raw, q, n-1))}</span>` : "";
+        const label = raw ? `<span>${esc(pTo(raw))}</span>` : "";
         return `<${tag} class="p-scale-btn" ${attrs}>${n}${label}</${tag}>`;
       }).join("")}
     </div>`;
@@ -4315,14 +4219,12 @@ function removeQ(id){
 let qn = 100;
 function addQ(type){
   const id = "q"+(++qn);
-  const q = {
+  qList().push({
     id, type, required:false, locked:false,
     text:"Untitled question",
     options: type==="choice" ? ["Option one","Option two"] : undefined,
     labels:  type==="scale"  ? ["Poor","","","","Excellent"] : undefined
-  };
-  ensureQuestionEs(q, {force:true});
-  qList().push(q);
+  });
   state.previewQId = id;
   syncQuestionCount(surveyIdFromHash() || "sv_post");
   toast("Question added.", true);
@@ -4335,7 +4237,7 @@ function addFromLib(id){
   if(already){ toast("That question is already in this survey."); return; }
   captureLibScroll(id);
   const qid = "q"+(++qn);
-  const q = {
+  qList().push({
     id: qid,
     text: l.text,
     type: l.type,
@@ -4344,9 +4246,7 @@ function addFromLib(id){
     lockNote: l.benchmark ? "Benchmark question — shared wording across participating agencies" : undefined,
     options: l.options ? [...l.options] : undefined,
     labels: l.type==="scale" ? ["Poor","","","","Excellent"] : undefined
-  };
-  ensureQuestionEs(q, {force:true});
-  qList().push(q);
+  });
   state.previewQId = qid;
   syncQuestionCount(surveyIdFromHash() || "sv_post");
   toast("Added from library.", true);
@@ -4435,13 +4335,9 @@ function renameDialog(id){
 function editQuestionDialog(id){
   const q = qList().find(x=>x.id===id);
   if(!q || q.locked) return "";
-  ensureQuestionEs(q);
   const opts = (q.options||[]).join("\n");
-  const optsEs = (q.optionsEs||[]).join("\n");
   const scaleLo = q.labels && q.labels[0] != null ? q.labels[0] : "Poor";
   const scaleHi = q.labels && q.labels[4] != null ? q.labels[4] : "Excellent";
-  const scaleLoEs = q.labelsEs && q.labelsEs[0] != null ? q.labelsEs[0] : translateToEs(scaleLo);
-  const scaleHiEs = q.labelsEs && q.labelsEs[4] != null ? q.labelsEs[4] : translateToEs(scaleHi);
   return `
   <div class="scrim" style="z-index:54"></div>
   <div class="dialog-wrap" onclick="closeEditQuestion()">
@@ -4450,13 +4346,8 @@ function editQuestionDialog(id){
       <h2 class="t-h4" id="edit-q-title">Edit question</h2>
       <p class="t-subtle dim mt8">${esc(TYPE_LABEL[q.type]||q.type)}</p>
       <div class="edit-q-field">
-        <label class="t-subtle" for="edit-q-text">Question (English)</label>
+        <label class="t-subtle" for="edit-q-text">Question</label>
         <textarea class="fw-input" id="edit-q-text" rows="3">${esc(q.text)}</textarea>
-      </div>
-      <div class="edit-q-field">
-        <label class="t-subtle" for="edit-q-text-es">Question (Spanish)</label>
-        <textarea class="fw-input" id="edit-q-text-es" rows="3">${esc(q.textEs||"")}</textarea>
-        <p class="t-detail dim mt8">Shown when the patient picks Español. Auto-generated when you add or change the English text.</p>
       </div>
       <div class="edit-q-switch">
         <div>
@@ -4468,31 +4359,18 @@ function editQuestionDialog(id){
       </div>
       ${q.type==="choice"?`
       <div class="edit-q-field">
-        <label class="t-subtle" for="edit-q-options">Options (English)</label>
+        <label class="t-subtle" for="edit-q-options">Options</label>
         <textarea class="fw-input" id="edit-q-options" rows="5">${esc(opts)}</textarea>
         <p class="t-detail dim mt8">One option per line.</p>
-      </div>
-      <div class="edit-q-field">
-        <label class="t-subtle" for="edit-q-options-es">Options (Spanish)</label>
-        <textarea class="fw-input" id="edit-q-options-es" rows="5">${esc(optsEs)}</textarea>
-        <p class="t-detail dim mt8">One option per line, matching the English list.</p>
       </div>`:""}
       ${q.type==="scale"?`
       <div class="edit-q-field">
-        <label class="t-subtle" for="edit-q-scale-lo">Low label (1) — English</label>
+        <label class="t-subtle" for="edit-q-scale-lo">Low label (1)</label>
         <input class="fw-input" id="edit-q-scale-lo" value="${esc(scaleLo)}">
       </div>
       <div class="edit-q-field">
-        <label class="t-subtle" for="edit-q-scale-lo-es">Low label (1) — Spanish</label>
-        <input class="fw-input" id="edit-q-scale-lo-es" value="${esc(scaleLoEs)}">
-      </div>
-      <div class="edit-q-field">
-        <label class="t-subtle" for="edit-q-scale-hi">High label (5) — English</label>
+        <label class="t-subtle" for="edit-q-scale-hi">High label (5)</label>
         <input class="fw-input" id="edit-q-scale-hi" value="${esc(scaleHi)}">
-      </div>
-      <div class="edit-q-field">
-        <label class="t-subtle" for="edit-q-scale-hi-es">High label (5) — Spanish</label>
-        <input class="fw-input" id="edit-q-scale-hi-es" value="${esc(scaleHiEs)}">
       </div>`:""}
       <div class="dialog-actions">
         <button class="fw-btn fw-btn--outline" type="button" onclick="closeEditQuestion()">Cancel</button>
@@ -4525,44 +4403,24 @@ function confirmEditQuestion(){
   const q = qList().find(x=>x.id===id);
   if(!q || q.locked){ state.editQuestion = null; render(); return; }
   const textEl = document.getElementById("edit-q-text");
-  const textEsEl = document.getElementById("edit-q-text-es");
   const reqEl = document.getElementById("edit-q-required");
   const text = ((textEl && textEl.value) || "").trim();
   if(!text){ toast("Write the question text."); if(textEl) textEl.focus(); return; }
-  const prevText = q.text;
-  const prevEs = q.textEs;
   q.text = text;
   q.required = !!(reqEl && reqEl.checked);
-  let textEs = ((textEsEl && textEsEl.value) || "").trim();
-  if(!textEs || (text!==prevText && textEs===prevEs)){
-    textEs = translateToEs(text);
-  }
-  q.textEs = textEs || translateToEs(text);
   if(q.type==="choice"){
     const optsEl = document.getElementById("edit-q-options");
-    const optsEsEl = document.getElementById("edit-q-options-es");
     const lines = ((optsEl && optsEl.value) || "").split(/\n/).map(s=>s.trim()).filter(Boolean);
     if(lines.length<2){ toast("Add at least two options."); if(optsEl) optsEl.focus(); return; }
     q.options = lines;
-    let linesEs = ((optsEsEl && optsEsEl.value) || "").split(/\n/).map(s=>s.trim()).filter(Boolean);
-    if(linesEs.length!==lines.length){
-      linesEs = lines.map(o=>translateToEs(o));
-    }
-    q.optionsEs = linesEs;
   }
   if(q.type==="scale"){
     const lo = document.getElementById("edit-q-scale-lo");
     const hi = document.getElementById("edit-q-scale-hi");
-    const loEs = document.getElementById("edit-q-scale-lo-es");
-    const hiEs = document.getElementById("edit-q-scale-hi-es");
     const loT = ((lo && lo.value) || "").trim() || "Poor";
     const hiT = ((hi && hi.value) || "").trim() || "Excellent";
     q.labels = [loT, "", "", "", hiT];
-    const loEsT = ((loEs && loEs.value) || "").trim() || translateToEs(loT);
-    const hiEsT = ((hiEs && hiEs.value) || "").trim() || translateToEs(hiT);
-    q.labelsEs = [loEsT, "", "", "", hiEsT];
   }
-  ensureQuestionEs(q, {force:false});
   const sid = surveyIdFromHash();
   const s = sid && state.surveys.find(x=>x.id===sid);
   if(s) s.updated = NOW;
@@ -4923,7 +4781,6 @@ window.addEventListener("hashchange", ()=>{
   }
   state.deleteSurvey = null;
   state.renameSurvey = null;
-  state.editQuestion = null;
   state.editingSurveyName = null;
   state.surveyMenu = null;
   state.previewSurvey = false;
