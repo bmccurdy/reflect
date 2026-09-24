@@ -440,7 +440,8 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .tbl--surveys .sv-status,
 .tbl--surveys .sv-responses,
 .tbl--surveys .sv-rate,
-.tbl--surveys .sv-updated{vertical-align:middle}
+.tbl--surveys .sv-updated,
+.tbl--surveys .sv-schedule{vertical-align:middle}
 .tbl--alerts td{vertical-align:middle}
 .star-btn{color:var(--muted-foreground)}
 .star-btn:hover{color:var(--fw-gold)}
@@ -646,6 +647,8 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 .ans:last-child{border-bottom:0}
 .num-link{color:var(--primary);font-weight:700;text-decoration:none}
 .num-link:hover{text-decoration:underline}
+.num-link--muted{color:var(--muted-foreground);font-weight:600}
+.num-link--muted:hover{color:var(--foreground)}
 button.num-link{
   background:none;border:0;padding:0;margin:0;font:inherit;cursor:pointer;
   color:var(--primary);font-weight:700;
@@ -733,6 +736,16 @@ button.num-link{
   margin-bottom:16px;
 }
 .dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:24px;flex-wrap:wrap}
+.dialog-actions--split{
+  justify-content:space-between;align-items:center;flex-wrap:nowrap;gap:12px;
+}
+.dialog-actions__end{display:flex;align-items:center;gap:8px;flex-shrink:0}
+@media (max-width:480px){
+  .dialog-actions--split{flex-wrap:wrap}
+  .dialog-actions--split .fw-btn--ghost{order:3;width:100%}
+  .dialog-actions__end{width:100%;justify-content:stretch}
+  .dialog-actions__end .fw-btn{flex:1}
+}
 .dialog--edit-q{width:min(520px,100%)}
 .edit-q-switch{
   display:flex;align-items:center;justify-content:space-between;gap:16px;
@@ -856,6 +869,44 @@ button.num-link{
 .trigger-summary-main{flex:1 1 180px;min-width:0}
 .trigger-summary-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .trigger-summary-warn{flex:1 1 100%;font-size:13px;line-height:20px;color:var(--muted-foreground)}
+.survey-lock-banner{margin-bottom:24px}
+.survey-lock-banner .fw-alert__actions{
+  display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;
+}
+.schedule-card .seg{margin-top:12px}
+.schedule-fields{display:grid;gap:12px;margin-top:16px}
+.schedule-fields .fw-field{min-width:0}
+.schedule-fields--2{grid-template-columns:1fr 1fr}
+@media (max-width:720px){
+  .schedule-fields--2{grid-template-columns:1fr}
+}
+.schedule-duration-select .fw-select__trigger{
+  height:40px;padding:0 36px 0 12px;font-size:14px;line-height:20px;
+}
+.schedule-duration-select .fw-select__chevron{
+  color:var(--muted-foreground);
+  transition:transform var(--dur-micro) var(--ease-out);
+}
+.schedule-duration-select.is-open .fw-select__chevron{
+  transform:translateY(-50%) rotate(180deg);
+}
+.schedule-duration-select .fw-select__menu{z-index:40}
+.schedule-fields input[type="date"].fw-input{
+  height:40px;min-height:40px;padding:0 12px;font-size:14px;line-height:20px;
+  color:var(--foreground);background:var(--card);
+  border:1px solid var(--border);border-radius:var(--r-md);
+  font-family:var(--font-sans);
+}
+.schedule-fields input[type="date"].fw-input:hover{border-color:var(--muted-foreground)}
+.schedule-fields input[type="date"].fw-input:focus,
+.schedule-fields input[type="date"].fw-input:focus-visible{
+  outline:none;border-color:var(--primary);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 18%,transparent);
+}
+.schedule-readonly{
+  margin-top:12px;padding:12px 14px;border:1px solid var(--border);
+  border-radius:var(--r-md);background:var(--muted);
+}
 .qcard{
   border:1px solid var(--border);border-radius:var(--r-lg);background:var(--card);
   color:var(--card-foreground);
@@ -1338,6 +1389,7 @@ html[data-theme="dark"] .patient{
   .tbl--surveys .sv-responses{order:7;margin-left:40px}
   .tbl--surveys .sv-rate{order:8}
   .tbl--surveys .sv-updated{order:9}
+  .tbl--surveys .sv-schedule{display:none}
   .tbl--surveys .sv-responses[data-live="yes"]::after{content:" responses"}
   .tbl--surveys .sv-rate::before,
   .tbl--surveys .sv-updated::before{
@@ -1673,10 +1725,131 @@ const ALERTS = [
 ];
 
 const SURVEYS = [
-  { id:"sv_post", name:"Post-transport experience", status:"Live", triggerId:"43063", questions:7, responses:84, rate:31, sent:271, updated:mins(4320) },
-  { id:"sv_notrans", name:"Refused transport follow-up", status:"Live", triggerId:"78396", questions:4, responses:19, rate:22, sent:86, updated:mins(11400) },
-  { id:"sv_q3", name:"Q3 community perception", status:"Draft", triggerId:null, questions:9, responses:0, rate:0, sent:0, updated:mins(220) }
+  { id:"sv_post", name:"Post-transport experience", status:"Live", triggerId:"43063",
+    familyId:"sv_post", version:1, clonedFromId:null,
+    schedule:{ mode:"ongoing", durationDays:30, startAt:null, endAt:null },
+    publishedAt:mins(4320), endsAt:null, stoppedAt:null,
+    questions:7, responses:84, rate:31, sent:271, updated:mins(4320) },
+  { id:"sv_notrans", name:"Refused transport follow-up", status:"Live", triggerId:"78396",
+    familyId:"sv_notrans", version:1, clonedFromId:null,
+    schedule:{ mode:"duration", durationDays:90, startAt:null, endAt:null },
+    publishedAt:mins(11400), endsAt:new Date("2026-03-15T00:00:00"), stoppedAt:null,
+    questions:4, responses:19, rate:22, sent:86, updated:mins(11400) },
+  { id:"sv_q3", name:"Q3 community perception", status:"Draft", triggerId:null,
+    familyId:"sv_q3", version:1, clonedFromId:null,
+    schedule:{ mode:"duration", durationDays:30, startAt:null, endAt:null },
+    publishedAt:null, endsAt:null, stoppedAt:null,
+    questions:9, responses:0, rate:0, sent:0, updated:mins(220) }
 ];
+
+function defaultSchedule(){
+  return { mode:"ongoing", durationDays:30, startAt:null, endAt:null };
+}
+function normalizeSurvey(s){
+  const out = { ...s };
+  out.familyId = out.familyId || out.id;
+  out.version = out.version || 1;
+  out.clonedFromId = out.clonedFromId != null ? out.clonedFromId : null;
+  out.schedule = { ...defaultSchedule(), ...(out.schedule||{}) };
+  if(out.schedule.startAt && !(out.schedule.startAt instanceof Date)){
+    out.schedule.startAt = new Date(out.schedule.startAt);
+  }
+  if(out.schedule.endAt && !(out.schedule.endAt instanceof Date)){
+    out.schedule.endAt = new Date(out.schedule.endAt);
+  }
+  if(out.publishedAt && !(out.publishedAt instanceof Date)) out.publishedAt = new Date(out.publishedAt);
+  if(out.endsAt && !(out.endsAt instanceof Date)) out.endsAt = new Date(out.endsAt);
+  if(out.stoppedAt && !(out.stoppedAt instanceof Date)) out.stoppedAt = new Date(out.stoppedAt);
+  out.publishedAt = out.publishedAt || null;
+  out.endsAt = out.endsAt != null ? out.endsAt : null;
+  out.stoppedAt = out.stoppedAt || null;
+  out.priorTriggerId = out.priorTriggerId != null
+    ? String(out.priorTriggerId).replace(/^#/,"")
+    : null;
+  return out;
+}
+function isSurveyLocked(s){
+  return !!s && s.status!=="Draft";
+}
+function isSurveyCollecting(s){
+  return !!s && s.status==="Live";
+}
+function cloneSchedule(src){
+  const base = { ...defaultSchedule(), ...(src||{}) };
+  return {
+    mode: base.mode==="range"||base.mode==="duration" ? base.mode : "ongoing",
+    durationDays: Math.max(1, Number(base.durationDays)||30),
+    startAt: base.startAt ? new Date(base.startAt) : null,
+    endAt: base.endAt ? new Date(base.endAt) : null
+  };
+}
+function resolveEndsAt(schedule, publishedAt){
+  if(!schedule || schedule.mode==="ongoing") return null;
+  if(schedule.mode==="duration"){
+    const days = Math.max(1, Number(schedule.durationDays)||30);
+    const start = publishedAt instanceof Date ? publishedAt : NOW;
+    return new Date(start.getTime() + days*86400000);
+  }
+  if(schedule.mode==="range"){
+    return schedule.endAt ? new Date(schedule.endAt) : null;
+  }
+  return null;
+}
+function toDateInputValue(d){
+  if(!d) return "";
+  const x = d instanceof Date ? d : new Date(d);
+  if(Number.isNaN(x.getTime())) return "";
+  const y = x.getFullYear();
+  const m = String(x.getMonth()+1).padStart(2,"0");
+  const day = String(x.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+function parseDateInput(v){
+  if(!v) return null;
+  const parts = String(v).split("-").map(Number);
+  if(parts.length!==3 || parts.some(n=>!Number.isFinite(n))) return null;
+  return new Date(parts[0], parts[1]-1, parts[2]);
+}
+function formatScheduleSummary(s){
+  if(!s) return "";
+  const sch = s.schedule || defaultSchedule();
+  if(s.status==="Live"){
+    if(!s.endsAt) return "Ongoing";
+    return `Ends ${day(s.endsAt)}`;
+  }
+  if(s.status==="Completed"){
+    return s.endsAt ? `Ended ${day(s.endsAt)}` : "Completed";
+  }
+  if(s.status==="Stopped"){
+    return s.stoppedAt ? `Stopped ${day(s.stoppedAt)}` : "Stopped";
+  }
+  if(sch.mode==="ongoing") return "Ongoing when published";
+  if(sch.mode==="duration") return `${sch.durationDays||30} days after publish`;
+  if(sch.mode==="range"){
+    const a = sch.startAt ? day(sch.startAt) : "Publish date";
+    const b = sch.endAt ? day(sch.endAt) : "—";
+    return `${a} – ${b}`;
+  }
+  return "";
+}
+const expiredToastShown = new Set();
+function expireDueSurveys(){
+  const done = [];
+  state.surveys.forEach(s=>{
+    if(s.status!=="Live" || !s.endsAt) return;
+    const end = s.endsAt instanceof Date ? s.endsAt : new Date(s.endsAt);
+    if(end.getTime() > NOW.getTime()) return;
+    s.status = "Completed";
+    releaseSurveyTrigger(s);
+    s.stoppedAt = end;
+    s.updated = NOW;
+    done.push(s.name);
+    if(!expiredToastShown.has(s.id)){
+      expiredToastShown.add(s.id);
+    }
+  });
+  return done;
+}
 
 /* FirstWatch trigger / watch catalog — surveys bind to these, not encounter call IDs */
 const TRIGGER_DEFS = [
@@ -1939,7 +2112,7 @@ const state = {
   route:"#/",
   theme:"light",
   alerts: ALERTS.map(a=>({...a, log:[...a.log]})),
-  surveys: SURVEYS.map(s=>({...s})),
+  surveys: SURVEYS.map(s=>normalizeSurvey(s)),
   surveyQuestions: Object.fromEntries(Object.entries(SURVEY_BANK).map(([k,qs])=>[k, qs.map(q=>({...q}))])),
   responses: Object.fromEntries(Object.entries(RESPONSES).map(([k,rows])=>[k, rows.map(r=>({...r, answers:{...r.answers}}))])),
   openAlert:null,
@@ -1950,10 +2123,13 @@ const state = {
   triggerSelectActive:0,
   triggerSelectQuery:"",
   triggerSelectShowUsed:false,
+  scheduleDurationOpen:false,
+  scheduleDurationActive:0,
   responseFilter:"all",
   responseLimit:11,
   drawerKey:null,
   deleteSurvey:null,
+  stopSurvey:null,
   renameSurvey:null,
   editQuestion:null,
   editingSurveyName:null,
@@ -2104,6 +2280,7 @@ function shell(body){
   ${state.openResponse?responseDrawer(state.openResponse):""}
   ${state.openTrigger?triggerDrawer(state.openTrigger):""}
   ${state.deleteSurvey?deleteConfirm(state.deleteSurvey):""}
+  ${state.stopSurvey?stopSurveyDialog(state.stopSurvey):""}
   ${state.renameSurvey?renameDialog(state.renameSurvey):""}
   ${state.editQuestion?editQuestionDialog(state.editQuestion):""}
   ${state.previewSurvey?surveyPreview():""}
@@ -2744,6 +2921,29 @@ function formatTriggerLabel(t){
   if(!t) return "";
   return `[#${t.id}] ${t.name}`;
 }
+function surveyActiveTriggerId(s){
+  const n = String(s?.triggerId||"").replace(/^#/,"");
+  return n || null;
+}
+function surveyPriorTriggerId(s){
+  const n = String(s?.priorTriggerId||"").replace(/^#/,"");
+  return n || null;
+}
+/** Active hold, else released history for ended versions. */
+function surveyDisplayTriggerId(s){
+  return surveyActiveTriggerId(s) || surveyPriorTriggerId(s);
+}
+function surveyTriggerReleased(s){
+  return !!s && !surveyActiveTriggerId(s) && !!surveyPriorTriggerId(s);
+}
+/** Clears the live hold but keeps priorTriggerId for display. @returns {string|null} freed id */
+function releaseSurveyTrigger(s){
+  if(!s) return null;
+  const freed = surveyActiveTriggerId(s);
+  if(freed) s.priorTriggerId = freed;
+  s.triggerId = null;
+  return freed;
+}
 function patientTriggerDefs(){
   return TRIGGER_DEFS.filter(t=>t.patientSurvey!==false);
 }
@@ -3008,11 +3208,32 @@ function previewQKey(e,id){
 }
 
 function surveyStatusBadge(s){
-  return `<span class="fw-badge ${s.status==="Live"?"fw-badge--success":"fw-badge--secondary"}">${
-    s.status==="Live"?I.checkCircle(12):I.pencil(12)}${s.status}</span>`;
+  if(s.status==="Live") return `<span class="fw-badge fw-badge--success">${I.checkCircle(12)}Live</span>`;
+  if(s.status==="Stopped") return `<span class="fw-badge fw-badge--destructive">${I.minus(12)}Stopped</span>`;
+  if(s.status==="Completed") return `<span class="fw-badge fw-badge--secondary">${I.check(12)}Completed</span>`;
+  return `<span class="fw-badge fw-badge--secondary">${I.pencil(12)}Draft</span>`;
+}
+function surveyTriggerCell(s){
+  const id = surveyDisplayTriggerId(s);
+  if(!id) return `<span class="dim">—</span>`;
+  const t = findTriggerDef(id);
+  const label = `Open trigger ${formatTriggerId(id)}${t?`, ${t.name}`:""}`;
+  return `<button type="button" class="num-link" onclick="openTrigger('${esc(id)}')" aria-label="${esc(label)}">${esc(formatTriggerId(id))}</button>`;
+}
+function surveyTriggerMeta(s){
+  const id = surveyDisplayTriggerId(s);
+  if(!id) return "";
+  const t = findTriggerDef(id);
+  const released = surveyTriggerReleased(s);
+  const idBtn = `<button type="button" class="num-link${released?" num-link--muted":""}" onclick="openTrigger('${esc(id)}')">${esc(formatTriggerId(id))}</button>`;
+  if(released && t){
+    return ` · ${idBtn} <span class="dim">${esc(t.name)}</span>`;
+  }
+  if(t) return ` · ${idBtn}`;
+  return ` · <span class="mono${released?" dim":""}">${esc(formatTriggerId(id))}</span>`;
 }
 function responseCountLink(s){
-  if(s.status!=="Live") return `<span class="dim">—</span>`;
+  if(s.status!=="Live" && s.status!=="Stopped" && s.status!=="Completed") return `<span class="dim">—</span>`;
   const n = s.responses;
   const label = n===1 ? "1 response" : n+" responses";
   return `<a class="num-link" href="#/surveys/${s.id}/responses" aria-label="${label}">${n}</a>`;
@@ -3127,44 +3348,251 @@ function triggerSelect(s){
   </div>`;
 }
 function triggerSummary(s){
-  const t = findTriggerDef(s.triggerId);
+  const id = surveyDisplayTriggerId(s);
+  const t = findTriggerDef(id);
+  const locked = isSurveyLocked(s);
+  const released = surveyTriggerReleased(s);
   if(!t){
-    return `<div class="trigger-summary" role="status">
+    return `<div class="trigger-summary${released?" trigger-summary--released":""}" role="status">
       <div class="trigger-summary-main">
-        <div class="t-pui" style="font-weight:700">Trigger ${esc(formatTriggerId(s.triggerId))} unavailable</div>
-        <p class="t-subtle dim mt8">Choose another trigger from the catalog before publishing.</p>
+        <div class="t-pui${released?" dim":""}" style="font-weight:700">Trigger ${esc(formatTriggerId(id))} unavailable</div>
+        <p class="t-subtle dim mt8">${released
+          ? "Previously linked · this trigger is no longer in the catalog."
+          : locked?"This trigger is no longer in the catalog.":"Choose another trigger from the catalog before publishing."}</p>
       </div>
     </div>`;
   }
   const others = surveysUsingTrigger(t.id, s.id);
   const inN = INCLUSION_RULES.length;
   const outN = EXCLUSION_RULES.length;
-  return `<div class="trigger-summary" role="status">
+  return `<div class="trigger-summary${released?" trigger-summary--released":""}" role="status">
     <div class="trigger-summary-main">
-      <div class="t-pui" style="font-weight:700">${esc(formatTriggerLabel(t))}</div>
-      <p class="t-subtle dim mt8">${esc(t.type)} · ${inN} inclusion · ${outN} exclusion</p>
+      <div class="t-pui${released?" dim":""}" style="font-weight:700">${esc(formatTriggerLabel(t))}</div>
+      <p class="t-subtle dim mt8">${released
+        ? "Previously linked · released when this version stopped collecting."
+        : `${esc(t.type)} · ${inN} inclusion · ${outN} exclusion`}</p>
     </div>
     <div class="trigger-summary-actions">
       <button type="button" class="fw-btn fw-btn--outline fw-btn--sm" onclick="openTrigger('${t.id}')">${I.eye(14)} View criteria</button>
-      ${s.status!=="Live"?`<button type="button" class="fw-btn fw-btn--ghost fw-btn--sm" onclick="clearSurveyTrigger('${s.id}')">Clear</button>`:""}
+      ${!locked && !released?`<button type="button" class="fw-btn fw-btn--ghost fw-btn--sm" onclick="clearSurveyTrigger('${s.id}')">Clear</button>`:""}
     </div>
-    ${others.length?`<p class="trigger-summary-warn">Conflict: also linked to ${others.map(o=>esc(o.name)).join(", ")}. Only one survey should use this trigger.</p>`:""}
+    ${!released && others.length?`<p class="trigger-summary-warn">Conflict: also linked to ${others.map(o=>esc(o.name)).join(", ")}. Only one survey should use this trigger.</p>`:""}
   </div>`;
 }
 function triggerAssocCard(s){
+  const locked = isSurveyLocked(s);
+  const activeId = surveyActiveTriggerId(s);
+  const displayId = surveyDisplayTriggerId(s);
   return `
   <div class="fw-card trigger-assoc">
     <div class="between between--inline" style="margin-bottom:16px">
       <div>
         <h2 class="t-h4">Associated trigger</h2>
-        <p class="t-subtle dim mt8">Which FirstWatch trigger queues invitations for this survey.</p>
+        <p class="t-subtle dim mt8">${locked
+          ? "Trigger used for invitations while this version was collecting."
+          : "Which FirstWatch trigger queues invitations for this survey."}</p>
       </div>
-      ${s.triggerId
+      ${activeId
         ? `<span class="fw-badge fw-badge--success">${I.checkCircle(12)} Linked</span>`
-        : `<span class="fw-badge fw-badge--outline">Required to publish</span>`}
+        : locked
+          ? `<span class="fw-badge fw-badge--secondary">Released</span>`
+          : `<span class="fw-badge fw-badge--outline">Required to publish</span>`}
     </div>
-    ${triggerSelect(s)}
-    ${s.triggerId?triggerSummary(s):""}
+    ${locked
+      ? (displayId
+          ? triggerSummary(s)
+          : `<p class="t-subtle dim">No trigger is held by this version.</p>`)
+      : `${triggerSelect(s)}${activeId?triggerSummary(s):""}`}
+  </div>`;
+}
+function scheduleDurationOptions(sch){
+  const days = Math.max(1, Number(sch.durationDays)||30);
+  const presets = [14,30,90];
+  const rows = presets.map(d=>({ value:String(d), label:`${d} days`, days:d }));
+  if(!presets.includes(days)){
+    rows.push({ value:String(days), label:`${days} days`, days, customValue:true });
+  }
+  rows.push({ value:"custom", label:"Custom…", days:null });
+  return rows;
+}
+function scheduleDurationSelect(s){
+  const sch = s.schedule || defaultSchedule();
+  const open = !!state.scheduleDurationOpen;
+  const rows = scheduleDurationOptions(sch);
+  const days = Math.max(1, Number(sch.durationDays)||30);
+  const selectedIdx = Math.max(0, rows.findIndex(r=>r.value!=="custom" && Number(r.days)===days));
+  const active = Math.min(rows.length-1, Math.max(0, state.scheduleDurationActive|0));
+  const shown = rows[selectedIdx] ? rows[selectedIdx].label : `${days} days`;
+  return `<div class="fw-field">
+    <label class="fw-label" id="sched-duration-label" for="sched-duration-trigger">Run for</label>
+    <div class="fw-select schedule-duration-select${open?" is-open":""}">
+      <button type="button" class="fw-select__trigger" id="sched-duration-trigger"
+        aria-haspopup="listbox" aria-expanded="${open}"
+        aria-labelledby="sched-duration-label sched-duration-trigger"
+        aria-controls="sched-duration-list"
+        ${open?`aria-activedescendant="sched-duration-opt-${active}"`:""}
+        onclick="scheduleDurationToggle(event)"
+        onkeydown="scheduleDurationKey(event)">${esc(shown)}</button>
+      <span class="fw-select__chevron" aria-hidden="true">${I.down(16)}</span>
+      ${open?`<div class="fw-select__menu" id="sched-duration-list" role="listbox" aria-labelledby="sched-duration-label">
+        ${rows.map((r,i)=>{
+          const on = r.value!=="custom" && Number(r.days)===days;
+          return `<div class="fw-select__opt" role="option" id="sched-duration-opt-${i}"
+            aria-selected="${on}"${i===active?" data-active":""}
+            onmousedown="event.preventDefault()"
+            onclick="scheduleDurationPick('${esc(r.value)}')">${esc(r.label)}${on?I.check(16):""}</div>`;
+        }).join("")}
+      </div>`:""}
+    </div>
+  </div>`;
+}
+function scheduleDurationPaint(focus){
+  const wrap = document.querySelector(".schedule-duration-select");
+  if(!wrap) return;
+  const s = currentSurvey();
+  if(!s) return;
+  const field = wrap.closest(".fw-field");
+  const host = field || wrap;
+  const tpl = document.createElement("template");
+  tpl.innerHTML = scheduleDurationSelect(s).trim();
+  host.replaceWith(tpl.content.firstElementChild);
+  if(focus!==false) document.getElementById("sched-duration-trigger")?.focus();
+  if(state.scheduleDurationOpen){
+    document.querySelector("#sched-duration-list .fw-select__opt[data-active]")?.scrollIntoView({block:"nearest"});
+  }
+}
+function scheduleDurationToggle(e){
+  if(e){ e.preventDefault(); e.stopPropagation(); }
+  if(isSurveyLocked(currentSurvey())) return;
+  state.scheduleDurationOpen = !state.scheduleDurationOpen;
+  if(state.scheduleDurationOpen){
+    const s = currentSurvey();
+    const sch = s?.schedule || defaultSchedule();
+    const rows = scheduleDurationOptions(sch);
+    const days = Math.max(1, Number(sch.durationDays)||30);
+    const idx = rows.findIndex(r=>r.value!=="custom" && Number(r.days)===days);
+    state.scheduleDurationActive = idx>=0 ? idx : 0;
+  }
+  scheduleDurationPaint();
+}
+function scheduleDurationPick(value){
+  state.scheduleDurationOpen = false;
+  const s = currentSurvey();
+  if(!s) return;
+  setSurveyDurationDays(s.id, value);
+}
+function scheduleDurationKey(e){
+  const open = !!state.scheduleDurationOpen;
+  const s = currentSurvey();
+  const rows = scheduleDurationOptions(s?.schedule || defaultSchedule());
+  const n = rows.length;
+  if(e.key==="Escape"){
+    if(open){ e.preventDefault(); state.scheduleDurationOpen = false; scheduleDurationPaint(); }
+    return;
+  }
+  if(e.key==="ArrowDown" || e.key==="ArrowUp"){
+    e.preventDefault();
+    if(!open){ scheduleDurationToggle(e); return; }
+    const delta = e.key==="ArrowDown" ? 1 : -1;
+    state.scheduleDurationActive = (state.scheduleDurationActive + delta + n) % n;
+    scheduleDurationPaint();
+    return;
+  }
+  if(e.key==="Home" || e.key==="End"){
+    if(!open) return;
+    e.preventDefault();
+    state.scheduleDurationActive = e.key==="Home" ? 0 : n-1;
+    scheduleDurationPaint();
+    return;
+  }
+  if((e.key==="Enter" || e.key===" ") && open){
+    e.preventDefault();
+    scheduleDurationPick(rows[state.scheduleDurationActive].value);
+  }
+}
+function scheduleCard(s){
+  const locked = isSurveyLocked(s);
+  const sch = s.schedule || defaultSchedule();
+  if(locked){
+    return `
+    <div class="fw-card sec schedule-card">
+      <div class="between between--inline">
+        <div>
+          <h2 class="t-h4">Schedule</h2>
+          <p class="t-subtle dim mt8">When this version collected responses.</p>
+        </div>
+        ${surveyStatusBadge(s)}
+      </div>
+      <div class="schedule-readonly">
+        <div class="t-pui" style="font-weight:700">${esc(formatScheduleSummary(s))}</div>
+        <p class="t-subtle dim mt8">
+          ${s.publishedAt?`Published ${day(s.publishedAt)}`: "Not published"}
+          ${s.version?` · v${s.version}`:""}
+          ${s.clonedFromId?` · based on prior version`:""}
+        </p>
+      </div>
+    </div>`;
+  }
+  return `
+  <div class="fw-card sec schedule-card">
+    <div class="between between--inline">
+      <div>
+        <h2 class="t-h4">Schedule</h2>
+        <p class="t-subtle dim mt8">How long this survey should collect responses after publish.</p>
+      </div>
+    </div>
+    <div class="seg" role="group" aria-label="Schedule mode">
+      ${[["ongoing","Ongoing"],["duration","For a period"],["range","Date range"]].map(([k,l])=>`
+        <button type="button" aria-pressed="${sch.mode===k}" onclick="setSurveyScheduleMode('${s.id}','${k}')">${l}</button>
+      `).join("")}
+    </div>
+    ${sch.mode==="duration"?`
+    <div class="schedule-fields">
+      ${scheduleDurationSelect(s)}
+      <p class="t-detail dim">Ends ${Number(sch.durationDays)||30} days after the publish date.</p>
+    </div>`:""}
+    ${sch.mode==="range"?`
+    <div class="schedule-fields schedule-fields--2">
+      <div class="fw-field">
+        <label class="fw-label" for="sched-start">Start date</label>
+        <input class="fw-input" id="sched-start" type="date" value="${esc(toDateInputValue(sch.startAt)||toDateInputValue(NOW))}"
+          onchange="setSurveyScheduleDate('${s.id}','startAt',this.value)">
+      </div>
+      <div class="fw-field">
+        <label class="fw-label" for="sched-end">End date</label>
+        <input class="fw-input" id="sched-end" type="date" value="${esc(toDateInputValue(sch.endAt))}"
+          onchange="setSurveyScheduleDate('${s.id}','endAt',this.value)">
+      </div>
+    </div>`:""}
+    ${sch.mode==="ongoing"?`<p class="t-subtle dim mt16">Runs until you stop it. The trigger stays linked while Live.</p>`:""}
+  </div>`;
+}
+function surveyLockBanner(s){
+  if(!isSurveyLocked(s)) return "";
+  if(s.status==="Live"){
+    return `
+    <div class="fw-alert fw-alert--info survey-lock-banner" role="status">
+      <span class="fw-alert__icon">${I.lock(20)}</span>
+      <div>
+        <p class="fw-alert__desc"><strong>Live — editing locked.</strong> This survey is collecting responses. Questions, trigger, and schedule can’t change on this version.</p>
+        <div class="fw-alert__actions">
+          <button type="button" class="fw-btn fw-btn--outline fw-btn--sm" onclick="askStopSurvey('${s.id}')">Stop survey</button>
+          <button type="button" class="fw-btn fw-btn--primary fw-btn--sm" onclick="duplicateAndEdit('${s.id}')">${I.copy(14)} Duplicate &amp; edit</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  const label = s.status==="Completed" ? "Completed" : "Stopped";
+  return `
+  <div class="fw-alert fw-alert--warning survey-lock-banner" role="status">
+    <span class="fw-alert__icon">${I.lock(20)}</span>
+    <div>
+      <p class="fw-alert__desc"><strong>${label} — read only.</strong> ${esc(formatScheduleSummary(s))}. ${surveyActiveTriggerId(s)?"":surveyPriorTriggerId(s)?"The trigger was released for a new draft.":"No trigger was linked."}</p>
+      <div class="fw-alert__actions">
+        <button type="button" class="fw-btn fw-btn--primary fw-btn--sm" onclick="duplicateAndEdit('${s.id}')">${I.copy(14)} Duplicate &amp; edit</button>
+        ${s.clonedFromId?`<a class="fw-btn fw-btn--outline fw-btn--sm" href="#/surveys/${s.clonedFromId}">View prior version</a>`:""}
+      </div>
+    </div>
   </div>`;
 }
 function triggerSelectPaint(focusSearch){
@@ -3235,6 +3663,7 @@ function triggerSelectPaintList(){
 }
 function triggerSelectToggle(e){
   if(e){ e.preventDefault(); e.stopPropagation(); }
+  if(isSurveyLocked(currentSurvey())) return;
   state.triggerSelectOpen = !state.triggerSelectOpen;
   if(state.triggerSelectOpen){
     state.triggerSelectQuery = "";
@@ -3276,6 +3705,7 @@ function triggerSelectTaken(id){
 function triggerSelectPick(id){
   const s = currentSurvey();
   if(!s) return;
+  if(isSurveyLocked(s)){ toast("This version is locked."); return; }
   const next = String(id||"").replace(/^#/,"");
   const def = findTriggerDef(next);
   if(!def || def.patientSurvey===false){
@@ -3292,12 +3722,12 @@ function triggerSelectPick(id){
   state.triggerSelectOpen = false;
   state.triggerSelectQuery = "";
   state.triggerSelectShowUsed = false;
-  toast(s.status==="Live" ? "Trigger updated. New invitations use this trigger." : "Trigger linked.", true);
+  toast("Trigger linked.", true);
   render();
 }
 function clearSurveyTrigger(id){
   const s = state.surveys.find(x=>x.id===id) || currentSurvey();
-  if(!s || s.status==="Live") return;
+  if(!s || isSurveyLocked(s)) return;
   s.triggerId = null;
   s.updated = NOW;
   state.triggerSelectOpen = false;
@@ -3358,6 +3788,10 @@ function triggerSelectKey(e){
 function publishSurvey(id){
   const s = state.surveys.find(x=>x.id===id);
   if(!s) return;
+  if(isSurveyLocked(s)){
+    toast("This version is locked. Duplicate & edit to make changes.");
+    return;
+  }
   if(!s.triggerId || !findTriggerDef(s.triggerId)){
     toast("Choose a trigger before publishing.");
     state.triggerSelectOpen = true;
@@ -3372,25 +3806,133 @@ function publishSurvey(id){
     });
     return;
   }
-  const wasLive = s.status==="Live";
+  const owner = triggerOwner(s.triggerId, s.id);
+  if(owner){
+    toast(`Trigger already linked to ${owner.name}.`);
+    return;
+  }
+  const sch = s.schedule || defaultSchedule();
+  if(sch.mode==="duration" && !(Number(sch.durationDays)>0)){
+    toast("Enter how many days this survey should run.");
+    return;
+  }
+  if(sch.mode==="range"){
+    if(!sch.endAt){
+      toast("Choose an end date before publishing.");
+      return;
+    }
+    const start = sch.startAt || NOW;
+    if(sch.endAt.getTime() <= start.getTime()){
+      toast("End date must be after the start date.");
+      return;
+    }
+  }
+  s.publishedAt = NOW;
+  s.endsAt = resolveEndsAt(sch, s.publishedAt);
+  s.stoppedAt = null;
   s.status = "Live";
   s.updated = NOW;
   state.triggerSelectOpen = false;
   state.triggerSelectShowUsed = false;
-  toast(wasLive ? "Published. New invitations use this version." : "Published. This survey is now live.", true);
+  toast(s.endsAt
+    ? `Published. Collecting through ${day(s.endsAt)}.`
+    : "Published. This survey is now live.", true);
+  render();
+}
+function setSurveyScheduleMode(id, mode){
+  const s = state.surveys.find(x=>x.id===id);
+  if(!s || isSurveyLocked(s)) return;
+  if(!s.schedule) s.schedule = defaultSchedule();
+  s.schedule.mode = mode==="duration"||mode==="range" ? mode : "ongoing";
+  s.updated = NOW;
+  state.scheduleDurationOpen = false;
+  render();
+}
+function setSurveyDurationDays(id, value){
+  const s = state.surveys.find(x=>x.id===id);
+  if(!s || isSurveyLocked(s)) return;
+  if(!s.schedule) s.schedule = defaultSchedule();
+  state.scheduleDurationOpen = false;
+  if(value==="custom"){
+    const raw = window.prompt("Run for how many days after publish?", String(s.schedule.durationDays||30));
+    if(raw==null){ render(); return; }
+    const n = Math.max(1, Math.min(3650, parseInt(raw,10)||30));
+    s.schedule.durationDays = n;
+  } else {
+    s.schedule.durationDays = Math.max(1, parseInt(value,10)||30);
+  }
+  s.updated = NOW;
+  render();
+}
+function setSurveyScheduleDate(id, field, value){
+  const s = state.surveys.find(x=>x.id===id);
+  if(!s || isSurveyLocked(s)) return;
+  if(!s.schedule) s.schedule = defaultSchedule();
+  s.schedule[field] = parseDateInput(value);
+  s.updated = NOW;
+  render();
+}
+function askStopSurvey(id){
+  const s = state.surveys.find(x=>x.id===id);
+  if(!s || s.status!=="Live") return;
+  state.surveyMenu = null;
+  state.stopSurvey = id;
+  render();
+}
+function closeStopSurvey(){ state.stopSurvey = null; render(); }
+function stopSurveyDialog(id){
+  const s = state.surveys.find(x=>x.id===id);
+  if(!s) return "";
+  const trig = findTriggerDef(s.triggerId);
+  return `
+  <div class="scrim" style="z-index:54"></div>
+  <div class="dialog-wrap" onclick="closeStopSurvey()">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="stop-title"
+      onclick="event.stopPropagation()">
+      <h2 class="t-h4" id="stop-title">Stop “${esc(s.name)}”?</h2>
+      <p class="t-body dim mt8">Stops invitations for this version and releases ${trig?esc(formatTriggerLabel(trig)):"its trigger"} so another draft can use it. Existing responses stay on this version.</p>
+      <div class="dialog-actions dialog-actions--split">
+        <button type="button" class="fw-btn fw-btn--ghost" onclick="closeStopSurvey()">Keep collecting</button>
+        <div class="dialog-actions__end">
+          <button type="button" class="fw-btn fw-btn--outline" onclick="confirmStopSurvey(false)">Stop only</button>
+          <button type="button" class="fw-btn fw-btn--primary" onclick="confirmStopSurvey(true)">${I.copy(16)} Stop &amp; duplicate</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+function confirmStopSurvey(andClone){
+  const id = state.stopSurvey;
+  if(!id) return;
+  const s = state.surveys.find(x=>x.id===id);
+  if(!s || s.status!=="Live"){ closeStopSurvey(); return; }
+  const freedTrigger = releaseSurveyTrigger(s);
+  s.status = "Stopped";
+  s.stoppedAt = NOW;
+  s.updated = NOW;
+  state.stopSurvey = null;
+  if(andClone){
+    const nid = duplicateAndEdit(id, { silent:true, claimTrigger:freedTrigger });
+    toast("Stopped. Draft opened with the freed trigger.", true);
+    if(nid) go("#/surveys/"+nid);
+    else render();
+    return;
+  }
+  toast("Survey stopped. Trigger released.", true);
   render();
 }
 
 function viewSurveysIndex(){
   const live = state.surveys.filter(s=>s.status==="Live").length;
   const drafts = state.surveys.filter(s=>s.status==="Draft").length;
+  const ended = state.surveys.filter(s=>s.status==="Stopped"||s.status==="Completed").length;
   return `
   <div class="page-head">
     <div class="crumbs"><a href="#/">Overview</a><span class="sep">/</span><span>Surveys</span></div>
     <div class="between">
       <div>
         <h1 class="t-h2">Surveys</h1>
-        <p class="t-p dim">${live} live · ${drafts} draft</p>
+        <p class="t-p dim">${live} live · ${drafts} draft${ended?` · ${ended} ended`:""}</p>
       </div>
       <button class="fw-btn fw-btn--primary" onclick="newSurvey()">${I.plus(16)} New survey</button>
     </div>
@@ -3400,7 +3942,7 @@ function viewSurveysIndex(){
     <table class="tbl tbl--stack tbl--surveys">
       <thead><tr>
         <th class="fav"><span class="sr">Favorite</span></th>
-        <th>Survey</th><th>Trigger ID</th><th>Status</th><th>Responses</th><th>Rate</th><th>Updated</th>
+        <th>Survey</th><th>Trigger ID</th><th>Status</th><th>Schedule</th><th>Responses</th><th>Rate</th><th>Updated</th>
         <th class="morecol"><span class="sr">Actions</span></th>
       </tr></thead>
       <tbody>
@@ -3413,12 +3955,11 @@ function viewSurveysIndex(){
             </td>
             <td class="sv-name">
               <a class="sv-title" href="#/surveys/${s.id}">${esc(s.name)}</a>
-              <div class="t-subtle dim">${s.questions} questions</div>
+              <div class="t-subtle dim">${s.questions} questions${s.version>1?` · v${s.version}`:""}</div>
             </td>
-            <td class="sv-trigger">${s.triggerId
-              ? `<button type="button" class="num-link" onclick="openTrigger('${esc(String(s.triggerId).replace(/^#/,""))}')" aria-label="Open trigger ${esc(formatTriggerId(s.triggerId))}${findTriggerDef(s.triggerId)?`, ${esc(findTriggerDef(s.triggerId).name)}`:""}">${esc(formatTriggerId(s.triggerId))}</button>`
-              : `<span class="dim">—</span>`}</td>
+            <td class="sv-trigger">${surveyTriggerCell(s)}</td>
             <td class="sv-status">${surveyStatusBadge(s)}</td>
+            <td class="dim sv-schedule">${esc(formatScheduleSummary(s))}</td>
             <td class="sv-responses" data-live="${s.status==="Live"?"yes":"no"}">${responseCountLink(s)}</td>
             <td class="sv-rate" data-empty="${s.rate?"no":"yes"}">${s.rate?s.rate+"%":"—"}</td>
             <td class="dim sv-updated">${ago(s.updated)}</td>
@@ -3439,17 +3980,26 @@ function viewSurveys(){
   const s = currentSurvey();
   if(!s) return viewSurveysIndex();
   const qs = qList();
-  const locked = qs.filter(q=>q.locked).length;
+  const lockedQs = qs.filter(q=>q.locked).length;
+  const surveyLocked = isSurveyLocked(s);
   const previewIdx = previewQIndex();
-  const trig = findTriggerDef(s.triggerId);
-  const trigMeta = trig
-    ? ` · <button type="button" class="num-link" onclick="openTrigger('${trig.id}')">${esc(formatTriggerId(trig.id))}</button>`
-    : s.triggerId
-      ? ` · <span class="mono">${esc(formatTriggerId(s.triggerId))}</span>`
-      : "";
+  const trigMeta = surveyTriggerMeta(s);
+  const schedMeta = ` · ${esc(formatScheduleSummary(s))}`;
+  const verMeta = s.version>1 ? ` · v${s.version}` : "";
   const meta = s.status==="Live"
-    ? `${qs.length} questions · live · ${s.responses} responses so far${trigMeta}`
-    : `${qs.length} questions · draft · not sent yet${trigMeta}`;
+    ? `${qs.length} questions · live · ${s.responses} responses so far${trigMeta}${schedMeta}${verMeta}`
+    : s.status==="Draft"
+      ? `${qs.length} questions · draft · not sent yet${trigMeta}${schedMeta}${verMeta}`
+      : `${qs.length} questions · ${s.status.toLowerCase()} · ${s.responses} responses${trigMeta}${schedMeta}${verMeta}`;
+  const pageActions = surveyLocked
+    ? `${s.status!=="Draft"?`<a class="fw-btn fw-btn--outline" href="#/surveys/${s.id}/responses">${I.inbox(16)} Responses</a>`:""}
+        <button class="fw-btn fw-btn--outline" onclick="openSurveyPreview()">${I.eye(16)} Preview</button>
+        ${s.status==="Live"
+          ? `<button class="fw-btn fw-btn--outline" onclick="askStopSurvey('${s.id}')">Stop survey</button>
+             <button class="fw-btn fw-btn--primary" onclick="duplicateAndEdit('${s.id}')">${I.copy(16)} Duplicate &amp; edit</button>`
+          : `<button class="fw-btn fw-btn--primary" onclick="duplicateAndEdit('${s.id}')">${I.copy(16)} Duplicate &amp; edit</button>`}`
+    : `<button class="fw-btn fw-btn--outline" onclick="openSurveyPreview()">${I.eye(16)} Preview</button>
+        <button class="fw-btn fw-btn--primary" onclick="publishSurvey('${s.id}')">Publish</button>`;
   return `
   <div class="page-head">
     <div class="crumbs"><a href="#/">Overview</a><span class="sep">/</span><a href="#/surveys">Surveys</a>
@@ -3457,7 +4007,7 @@ function viewSurveys(){
     <a class="page-back" href="#/surveys">${I.chevronLeft(16)} Surveys</a>
     <div class="between">
       <div>
-        ${state.editingSurveyName===s.id?`
+        ${!surveyLocked && state.editingSurveyName===s.id?`
         <h1 class="t-h2 title-edit">
           <label class="sr" for="survey-name-input">Survey name</label>
           <div class="title-edit-field">
@@ -3473,39 +4023,42 @@ function viewSurveys(){
           </div>
         </h1>`:`
         <h1 class="t-h2 title-edit">
-          <button type="button" class="title-edit-hit" title="Rename survey" onclick="startInlineRename('${s.id}')">
+          ${surveyLocked
+            ? `<span>${esc(s.name)}</span>`
+            : `<button type="button" class="title-edit-hit" title="Rename survey" onclick="startInlineRename('${s.id}')">
             <span>${esc(s.name)}</span>
             <span class="title-edit-pen" aria-hidden="true">${I.pencil(16)}</span>
-          </button>
+          </button>`}
         </h1>`}
         <p class="t-p dim">${meta}</p>
       </div>
       <div class="row page-actions" style="gap:8px">
-        ${s.status==="Live"?`<a class="fw-btn fw-btn--outline" href="#/surveys/${s.id}/responses">${I.inbox(16)} Responses</a>`:""}
-        <button class="fw-btn fw-btn--outline" onclick="openSurveyPreview()">
-          ${I.eye(16)} Preview</button>
-        <button class="fw-btn fw-btn--primary" onclick="publishSurvey('${s.id}')">${s.status==="Live"?"Publish changes":"Publish"}</button>
+        ${pageActions}
       </div>
     </div>
   </div>
+  ${surveyLockBanner(s)}
   <div class="split">
     <div>
       ${triggerAssocCard(s)}
+      ${scheduleCard(s)}
       <div class="fw-card sec">
         <div class="between between--inline" style="margin-bottom:16px">
           <div>
             <h2 class="t-h4">Questions</h2>
-            <p class="t-subtle dim mt8">Drag to reorder. Edit wording and required with the pencil. Benchmark questions can't be edited.</p>
+            <p class="t-subtle dim mt8">${surveyLocked
+              ? "Question wording is locked on this version."
+              : "Drag to reorder. Edit wording and required with the pencil. Benchmark questions can't be edited."}</p>
           </div>
           <span class="fw-badge fw-badge--outline">${qs.filter(q=>q.required).length} required</span>
         </div>
         ${qs.length?qs.map((q,i)=>`
-          <div class="qcard qcard-select ${q.locked?"locked":""} ${i===previewIdx?"selected":""}"
+          <div class="qcard qcard-select ${q.locked||surveyLocked?"locked":""} ${i===previewIdx?"selected":""}"
             data-qid="${q.id}" tabindex="0" aria-current="${i===previewIdx?"true":"false"}"
             onclick="selectPreviewQ('${q.id}')" onkeydown="previewQKey(event,'${q.id}')"
-            ondragover="qDragOver(event)" ondragenter="qDragEnter(event)" ondrop="qDrop(event)">
-            <span class="grip" draggable="true" aria-hidden="true"
-              ondragstart="qDragStart(event)" ondragend="qDragEnd()">${q.locked?I.lock(16):I.grip(16)}</span>
+            ${surveyLocked?"":`ondragover="qDragOver(event)" ondragenter="qDragEnter(event)" ondrop="qDrop(event)"`}>
+            <span class="grip" ${surveyLocked||q.locked?"":`draggable="true"`} aria-hidden="true"
+              ${surveyLocked||q.locked?"":`ondragstart="qDragStart(event)" ondragend="qDragEnd()"`}>${surveyLocked||q.locked?I.lock(16):I.grip(16)}</span>
             <div class="qcard-body">
               <div class="t-pui" style="font-weight:700">${esc(q.text)}</div>
               <div class="qmeta">
@@ -3516,23 +4069,23 @@ function viewSurveys(){
               ${q.locked?`<p class="t-subtle dim mt8">${esc(q.lockNote)}</p>`:""}
               ${q.help?`<p class="t-subtle dim mt8">${esc(q.help)}</p>`:""}
             </div>
-            <div class="qbtns" onclick="event.stopPropagation()">
+            ${surveyLocked?"":`<div class="qbtns" onclick="event.stopPropagation()">
               <button class="iconbtn" aria-label="Move up"   ${i===0?"disabled":""} onclick="moveQ(${i},-1)">${I.up(16)}</button>
               <button class="iconbtn" aria-label="Move down" ${i===qs.length-1?"disabled":""} onclick="moveQ(${i},1)">${I.down(16)}</button>
               <button class="iconbtn" aria-label="Edit" title="${q.locked?"Benchmark questions can't be edited":"Edit question"}"
                 ${q.locked?"disabled":`onclick="openEditQuestion('${q.id}')"`}>${I.pencil(16)}</button>
               <button class="iconbtn" aria-label="Remove" title="Remove question" onclick="removeQ('${q.id}')">${I.trash(16)}</button>
-            </div>
-          </div>`).join("") : `<p class="t-subtle dim" style="margin-bottom:16px">No questions yet. Add one, or pick from the library.</p>`}
-        <div class="addrow">
+            </div>`}
+          </div>`).join("") : `<p class="t-subtle dim" style="margin-bottom:16px">${surveyLocked?"No questions on this version.":"No questions yet. Add one, or pick from the library."}</p>`}
+        ${surveyLocked?"":`<div class="addrow">
           <button class="fw-btn fw-btn--outline fw-btn--sm" onclick="addQ('yesno')">${I.plus(16)} Yes / no</button>
           <button class="fw-btn fw-btn--outline fw-btn--sm" onclick="addQ('scale')">${I.plus(16)} Rating</button>
           <button class="fw-btn fw-btn--outline fw-btn--sm" onclick="addQ('choice')">${I.plus(16)} Multiple choice</button>
           <button class="fw-btn fw-btn--outline fw-btn--sm" onclick="addQ('text')">${I.plus(16)} Written answer</button>
-        </div>
+        </div>`}
       </div>
 
-      <div class="fw-card sec">
+      ${surveyLocked?"":`<div class="fw-card sec">
         <h2 class="t-h4">Question library</h2>
         <p class="t-subtle dim mt8">Wording other agencies have already tested.</p>
         <div class="lib-filters" role="group" aria-label="Filter library">
@@ -3573,24 +4126,26 @@ function viewSurveys(){
           <span class="dim" style="padding-top:2px">${I.shield(18)}</span>
           <div>
             <h2 class="t-h4">Benchmarking</h2>
-            <p class="t-body dim mt8">${locked
-              ? `${locked===1?"One question":"Two questions"} in this survey use shared wording so results can be compared
+            <p class="t-body dim mt8">${lockedQs
+              ? `${lockedQs===1?"One question":"Two questions"} in this survey use shared wording so results can be compared
               across participating agencies. You keep your own questions alongside them. Leaving the benchmark
-              means ${locked===1?"that question becomes":"those questions become"} editable and your agency drops out of comparison.`
+              means ${lockedQs===1?"that question becomes":"those questions become"} editable and your agency drops out of comparison.`
               : "This survey isn't in the benchmark. Add the shared questions if you want results compared across agencies."}</p>
             <button class="fw-btn fw-btn--outline fw-btn--sm mt16" type="button" disabled title="Not in this prototype">
               Benchmark settings</button>
           </div>
         </div>
-      </div>
+      </div>`}
 
       <div class="fw-card sec" style="border-color:color-mix(in srgb,var(--destructive) 35%,var(--border))">
         <h2 class="t-h4">Delete this survey</h2>
         <p class="t-subtle dim mt8">${s.status==="Live" && s.responses
-          ? `This survey is live with ${s.responses} response${s.responses===1?"":"s"}. Deleting it stops invitations and removes those responses from Reflect.`
+          ? `This survey is live with ${s.responses} response${s.responses===1?"":"s"}. Prefer Stop survey to end collection and keep history. Deleting removes responses from Reflect.`
           : s.status==="Live"
-          ? "This survey is live. Deleting it stops invitations and removes it from Reflect."
-          : "This draft hasn't been sent yet. Deleting it removes the survey and its questions."} This can't be undone.</p>
+          ? "This survey is live. Prefer Stop survey to release the trigger. Deleting removes it from Reflect."
+          : s.status==="Draft"
+          ? "This draft hasn't been sent yet. Deleting it removes the survey and its questions."
+          : "This version is no longer collecting. Deleting removes it and its responses from Reflect."} This can't be undone.</p>
         <button class="fw-btn fw-btn--sm fw-btn--ghost-destructive mt16" onclick="askDeleteSurvey('${s.id}')">
           ${I.trash(16)} Delete survey</button>
       </div>
@@ -3604,7 +4159,9 @@ function viewSurveys(){
             : "Live preview — what the patient sees"}</div>
           <div style="max-height:640px;overflow-y:auto">${patientPreview()}</div>
         </div>
-        <p class="t-subtle dim mt16">Preview reflects unsaved changes. Publish to send this version.</p>
+        <p class="t-subtle dim mt16">${surveyLocked
+          ? "Preview of this locked version."
+          : "Preview reflects unsaved changes. Publish to send this version."}</p>
       </div>
     </div>
   </div>`;
@@ -4626,6 +5183,7 @@ function claim(id){
 }
 
 function moveQTo(from, to){
+  if(isSurveyLocked(currentSurvey())){ toast("This version is locked."); return; }
   const q = qList();
   if(from===to || from<0 || to<0 || from>=q.length || to>=q.length) return;
   withFlip("[data-qid]", ()=>{
@@ -4642,6 +5200,7 @@ function qClearDropHints(except){
   });
 }
 function qDragStart(e){
+  if(isSurveyLocked(currentSurvey())){ e.preventDefault(); return; }
   const card = e.currentTarget.closest(".qcard");
   if(!card){ e.preventDefault(); return; }
   const id = card.getAttribute("data-qid");
@@ -4691,6 +5250,7 @@ function qDragEnd(){
   });
 }
 function removeQ(id){
+  if(isSurveyLocked(currentSurvey())){ toast("This version is locked."); return; }
   const apply = ()=>{
     const sid = surveyIdFromHash() || "sv_post";
     const qs = qList();
@@ -4713,6 +5273,7 @@ function removeQ(id){
 }
 let qn = 100;
 function addQ(type){
+  if(isSurveyLocked(currentSurvey())){ toast("This version is locked."); return; }
   const id = "q"+(++qn);
   qList().push({
     id, type, required:false, locked:false,
@@ -4726,6 +5287,7 @@ function addQ(type){
   withFlip("[data-qid]", render);
 }
 function addFromLib(id){
+  if(isSurveyLocked(currentSurvey())){ toast("This version is locked."); return; }
   const l = LIBRARY.find(x=>x.id===id);
   if(!l) return;
   const already = qList().some(q=>q.text.trim().toLowerCase()===l.text.trim().toLowerCase());
@@ -4755,40 +5317,88 @@ function setLibraryFilter(f){
 let sn = 100;
 function newSurvey(){
   const id = "sv_"+ (++sn);
-  state.surveys.unshift({ id, name:"Untitled survey", status:"Draft", triggerId:null, questions:0, responses:0, rate:0, sent:0, starred:false, updated:NOW });
+  state.surveys.unshift(normalizeSurvey({
+    id, name:"Untitled survey", status:"Draft", triggerId:null,
+    familyId:id, version:1, clonedFromId:null,
+    schedule:defaultSchedule(),
+    publishedAt:null, endsAt:null, stoppedAt:null,
+    questions:0, responses:0, rate:0, sent:0, starred:false, updated:NOW
+  }));
   state.surveyQuestions[id] = [];
   state.responses[id] = [];
   go("#/surveys/"+id);
   toast("Draft created.");
 }
-function duplicateSurvey(id){
+function nextFamilyVersion(familyId){
+  return state.surveys
+    .filter(s=>s.familyId===familyId)
+    .reduce((max,s)=>Math.max(max, Number(s.version)||1), 0) + 1;
+}
+function baseSurveyName(name){
+  return String(name||"Survey").replace(/\s*\(v\d+\)\s*$/i,"").replace(/\s*\(copy\)\s*$/i,"").trim() || "Survey";
+}
+/** @returns {string|null} new survey id */
+function duplicateAndEdit(id, { silent=false, claimTrigger=null }={}){
   const s = state.surveys.find(x=>x.id===id);
-  if(!s) return;
+  if(!s) return null;
   const nid = "sv_"+ (++sn);
+  const familyId = s.familyId || s.id;
+  const version = nextFamilyVersion(familyId);
+  const base = baseSurveyName(s.name);
   const copy = (state.surveyQuestions[id]||[]).map(q=>({
     ...q, id:"q"+(++qn),
     options: q.options ? [...q.options] : undefined,
     labels: q.labels ? [...q.labels] : undefined
   }));
-  state.surveys.unshift({ ...s, id:nid, name:s.name+" (copy)", status:"Draft", triggerId:null, responses:0, rate:0, sent:0, starred:false, updated:NOW, questions:copy.length });
+  let triggerId = null;
+  if(claimTrigger && !triggerOwner(claimTrigger, nid)){
+    triggerId = String(claimTrigger).replace(/^#/,"");
+  }
+  state.surveys.unshift(normalizeSurvey({
+    id:nid,
+    name:`${base} (v${version})`,
+    status:"Draft",
+    triggerId,
+    familyId,
+    version,
+    clonedFromId:s.id,
+    schedule:cloneSchedule(s.schedule),
+    publishedAt:null,
+    endsAt:null,
+    stoppedAt:null,
+    questions:copy.length,
+    responses:0,
+    rate:0,
+    sent:0,
+    starred:false,
+    updated:NOW
+  }));
   state.surveyQuestions[nid] = copy;
   state.responses[nid] = [];
   state.surveyMenu = null;
-  go("#/surveys/"+nid);
-  toast("Duplicated as a draft.");
+  if(!silent){
+    go("#/surveys/"+nid);
+    toast("Draft created from prior version.");
+  }
+  return nid;
+}
+function duplicateSurvey(id){
+  duplicateAndEdit(id);
 }
 
 function surveyRowMenu(s){
   const open = state.surveyMenu===s.id;
+  const locked = isSurveyLocked(s);
   return `<div class="menu-wrap${open?" open":""}" onclick="event.stopPropagation()">
     <button type="button" class="iconbtn" aria-label="More actions" aria-haspopup="menu" aria-expanded="${open}"
       onclick="toggleSurveyMenu('${s.id}',event)">${I.more(18)}</button>
     ${open?`<div class="menu" role="menu">
       <button type="button" role="menuitem" onclick="toggleStar('${s.id}')">${I.star(16)} ${s.starred?"Unstar":"Star"}</button>
       <div class="menu-sep"></div>
-      <button type="button" role="menuitem" onclick="askRenameSurvey('${s.id}')">${I.pencil(16)} Rename</button>
-      ${s.status==="Live"?`<button type="button" role="menuitem" onclick="go('#/surveys/${s.id}/responses')">${I.inbox(16)} View responses</button>`:""}
-      <button type="button" role="menuitem" onclick="duplicateSurvey('${s.id}')">${I.copy(16)} Duplicate</button>
+      ${locked?"":`<button type="button" role="menuitem" onclick="askRenameSurvey('${s.id}')">${I.pencil(16)} Rename</button>`}
+      ${s.status!=="Draft"?`<button type="button" role="menuitem" onclick="go('#/surveys/${s.id}/responses')">${I.inbox(16)} View responses</button>`:""}
+      ${s.status==="Live"?`<button type="button" role="menuitem" onclick="askStopSurvey('${s.id}')">${I.minus(16)} Stop survey</button>`:""}
+      <button type="button" role="menuitem" onclick="duplicateAndEdit('${s.id}')">${I.copy(16)} Duplicate &amp; edit</button>
       <button type="button" role="menuitem" class="danger" onclick="askDeleteSurvey('${s.id}')">${I.trash(16)} Delete</button>
     </div>`:""}
   </div>`;
@@ -4875,6 +5485,7 @@ function editQuestionDialog(id){
   </div>`;
 }
 function openEditQuestion(id){
+  if(isSurveyLocked(currentSurvey())){ toast("This version is locked."); return; }
   const q = qList().find(x=>x.id===id);
   if(!q || q.locked){
     toast("Benchmark questions can't be edited.");
@@ -4933,7 +5544,8 @@ function applySurveyName(id, raw){
   return {ok:true, changed};
 }
 function askRenameSurvey(id){
-  if(!state.surveys.find(x=>x.id===id)) return;
+  const s = state.surveys.find(x=>x.id===id);
+  if(!s || isSurveyLocked(s)){ toast("This version is locked."); return; }
   state.surveyMenu = null;
   state.renameSurvey = id;
   render();
@@ -4954,7 +5566,8 @@ function confirmRenameSurvey(){
 
 let skipSurveyNameBlur = false;
 function startInlineRename(id){
-  if(!state.surveys.find(x=>x.id===id)) return;
+  const s = state.surveys.find(x=>x.id===id);
+  if(!s || isSurveyLocked(s)){ toast("This version is locked."); return; }
   state.editingSurveyName = id;
   render();
   const input = document.getElementById("survey-name-input");
@@ -5242,6 +5855,7 @@ function closeSurveyPreview(){
 function isPatientRoute(h){ return h.startsWith("#/s/") && !h.startsWith("#/surveys"); }
 
 function render(){
+  expireDueSurveys();
   const h = location.hash || "#/";
   state.route = h;
   const root = document.getElementById("root");
@@ -5275,6 +5889,7 @@ window.addEventListener("hashchange", ()=>{
     state.openAlert = null;
   }
   state.deleteSurvey = null;
+  state.stopSurvey = null;
   state.renameSurvey = null;
   state.editingSurveyName = null;
   state.surveyMenu = null;
@@ -5284,6 +5899,7 @@ window.addEventListener("hashchange", ()=>{
   state.triggerSelectOpen = false;
   state.triggerSelectQuery = "";
   state.triggerSelectShowUsed = false;
+  state.scheduleDurationOpen = false;
   state.responseFilter = "all";
   state.responseLimit = RESPONSE_PAGE;
   state.navOpen = false;
@@ -5306,6 +5922,7 @@ window.addEventListener("keydown", e=>{
   }
   if(e.key!=="Escape") return;
   if(state.triggerSelectOpen){ state.triggerSelectOpen = false; triggerSelectPaint(); return; }
+  if(state.scheduleDurationOpen){ state.scheduleDurationOpen = false; scheduleDurationPaint(); return; }
   if(state.pSelectOpen){ state.pSelectOpen = null; pSelectPaint(); return; }
   if(state.crewSelectOpen){ state.crewSelectOpen = false; crewSelectPaint(); return; }
   if(state.navOpen){ closeNav(); return; }
@@ -5315,6 +5932,7 @@ window.addEventListener("keydown", e=>{
   if(state.editingSurveyName){ cancelInlineRename(); return; }
   if(state.surveyMenu){ closeSurveyMenu(); return; }
   if(state.deleteSurvey){ closeDeleteSurvey(); return; }
+  if(state.stopSurvey){ closeStopSurvey(); return; }
   if(state.openResponse){ closeResponse(); return; }
   if(state.openTrigger){ closeTrigger(); return; }
   if(state.openAlert){ closeAlert(); }
@@ -5327,6 +5945,10 @@ window.addEventListener("mousedown", e=>{
   if(state.triggerSelectOpen && !e.target.closest(".trigger-select")){
     state.triggerSelectOpen = false;
     triggerSelectPaint(false);
+  }
+  if(state.scheduleDurationOpen && !e.target.closest(".schedule-duration-select")){
+    state.scheduleDurationOpen = false;
+    scheduleDurationPaint(false);
   }
   if(state.pSelectOpen && !e.target.closest(".fw-select")){
     state.pSelectOpen = null;
