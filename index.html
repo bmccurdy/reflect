@@ -1556,43 +1556,43 @@ const ALERTS = [
     reason:"Rated 1 of 5 on respect, plus a written complaint",
     quote:"Nobody told me where we were going or what the medicine was. I asked twice. I'm 78 years old and I was scared the whole ride.",
     scores:{respect:1,listening:2,comfort:2}, at:mins(38), age:"78", band:"75+", lang:"English",
-    zone:"Manhasset", assigned:"You", log:[] },
+    phone:"(516) 555-0142", zone:"Manhasset", assigned:"You", log:[] },
   { id:"A-4470", status:"critical", unit:"E-7", call:"Fall, hip",
     crew:"Boyd / Trần",
     reason:"Rated 1 of 5 on comfort, mentions being dropped",
     quote:"The stretcher slipped when they loaded me and nobody said sorry. My hip hurt worse after than before.",
     scores:{respect:3,listening:3,comfort:1}, at:mins(96), age:"64", band:"55-64", lang:"English",
-    zone:"Great Neck", assigned:"You", log:[] },
+    phone:"(516) 555-0198", zone:"Great Neck", assigned:"You", log:[] },
   { id:"A-4468", status:"elevated", unit:"M-3", call:"Difficulty breathing",
     crew:"Okafor / Reyes",
     reason:"Would not call 911 again",
     quote:"They were fine but it took a long time and I could not breathe. I would drive myself next time.",
     scores:{respect:4,listening:4,comfort:3}, at:mins(174), age:"51", band:"45-54", lang:"Spanish",
-    zone:"New Hyde Park", assigned:"Unassigned", log:[] },
+    phone:"(516) 555-0174", zone:"New Hyde Park", assigned:"Unassigned", log:[] },
   { id:"A-4465", status:"elevated", unit:"M-12", call:"Diabetic emergency",
     crew:"Alvarez / Nwosu",
     reason:"Second low score for M-12 this week",
     quote:"Rushed. I felt like a task on a list.",
     scores:{respect:2,listening:2,comfort:3}, at:mins(320), age:"43", band:"35-44", lang:"English",
-    zone:"Manhasset", assigned:"Unassigned", log:[] },
+    phone:"(516) 555-0116", zone:"Manhasset", assigned:"Unassigned", log:[] },
   { id:"A-4462", status:"elevated", unit:"E-2", call:"MVC, no transport",
     crew:"Halloran / Pike",
     reason:"Free text flagged for review",
     quote:"I did not want to go to the hospital and I felt pressured about it. Everything else was good.",
     scores:{respect:3,listening:2,comfort:4}, at:mins(410), age:"29", band:"25-34", lang:"English",
-    zone:"Port Washington", assigned:"K. Doyle", log:[] },
+    phone:"(516) 555-0133", zone:"Port Washington", assigned:"K. Doyle", log:[] },
   { id:"A-4459", status:"elevated", unit:"M-8", call:"Chest pain",
     crew:"Sowande / Kim",
     reason:"Rated 2 of 5 on listening",
     quote:"I told them about my allergy three times.",
     scores:{respect:3,listening:2,comfort:3}, at:mins(1180), age:"67", band:"65-74", lang:"English",
-    zone:"Great Neck", assigned:"Unassigned", log:[] },
+    phone:"(516) 555-0187", zone:"Great Neck", assigned:"Unassigned", log:[] },
   { id:"A-4455", status:"resolved", unit:"M-3", call:"Seizure",
     crew:"Okafor / Reyes",
     reason:"Rated 1 of 5 on comfort",
     quote:"Freezing cold in the back and no blanket until I asked.",
     scores:{respect:4,listening:4,comfort:1}, at:mins(1610), age:"38", band:"35-44", lang:"English",
-    zone:"New Hyde Park", assigned:"You",
+    phone:"(516) 555-0155", zone:"New Hyde Park", assigned:"You",
     log:[
       { who:"You", at:mins(1520), text:"Called and spoke with the patient. Apologized. She was satisfied with the call." },
       { who:"You", at:mins(1518), text:"Blanket stock on M-3 checked — restocked and flagged to shift lead." },
@@ -1603,7 +1603,7 @@ const ALERTS = [
     reason:"Would not call 911 again",
     quote:"Long wait. The crew themselves were kind.",
     scores:{respect:5,listening:4,comfort:3}, at:mins(2900), age:"81", band:"75+", lang:"English",
-    zone:"Manhasset", assigned:"K. Doyle",
+    phone:"(516) 555-0129", zone:"Manhasset", assigned:"K. Doyle",
     log:[{ who:"K. Doyle", at:mins(2760), text:"Left voicemail. Response time was 14 min — traffic on Northern Blvd. No action for crew." }] }
 ];
 
@@ -2098,7 +2098,6 @@ function cardCallback({lead=false}={}){
           <h2 class="t-h4">Needs a callback</h2>
           <p class="t-subtle dim">Open alerts waiting in the queue.</p>
         </div>
-        <a class="fw-btn fw-btn--primary fw-btn--sm" href="#/alerts">Open queue</a>
       </div>
       <div class="spot-split">
         <div>
@@ -2120,7 +2119,6 @@ function cardQuality({lead=false}={}){
           <h2 class="t-h4">Quality</h2>
           <p class="t-subtle dim">Patient scores this period.</p>
         </div>
-        <a class="fw-btn fw-btn--primary fw-btn--sm" href="#/scorecard">View scorecard</a>
       </div>
       <div class="spot-split">
         <div>
@@ -2196,7 +2194,6 @@ function cardCrewScorecard(){
         <h2 class="t-h4" id="crew-kpi-heading">Crew scorecard</h2>
         <p class="t-subtle dim mt8">All crew · last 30 days · same metrics as the scorecard</p>
       </div>
-      <a class="fw-btn fw-btn--primary fw-btn--sm" href="#/scorecard">View scorecard</a>
     </div>
     <div class="grid g-3 mt16">
       ${rows.map(h=>`
@@ -2754,7 +2751,7 @@ function viewAlerts(){
               <div class="snip">${esc(a.quote)}</div>
               <div class="al-meta">${a.unit} · ${esc(a.assigned)} · ${ago(a.at)}</div>
             </td>
-            <td class="al-unit"><span class="mono">${a.unit}</span><div class="t-subtle dim">${esc(a.call)}</div></td>
+            <td class="al-unit"><span style="font-weight:700;font-size:14px;line-height:20px">${esc(a.unit)}</span><div class="t-subtle dim">${esc(a.call)}</div></td>
             <td class="al-assigned${a.assigned==="Unassigned"?" dim":""}">${esc(a.assigned)}</td>
             <td class="dim al-opened">${ago(a.at)}</td>
           </tr>`).join("")}
@@ -2787,7 +2784,7 @@ function drawer(id){
       <div>
         ${statusBadge(a.status)}
         <h2 class="t-h4 mt8">${esc(a.reason)}</h2>
-        <p class="t-subtle dim">Alert <span class="mono">${a.id}</span> · opened ${ago(a.at)} · ${clock(a.at)}</p>
+        <p class="t-subtle dim">Alert <span style="font-weight:700">${esc(a.id)}</span> · opened ${ago(a.at)} · ${clock(a.at)}</p>
       </div>
       <button class="iconbtn" onclick="closeAlert()" aria-label="Close">${I.x(18)}</button>
     </div>
@@ -2797,11 +2794,12 @@ function drawer(id){
         ${sc("Respect",a.scores.respect)}${sc("Listening",a.scores.listening)}${sc("Comfort",a.scores.comfort)}
       </div>
       <dl class="kv mt24">
-        <dt>Unit / crew</dt><dd><span class="mono">${a.unit}</span> — ${esc(a.crew)}</dd>
+        <dt>Unit / crew</dt><dd>${esc(a.unit)} — ${esc(a.crew)}</dd>
         <dt>Call type</dt><dd>${esc(a.call)}</dd>
         <dt>Area</dt><dd>${esc(a.zone)}</dd>
         <dt>Age band</dt><dd>${a.band}</dd>
         <dt>Language</dt><dd>${a.lang}</dd>
+        <dt>Phone #</dt><dd>${a.phone?esc(a.phone):`<span class="dim">—</span>`}</dd>
         <dt>Assigned</dt><dd>${esc(a.assigned)}</dd>
       </dl>
       ${a.lang!=="English"?`<div class="stale mt16" style="margin-bottom:0">
