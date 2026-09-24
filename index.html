@@ -436,6 +436,11 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 }
 .tbl .fav{width:52px;padding-left:12px;padding-right:0;vertical-align:middle}
 .tbl .morecol{width:52px;padding-left:8px;padding-right:12px;text-align:right;vertical-align:middle}
+.tbl--surveys .sv-trigger,
+.tbl--surveys .sv-status,
+.tbl--surveys .sv-responses,
+.tbl--surveys .sv-rate,
+.tbl--surveys .sv-updated{vertical-align:middle}
 .star-btn{color:var(--muted-foreground)}
 .star-btn:hover{color:var(--fw-gold)}
 .star-btn[aria-pressed="true"]{color:var(--fw-gold)}
@@ -640,6 +645,14 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 .ans:last-child{border-bottom:0}
 .num-link{color:var(--primary);font-weight:700;text-decoration:none}
 .num-link:hover{text-decoration:underline}
+button.num-link{
+  background:none;border:0;padding:0;margin:0;font:inherit;cursor:pointer;
+  color:var(--primary);font-weight:700;
+}
+.sv-title{
+  color:var(--primary);font-weight:700;text-decoration:none;
+}
+.sv-title:hover{text-decoration:underline}
 
 .empty{padding:64px 24px;text-align:center}
 .empty .t{font-size:20px;line-height:28px;font-weight:700}
@@ -661,6 +674,7 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   transition:transform var(--dur-page) var(--ease-out);
 }
 .drawer.is-open{transform:translate3d(0,0,0)}
+.drawer--trigger{width:min(420px,100%)}
 .drawer.is-paging{transition:none}
 .drawer.is-paging .drawer-head,
 .drawer.is-paging .drawer-body > *{animation:none}
@@ -721,6 +735,47 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 .kv{display:grid;grid-template-columns:132px 1fr;gap:8px 16px;font-size:14px;line-height:20px}
 .kv dt{color:var(--muted-foreground)}
 .kv dd{margin:0}
+.drawer--trigger .drawer-body{
+  display:flex;flex-direction:column;gap:20px;
+}
+.drawer--trigger .trigger-id-line{
+  display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
+}
+.drawer--trigger .kv{
+  grid-template-columns:minmax(0,88px) minmax(0,1fr);
+  gap:10px 12px;
+  word-break:break-word;
+}
+.drawer--trigger .trigger-rules{
+  display:flex;flex-direction:column;gap:0;
+  min-width:0;
+}
+.drawer--trigger .trigger-rules .fw-tablist{
+  display:flex;width:100%;
+}
+.drawer--trigger .trigger-rules .fw-tab{
+  flex:1;justify-content:center;
+  font-size:13px;line-height:18px;padding:8px 10px;
+  white-space:nowrap;
+}
+.drawer--trigger .trigger-rules .fw-tablist,
+.drawer--trigger .trigger-rules .fw-tab{
+  transition:none !important;
+  animation:none !important;
+}
+.drawer--trigger .trigger-rules .fw-tabpanel{
+  padding-top:14px;
+}
+.drawer--trigger .trigger-rules .trigger-rules-data.is-enter{
+  animation:triggerPanelIn var(--dur-fast) var(--ease-out) both;
+}
+@keyframes triggerPanelIn{
+  from{opacity:0;transform:translate3d(8px,0,0)}
+  to{opacity:1;transform:none}
+}
+.drawer--trigger .trigger-rules .rule-list{gap:8px}
+.drawer--trigger .trigger-rules .rule{align-items:flex-start}
+.drawer--trigger .trigger-rules .t-detail{margin-top:12px}
 .quote{
   border-left:3px solid var(--primary);padding:4px 0 4px 16px;margin:0 0 16px;
   font-size:16px;line-height:28px;
@@ -1192,7 +1247,7 @@ html[data-theme="dark"] .patient{
   .tbl--surveys tbody tr{align-items:flex-start;padding:16px 0}
   .tbl--surveys tbody tr::before{
     content:"";
-    order:5;flex:0 0 100%;width:100%;height:0;
+    order:6;flex:0 0 100%;width:100%;height:0;
   }
   .tbl--surveys .sv-fav{
     order:1;flex:0 0 auto;width:auto;padding:0;
@@ -1201,9 +1256,12 @@ html[data-theme="dark"] .patient{
     order:2;flex:1 1 0;min-width:0;
     font-size:16px;line-height:24px;
   }
-  .tbl--surveys .sv-status{order:3;flex:0 0 auto;padding-top:4px}
+  .tbl--surveys .sv-trigger{
+    order:3;flex:0 0 auto;padding-top:4px;
+  }
+  .tbl--surveys .sv-status{order:4;flex:0 0 auto;padding-top:4px}
   .tbl--surveys .sv-more{
-    order:4;flex:0 0 auto;width:auto;padding:0;
+    order:5;flex:0 0 auto;width:auto;padding:0;
   }
   .tbl--surveys .sv-responses,
   .tbl--surveys .sv-rate,
@@ -1212,9 +1270,9 @@ html[data-theme="dark"] .patient{
     color:var(--muted-foreground);
     font-size:13px;line-height:20px;
   }
-  .tbl--surveys .sv-responses{order:6;margin-left:40px}
-  .tbl--surveys .sv-rate{order:7}
-  .tbl--surveys .sv-updated{order:8}
+  .tbl--surveys .sv-responses{order:7;margin-left:40px}
+  .tbl--surveys .sv-rate{order:8}
+  .tbl--surveys .sv-updated{order:9}
   .tbl--surveys .sv-responses[data-live="yes"]::after{content:" responses"}
   .tbl--surveys .sv-rate::before,
   .tbl--surveys .sv-updated::before{
@@ -1550,9 +1608,9 @@ const ALERTS = [
 ];
 
 const SURVEYS = [
-  { id:"sv_post", name:"Post-transport experience", status:"Live", questions:7, responses:84, rate:31, sent:271, updated:mins(4320) },
-  { id:"sv_notrans", name:"Refused transport follow-up", status:"Live", questions:4, responses:19, rate:22, sent:86, updated:mins(11400) },
-  { id:"sv_q3", name:"Q3 community perception", status:"Draft", questions:9, responses:0, rate:0, sent:0, updated:mins(220) }
+  { id:"sv_post", name:"Post-transport experience", status:"Live", triggerId:"#7741", questions:7, responses:84, rate:31, sent:271, updated:mins(4320) },
+  { id:"sv_notrans", name:"Refused transport follow-up", status:"Live", triggerId:"#7738", questions:4, responses:19, rate:22, sent:86, updated:mins(11400) },
+  { id:"sv_q3", name:"Q3 community perception", status:"Draft", triggerId:null, questions:9, responses:0, rate:0, sent:0, updated:mins(220) }
 ];
 
 const QUESTIONS = [
@@ -1805,6 +1863,8 @@ const state = {
   responses: Object.fromEntries(Object.entries(RESPONSES).map(([k,rows])=>[k, rows.map(r=>({...r, answers:{...r.answers}}))])),
   openAlert:null,
   openResponse:null,
+  openTrigger:null,
+  triggerRulesTab:"inclusion",
   responseFilter:"all",
   responseLimit:11,
   drawerKey:null,
@@ -1957,6 +2017,7 @@ function shell(body){
   </div>
   ${state.openAlert?drawer(state.openAlert):""}
   ${state.openResponse?responseDrawer(state.openResponse):""}
+  ${state.openTrigger?triggerDrawer(state.openTrigger):""}
   ${state.deleteSurvey?deleteConfirm(state.deleteSurvey):""}
   ${state.renameSurvey?renameDialog(state.renameSurvey):""}
   ${state.previewSurvey?surveyPreview():""}
@@ -2497,22 +2558,17 @@ function triggerStatusBadge(k){
   return `<span class="${s.cls}">${s.label}</span>`;
 }
 
-function viewTriggers(){
+function triggerInfoAlert(){
   return `
-  <div class="page-head">
-    <div class="crumbs"><a href="#/">Overview</a><span class="sep">/</span><span>Triggers</span></div>
-    <div>
-      <h1 class="t-h2">Triggers</h1>
-      <p class="t-p dim">Every qualifying encounter is identified and queued for a survey. No one has to send it by hand.</p>
-    </div>
-  </div>
-
   <div class="fw-alert fw-alert--info" role="status">
     <span class="fw-alert__icon">${I.bolt(20)}</span>
     <p class="fw-alert__desc">Triggers check every incoming call against your agency's eligibility rules. Qualifying patients get an SMS survey automatically.</p>
-  </div>
+  </div>`;
+}
 
-  <section class="fw-card fw-card-flush sec">
+function triggerEncountersCard(){
+  return `
+  <section class="fw-card fw-card-flush">
     <div class="fw-card-head">
       <div>
         <h2 class="t-h4">Recent qualifying encounters</h2>
@@ -2541,9 +2597,13 @@ function viewTriggers(){
       </tbody>
     </table>
     </div>
-  </section>
+  </section>`;
+}
 
-  <div class="grid g-2 sec">
+function triggerRulesCards({stacked=false}={}){
+  const wrap = stacked ? `style="display:flex;flex-direction:column;gap:16px"` : `class="grid g-2"`;
+  return `
+  <div ${wrap}>
     <section class="fw-card">
       <div class="row rule-head">
         <span class="rule-head--in">${I.checkCircle(18)}</span>
@@ -2572,9 +2632,102 @@ function viewTriggers(){
       </div>
       <p class="t-detail dim mt16">If any exclusion criterion is matched, the encounter is skipped.</p>
     </section>
-  </div>
+  </div>`;
+}
 
-  <section class="fw-card fw-card--dashed sec">
+function triggerRulesPanel(tab){
+  const inclusion = tab!=="exclusion";
+  if(inclusion){
+    return `
+    <div class="fw-tabpanel" role="tabpanel" id="trigger-panel-inclusion"
+      aria-labelledby="trigger-tab-inclusion">
+      <div class="trigger-rules-data">
+        <div class="rule-list">
+          ${INCLUSION_RULES.map(r=>`
+            <div class="rule rule--in">
+              <span class="rule-ico">${I.checkCircle(16)}</span>
+              <span>${esc(r)}</span>
+            </div>`).join("")}
+        </div>
+        <p class="t-detail dim">All inclusion criteria must be met for a survey to be queued.</p>
+      </div>
+    </div>`;
+  }
+  return `
+    <div class="fw-tabpanel" role="tabpanel" id="trigger-panel-exclusion"
+      aria-labelledby="trigger-tab-exclusion">
+      <div class="trigger-rules-data">
+        <div class="rule-list">
+          ${EXCLUSION_RULES.map(r=>`
+            <div class="rule rule--out">
+              <span class="rule-ico">${I.x(16)}</span>
+              <span>${esc(r)}</span>
+            </div>`).join("")}
+        </div>
+        <p class="t-detail dim">If any exclusion criterion is matched, the encounter is skipped.</p>
+      </div>
+    </div>`;
+}
+
+function triggerRulesTabs(){
+  const tab = state.triggerRulesTab==="exclusion" ? "exclusion" : "inclusion";
+  const inclusion = tab==="inclusion";
+  return `
+  <div class="fw-tabs trigger-rules">
+    <div class="fw-tablist" role="tablist" aria-label="Eligibility criteria">
+      <button type="button" class="fw-tab" role="tab" id="trigger-tab-inclusion"
+        aria-selected="${inclusion}" ${inclusion?"data-active":""}
+        aria-controls="trigger-panel-inclusion"
+        onclick="setTriggerRulesTab('inclusion')">Inclusion criteria</button>
+      <button type="button" class="fw-tab" role="tab" id="trigger-tab-exclusion"
+        aria-selected="${!inclusion}" ${!inclusion?"data-active":""}
+        aria-controls="trigger-panel-exclusion"
+        onclick="setTriggerRulesTab('exclusion')">Exclusion criteria</button>
+    </div>
+    ${triggerRulesPanel(tab)}
+  </div>`;
+}
+
+function setTriggerRulesTab(tab){
+  const next = tab==="exclusion" ? "exclusion" : "inclusion";
+  if(state.triggerRulesTab===next) return;
+  state.triggerRulesTab = next;
+  const host = document.querySelector(".drawer--trigger .trigger-rules");
+  if(!host || !state.openTrigger){
+    render();
+    return;
+  }
+  const inclBtn = host.querySelector("#trigger-tab-inclusion");
+  const exclBtn = host.querySelector("#trigger-tab-exclusion");
+  const inclusion = next==="inclusion";
+  if(inclBtn){
+    inclBtn.setAttribute("aria-selected", inclusion ? "true" : "false");
+    if(inclusion) inclBtn.setAttribute("data-active", "");
+    else inclBtn.removeAttribute("data-active");
+  }
+  if(exclBtn){
+    exclBtn.setAttribute("aria-selected", inclusion ? "false" : "true");
+    if(!inclusion) exclBtn.setAttribute("data-active", "");
+    else exclBtn.removeAttribute("data-active");
+  }
+  const panel = host.querySelector(".fw-tabpanel");
+  const wrap = document.createElement("div");
+  wrap.innerHTML = triggerRulesPanel(next).trim();
+  const nextPanel = wrap.firstElementChild;
+  if(!nextPanel){ render(); return; }
+  const data = nextPanel.querySelector(".trigger-rules-data");
+  const reduce = typeof prefersReduce==="function"
+    ? prefersReduce()
+    : matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(data && !reduce) data.classList.add("is-enter");
+  if(panel) panel.replaceWith(nextPanel);
+  else host.appendChild(nextPanel);
+  (inclusion ? inclBtn : exclBtn)?.focus();
+}
+
+function triggerTimingCard(){
+  return `
+  <section class="fw-card fw-card--dashed">
     <div class="row timing">
       <span class="sec-icon">${I.shield(20)}</span>
       <div>
@@ -2583,6 +2736,76 @@ function viewTriggers(){
       </div>
     </div>
   </section>`;
+}
+
+function findTriggerByCall(callId){
+  const n = String(callId||"").replace(/^#/,"");
+  if(!n) return null;
+  return TRIGGERS.find(t=>String(t.call).replace(/^#/,"")===n) || null;
+}
+
+function viewTriggers(){
+  return `
+  <div class="page-head">
+    <div class="crumbs"><a href="#/">Overview</a><span class="sep">/</span><span>Triggers</span></div>
+    <div>
+      <h1 class="t-h2">Triggers</h1>
+      <p class="t-p dim">Every qualifying encounter is identified and queued for a survey. No one has to send it by hand.</p>
+    </div>
+  </div>
+
+  ${triggerInfoAlert()}
+
+  <div class="sec">${triggerEncountersCard()}</div>
+  <div class="sec">${triggerRulesCards()}</div>
+  <div class="sec">${triggerTimingCard()}</div>`;
+}
+
+function triggerDrawer(callId){
+  const t = findTriggerByCall(callId);
+  const call = t ? t.call : String(callId);
+  const mobile = t
+    ? (t.mobile
+      ? `<span class="icon-yes row" style="gap:6px">${I.check(16)} On record</span>`
+      : `<span class="icon-no row" style="gap:6px">${I.x(16)} Not on record</span>`)
+    : "—";
+  return `
+  <div class="scrim" onclick="closeTrigger()"></div>
+  <aside class="drawer drawer--trigger" role="dialog" aria-modal="true" aria-labelledby="trigger-title">
+    <div class="drawer-head">
+      <div>
+        ${t?triggerStatusBadge(t.status):`<span class="fw-badge fw-badge--secondary">Unknown</span>`}
+        <h2 class="t-h4 mt8 trigger-id-line" id="trigger-title">
+          <span class="t-subtle dim" style="font-weight:400">Trigger ID</span>
+          <span class="mono">${esc(call)}</span>
+        </h2>
+        <p class="t-subtle dim">${t?esc(t.patient):"No matching encounter"} · ${esc(AGENCY.name)}</p>
+      </div>
+      <button class="iconbtn" onclick="closeTrigger()" aria-label="Close">${I.x(18)}</button>
+    </div>
+    <div class="drawer-body">
+      ${t?`<dl class="kv">
+        <dt>Patient</dt><dd>${esc(t.patient)}</dd>
+        <dt>Crew</dt><dd>${esc(t.crew)}</dd>
+        <dt>Unit</dt><dd><span class="mono">${esc(t.unit)}</span></dd>
+        <dt>Impression</dt><dd>${esc(t.impression)}</dd>
+        <dt>Mobile</dt><dd>${mobile}</dd>
+      </dl>`:`<p class="t-p dim">This call number isn’t in the live trigger feed.</p>`}
+      ${triggerRulesTabs()}
+    </div>
+  </aside>`;
+}
+function openTrigger(id){
+  if(id==null || id==="") return;
+  state.openResponse = null;
+  state.openAlert = null;
+  state.openTrigger = String(id);
+  state.triggerRulesTab = "inclusion";
+  render();
+}
+function closeTrigger(){
+  state.openTrigger = null;
+  render();
 }
 
 /* ============================================================
@@ -2794,20 +3017,26 @@ function viewSurveysIndex(){
     <table class="tbl tbl--stack tbl--surveys">
       <thead><tr>
         <th class="fav"><span class="sr">Favorite</span></th>
-        <th>Survey</th><th>Status</th><th>Responses</th><th>Rate</th><th>Updated</th>
+        <th>Survey</th><th>Trigger ID</th><th>Status</th><th>Responses</th><th>Rate</th><th>Updated</th>
         <th class="morecol"><span class="sr">Actions</span></th>
       </tr></thead>
       <tbody>
         ${state.surveys.map(s=>`
-          <tr class="clickable" onclick="go('#/surveys/${s.id}')">
-            <td class="fav sv-fav" onclick="event.stopPropagation()">
+          <tr>
+            <td class="fav sv-fav">
               <button class="iconbtn star-btn" aria-pressed="${!!s.starred}"
                 aria-label="${s.starred?"Remove from favorites":"Add to favorites"}"
                 onclick="toggleStar('${s.id}')">${s.starred?I.starFill(18):I.star(18)}</button>
             </td>
-            <td class="sv-name" style="font-weight:700">${esc(s.name)}<div class="t-subtle dim">${s.questions} questions</div></td>
+            <td class="sv-name">
+              <a class="sv-title" href="#/surveys/${s.id}">${esc(s.name)}</a>
+              <div class="t-subtle dim">${s.questions} questions</div>
+            </td>
+            <td class="sv-trigger">${s.triggerId
+              ? `<button type="button" class="num-link" onclick="openTrigger('${esc(String(s.triggerId))}')" aria-label="Open trigger ${esc(String(s.triggerId))}">${esc(String(s.triggerId))}</button>`
+              : `<span class="dim">—</span>`}</td>
             <td class="sv-status">${surveyStatusBadge(s)}</td>
-            <td class="sv-responses" data-live="${s.status==="Live"?"yes":"no"}" onclick="event.stopPropagation()">${responseCountLink(s)}</td>
+            <td class="sv-responses" data-live="${s.status==="Live"?"yes":"no"}">${responseCountLink(s)}</td>
             <td class="sv-rate" data-empty="${s.rate?"no":"yes"}">${s.rate?s.rate+"%":"—"}</td>
             <td class="dim sv-updated">${ago(s.updated)}</td>
             <td class="morecol sv-more">${surveyRowMenu(s)}</td>
@@ -3816,6 +4045,7 @@ function prefersReduce(){
 function drawerKey(){
   if(state.openResponse) return `r:${state.openResponse.surveyId}:${state.openResponse.id}`;
   if(state.openAlert) return `a:${state.openAlert}`;
+  if(state.openTrigger) return `t:${state.openTrigger}`;
   return null;
 }
 function isResponsePaging(){
@@ -4127,7 +4357,7 @@ function setLibraryFilter(f){
 let sn = 100;
 function newSurvey(){
   const id = "sv_"+ (++sn);
-  state.surveys.unshift({ id, name:"Untitled survey", status:"Draft", questions:0, responses:0, rate:0, sent:0, starred:false, updated:NOW });
+  state.surveys.unshift({ id, name:"Untitled survey", status:"Draft", triggerId:null, questions:0, responses:0, rate:0, sent:0, starred:false, updated:NOW });
   state.surveyQuestions[id] = [];
   state.responses[id] = [];
   go("#/surveys/"+id);
@@ -4539,7 +4769,7 @@ function render(){
   else body = viewOverview();
   root.innerHTML = shell(body);
   document.body.classList.toggle("nav-open", !!state.navOpen);
-  document.body.classList.toggle("drawer-open", !!(state.openAlert||state.openResponse));
+  document.body.classList.toggle("drawer-open", !!(state.openAlert||state.openResponse||state.openTrigger));
   restoreLibScroll();
   armDrawer();
   if(enter) requestAnimationFrame(()=>document.documentElement.classList.remove("is-route-enter"));
@@ -4555,6 +4785,7 @@ window.addEventListener("hashchange", ()=>{
   state.surveyMenu = null;
   state.previewSurvey = false;
   state.openResponse = null;
+  state.openTrigger = null;
   state.responseFilter = "all";
   state.responseLimit = RESPONSE_PAGE;
   state.navOpen = false;
@@ -4585,6 +4816,7 @@ window.addEventListener("keydown", e=>{
   if(state.surveyMenu){ closeSurveyMenu(); return; }
   if(state.deleteSurvey){ closeDeleteSurvey(); return; }
   if(state.openResponse){ closeResponse(); return; }
+  if(state.openTrigger){ closeTrigger(); return; }
   if(state.openAlert){ closeAlert(); }
 });
 window.addEventListener("mousedown", e=>{
