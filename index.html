@@ -83,6 +83,8 @@ ul{margin:0;padding:0;list-style:none}
 /* Kit cards are slot-based; this prototype uses one padded box. */
 .fw-card{padding:24px}
 .bento .fw-card,.grid .fw-card{box-shadow:none}
+.grid .fw-card.bento-lowest,
+.grid .fw-card.bento-demo{box-shadow:var(--shadow-md)}
 .fw-card-tight{padding:16px}
 .fw-navy{background:var(--fw-navy);color:var(--base-white)}
 textarea.fw-input{height:auto;min-height:88px;padding:12px;resize:vertical;line-height:24px}
@@ -3289,7 +3291,7 @@ function openAlertFromResponse(id){
    ============================================================ */
 function cardByDemographic(){
   return `
-    <section class="fw-card">
+    <section class="fw-card bento-demo">
       <h2 class="t-h4">By demographic</h2>
       <p class="t-subtle dim mt8">Average score. Optional questions, so not every respondent is counted.</p>
       <div class="bars mt16">
