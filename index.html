@@ -340,6 +340,10 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .funnel-stats > *,
 .spot-split > *{min-width:0}
 .funnel-strip{margin:16px 0 0;overflow:hidden}
+.crew-kpi-strip{margin:16px 0 0}
+.crew-kpi-strip .crew-kpi-head{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;
+}
 .funnel-stats{
   display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
   gap:0;margin-top:16px;
@@ -388,14 +392,14 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .bento{
   display:grid;
   grid-template-columns:1fr 1fr;
-  grid-template-rows:auto 1fr auto;
+  grid-template-rows:auto 1fr;
   gap:16px;
   align-items:stretch;
 }
 .kpi-spot{
   display:grid;
   grid-template-rows:subgrid;
-  grid-row:span 3;
+  grid-row:span 2;
   gap:16px;
   padding:0;
 }
@@ -404,7 +408,7 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .kpi-head{flex:1;min-width:0}
 .kpi-head .t-subtle{margin-top:4px}
 .kpi-spot--good .kpi-delta{color:var(--status-resolved)}
-.spot-split{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end;align-self:end;min-width:0;padding:0 24px}
+.spot-split{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end;align-self:end;min-width:0;padding:0 24px 20px}
 .kpi-spot .kpi-foot{padding:12px 24px 20px}
 .spot-split > div + div{border-left:1px solid var(--border);padding-left:16px}
 .al-reason{font-weight:700}
@@ -1792,7 +1796,6 @@ const COMMENDATIONS = [
 /* mutable runtime state */
 const state = {
   route:"#/",
-  role:"supervisor",
   theme:"light",
   alerts: ALERTS.map(a=>({...a, log:[...a.log]})),
   surveys: SURVEYS.map(s=>({...s})),
@@ -1912,11 +1915,6 @@ function shell(body){
     return `<a href="${h}" ${on?'aria-current="page"':''} onclick="onNavLink('${h}')">${l}${
       l==="Alerts"&&c?`<span class="count" aria-label="${c} open">${c}</span>`:""}</a>`;
   }).join("");
-  const roleSwitch = `
-    <div class="seg" role="group" aria-label="View as">
-      <button aria-pressed="${state.role==="supervisor"}" onclick="setRole('supervisor')">Supervisor</button>
-      <button aria-pressed="${state.role==="leadership"}" onclick="setRole('leadership')">Leadership</button>
-    </div>`;
   return `
   <div class="shell">
     ${compactNav?`<div class="nav-scrim${state.navOpen?" is-open":""}" onclick="closeNav()"></div>
@@ -1932,7 +1930,6 @@ function shell(body){
       <nav class="nav-drawer-links">${navLinks}</nav>
       <div class="nav-drawer-foot">
         <div class="brand-sub">${AGENCY.name}</div>
-        ${roleSwitch}
       </div>
     </aside>`:""}
     <header class="topbar">
@@ -1949,7 +1946,6 @@ function shell(body){
       <div class="spacer"></div>
       <div class="demo-switch">
         <span class="brand-sub">${AGENCY.name}</span>
-        ${roleSwitch}
       </div>
       <button class="iconbtn" onclick="toggleTheme()" aria-label="Switch theme">
         ${state.theme==="light"?I.moon(18):I.sun(18)}
@@ -2040,7 +2036,7 @@ function cardCallback({lead=false}={}){
           <h2 class="t-h4">Needs a callback</h2>
           <p class="t-subtle dim">Open alerts waiting in the queue.</p>
         </div>
-        ${urgent?`<span class="fw-badge fw-badge--destructive">Urgent</span>`:""}
+        <a class="fw-btn fw-btn--primary fw-btn--sm" href="#/alerts">Open queue</a>
       </div>
       <div class="spot-split">
         <div>
@@ -2052,10 +2048,6 @@ function cardCallback({lead=false}={}){
           <div class="stat-k">Oldest wait</div>
         </div>
       </div>
-      <div class="kpi-foot">
-        <span class="row">${I.clock(14)} ${crit} critical</span>
-        <a class="fw-btn fw-btn--primary fw-btn--sm" href="#/alerts">Open queue</a>
-      </div>
     </section>`;
 }
 function cardQuality({lead=false}={}){
@@ -2066,7 +2058,7 @@ function cardQuality({lead=false}={}){
           <h2 class="t-h4">Quality</h2>
           <p class="t-subtle dim">Patient scores this period.</p>
         </div>
-        <span class="kpi-delta">${I.trendUp(14)} Strong</span>
+        <a class="fw-btn fw-btn--primary fw-btn--sm" href="#/scorecard">View scorecard</a>
       </div>
       <div class="spot-split">
         <div>
@@ -2077,10 +2069,6 @@ function cardQuality({lead=false}={}){
           <div class="kpi-v">4.2 <span class="stat-unit">of 5</span></div>
           <div class="stat-k">Care</div>
         </div>
-      </div>
-      <div class="kpi-foot">
-        <span class="row">${I.calendar(14)} ${surveyPeriod()}</span>
-        <a class="fw-btn fw-btn--outline fw-btn--sm" href="#/scorecard">View scorecard</a>
       </div>
     </section>`;
 }
@@ -2101,11 +2089,68 @@ function cardLowestScores(){
     </section>`;
 }
 
+function crewScoreAggregate(){
+  const crew = SCORECARD_CREW;
+  const surveys = crew.reduce((n,c)=>n+c.surveys,0);
+  const weight = surveys || 1;
+  const wavg = key => crew.reduce((n,c)=>n+(Number(c[key])||0)*c.surveys,0)/weight;
+  return {
+    surveys,
+    crewCount: crew.length,
+    q1: wavg("q1"),
+    rec: Math.round(wavg("rec")),
+    listen: Math.round(wavg("listen")),
+    care: Math.round(wavg("care")),
+    commend: crew.reduce((n,c)=>n+c.commend,0),
+    flags: crew.reduce((n,c)=>n+c.flags,0)
+  };
+}
+function cardCrewScorecard(){
+  const a = crewScoreAggregate();
+  const q1Tone = a.q1>=4.0?"var(--primary)":"var(--status-elevated)";
+  const recTone = a.rec>=65?"var(--primary)":"var(--status-elevated)";
+  const listenTone = a.listen>=80?"var(--primary)":"var(--status-elevated)";
+  const careTone = a.care>=80?"var(--primary)":"var(--status-elevated)";
+  const flagTone = a.flags<=3*a.crewCount?"var(--primary)":"var(--status-elevated)";
+  const across = `${a.surveys} responses · ${a.crewCount} crew`;
+  const rows = [
+    { k:"Avg care rating (Q1)", v:`${a.q1.toFixed(1)} / 5`, sub:across,
+      pct:Math.round(a.q1/5*100), accent:q1Tone, meter:true },
+    { k:"Likelihood to recommend (Q2)", v:`${a.rec}%`, sub:"Weighted by survey volume",
+      pct:a.rec, accent:recTone, meter:true },
+    { k:"Felt listened to (Q3)", v:`${a.listen}% yes`, sub:"Weighted by survey volume",
+      pct:a.listen, accent:listenTone, meter:true },
+    { k:"Felt cared for (Q4)", v:`${a.care}% yes`, sub:"Weighted by survey volume",
+      pct:a.care, accent:careTone, meter:true },
+    { k:"Commendations", v:String(a.commend), sub:"Total across all crew",
+      accent:"var(--primary)", meter:false },
+    { k:"Flagged responses", v:String(a.flags), sub:"Lower is better · all crew",
+      accent:flagTone, meter:false }
+  ];
+  return `
+  <section class="fw-card crew-kpi-strip" aria-labelledby="crew-kpi-heading">
+    <div class="crew-kpi-head">
+      <div>
+        <h2 class="t-h4" id="crew-kpi-heading">Crew scorecard</h2>
+        <p class="t-subtle dim mt8">All crew · last 30 days · same metrics as the scorecard</p>
+      </div>
+      <a class="fw-btn fw-btn--primary fw-btn--sm" href="#/scorecard">View scorecard</a>
+    </div>
+    <div class="grid g-3 mt16">
+      ${rows.map(h=>`
+        <div class="stat-cell stat-cell--accent" style="--stat-accent:${h.accent}">
+          <div class="stat-k">${esc(h.k)}</div>
+          <div class="stat-v">${esc(h.v)}</div>
+          ${h.meter?`<span class="bar score-meter"><i style="width:${h.pct}%;background:${h.accent}"></i></span>`:""}
+          <div class="stat-sub">${esc(h.sub)}</div>
+        </div>`).join("")}
+    </div>
+  </section>`;
+}
+
 function viewOverview(){
-  const supervisorFirst = state.role==="supervisor";
-  const work = supervisorFirst
-    ? `${cardCallback({lead:true})}${cardQuality()}`
-    : `${cardQuality({lead:true})}${cardCallback()}`;
+  const work = `${cardQuality({lead:true})}${cardCallback()}`;
+  const crewKpis = cardCrewScorecard();
   const funnel = cardFunnel();
   const charts = `
   <div class="grid g-2 mt16" aria-label="Score charts">
@@ -2115,13 +2160,12 @@ function viewOverview(){
 
   return `
   <div class="page-head">
-    <h1 class="t-h2">${supervisorFirst?"Supervisor overview":"Reflect overview"}</h1>
-    <p class="t-p dim">${supervisorFirst
-      ? "Everything waiting on a supervisor, in one place."
-      : `Patient experience across ${AGENCY.name}, ${day(mins(43200))} to today.`}</p>
+    <h1 class="t-h2">Reflect overview</h1>
+    <p class="t-p dim">Patient experience across ${AGENCY.name}, ${day(mins(43200))} to today.</p>
   </div>
   ${staleBanner()}
-  <div class="bento" aria-label="${supervisorFirst?"Open work":"System health"}">${work}</div>
+  <div class="bento" aria-label="System health">${work}</div>
+  ${crewKpis}
   ${funnel}
   ${charts}
 `;
@@ -3504,7 +3548,7 @@ function pDemoBar(){
   if(state.previewSurvey) return "";
   return `<div class="p-demo">
     <span>${esc(pT("demoBar"))}</span>
-    <button class="fw-btn fw-btn--outline fw-btn--sm" type="button" onclick="setRole('supervisor')">${esc(pT("backStaff"))}</button>
+    <button class="fw-btn fw-btn--outline fw-btn--sm" type="button" onclick="go('#/')">${esc(pT("backStaff"))}</button>
   </div>`;
 }
 const P_DEMO = {
@@ -3867,11 +3911,6 @@ function onNavLink(h){
   const same = h==="#/surveys" ? cur.startsWith("#/surveys") : cur===h;
   closeNav();
   if(same){ scrollPageTop(); return; }
-}
-function setRole(r){
-  if(r!=="supervisor" && r!=="leadership") return;
-  state.role = r;
-  render();
 }
 function toggleTheme(){
   state.theme = state.theme==="light" ? "dark" : "light";
@@ -4484,7 +4523,6 @@ function render(){
   document.documentElement.classList.toggle("is-route-enter", enter);
 
   if(isPatientRoute(h)){
-    if(state.role==="patient") state.role = "supervisor";
     go("#/surveys");
     return;
   }
@@ -4508,7 +4546,6 @@ function render(){
 window.addEventListener("hashchange", ()=>{
   if(!isPatientRoute(location.hash||"")){
     state.openAlert = null;
-    if(state.role==="patient") state.role = "supervisor";
   }
   state.deleteSurvey = null;
   state.renameSurvey = null;
