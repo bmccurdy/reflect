@@ -60,8 +60,6 @@
       page = "Patient survey";
     } else if (hash === "#/alerts") {
       page = "Alerts";
-    } else if (hash === "#/triggers") {
-      page = "Triggers";
     } else if (hash === "#/scorecard") {
       page = "Scorecard";
     } else if (hash === "#/blink") {

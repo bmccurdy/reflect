@@ -1966,7 +1966,6 @@ function shell(body){
   const compactNav = window.matchMedia("(max-width: 1199px)").matches;
   const nav = [
     ["#/","Overview"],
-    ["#/triggers","Triggers"],
     ["#/surveys","Surveys"],
     ["#/alerts","Alerts"],
     ["#/scorecard","Scorecard"],
@@ -2558,83 +2557,6 @@ function triggerStatusBadge(k){
   return `<span class="${s.cls}">${s.label}</span>`;
 }
 
-function triggerInfoAlert(){
-  return `
-  <div class="fw-alert fw-alert--info" role="status">
-    <span class="fw-alert__icon">${I.bolt(20)}</span>
-    <p class="fw-alert__desc">Triggers check every incoming call against your agency's eligibility rules. Qualifying patients get an SMS survey automatically.</p>
-  </div>`;
-}
-
-function triggerEncountersCard(){
-  return `
-  <section class="fw-card fw-card-flush">
-    <div class="fw-card-head">
-      <div>
-        <h2 class="t-h4">Recent qualifying encounters</h2>
-        <p class="t-subtle dim mt8">${esc(AGENCY.name)} · live monitoring</p>
-      </div>
-      <div class="live-tag"><span class="live-dot" aria-hidden="true"></span> Live</div>
-    </div>
-    <div class="tbl-inset">
-    <table class="tbl tbl--stack tbl--encounters">
-      <thead><tr>
-        <th>Call #</th><th>Patient</th><th>Crew</th><th>Unit</th><th>Impression</th><th>Mobile</th><th>Status</th>
-      </tr></thead>
-      <tbody>
-        ${TRIGGERS.map(t=>`
-          <tr>
-            <td class="mono enc-call">${esc(t.call)}</td>
-            <td class="enc-patient">${esc(t.patient)}</td>
-            <td class="dim enc-crew">${esc(t.crew)}</td>
-            <td class="mono enc-unit">${esc(t.unit)}</td>
-            <td class="enc-impression">${esc(t.impression)}</td>
-            <td class="enc-mobile" data-mobile="${t.mobile?"yes":"no"}">${t.mobile
-              ? `<span class="icon-yes" title="Mobile on record">${I.check(16)}<span class="sr">Yes</span></span>`
-              : `<span class="icon-no" title="No mobile on record">${I.x(16)}<span class="sr">No</span></span>`}</td>
-            <td class="enc-status">${triggerStatusBadge(t.status)}</td>
-          </tr>`).join("")}
-      </tbody>
-    </table>
-    </div>
-  </section>`;
-}
-
-function triggerRulesCards({stacked=false}={}){
-  const wrap = stacked ? `style="display:flex;flex-direction:column;gap:16px"` : `class="grid g-2"`;
-  return `
-  <div ${wrap}>
-    <section class="fw-card">
-      <div class="row rule-head">
-        <span class="rule-head--in">${I.checkCircle(18)}</span>
-        <h2 class="t-h4">Inclusion criteria</h2>
-      </div>
-      <div class="rule-list">
-        ${INCLUSION_RULES.map(r=>`
-          <div class="rule rule--in">
-            <span class="rule-ico">${I.checkCircle(16)}</span>
-            <span>${esc(r)}</span>
-          </div>`).join("")}
-      </div>
-      <p class="t-detail dim mt16">All inclusion criteria must be met for a survey to be queued.</p>
-    </section>
-    <section class="fw-card">
-      <div class="row rule-head">
-        <span class="rule-head--out">${I.x(18)}</span>
-        <h2 class="t-h4">Exclusion criteria</h2>
-      </div>
-      <div class="rule-list">
-        ${EXCLUSION_RULES.map(r=>`
-          <div class="rule rule--out">
-            <span class="rule-ico">${I.x(16)}</span>
-            <span>${esc(r)}</span>
-          </div>`).join("")}
-      </div>
-      <p class="t-detail dim mt16">If any exclusion criterion is matched, the encounter is skipped.</p>
-    </section>
-  </div>`;
-}
-
 function triggerRulesPanel(tab){
   const inclusion = tab!=="exclusion";
   if(inclusion){
@@ -2725,40 +2647,10 @@ function setTriggerRulesTab(tab){
   (inclusion ? inclBtn : exclBtn)?.focus();
 }
 
-function triggerTimingCard(){
-  return `
-  <section class="fw-card fw-card--dashed">
-    <div class="row timing">
-      <span class="sec-icon">${I.shield(20)}</span>
-      <div>
-        <h2 class="t-h4">Timing and delivery</h2>
-        <p class="t-body dim mt8">Surveys go out by SMS within minutes of transport. Each qualifying encounter gets one unique link. Links expire after your agency's window. Patients pick a language before they start.</p>
-      </div>
-    </div>
-  </section>`;
-}
-
 function findTriggerByCall(callId){
   const n = String(callId||"").replace(/^#/,"");
   if(!n) return null;
   return TRIGGERS.find(t=>String(t.call).replace(/^#/,"")===n) || null;
-}
-
-function viewTriggers(){
-  return `
-  <div class="page-head">
-    <div class="crumbs"><a href="#/">Overview</a><span class="sep">/</span><span>Triggers</span></div>
-    <div>
-      <h1 class="t-h2">Triggers</h1>
-      <p class="t-p dim">Every qualifying encounter is identified and queued for a survey. No one has to send it by hand.</p>
-    </div>
-  </div>
-
-  ${triggerInfoAlert()}
-
-  <div class="sec">${triggerEncountersCard()}</div>
-  <div class="sec">${triggerRulesCards()}</div>
-  <div class="sec">${triggerTimingCard()}</div>`;
 }
 
 function triggerDrawer(callId){
@@ -4760,7 +4652,7 @@ function render(){
   }
   let body;
   if(h==="#/alerts") body = viewAlerts();
-  else if(h==="#/triggers") body = viewTriggers();
+  else if(h==="#/triggers"){ go("#/"); return; }
   else if(h==="#/scorecard") body = viewScorecard();
   else if(h==="#/blink") body = viewBlink();
   else if(h==="#/surveys") body = viewSurveysIndex();
