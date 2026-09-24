@@ -203,6 +203,21 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .main{flex:1;padding:32px 24px 96px;max-width:1280px;width:100%;margin:0 auto;background:var(--muted);overflow-x:clip;min-width:0}
 .page-head{margin-bottom:24px}
 .title-edit{display:flex;align-items:center;gap:8px;min-width:0;max-width:100%}
+.survey-readonly-pill{
+  flex:0 0 auto;
+  background:var(--neutral-200);
+  color:var(--neutral-900);
+  border:1px solid var(--neutral-300);
+  font-weight:500;
+}
+.survey-readonly-pill svg{flex:0 0 auto;color:currentColor}
+.survey-title-pill{flex:0 0 auto}
+.survey-title-meta{margin-top:6px}
+html[data-theme="dark"] .survey-readonly-pill{
+  background:var(--neutral-800);
+  color:var(--neutral-100);
+  border-color:var(--neutral-600);
+}
 .title-edit-hit{
   display:inline-flex;align-items:center;gap:8px;min-width:0;max-width:100%;
   margin:0;padding:0;border:0;background:transparent;
@@ -3224,13 +3239,39 @@ function surveyTriggerMeta(s){
   const id = surveyDisplayTriggerId(s);
   if(!id) return "";
   const t = findTriggerDef(id);
-  const released = surveyTriggerReleased(s);
-  const idBtn = `<button type="button" class="num-link${released?" num-link--muted":""}" onclick="openTrigger('${esc(id)}')">${esc(formatTriggerId(id))}</button>`;
-  if(released && t){
-    return ` · ${idBtn} <span class="dim">${esc(t.name)}</span>`;
+  const label = `Open trigger ${formatTriggerId(id)}${t?`, ${t.name}`:""}`;
+  return ` · <button type="button" class="num-link" onclick="openTrigger('${esc(id)}')" aria-label="${esc(label)}">${esc(formatTriggerId(id))}</button>`;
+}
+function surveyTitleMeta(s){
+  const qs = (state.surveyQuestions[s.id]||[]).length;
+  const n = Number(s.responses)||0;
+  const resp = n===1 ? "1 response" : `${n} responses`;
+  const trig = surveyTriggerMeta(s);
+  if(s.status==="Live"){
+    const parts = [];
+    if(s.publishedAt) parts.push(`Published ${day(s.publishedAt)}`);
+    parts.push(s.endsAt ? `Ends ${day(s.endsAt)}` : "Ongoing");
+    parts.push(resp);
+    if(s.version>1) parts.push(`v${s.version}`);
+    return parts.map(esc).join(" · ")+trig;
   }
-  if(t) return ` · ${idBtn}`;
-  return ` · <span class="mono${released?" dim":""}">${esc(formatTriggerId(id))}</span>`;
+  if(s.status==="Draft"){
+    const q = qs===1 ? "1 question" : `${qs} questions`;
+    return `${q} · Not published${trig}`;
+  }
+  if(s.status==="Stopped"){
+    const parts = [];
+    if(s.publishedAt) parts.push(`Published ${day(s.publishedAt)}`);
+    parts.push(s.stoppedAt ? `Stopped ${day(s.stoppedAt)}` : "Stopped");
+    parts.push(resp);
+    if(s.version>1) parts.push(`v${s.version}`);
+    return parts.map(esc).join(" · ")+trig;
+  }
+  if(s.status==="Completed"){
+    const when = s.endsAt ? `Ended ${day(s.endsAt)}` : "Completed";
+    return `${esc(when)} · ${resp}${trig}`;
+  }
+  return "";
 }
 function responseCountLink(s){
   if(s.status!=="Live" && s.status!=="Stopped" && s.status!=="Completed") return `<span class="dim">—</span>`;
@@ -3388,9 +3429,7 @@ function triggerAssocCard(s){
     <div class="between between--inline" style="margin-bottom:16px">
       <div>
         <h2 class="t-h4">Associated trigger</h2>
-        <p class="t-subtle dim mt8">${locked
-          ? "Trigger used for invitations while this version was collecting."
-          : "Which FirstWatch trigger queues invitations for this survey."}</p>
+        ${locked?"":`<p class="t-subtle dim mt8">Which FirstWatch trigger queues invitations for this survey.</p>`}
       </div>
       ${activeId
         ? `<span class="fw-badge fw-badge--success">${I.checkCircle(12)} Linked</span>`
@@ -3569,25 +3608,21 @@ function scheduleCard(s){
 }
 function surveyLockBanner(s){
   if(!isSurveyLocked(s)) return "";
+  if(s.status==="Stopped") return "";
   if(s.status==="Live"){
     return `
     <div class="fw-alert fw-alert--info survey-lock-banner" role="status">
       <span class="fw-alert__icon">${I.lock(20)}</span>
       <div>
         <p class="fw-alert__desc"><strong>Live — editing locked.</strong> This survey is collecting responses. Questions, trigger, and schedule can’t change on this version.</p>
-        <div class="fw-alert__actions">
-          <button type="button" class="fw-btn fw-btn--outline fw-btn--sm" onclick="askStopSurvey('${s.id}')">Stop survey</button>
-          <button type="button" class="fw-btn fw-btn--primary fw-btn--sm" onclick="duplicateAndEdit('${s.id}')">${I.copy(14)} Duplicate &amp; edit</button>
-        </div>
       </div>
     </div>`;
   }
-  const label = s.status==="Completed" ? "Completed" : "Stopped";
   return `
   <div class="fw-alert fw-alert--warning survey-lock-banner" role="status">
     <span class="fw-alert__icon">${I.lock(20)}</span>
     <div>
-      <p class="fw-alert__desc"><strong>${label} — read only.</strong> ${esc(formatScheduleSummary(s))}. ${surveyActiveTriggerId(s)?"":surveyPriorTriggerId(s)?"The trigger was released for a new draft.":"No trigger was linked."}</p>
+      <p class="fw-alert__desc"><strong>Completed — read only.</strong> ${esc(formatScheduleSummary(s))}. ${surveyActiveTriggerId(s)?"":surveyPriorTriggerId(s)?"The trigger was released for a new draft.":"No trigger was linked."}</p>
       <div class="fw-alert__actions">
         <button type="button" class="fw-btn fw-btn--primary fw-btn--sm" onclick="duplicateAndEdit('${s.id}')">${I.copy(14)} Duplicate &amp; edit</button>
         ${s.clonedFromId?`<a class="fw-btn fw-btn--outline fw-btn--sm" href="#/surveys/${s.clonedFromId}">View prior version</a>`:""}
@@ -3983,14 +4018,7 @@ function viewSurveys(){
   const lockedQs = qs.filter(q=>q.locked).length;
   const surveyLocked = isSurveyLocked(s);
   const previewIdx = previewQIndex();
-  const trigMeta = surveyTriggerMeta(s);
-  const schedMeta = ` · ${esc(formatScheduleSummary(s))}`;
-  const verMeta = s.version>1 ? ` · v${s.version}` : "";
-  const meta = s.status==="Live"
-    ? `${qs.length} questions · live · ${s.responses} responses so far${trigMeta}${schedMeta}${verMeta}`
-    : s.status==="Draft"
-      ? `${qs.length} questions · draft · not sent yet${trigMeta}${schedMeta}${verMeta}`
-      : `${qs.length} questions · ${s.status.toLowerCase()} · ${s.responses} responses${trigMeta}${schedMeta}${verMeta}`;
+  const meta = surveyTitleMeta(s);
   const pageActions = surveyLocked
     ? `${s.status!=="Draft"?`<a class="fw-btn fw-btn--outline" href="#/surveys/${s.id}/responses">${I.inbox(16)} Responses</a>`:""}
         <button class="fw-btn fw-btn--outline" onclick="openSurveyPreview()">${I.eye(16)} Preview</button>
@@ -4029,8 +4057,10 @@ function viewSurveys(){
             <span>${esc(s.name)}</span>
             <span class="title-edit-pen" aria-hidden="true">${I.pencil(16)}</span>
           </button>`}
+          ${s.status==="Live"?`<span class="fw-badge fw-badge--success survey-title-pill">${I.checkCircle(12)} Live</span>`:""}
+          ${s.status==="Stopped"?`<span class="fw-badge survey-readonly-pill">${I.lock(12)} Read only</span>`:""}
         </h1>`}
-        <p class="t-p dim">${meta}</p>
+        <p class="t-subtle dim survey-title-meta">${meta}</p>
       </div>
       <div class="row page-actions" style="gap:8px">
         ${pageActions}
@@ -4041,7 +4071,7 @@ function viewSurveys(){
   <div class="split">
     <div>
       ${triggerAssocCard(s)}
-      ${scheduleCard(s)}
+      ${s.status==="Draft"||s.status==="Completed"?scheduleCard(s):""}
       <div class="fw-card sec">
         <div class="between between--inline" style="margin-bottom:16px">
           <div>
