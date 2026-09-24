@@ -807,13 +807,12 @@ button.num-link{
 }
 .drawer--trigger .trigger-rules .fw-tabpanel{
   padding-top:14px;
+  animation:none;
+  transition:none;
 }
-.drawer--trigger .trigger-rules .trigger-rules-data.is-enter{
-  animation:triggerPanelIn var(--dur-fast) var(--ease-out) both;
-}
-@keyframes triggerPanelIn{
-  from{opacity:0;transform:translate3d(8px,0,0)}
-  to{opacity:1;transform:none}
+.drawer--trigger .trigger-rules .trigger-rules-data{
+  animation:none;
+  transition:none;
 }
 .drawer--trigger .trigger-rules .rule-list{gap:8px}
 .drawer--trigger .trigger-rules .rule{align-items:flex-start}
@@ -2955,11 +2954,6 @@ function setTriggerRulesTab(tab){
   wrap.innerHTML = triggerRulesPanel(next).trim();
   const nextPanel = wrap.firstElementChild;
   if(!nextPanel){ render(); return; }
-  const data = nextPanel.querySelector(".trigger-rules-data");
-  const reduce = typeof prefersReduce==="function"
-    ? prefersReduce()
-    : matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if(data && !reduce) data.classList.add("is-enter");
   if(panel) panel.replaceWith(nextPanel);
   else host.appendChild(nextPanel);
   (inclusion ? inclBtn : exclBtn)?.focus();
