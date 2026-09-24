@@ -413,7 +413,7 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .spot-split{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end;align-self:end;min-width:0;padding:0 24px 20px}
 .kpi-spot .kpi-foot{padding:12px 24px 20px}
 .spot-split > div + div{border-left:1px solid var(--border);padding-left:16px}
-.al-reason{font-weight:700}
+.al-reason{font-weight:700;text-align:left}
 .al-meta{display:none;margin-top:8px;color:var(--muted-foreground);font-size:13px;line-height:20px}
 
 /* queue table */
@@ -2702,11 +2702,6 @@ function closeTrigger(){
    ============================================================ */
 let queueFilter = "open";
 function setFilter(f){ queueFilter = f; render(); }
-function alertRowKey(e,id){
-  if(e.key!=="Enter" && e.key!==" ") return;
-  e.preventDefault();
-  openAlert(id);
-}
 
 function viewAlerts(){
   const all = state.alerts;
@@ -2741,13 +2736,10 @@ function viewAlerts(){
       </tr></thead>
       <tbody aria-live="polite">
         ${list.map(a=>`
-          <tr class="clickable" id="row-${a.id}" tabindex="0"
-            aria-label="${esc(a.reason)}"
-            onclick="openAlert('${a.id}')"
-            onkeydown="alertRowKey(event,'${a.id}')">
+          <tr id="row-${a.id}">
             <td class="al-status">${statusBadge(a.status)}</td>
             <td class="al-why">
-              <div class="al-reason">${esc(a.reason)}</div>
+              <button type="button" class="al-reason num-link" onclick="openAlert('${a.id}')">${esc(a.reason)}</button>
               <div class="snip">${esc(a.quote)}</div>
               <div class="al-meta">${a.unit} · ${esc(a.assigned)} · ${ago(a.at)}</div>
             </td>
@@ -4084,7 +4076,15 @@ function blinkSend(id){
 }
 
 function openAlert(id){ state.openAlert = id; render(); }
-function closeAlert(){ state.openAlert = null; render(); }
+function closeAlert(){
+  const id = state.openAlert;
+  state.openAlert = null;
+  render();
+  requestAnimationFrame(()=>{
+    const btn = id && document.querySelector(`#row-${CSS.escape(id)} .al-reason`);
+    if(btn) btn.focus();
+  });
+}
 
 function noteFor(id){
   const el = document.getElementById("note-"+id);
