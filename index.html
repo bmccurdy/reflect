@@ -802,6 +802,60 @@ button.num-link{
   position:sticky;top:72px;z-index:20;
   background:transparent;
 }
+.trigger-assoc .fw-select{margin-top:0}
+.trigger-select .fw-select__trigger{
+  text-align:left;justify-content:flex-start;padding-right:36px;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.trigger-select .fw-select__menu{max-height:min(360px,50vh);padding-top:0;overflow:hidden;display:flex;flex-direction:column}
+.trigger-select-search{
+  position:sticky;top:0;z-index:1;padding:8px;background:var(--card);
+  border-bottom:1px solid var(--border);flex:0 0 auto;
+}
+.trigger-select-search .fw-input{width:100%}
+.trigger-select-list{overflow:auto;padding:6px;flex:1 1 auto}
+.trigger-select-hint{
+  flex:0 0 auto;padding:6px 14px 0;font-size:12px;line-height:16px;color:var(--muted-foreground);
+}
+.trigger-select-foot{
+  flex:0 0 auto;border-top:1px solid var(--border);padding:6px;background:var(--card);
+}
+.trigger-select-foot-btn{
+  width:100%;border:0;background:transparent;cursor:pointer;text-align:left;
+  padding:8px 10px;border-radius:var(--r-sm);font-size:13px;line-height:18px;
+  font-weight:600;color:var(--primary);
+}
+.trigger-select-foot-btn:hover{background:var(--surface-hover)}
+.trigger-select-section{
+  padding:8px 10px 4px;font-size:11px;line-height:16px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.04em;color:var(--muted-foreground);
+}
+.trigger-select-opt{align-items:flex-start}
+.trigger-select-opt.is-disabled{
+  opacity:.55;cursor:default;
+}
+.trigger-select-opt.is-disabled:hover,
+.trigger-select-opt.is-disabled[data-active]{
+  background:var(--surface-hover);
+}
+.trigger-select-opt-copy{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.trigger-select-opt-id{font-family:var(--font-mono, ui-monospace, monospace);font-size:12px;line-height:16px;color:var(--muted-foreground)}
+.trigger-select-opt-name{font-size:14px;line-height:20px}
+.trigger-select-opt-used{
+  display:inline;padding:0;border:0;background:transparent;cursor:pointer;
+  font-size:12px;line-height:16px;font-weight:600;color:var(--primary);text-align:left;
+}
+.trigger-select-opt-used:hover{text-decoration:underline}
+.trigger-select-empty{padding:12px 10px;color:var(--muted-foreground);font-size:13px;line-height:20px}
+.trigger-summary{
+  margin-top:12px;padding:12px 14px;border:1px solid var(--border);
+  border-radius:var(--r-md);background:var(--muted);display:flex;flex-wrap:wrap;
+  align-items:center;gap:8px 12px;
+}
+.trigger-summary-main{flex:1 1 180px;min-width:0}
+.trigger-summary-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.trigger-summary-warn{flex:1 1 100%;font-size:13px;line-height:20px;color:var(--muted-foreground)}
 .qcard{
   border:1px solid var(--border);border-radius:var(--r-lg);background:var(--card);
   color:var(--card-foreground);
@@ -1620,8 +1674,23 @@ const ALERTS = [
 
 const SURVEYS = [
   { id:"sv_post", name:"Post-transport experience", status:"Live", triggerId:"43063", questions:7, responses:84, rate:31, sent:271, updated:mins(4320) },
-  { id:"sv_notrans", name:"Refused transport follow-up", status:"Live", triggerId:"47738", questions:4, responses:19, rate:22, sent:86, updated:mins(11400) },
+  { id:"sv_notrans", name:"Refused transport follow-up", status:"Live", triggerId:"78396", questions:4, responses:19, rate:22, sent:86, updated:mins(11400) },
   { id:"sv_q3", name:"Q3 community perception", status:"Draft", triggerId:null, questions:9, responses:0, rate:0, sent:0, updated:mins(220) }
+];
+
+/* FirstWatch trigger / watch catalog — surveys bind to these, not encounter call IDs */
+const TRIGGER_DEFS = [
+  { id:"76877", name:"CAD Mobile All Responses (FWINTERNAL)", type:"Response", patientSurvey:false },
+  { id:"77992", name:"FW - Hospital Status Dashboard", type:"Dashboard", patientSurvey:false },
+  { id:"8878",  name:"Prime County - 911 Transports", type:"Transport" },
+  { id:"43063", name:"Prime County - All Incidents", type:"Incident" },
+  { id:"78396", name:"Prime County - All Responses", type:"Response" },
+  { id:"12409", name:"Prime County - Chute Time 90 Secs *", type:"Operations" },
+  { id:"8825",  name:"Prime County - Fires", type:"Incident" },
+  { id:"23192", name:"Prime County - IDV", type:"Operations" },
+  { id:"8881",  name:"Prime County - Abdominal Pain", type:"Impression" },
+  { id:"8882",  name:"Prime County - Allergy/Rash", type:"Impression" },
+  { id:"8888",  name:"Prime County - ALS Time-on-Task (60 min)", type:"Operations" }
 ];
 
 const QUESTIONS = [
@@ -1788,13 +1857,14 @@ const ZONES = [
   { label:"Port Washington",  n:13, score:4.5 }
 ];
 
+/* Encounter feed (individual calls) — distinct from TRIGGER_DEFS catalog IDs */
 const TRIGGERS = [
-  { call:"43063", patient:"M. Rodriguez, 54", crew:"Gilligan / Smith", unit:"M-12", impression:"Chest pain", mobile:true, status:"sent" },
-  { call:"47738", patient:"C. Jean-Baptiste, 67", crew:"Baptiste / Lee", unit:"M-7", impression:"Syncope", mobile:true, status:"sent" },
-  { call:"47735", patient:"A. Nguyen, 41", crew:"Hernandez / Williams", unit:"M-3", impression:"Fall / injury", mobile:true, status:"pending" },
-  { call:"47732", patient:"L. Okafor, 29", crew:"Gilligan / Smith", unit:"M-12", impression:"Respiratory", mobile:true, status:"alert" },
-  { call:"47729", patient:"E. Santos, 73", crew:"Sanchez / Tran", unit:"M-19", impression:"CVA / stroke", mobile:false, status:"excluded" },
-  { call:"47727", patient:"P. Alvarez, 38", crew:"Baptiste / Lee", unit:"M-7", impression:"Abdominal pain", mobile:true, status:"sent" }
+  { call:"#7741", triggerId:"43063", patient:"M. Rodriguez, 54", crew:"Gilligan / Smith", unit:"M-12", impression:"Chest pain", mobile:true, status:"sent" },
+  { call:"#7738", triggerId:"78396", patient:"C. Jean-Baptiste, 67", crew:"Baptiste / Lee", unit:"M-7", impression:"Syncope", mobile:true, status:"sent" },
+  { call:"#7735", triggerId:"43063", patient:"A. Nguyen, 41", crew:"Hernandez / Williams", unit:"M-3", impression:"Fall / injury", mobile:true, status:"pending" },
+  { call:"#7732", triggerId:"43063", patient:"L. Okafor, 29", crew:"Gilligan / Smith", unit:"M-12", impression:"Respiratory", mobile:true, status:"alert" },
+  { call:"#7729", triggerId:"43063", patient:"E. Santos, 73", crew:"Sanchez / Tran", unit:"M-19", impression:"CVA / stroke", mobile:false, status:"excluded" },
+  { call:"#7727", triggerId:"78396", patient:"P. Alvarez, 38", crew:"Baptiste / Lee", unit:"M-7", impression:"Abdominal pain", mobile:true, status:"sent" }
 ];
 const TRIGGER_STATUS = {
   sent:{ label:"Survey sent", cls:"fw-badge fw-badge--success" },
@@ -1847,19 +1917,19 @@ const SCORECARD_CREW = [
 ];
 
 const COMMENDATIONS = [
-  { id:"b1", crew:"Gilligan / Smith", unit:"M-12", call:"43063",
+  { id:"b1", crew:"Gilligan / Smith", unit:"M-12", call:"#7741",
     text:"The crew were absolutely wonderful. They kept me calm the entire time and explained everything that was happening. I couldn't have asked for better care.",
     patient:"M. Rodriguez", sent:false },
-  { id:"b2", crew:"Baptiste / Lee", unit:"M-7", call:"47738",
+  { id:"b2", crew:"Baptiste / Lee", unit:"M-7", call:"#7738",
     text:"Muy profesionales y amables. Me hicieron sentir segura durante todo el traslado. Gracias a los dos.",
     patient:"C. Jean-Baptiste", lang:"Spanish", sent:false },
-  { id:"b3", crew:"Hernandez / Williams", unit:"M-3", call:"47735",
+  { id:"b3", crew:"Hernandez / Williams", unit:"M-3", call:"#7735",
     text:"Antonio and William treated my father like a king. Very kind, very caring. We are so grateful.",
     patient:"A. Nguyen", sent:false },
-  { id:"b4", crew:"Sanchez / Tran", unit:"M-19", call:"47698",
+  { id:"b4", crew:"Sanchez / Tran", unit:"M-19", call:"#7698",
     text:"Crew was calm and professional, stellar patient care. Thank you!",
     patient:"F. Delgado", sent:true },
-  { id:"b5", crew:"Baptiste / Lee", unit:"M-7", call:"47727",
+  { id:"b5", crew:"Baptiste / Lee", unit:"M-7", call:"#7727",
     text:"Smooth drive, caring, kind and compassionate crew. Thank you!",
     patient:"P. Alvarez", sent:true }
 ];
@@ -1876,6 +1946,10 @@ const state = {
   openResponse:null,
   openTrigger:null,
   triggerRulesTab:"inclusion",
+  triggerSelectOpen:false,
+  triggerSelectActive:0,
+  triggerSelectQuery:"",
+  triggerSelectShowUsed:false,
   responseFilter:"all",
   responseLimit:11,
   drawerKey:null,
@@ -2657,43 +2731,95 @@ function setTriggerRulesTab(tab){
   (inclusion ? inclBtn : exclBtn)?.focus();
 }
 
-function findTriggerByCall(callId){
-  const n = String(callId||"").replace(/^#/,"");
+function findTriggerDef(id){
+  const n = String(id||"").replace(/^#/,"");
   if(!n) return null;
-  return TRIGGERS.find(t=>String(t.call).replace(/^#/,"")===n) || null;
+  return TRIGGER_DEFS.find(t=>t.id===n) || null;
+}
+function formatTriggerId(id){
+  const n = String(id||"").replace(/^#/,"");
+  return n ? `#${n}` : "";
+}
+function formatTriggerLabel(t){
+  if(!t) return "";
+  return `[#${t.id}] ${t.name}`;
+}
+function patientTriggerDefs(){
+  return TRIGGER_DEFS.filter(t=>t.patientSurvey!==false);
+}
+function surveysUsingTrigger(id, exceptId){
+  const n = String(id||"").replace(/^#/,"");
+  return state.surveys.filter(s=>String(s.triggerId||"").replace(/^#/,"")===n && s.id!==exceptId);
+}
+function triggerOwner(id, exceptId){
+  return surveysUsingTrigger(id, exceptId)[0] || null;
+}
+function triggerMatchesQuery(t, q){
+  if(!q) return true;
+  const id = t.id.toLowerCase();
+  const name = t.name.toLowerCase();
+  return id.includes(q) || name.includes(q) || (`#${id}`).includes(q) || (`[#${id}]`).includes(q);
+}
+/* Available by default; in-use only when expanded or when search matches them. */
+function triggerSelectModel(surveyId){
+  const q = (state.triggerSelectQuery||"").trim().toLowerCase();
+  const sid = surveyId || currentSurvey()?.id;
+  const all = patientTriggerDefs();
+  const available = [];
+  const inUseAll = [];
+  all.forEach(t=>{
+    if(triggerOwner(t.id, sid)) inUseAll.push(t);
+    else available.push(t);
+  });
+  const availableShown = available.filter(t=>triggerMatchesQuery(t, q));
+  const inUseMatched = inUseAll.filter(t=>triggerMatchesQuery(t, q));
+  const includeInUse = !!state.triggerSelectShowUsed || !!q;
+  const inUseShown = includeInUse ? inUseMatched : [];
+  return {
+    q,
+    available: availableShown,
+    inUse: inUseShown,
+    inUseTotal: inUseAll.length,
+    inUseMatched: inUseMatched.length,
+    includeInUse,
+    rows: availableShown.concat(inUseShown)
+  };
+}
+function triggerSelectFiltered(){
+  return triggerSelectModel().rows;
 }
 
 function triggerDrawer(callId){
-  const t = findTriggerByCall(callId);
-  const call = t ? t.call : String(callId);
-  const mobile = t
-    ? (t.mobile
-      ? `<span class="icon-yes row" style="gap:6px">${I.check(16)} On record</span>`
-      : `<span class="icon-no row" style="gap:6px">${I.x(16)} Not on record</span>`)
-    : "—";
+  const t = findTriggerDef(callId);
+  const call = t ? formatTriggerId(t.id) : formatTriggerId(callId) || String(callId||"");
+  const used = t ? surveysUsingTrigger(t.id) : [];
   return `
   <div class="scrim" onclick="closeTrigger()"></div>
   <aside class="drawer drawer--trigger" role="dialog" aria-modal="true" aria-labelledby="trigger-title">
     <div class="drawer-head">
       <div>
-        ${t?triggerStatusBadge(t.status):`<span class="fw-badge fw-badge--secondary">Unknown</span>`}
+        ${t
+          ? `<span class="fw-badge fw-badge--secondary">${esc(t.type||"Trigger")}</span>`
+          : `<span class="fw-badge fw-badge--secondary">Unknown</span>`}
         <h2 class="t-h4 mt8 trigger-id-line" id="trigger-title">
           <span class="t-subtle dim" style="font-weight:400">Trigger ID</span>
           <span class="mono">${esc(call)}</span>
         </h2>
-        <p class="t-subtle dim">${t?esc(t.patient):"No matching encounter"} · ${esc(AGENCY.name)}</p>
+        <p class="t-subtle dim">${t?esc(t.name):"No matching trigger definition"} · ${esc(AGENCY.name)}</p>
       </div>
       <button class="iconbtn" onclick="closeTrigger()" aria-label="Close">${I.x(18)}</button>
     </div>
     <div class="drawer-body">
       ${t?`<dl class="kv">
-        <dt>Patient</dt><dd>${esc(t.patient)}</dd>
-        <dt>Crew</dt><dd>${esc(t.crew)}</dd>
-        <dt>Unit</dt><dd><span class="mono">${esc(t.unit)}</span></dd>
-        <dt>Impression</dt><dd>${esc(t.impression)}</dd>
-        <dt>Mobile</dt><dd>${mobile}</dd>
-      </dl>`:`<p class="t-p dim">This call number isn’t in the live trigger feed.</p>`}
-      ${triggerRulesTabs()}
+        <dt>Name</dt><dd>${esc(t.name)}</dd>
+        <dt>Type</dt><dd>${esc(t.type||"—")}</dd>
+        <dt>Inclusion</dt><dd>${INCLUSION_RULES.length} criteria</dd>
+        <dt>Exclusion</dt><dd>${EXCLUSION_RULES.length} criteria</dd>
+        <dt>Surveys</dt><dd>${used.length
+          ? used.map(s=>`<a href="#/surveys/${s.id}" onclick="closeTrigger()">${esc(s.name)}</a>`).join(", ")
+          : `<span class="dim">None linked yet</span>`}</dd>
+      </dl>`:`<p class="t-p dim">This trigger isn’t in the agency catalog.</p>`}
+      ${t?triggerRulesTabs():""}
     </div>
   </aside>`;
 }
@@ -2701,7 +2827,8 @@ function openTrigger(id){
   if(id==null || id==="") return;
   state.openResponse = null;
   state.openAlert = null;
-  state.openTrigger = String(id);
+  state.triggerSelectOpen = false;
+  state.openTrigger = String(id).replace(/^#/,"");
   state.triggerRulesTab = "inclusion";
   render();
 }
@@ -2893,6 +3020,367 @@ function responseCountLink(s){
 function responsesFor(id){ return state.responses[id] || []; }
 function isResponsesRoute(h){ return /^#\/surveys\/[^/]+\/responses/.test(h || location.hash || ""); }
 
+function triggerSelectOptHtml(model, selected, active, surveyId){
+  const { available, inUse, q, inUseTotal, includeInUse } = model;
+  if(!available.length && !inUse.length){
+    if(q){
+      return `<div class="trigger-select-empty">No triggers match that search.</div>`;
+    }
+    if(inUseTotal){
+      return `<div class="trigger-select-empty">All triggers are linked to other surveys. Show in-use triggers to review them.</div>`;
+    }
+    return `<div class="trigger-select-empty">No triggers available.</div>`;
+  }
+  let idx = 0;
+  const renderRow = (t)=>{
+    const i = idx++;
+    const on = selected && selected.id===t.id;
+    const owner = triggerOwner(t.id, surveyId);
+    const taken = !!owner;
+    if(taken){
+      return `<div class="fw-select__opt trigger-select-opt is-disabled" role="option" id="trigger-select-opt-${i}"
+        aria-selected="false" aria-disabled="true"${i===active?" data-active":""}
+        onmousedown="event.preventDefault()"
+        onclick="triggerSelectTaken('${t.id}')">
+        <span class="trigger-select-opt-copy">
+          <span class="trigger-select-opt-id">[#${esc(t.id)}]</span>
+          <span class="trigger-select-opt-name">${esc(t.name)}</span>
+          <button type="button" class="trigger-select-opt-used"
+            onmousedown="event.preventDefault()"
+            onclick="event.stopPropagation();goToTriggerOwner('${owner.id}')">In use · ${esc(owner.name)}</button>
+        </span>
+        <span class="fw-badge fw-badge--secondary">In use</span>
+      </div>`;
+    }
+    return `<div class="fw-select__opt trigger-select-opt" role="option" id="trigger-select-opt-${i}"
+      aria-selected="${on}"${i===active?" data-active":""}
+      onmousedown="event.preventDefault()"
+      onclick="triggerSelectPick('${t.id}')">
+      <span class="trigger-select-opt-copy">
+        <span class="trigger-select-opt-id">[#${esc(t.id)}]</span>
+        <span class="trigger-select-opt-name">${esc(t.name)}</span>
+      </span>
+      ${on?I.check(16):""}
+    </div>`;
+  };
+  let html = available.map(renderRow).join("");
+  if(inUse.length){
+    html += `<div class="trigger-select-section" aria-hidden="true">In use</div>`;
+    html += inUse.map(renderRow).join("");
+  }
+  return html;
+}
+function triggerSelectHintHtml(model){
+  if(!model.q || state.triggerSelectShowUsed || !model.inUseMatched) return "";
+  const n = model.inUseMatched;
+  return `<div class="trigger-select-hint" id="trigger-select-hint">${n} match${n===1?"":"es"} in use — shown below.</div>`;
+}
+function triggerSelectFootHtml(model){
+  if(model.q || !model.inUseTotal) return "";
+  const n = model.inUseTotal;
+  const label = state.triggerSelectShowUsed
+    ? "Hide in-use triggers"
+    : `Show ${n} in-use trigger${n===1?"":"s"}`;
+  return `<div class="trigger-select-foot">
+    <button type="button" class="trigger-select-foot-btn" id="trigger-select-foot-btn"
+      onmousedown="event.preventDefault()"
+      onclick="toggleTriggerSelectShowUsed()">${esc(label)}</button>
+  </div>`;
+}
+function triggerSelect(s){
+  const open = !!state.triggerSelectOpen;
+  const model = triggerSelectModel(s.id);
+  const rows = model.rows;
+  const active = Math.min(Math.max(0, rows.length-1), Math.max(0, state.triggerSelectActive|0));
+  const selected = findTriggerDef(s.triggerId);
+  const shown = selected ? formatTriggerLabel(selected) : "Select a trigger to associate with this survey…";
+  return `<div class="fw-field">
+    <label class="fw-label" id="trigger-select-label" for="trigger-select-trigger">
+      Base trigger <span class="fw-label__req" aria-hidden="true">*</span>
+    </label>
+    <div class="fw-select trigger-select${open?" is-open":""}">
+      <button type="button" class="fw-select__trigger" id="trigger-select-trigger"
+        aria-haspopup="listbox" aria-expanded="${open}"
+        aria-labelledby="trigger-select-label trigger-select-trigger"
+        aria-controls="trigger-select-options"
+        ${!selected?`data-placeholder`:""}
+        ${open && rows.length?`aria-activedescendant="trigger-select-opt-${active}"`:""}
+        onclick="triggerSelectToggle(event)"
+        onkeydown="triggerSelectKey(event)">${esc(shown)}</button>
+      <span class="fw-select__chevron" aria-hidden="true">${I.down(16)}</span>
+      ${open?`<div class="fw-select__menu">
+        <div class="trigger-select-search">
+          <input class="fw-input" id="trigger-select-search" type="search"
+            placeholder="Search by ID or name" autocomplete="off"
+            value="${esc(state.triggerSelectQuery||"")}"
+            aria-label="Filter triggers"
+            onkeydown="triggerSelectSearchKey(event)"
+            oninput="onTriggerSelectInput(this.value)">
+        </div>
+        ${triggerSelectHintHtml(model)}
+        <div class="trigger-select-list" id="trigger-select-options" role="listbox" aria-labelledby="trigger-select-label">
+          ${triggerSelectOptHtml(model, selected, active, s.id)}
+        </div>
+        ${triggerSelectFootHtml(model)}
+      </div>`:""}
+    </div>
+  </div>`;
+}
+function triggerSummary(s){
+  const t = findTriggerDef(s.triggerId);
+  if(!t){
+    return `<div class="trigger-summary" role="status">
+      <div class="trigger-summary-main">
+        <div class="t-pui" style="font-weight:700">Trigger ${esc(formatTriggerId(s.triggerId))} unavailable</div>
+        <p class="t-subtle dim mt8">Choose another trigger from the catalog before publishing.</p>
+      </div>
+    </div>`;
+  }
+  const others = surveysUsingTrigger(t.id, s.id);
+  const inN = INCLUSION_RULES.length;
+  const outN = EXCLUSION_RULES.length;
+  return `<div class="trigger-summary" role="status">
+    <div class="trigger-summary-main">
+      <div class="t-pui" style="font-weight:700">${esc(formatTriggerLabel(t))}</div>
+      <p class="t-subtle dim mt8">${esc(t.type)} · ${inN} inclusion · ${outN} exclusion</p>
+    </div>
+    <div class="trigger-summary-actions">
+      <button type="button" class="fw-btn fw-btn--outline fw-btn--sm" onclick="openTrigger('${t.id}')">${I.eye(14)} View criteria</button>
+      ${s.status!=="Live"?`<button type="button" class="fw-btn fw-btn--ghost fw-btn--sm" onclick="clearSurveyTrigger('${s.id}')">Clear</button>`:""}
+    </div>
+    ${others.length?`<p class="trigger-summary-warn">Conflict: also linked to ${others.map(o=>esc(o.name)).join(", ")}. Only one survey should use this trigger.</p>`:""}
+  </div>`;
+}
+function triggerAssocCard(s){
+  return `
+  <div class="fw-card trigger-assoc">
+    <div class="between between--inline" style="margin-bottom:16px">
+      <div>
+        <h2 class="t-h4">Associated trigger</h2>
+        <p class="t-subtle dim mt8">Which FirstWatch trigger queues invitations for this survey.</p>
+      </div>
+      ${s.triggerId
+        ? `<span class="fw-badge fw-badge--success">${I.checkCircle(12)} Linked</span>`
+        : `<span class="fw-badge fw-badge--outline">Required to publish</span>`}
+    </div>
+    ${triggerSelect(s)}
+    ${s.triggerId?triggerSummary(s):""}
+  </div>`;
+}
+function triggerSelectPaint(focusSearch){
+  const wrap = document.querySelector(".trigger-select");
+  if(!wrap) return;
+  const s = currentSurvey();
+  if(!s) return;
+  const field = wrap.closest(".fw-field");
+  const host = field || wrap;
+  const tpl = document.createElement("template");
+  tpl.innerHTML = triggerSelect(s).trim();
+  host.replaceWith(tpl.content.firstElementChild);
+  if(focusSearch!==false && state.triggerSelectOpen){
+    const input = document.getElementById("trigger-select-search");
+    if(input){
+      input.focus();
+      const len = input.value.length;
+      try{ input.setSelectionRange(len, len); }catch(_){}
+    } else {
+      document.getElementById("trigger-select-trigger")?.focus();
+    }
+  } else if(focusSearch!==false){
+    document.getElementById("trigger-select-trigger")?.focus();
+  }
+  if(state.triggerSelectOpen){
+    document.querySelector(".trigger-select-opt[data-active]")?.scrollIntoView({block:"nearest"});
+  }
+}
+/* Update options/footer only — keep the search input mounted so typing doesn't glitch. */
+function triggerSelectPaintList(){
+  const menu = document.querySelector(".trigger-select .fw-select__menu");
+  const list = document.querySelector(".trigger-select-list");
+  const triggerBtn = document.getElementById("trigger-select-trigger");
+  if(!menu || !list || !state.triggerSelectOpen) return;
+  const s = currentSurvey();
+  const selected = findTriggerDef(s?.triggerId);
+  const model = triggerSelectModel(s?.id);
+  const rows = model.rows;
+  const active = rows.length
+    ? Math.min(Math.max(0, rows.length-1), Math.max(0, state.triggerSelectActive|0))
+    : 0;
+  state.triggerSelectActive = active;
+  list.innerHTML = triggerSelectOptHtml(model, selected, active, s?.id);
+
+  const hintHtml = triggerSelectHintHtml(model);
+  let hint = menu.querySelector(".trigger-select-hint");
+  if(hintHtml){
+    if(hint) hint.outerHTML = hintHtml;
+    else list.insertAdjacentHTML("beforebegin", hintHtml);
+  } else if(hint){
+    hint.remove();
+  }
+
+  const footHtml = triggerSelectFootHtml(model);
+  let foot = menu.querySelector(".trigger-select-foot");
+  if(footHtml){
+    if(foot) foot.outerHTML = footHtml;
+    else menu.insertAdjacentHTML("beforeend", footHtml);
+  } else if(foot){
+    foot.remove();
+  }
+
+  if(triggerBtn){
+    if(rows.length) triggerBtn.setAttribute("aria-activedescendant", `trigger-select-opt-${active}`);
+    else triggerBtn.removeAttribute("aria-activedescendant");
+  }
+  document.querySelector(".trigger-select-opt[data-active]")?.scrollIntoView({block:"nearest"});
+}
+function triggerSelectToggle(e){
+  if(e){ e.preventDefault(); e.stopPropagation(); }
+  state.triggerSelectOpen = !state.triggerSelectOpen;
+  if(state.triggerSelectOpen){
+    state.triggerSelectQuery = "";
+    state.triggerSelectShowUsed = false;
+    const rows = triggerSelectFiltered();
+    const sel = findTriggerDef(currentSurvey()?.triggerId);
+    const idx = sel ? rows.findIndex(t=>t.id===sel.id) : 0;
+    state.triggerSelectActive = idx>=0 ? idx : 0;
+  } else {
+    state.triggerSelectQuery = "";
+    state.triggerSelectShowUsed = false;
+  }
+  triggerSelectPaint();
+}
+function onTriggerSelectInput(val){
+  state.triggerSelectQuery = val;
+  state.triggerSelectActive = 0;
+  triggerSelectPaintList();
+}
+function toggleTriggerSelectShowUsed(){
+  state.triggerSelectShowUsed = !state.triggerSelectShowUsed;
+  state.triggerSelectActive = 0;
+  triggerSelectPaintList();
+  document.getElementById("trigger-select-search")?.focus();
+}
+function goToTriggerOwner(surveyId){
+  if(!surveyId) return;
+  state.triggerSelectOpen = false;
+  state.triggerSelectQuery = "";
+  state.triggerSelectShowUsed = false;
+  go("#/surveys/"+surveyId);
+}
+function triggerSelectTaken(id){
+  const owner = triggerOwner(id, currentSurvey()?.id);
+  toast(owner
+    ? `Already linked to ${owner.name}. Clear or change that survey first.`
+    : "That trigger is already in use.");
+}
+function triggerSelectPick(id){
+  const s = currentSurvey();
+  if(!s) return;
+  const next = String(id||"").replace(/^#/,"");
+  const def = findTriggerDef(next);
+  if(!def || def.patientSurvey===false){
+    toast("That trigger isn’t available for patient surveys.");
+    return;
+  }
+  const owner = triggerOwner(next, s.id);
+  if(owner){
+    triggerSelectTaken(next);
+    return;
+  }
+  s.triggerId = next;
+  s.updated = NOW;
+  state.triggerSelectOpen = false;
+  state.triggerSelectQuery = "";
+  state.triggerSelectShowUsed = false;
+  toast(s.status==="Live" ? "Trigger updated. New invitations use this trigger." : "Trigger linked.", true);
+  render();
+}
+function clearSurveyTrigger(id){
+  const s = state.surveys.find(x=>x.id===id) || currentSurvey();
+  if(!s || s.status==="Live") return;
+  s.triggerId = null;
+  s.updated = NOW;
+  state.triggerSelectOpen = false;
+  state.triggerSelectShowUsed = false;
+  render();
+}
+function triggerSelectSearchKey(e){
+  if(e.key==="Escape"){
+    e.preventDefault();
+    e.stopPropagation();
+    state.triggerSelectOpen = false;
+    state.triggerSelectShowUsed = false;
+    triggerSelectPaint();
+    return;
+  }
+  if(e.key==="ArrowDown" || e.key==="ArrowUp" || e.key==="Home" || e.key==="End" || e.key==="Enter"){
+    triggerSelectKey(e);
+  }
+}
+function triggerSelectKey(e){
+  const open = !!state.triggerSelectOpen;
+  const rows = triggerSelectFiltered();
+  const n = rows.length;
+  if(e.key==="Escape"){
+    if(open){
+      e.preventDefault();
+      state.triggerSelectOpen = false;
+      state.triggerSelectShowUsed = false;
+      triggerSelectPaint();
+    }
+    return;
+  }
+  if(e.key==="ArrowDown" || e.key==="ArrowUp"){
+    e.preventDefault();
+    if(!open){ triggerSelectToggle(e); return; }
+    if(!n) return;
+    const delta = e.key==="ArrowDown" ? 1 : -1;
+    state.triggerSelectActive = (state.triggerSelectActive + delta + n) % n;
+    triggerSelectPaintList();
+    return;
+  }
+  if(e.key==="Home" || e.key==="End"){
+    if(!open || !n) return;
+    e.preventDefault();
+    state.triggerSelectActive = e.key==="Home" ? 0 : n-1;
+    triggerSelectPaintList();
+    return;
+  }
+  if((e.key==="Enter" || e.key===" ") && open){
+    e.preventDefault();
+    if(!n) return;
+    const row = rows[state.triggerSelectActive];
+    if(!row) return;
+    if(triggerOwner(row.id, currentSurvey()?.id)) triggerSelectTaken(row.id);
+    else triggerSelectPick(row.id);
+  }
+}
+function publishSurvey(id){
+  const s = state.surveys.find(x=>x.id===id);
+  if(!s) return;
+  if(!s.triggerId || !findTriggerDef(s.triggerId)){
+    toast("Choose a trigger before publishing.");
+    state.triggerSelectOpen = true;
+    state.triggerSelectQuery = "";
+    state.triggerSelectShowUsed = false;
+    state.triggerSelectActive = 0;
+    render();
+    requestAnimationFrame(()=>{
+      document.getElementById("trigger-select-search")?.focus()
+        || document.getElementById("trigger-select-trigger")?.focus();
+      document.querySelector(".trigger-assoc")?.scrollIntoView({block:"nearest", behavior:"smooth"});
+    });
+    return;
+  }
+  const wasLive = s.status==="Live";
+  s.status = "Live";
+  s.updated = NOW;
+  state.triggerSelectOpen = false;
+  state.triggerSelectShowUsed = false;
+  toast(wasLive ? "Published. New invitations use this version." : "Published. This survey is now live.", true);
+  render();
+}
+
 function viewSurveysIndex(){
   const live = state.surveys.filter(s=>s.status==="Live").length;
   const drafts = state.surveys.filter(s=>s.status==="Draft").length;
@@ -2928,7 +3416,7 @@ function viewSurveysIndex(){
               <div class="t-subtle dim">${s.questions} questions</div>
             </td>
             <td class="sv-trigger">${s.triggerId
-              ? `<button type="button" class="num-link" onclick="openTrigger('${esc(String(s.triggerId))}')" aria-label="Open trigger ${esc(String(s.triggerId))}">${esc(String(s.triggerId))}</button>`
+              ? `<button type="button" class="num-link" onclick="openTrigger('${esc(String(s.triggerId).replace(/^#/,""))}')" aria-label="Open trigger ${esc(formatTriggerId(s.triggerId))}${findTriggerDef(s.triggerId)?`, ${esc(findTriggerDef(s.triggerId).name)}`:""}">${esc(formatTriggerId(s.triggerId))}</button>`
               : `<span class="dim">—</span>`}</td>
             <td class="sv-status">${surveyStatusBadge(s)}</td>
             <td class="sv-responses" data-live="${s.status==="Live"?"yes":"no"}">${responseCountLink(s)}</td>
@@ -2953,9 +3441,15 @@ function viewSurveys(){
   const qs = qList();
   const locked = qs.filter(q=>q.locked).length;
   const previewIdx = previewQIndex();
+  const trig = findTriggerDef(s.triggerId);
+  const trigMeta = trig
+    ? ` · <button type="button" class="num-link" onclick="openTrigger('${trig.id}')">${esc(formatTriggerId(trig.id))}</button>`
+    : s.triggerId
+      ? ` · <span class="mono">${esc(formatTriggerId(s.triggerId))}</span>`
+      : "";
   const meta = s.status==="Live"
-    ? `${qs.length} questions · live · ${s.responses} responses so far`
-    : `${qs.length} questions · draft · not sent yet`;
+    ? `${qs.length} questions · live · ${s.responses} responses so far${trigMeta}`
+    : `${qs.length} questions · draft · not sent yet${trigMeta}`;
   return `
   <div class="page-head">
     <div class="crumbs"><a href="#/">Overview</a><span class="sep">/</span><a href="#/surveys">Surveys</a>
@@ -2990,13 +3484,14 @@ function viewSurveys(){
         ${s.status==="Live"?`<a class="fw-btn fw-btn--outline" href="#/surveys/${s.id}/responses">${I.inbox(16)} Responses</a>`:""}
         <button class="fw-btn fw-btn--outline" onclick="openSurveyPreview()">
           ${I.eye(16)} Preview</button>
-        <button class="fw-btn fw-btn--primary" onclick="toast('${s.status==="Live"?"Published. New invitations use this version.":"Published. This survey is now live."}')">${s.status==="Live"?"Publish changes":"Publish"}</button>
+        <button class="fw-btn fw-btn--primary" onclick="publishSurvey('${s.id}')">${s.status==="Live"?"Publish changes":"Publish"}</button>
       </div>
     </div>
   </div>
   <div class="split">
     <div>
-      <div class="fw-card">
+      ${triggerAssocCard(s)}
+      <div class="fw-card sec">
         <div class="between between--inline" style="margin-bottom:16px">
           <div>
             <h2 class="t-h4">Questions</h2>
@@ -4275,7 +4770,7 @@ function duplicateSurvey(id){
     options: q.options ? [...q.options] : undefined,
     labels: q.labels ? [...q.labels] : undefined
   }));
-  state.surveys.unshift({ ...s, id:nid, name:s.name+" (copy)", status:"Draft", responses:0, rate:0, sent:0, starred:false, updated:NOW, questions:copy.length });
+  state.surveys.unshift({ ...s, id:nid, name:s.name+" (copy)", status:"Draft", triggerId:null, responses:0, rate:0, sent:0, starred:false, updated:NOW, questions:copy.length });
   state.surveyQuestions[nid] = copy;
   state.responses[nid] = [];
   state.surveyMenu = null;
@@ -4786,6 +5281,9 @@ window.addEventListener("hashchange", ()=>{
   state.previewSurvey = false;
   state.openResponse = null;
   state.openTrigger = null;
+  state.triggerSelectOpen = false;
+  state.triggerSelectQuery = "";
+  state.triggerSelectShowUsed = false;
   state.responseFilter = "all";
   state.responseLimit = RESPONSE_PAGE;
   state.navOpen = false;
@@ -4807,6 +5305,7 @@ window.addEventListener("keydown", e=>{
     }
   }
   if(e.key!=="Escape") return;
+  if(state.triggerSelectOpen){ state.triggerSelectOpen = false; triggerSelectPaint(); return; }
   if(state.pSelectOpen){ state.pSelectOpen = null; pSelectPaint(); return; }
   if(state.crewSelectOpen){ state.crewSelectOpen = false; crewSelectPaint(); return; }
   if(state.navOpen){ closeNav(); return; }
@@ -4824,6 +5323,10 @@ window.addEventListener("mousedown", e=>{
   if(state.surveyMenu && !e.target.closest(".menu-wrap")){
     state.surveyMenu = null;
     render();
+  }
+  if(state.triggerSelectOpen && !e.target.closest(".trigger-select")){
+    state.triggerSelectOpen = false;
+    triggerSelectPaint(false);
   }
   if(state.pSelectOpen && !e.target.closest(".fw-select")){
     state.pSelectOpen = null;
