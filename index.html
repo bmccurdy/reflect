@@ -927,8 +927,22 @@ button.num-link{
 .trigger-summary{
   margin-top:12px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;
 }
-.trigger-assoc:not(.publish-setup) .trigger-assoc-head{margin-bottom:6px}
+.trigger-assoc:not(.publish-setup) .trigger-assoc-head{margin-bottom:12px}
 .trigger-assoc:not(.publish-setup) .trigger-summary{margin-top:0}
+.trigger-well{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  gap:12px;padding:12px 14px;
+  background:var(--muted);border:1px solid var(--border);border-radius:var(--r-md);
+}
+.trigger-well-copy{min-width:0;flex:1 1 16rem}
+.trigger-well-name{
+  margin:0;font-size:16px;line-height:24px;font-weight:600;color:var(--foreground);
+}
+.trigger-well-name.dim{font-weight:500;color:var(--muted-foreground)}
+.trigger-well-meta{
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:4px;
+}
+.trigger-well > .fw-btn{flex:0 0 auto}
 .trigger-assoc-head{
   display:flex;align-items:center;flex-wrap:wrap;gap:8px;
 }
@@ -3561,10 +3575,30 @@ function scheduleSetupFields(s){
     </div>`:""}
     ${sch.mode==="ongoing"?`<p class="t-detail dim mt8">Runs until you stop it.</p>`:""}`;
 }
+function triggerAssocWell(s){
+  const id = surveyDisplayTriggerId(s);
+  const t = id ? findTriggerDef(id) : null;
+  const released = surveyTriggerReleased(s);
+  if(!id) return `<p class="t-subtle dim">No trigger is held by this version.</p>`;
+  if(!t){
+    return `<div class="trigger-well" role="status">
+      <p class="trigger-well-name dim">Trigger ${esc(formatTriggerId(id))} unavailable</p>
+    </div>`;
+  }
+  return `<div class="trigger-well${released?" is-released":""}" role="status">
+    <div class="trigger-well-copy">
+      <p class="trigger-well-name${released?" dim":""}">${esc(t.name)}</p>
+      <div class="trigger-well-meta">
+        ${surveyTriggerCell(s)}
+        ${t.type?`<span class="fw-badge fw-badge--outline">${esc(t.type)}</span>`:""}
+      </div>
+    </div>
+    <button type="button" class="fw-btn fw-btn--outline fw-btn--sm" onclick="openTrigger('${esc(t.id)}')">${I.eye(14)} View</button>
+  </div>`;
+}
 function triggerAssocCard(s){
   const locked = isSurveyLocked(s);
   const activeId = surveyActiveTriggerId(s);
-  const displayId = surveyDisplayTriggerId(s);
   if(!locked){
     return `
     <div class="fw-card trigger-assoc publish-setup">
@@ -3595,9 +3629,7 @@ function triggerAssocCard(s){
         ? `<span class="fw-badge fw-badge--success">${I.checkCircle(12)} Linked</span>`
         : `<span class="fw-badge fw-badge--secondary">Previously linked</span>`}
     </div>
-    ${displayId
-      ? triggerSummary(s)
-      : `<p class="t-subtle dim">No trigger is held by this version.</p>`}
+    ${triggerAssocWell(s)}
   </div>`;
 }
 function scheduleDurationOptions(sch){
