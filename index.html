@@ -944,6 +944,21 @@ button.num-link{
 .trigger-summary-actions{display:flex;flex-wrap:wrap;gap:4px;align-items:center;flex:0 0 auto}
 .trigger-summary-warn{flex:1 1 100%;font-size:13px;line-height:20px;color:var(--muted-foreground);margin:0}
 .survey-lock-banner{margin-bottom:24px}
+.survey-lock-banner.fw-alert--info{
+  align-items:center;
+  padding:10px 16px;
+  background:var(--accent);
+  border-color:var(--primary);
+  color:var(--accent-foreground);
+}
+.survey-lock-banner.fw-alert--info .fw-alert__icon{
+  margin-top:0;
+  color:var(--primary);
+}
+.survey-lock-banner.fw-alert--info .fw-alert__desc,
+.survey-lock-banner.fw-alert--info .fw-alert__desc strong{
+  color:var(--accent-foreground);
+}
 .survey-lock-banner .fw-alert__actions{
   display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;
 }
