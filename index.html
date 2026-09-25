@@ -278,16 +278,17 @@ html[data-theme="dark"] .survey-readonly-pill{
 .rs-filters button{white-space:nowrap}
 .rs-more{padding:8px 16px 16px;text-align:center}
 .rs-excerpt{
-  color:var(--foreground);font-size:16px;line-height:24px;font-weight:600;
+  font-size:16px;line-height:24px;font-weight:600;
   max-width:42rem;
   display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;
   overflow:hidden;
 }
+a.rs-excerpt{color:var(--primary);text-decoration:none}
+a.rs-excerpt:hover{text-decoration:underline}
 .rs-call{
   display:inline-flex;align-items:center;gap:6px;
   margin-top:6px;color:var(--foreground);font-weight:500;
 }
-.rs-go{width:40px;text-align:right;vertical-align:middle;color:var(--muted-foreground)}
 .rs-meta{display:none}
 .rs-flags{white-space:nowrap}
 .row{display:flex;align-items:center;gap:12px}
@@ -459,6 +460,7 @@ html[data-theme="dark"] .survey-readonly-pill{
 .tbl--surveys .sv-rate,
 .tbl--surveys .sv-schedule{vertical-align:middle}
 .tbl--alerts td{vertical-align:middle}
+.tbl--responses td{vertical-align:middle}
 .star-btn{color:var(--muted-foreground)}
 .star-btn:hover{color:var(--fw-gold)}
 .star-btn[aria-pressed="true"]{color:var(--fw-gold)}
@@ -1366,7 +1368,6 @@ html[data-theme="dark"] .patient{
   .between--inline .fw-badge{flex:0 0 auto}
   .crumbs{display:none}
   .page-back{display:inline-flex}
-  .page-head .rs-edit{display:none}
   .rs-filters{width:100%}
   .rs-filters button{flex:1;padding:0 6px}
   .drawer-back{display:flex}
@@ -1494,9 +1495,6 @@ html[data-theme="dark"] .patient{
     text-align:right;padding-top:2px;
   }
   .tbl--responses .rs-flags:empty{display:none}
-  .tbl--responses .rs-go{
-    order:3;flex:0 0 auto;width:auto;align-self:flex-start;padding-top:4px;
-  }
   .tbl--responses .rs-when,
   .tbl--responses .rs-area,
   .tbl--responses .rs-lang{display:none !important}
@@ -4362,11 +4360,6 @@ function showOlderResponses(){
   state.responseLimit += RESPONSE_PAGE;
   render();
 }
-function responseRowKey(e, surveyId, id){
-  if(e.key!=="Enter" && e.key!==" ") return;
-  e.preventDefault();
-  openResponse(surveyId, id);
-}
 function responseNeighbors(ref){
   const qs = state.surveyQuestions[ref.surveyId] || [];
   const list = filteredResponses(ref.surveyId, qs).slice(0, state.responseLimit);
@@ -4421,7 +4414,6 @@ function viewSurveyResponses(){
         <h1 class="t-h2">Responses</h1>
         ${total?`<p class="t-p dim">${subtitle}</p>`:""}
       </div>
-      ${s.status==="Live" && loaded.length?`<a class="fw-btn fw-btn--outline rs-edit" href="#/surveys/${s.id}">${I.pencil(16)} Edit survey</a>`:""}
     </div>
     ${loaded.length?`<div class="seg rs-filters" role="group" aria-label="Filter responses">
       ${tabs.map(([k,l,n])=>`<button aria-pressed="${filter===k}" aria-label="${k==="callback"?"Wants a call":l}, ${n}" onclick="setResponseFilter('${k}')">${l} (${n})</button>`).join("")}
@@ -4430,21 +4422,18 @@ function viewSurveyResponses(){
   ${visible.length?`<div class="fw-card fw-card-flush">
     <div class="tbl-inset">
     <table class="tbl tbl--stack tbl--responses">
-      <thead><tr><th>What they said</th><th>Status</th><th>When</th><th>Area</th><th>Language</th><th></th></tr></thead>
+      <thead><tr><th>What they said</th><th>Status</th><th>When</th><th>Area</th><th>Language</th></tr></thead>
       <tbody>
         ${visible.map(r=>{
           const excerpt = responseExcerpt(r, qs);
           const call = responseWantsCall(r, qs);
           const alert = r.alert && state.alerts.find(a=>a.id===r.alert);
           const meta = [ago(r.at), r.zone, r.band, r.lang].filter(Boolean).join(" · ");
-          const aria = [excerpt, ago(r.at), r.zone, alert?"Flagged":"", call?"Asked for a call":""].filter(Boolean).join(". ");
           return `
-          <tr class="clickable" id="row-${r.id}" tabindex="0"
-            aria-label="${esc(aria)}"
-            onclick="openResponse('${s.id}','${r.id}')"
-            onkeydown="responseRowKey(event,'${s.id}','${r.id}')">
+          <tr id="row-${r.id}">
             <td class="rs-quote">
-              <div class="rs-excerpt">${esc(excerpt)}</div>
+              <a class="rs-excerpt" href="#/surveys/${esc(s.id)}/responses"
+                onclick="event.preventDefault(); openResponse('${esc(s.id)}','${esc(r.id)}')">${esc(excerpt)}</a>
               ${call && excerpt!=="Asked for a call"?`<div class="rs-call t-detail">${I.phone(12)} Asked for a call</div>`:""}
             </td>
             <td class="rs-flags">${alert?statusBadge(alert.status):""}</td>
@@ -4452,7 +4441,6 @@ function viewSurveyResponses(){
             <td class="rs-area">${esc(r.zone||"—")}<div class="t-detail dim">${esc(r.band||"")}</div></td>
             <td class="dim rs-lang">${esc(r.lang||"—")}</td>
             <td class="rs-meta">${esc(meta)}</td>
-            <td class="rs-go" aria-hidden="true">${I.chevronRight(16)}</td>
           </tr>`;
         }).join("")}
       </tbody>
@@ -4559,8 +4547,8 @@ function closeResponse(){
   state.openResponse = null;
   render();
   requestAnimationFrame(()=>{
-    const row = id && document.getElementById("row-"+id);
-    if(row) row.focus();
+    const link = id && document.querySelector("#row-"+CSS.escape(id)+" .rs-excerpt");
+    if(link) link.focus();
   });
 }
 function openAlertFromResponse(id){
