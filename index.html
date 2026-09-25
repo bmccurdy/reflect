@@ -1429,21 +1429,29 @@ body:not(.is-locked) #gate{display:none}
   display:flex;align-items:center;gap:10px;margin-bottom:16px;
 }
 .gate-brand img{width:32px;height:32px;display:block}
+/* type=text + disc masking — type=password triggers browser Save Password even without a <form> */
+#gate-pass{
+  -webkit-text-security:disc;
+  text-security:disc;
+}
 </style>
 </head>
 <body class="is-locked">
 <div id="gate" class="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title">
-    <form class="gate-card" id="gate-form">
+  <!-- Not a login form: no <form>, no type=password (avoids iOS/Chrome Save Password after unlock) -->
+  <div class="gate-card" id="gate-card">
     <div class="gate-brand">
       <img src="logo.png" width="32" height="32" alt="">
       <p class="gate-kicker">FirstWatch · Reflect</p>
     </div>
     <h1 class="t-h4 gate-title" id="gate-title">Please enter your password</h1>
     <label class="t-subtle gate-label" for="gate-pass">Password</label>
-    <input class="fw-input" id="gate-pass" type="password" autocomplete="current-password" required>
-    <button class="fw-btn fw-btn--primary gate-submit" type="submit">Continue</button>
+    <input class="fw-input" id="gate-pass" type="text" inputmode="text" name="reflect-site-access"
+      autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+      data-lpignore="true" data-1p-ignore="true" data-bwignore="true" data-form-type="other">
+    <button class="fw-btn fw-btn--primary gate-submit" id="gate-submit" type="button">Continue</button>
     <p class="gate-err" id="gate-err" role="alert"></p>
-  </form>
+  </div>
 </div>
 <div id="root"></div>
 <script>
@@ -1458,16 +1466,25 @@ function unlockGate(){
   const gate = document.getElementById("gate");
   if(gate) gate.remove();
 }
-if(sessionStorage.getItem(GATE_KEY)==="ok") unlockGate();
-document.getElementById("gate-form").addEventListener("submit", async e=>{
-  e.preventDefault();
+async function tryUnlockGate(){
+  const pass = document.getElementById("gate-pass");
   const err = document.getElementById("gate-err");
+  if(!pass || !err) return;
   err.textContent = "";
-  const ok = await gateHash(document.getElementById("gate-pass").value) === GATE_HASH;
+  const ok = await gateHash(pass.value) === GATE_HASH;
   if(!ok){ err.textContent = "That password doesn't match."; return; }
+  pass.value = "";
+  pass.blur();
   sessionStorage.setItem(GATE_KEY, "ok");
   unlockGate();
-});
+}
+if(sessionStorage.getItem(GATE_KEY)==="ok") unlockGate();
+else {
+  document.getElementById("gate-submit").addEventListener("click", tryUnlockGate);
+  document.getElementById("gate-pass").addEventListener("keydown", e=>{
+    if(e.key==="Enter"){ e.preventDefault(); tryUnlockGate(); }
+  });
+}
 </script>
 <script>
 /* ============================================================
