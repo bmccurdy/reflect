@@ -777,15 +777,34 @@ button.num-link{
 .kv{display:grid;grid-template-columns:132px 1fr;gap:8px 16px;font-size:14px;line-height:20px}
 .kv dt{color:var(--muted-foreground)}
 .kv dd{margin:0}
+.drawer--trigger .drawer-head{
+  padding:16px 18px;
+  gap:12px;
+}
+.drawer--trigger .drawer-head .t-h4{
+  font-size:16px;line-height:22px;
+}
+.drawer--trigger .drawer-head .t-subtle{
+  font-size:12px;line-height:18px;
+}
+.drawer--trigger .drawer-head .fw-badge{
+  font-size:11px;line-height:16px;padding:2px 7px;
+}
 .drawer--trigger .drawer-body{
-  display:flex;flex-direction:column;gap:20px;
+  display:flex;flex-direction:column;gap:14px;
+  padding:16px 18px;
+  font-size:13px;line-height:18px;
+}
+.drawer--trigger .drawer-body .t-p{
+  font-size:13px;line-height:18px;
 }
 .drawer--trigger .trigger-id-line{
-  display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
+  display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;
 }
 .drawer--trigger .kv{
-  grid-template-columns:minmax(0,88px) minmax(0,1fr);
-  gap:10px 12px;
+  grid-template-columns:minmax(0,76px) minmax(0,1fr);
+  gap:6px 10px;
+  font-size:13px;line-height:18px;
   word-break:break-word;
 }
 .drawer--trigger .trigger-rules{
@@ -797,7 +816,7 @@ button.num-link{
 }
 .drawer--trigger .trigger-rules .fw-tab{
   flex:1;justify-content:center;
-  font-size:13px;line-height:18px;padding:8px 10px;
+  font-size:12px;line-height:16px;padding:6px 8px;
   white-space:nowrap;
 }
 .drawer--trigger .trigger-rules .fw-tablist,
@@ -806,7 +825,7 @@ button.num-link{
   animation:none !important;
 }
 .drawer--trigger .trigger-rules .fw-tabpanel{
-  padding-top:14px;
+  padding-top:10px;
   animation:none;
   transition:none;
 }
@@ -814,9 +833,17 @@ button.num-link{
   animation:none;
   transition:none;
 }
-.drawer--trigger .trigger-rules .rule-list{gap:8px}
-.drawer--trigger .trigger-rules .rule{align-items:flex-start}
-.drawer--trigger .trigger-rules .t-detail{margin-top:12px}
+.drawer--trigger .trigger-rules .rule-list{gap:6px}
+.drawer--trigger .trigger-rules .rule{
+  align-items:flex-start;
+  gap:8px;
+  padding:8px 10px;
+  font-size:13px;line-height:18px;
+}
+.drawer--trigger .trigger-rules .t-detail{
+  margin-top:8px;
+  font-size:11px;line-height:16px;
+}
 .quote{
   border-left:3px solid var(--primary);padding:4px 0 4px 16px;margin:0 0 16px;
   font-size:16px;line-height:28px;
