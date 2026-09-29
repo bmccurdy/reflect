@@ -150,6 +150,11 @@ a.fw-btn{text-decoration:none}
 .topbar .seg button[aria-pressed="true"]{background:var(--base-white);color:var(--fw-navy);box-shadow:none}
 .topbar .iconbtn{color:color-mix(in srgb,var(--base-white) 80%,transparent)}
 .topbar .iconbtn:hover{background:color-mix(in srgb,var(--base-white) 12%,transparent);color:var(--base-white)}
+.topbar .iconbtn[aria-current="page"]{
+  background:color-mix(in srgb,var(--base-white) 16%,transparent);
+  color:var(--base-white);
+}
+.topbar-tools{display:flex;align-items:center;gap:4px}
 .iconbtn.nav-toggle{display:none}
 
 .nav-scrim{
@@ -202,6 +207,69 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 
 .main{flex:1;padding:32px 24px 96px;max-width:1280px;width:100%;margin:0 auto;background:var(--muted);overflow-x:clip;min-width:0}
 .page-head{margin-bottom:24px}
+.settings-wrap{width:100%}
+.settings-tabs{margin-bottom:20px}
+.settings-tabs .fw-tablist--line{display:flex;width:100%}
+.integ-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.fw-card.integ-tile{position:relative;padding:0;overflow:hidden;background:transparent}
+.fw-card.integ-tile:hover{background:var(--background)}
+.integ-tile-link{
+  display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;
+  padding:16px 52px 16px 16px;
+  color:inherit;text-decoration:none;border-radius:inherit;
+}
+.integ-ico,
+.integ-tile:hover .integ-ico{
+  width:40px;height:40px;flex:0 0 auto;
+  display:grid;place-items:center;
+  border-radius:var(--r-md);
+  border:1px solid var(--border);
+  background:var(--base);color:var(--primary);
+}
+.integ-name{display:block;font-size:14px;line-height:20px;font-weight:600}
+.integ-desc{
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden;margin-top:2px;
+  font-size:13px;line-height:18px;color:var(--muted-foreground);
+}
+.integ-mark{
+  position:absolute;top:12px;right:12px;z-index:1;
+  width:28px;height:28px;padding:0;border:1px solid var(--border);border-radius:var(--r-md);
+  display:grid;place-items:center;
+  background:var(--base-white);color:var(--muted-foreground);cursor:pointer;
+}
+.integ-mark:hover{
+  background:var(--surface-hover);
+  border-color:var(--border-strong);
+  color:var(--foreground);
+}
+.integ-mark.integ-mark--on,
+.integ-mark.integ-mark--on:hover{
+  border-color:transparent;
+  background:color-mix(in srgb, var(--semantic-success) 10%, transparent);
+  color:var(--green-600);
+  cursor:default;
+}
+.integ-back{
+  display:inline-flex;align-items:center;gap:4px;margin-bottom:20px;
+  color:var(--muted-foreground);font-size:14px;font-weight:500;text-decoration:none;
+}
+.integ-back:hover{color:var(--foreground)}
+.integ-detail-head{
+  display:flex;align-items:center;gap:16px;
+  padding-bottom:20px;border-bottom:1px solid var(--border);
+}
+.integ-detail-copy{min-width:0}
+.integ-detail-sub{margin-top:4px}
+.integ-detail-actions{margin-left:auto;display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.integ-detail-body{padding-top:24px;width:100%}
+.integ-about{font-size:14px;line-height:22px;margin:0}
+.integ-note{margin-top:24px}
+@media (max-width:720px){
+  .integ-grid{grid-template-columns:1fr}
+  .integ-detail-head{flex-wrap:wrap}
+  .integ-detail-actions{margin-left:0}
+}
 .title-edit{display:flex;align-items:center;gap:8px;min-width:0;max-width:100%}
 .survey-readonly-pill{
   flex:0 0 auto;
@@ -477,13 +545,18 @@ a.rs-excerpt:hover{text-decoration:underline}
   box-shadow:var(--shadow-lg);
   animation:pop var(--dur-layout) var(--ease-out);
 }
-.menu button{
+.menu button,
+.menu .menu-link{
   display:flex;align-items:center;gap:10px;width:100%;
   height:36px;padding:0 10px;border:0;background:transparent;
   border-radius:var(--r-md);cursor:pointer;text-align:left;
-  font-size:14px;line-height:20px;font-weight:400;color:inherit;
+  font-size:14px;line-height:20px;font-weight:400;color:inherit;text-decoration:none;
 }
-.menu button:hover{background:var(--muted)}
+.menu button:hover,
+.menu .menu-link:hover{background:var(--muted)}
+.integ-detail-actions .menu{width:fit-content;min-width:0}
+.integ-detail-actions .menu button,
+.integ-detail-actions .menu .menu-link{white-space:nowrap;width:100%}
 .menu button.danger{color:var(--destructive)}
 .menu button.danger:hover{background:var(--status-critical-wash)}
 .menu-sep{height:1px;background:var(--border);margin:6px 4px}
@@ -1782,6 +1855,16 @@ document.getElementById("gate-form").addEventListener("submit", async e=>{
    1. MOCK DATA — seeded, deterministic. No PHI. All synthetic.
    ============================================================ */
 const AGENCY = { name:"Prime County", id:"ag_cedar", short:"PC" };
+const INTEGRATIONS = [
+  { id:"scorecard", name:"Scorecard", hash:"#/scorecard", icon:"thumbUp",
+    desc:"Crew operations and patient feedback for the last 30 days.",
+    about:"Open a crew member’s operations and patient survey results side by side. Compare chute time, response, and transfer of care with the agency average, then review protocol compliance for the last 30 days.",
+  },
+  { id:"blink", name:"Blink", hash:"#/blink", icon:"bolt",
+    desc:"Review patient commendations and send them to crew boards.",
+    about:"Read commendations patients leave on surveys, then post the ones you approve to the crew Blink board. Sent notes stay on the board so the crew can see them.",
+  }
+];
 
 const NOW = new Date("2026-01-31T00:00:00");
 const mins = n => new Date(NOW.getTime() - n*60000);
@@ -2298,6 +2381,10 @@ const state = {
   navOpen:false,
   scrollPreserve:null,
   scorecardCrew:0,
+  integrations:{ scorecard:true, blink:true },
+  integrationNav:{ scorecard:true, blink:true },
+  integMenu:null,
+  disconnectIntegration:null,
   crewSelectOpen:false,
   crewSelectActive:0,
   pSlide:null,
@@ -2342,6 +2429,7 @@ const I = {
   users:      s=>ic('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/>',s),
   userPlus:   s=>ic('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/>',s),
   chart:      s=>ic('<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>',s),
+  thumbUp:    s=>ic('<path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/>',s),
   pencil:     s=>ic('<path d="M21.2 3.8a2.7 2.7 0 0 0-3.8 0L4 17v4h4L21.2 7.6a2.7 2.7 0 0 0 0-3.8Z"/>',s),
   moon:       s=>ic('<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',s),
   sun:        s=>ic('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/>',s),
@@ -2354,7 +2442,8 @@ const I = {
   trendUp:    s=>ic('<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',s),
   trendDown:  s=>ic('<polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/>',s),
   menu:       s=>ic('<line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/>',s),
-  globe:      s=>ic('<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 1 0 20 14.5 14.5 0 0 1 0-20"/><path d="M2 12h20"/>',s)
+  globe:      s=>ic('<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 1 0 20 14.5 14.5 0 0 1 0-20"/><path d="M2 12h20"/>',s),
+  settings:   s=>ic('<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',s)
 };
 
 const STATUS = {
@@ -2378,12 +2467,12 @@ const critCount = () => state.alerts.filter(a=>a.status==="critical").length;
 function shell(body){
   const c = openCount();
   const compactNav = window.matchMedia("(max-width: 1199px)").matches;
+  const onSettings = state.route.startsWith("#/settings");
   const nav = [
     ["#/","Overview"],
     ["#/surveys","Surveys"],
     ["#/alerts","Alerts"],
-    ["#/scorecard","Scorecard"],
-    ["#/blink","Blink"]
+    ...INTEGRATIONS.filter(i=>state.integrations[i.id] && state.integrationNav[i.id]).map(i=>[i.hash, i.name])
   ];
   const navLinks = nav.map(([h,l])=>{
     const on = h==="#/surveys" ? state.route.startsWith("#/surveys") : state.route===h;
@@ -2422,15 +2511,22 @@ function shell(body){
       <div class="demo-switch">
         <span class="brand-sub">${AGENCY.name}</span>
       </div>
-      <button class="iconbtn" onclick="toggleTheme()" aria-label="Switch theme">
-        ${state.theme==="light"?I.moon(18):I.sun(18)}
-      </button>
+      <div class="topbar-tools">
+        <button class="iconbtn" type="button" onclick="openSettings()" aria-label="Settings"
+          ${onSettings?'aria-current="page"':""}>
+          ${I.settings(18)}
+        </button>
+        <button class="iconbtn" type="button" onclick="toggleTheme()" aria-label="Switch theme">
+          ${state.theme==="light"?I.moon(18):I.sun(18)}
+        </button>
+      </div>
     </header>
     <main class="main">${body}</main>
   </div>
   ${state.openAlert?drawer(state.openAlert):""}
   ${state.openResponse?responseDrawer(state.openResponse):""}
   ${state.openTrigger?triggerDrawer(state.openTrigger):""}
+  ${state.disconnectIntegration?disconnectConfirm(state.disconnectIntegration):""}
   ${state.deleteSurvey?deleteConfirm(state.deleteSurvey):""}
   ${state.stopSurvey?stopSurveyDialog(state.stopSurvey):""}
   ${state.renameSurvey?renameDialog(state.renameSurvey):""}
@@ -2961,6 +3057,168 @@ function viewBlink(){
       </div>
     </section>
   </div>`;
+}
+
+function integrationIcon(item, size){
+  const draw = I[item.icon];
+  return draw ? draw(size) : I.bolt(size);
+}
+function integrationFromRoute(){
+  const m = (state.route || "").match(/^#\/settings\/([^/]+)$/);
+  if(!m) return null;
+  const id = decodeURIComponent(m[1]);
+  return INTEGRATIONS.find(i=>i.id===id) || null;
+}
+
+function viewSettings(){
+  const item = integrationFromRoute();
+  if((state.route || "").startsWith("#/settings/") && item) return viewIntegrationDetail(item);
+  return `
+  <div class="settings-wrap">
+    <div class="page-head">
+      <h1 class="t-h2">Settings</h1>
+      <p class="t-p dim">Review crew operations and patient feedback, and share commendations with crews.</p>
+    </div>
+    <div class="fw-tabs settings-tabs">
+      <div class="fw-tablist fw-tablist--line" role="tablist" aria-label="Settings">
+        <button type="button" class="fw-tab" role="tab" id="settings-tab-integrations"
+          aria-selected="true" data-active tabindex="0">Integrations</button>
+      </div>
+    </div>
+    <div class="integ-grid" role="tabpanel" aria-labelledby="settings-tab-integrations">
+      ${INTEGRATIONS.map(entry=>{
+        const on = !!state.integrations[entry.id];
+        return `
+        <article class="fw-card fw-card--flat integ-tile">
+          <a class="integ-tile-link" href="#/settings/${entry.id}">
+            <span class="integ-ico" aria-hidden="true">${integrationIcon(entry, 20)}</span>
+            <span>
+              <span class="integ-name">${esc(entry.name)}</span>
+              <span class="integ-desc">${esc(entry.desc)}</span>
+            </span>
+          </a>
+          ${on
+            ? `<span class="integ-mark integ-mark--on">${I.check(14)}<span class="sr">Connected</span></span>`
+            : `<button type="button" class="integ-mark" aria-label="Connect ${esc(entry.name)}"
+                onclick="toggleIntegration('${entry.id}', true)">${I.plus(16)}</button>`}
+        </article>`;
+      }).join("")}
+    </div>
+  </div>`;
+}
+
+function viewIntegrationDetail(item){
+  const on = !!state.integrations[item.id];
+  const inNav = on && !!state.integrationNav[item.id];
+  const menuOpen = state.integMenu===item.id;
+  return `
+  <div class="settings-wrap">
+    <a class="integ-back" href="#/settings">${I.chevronLeft(16)} Integrations</a>
+    <div class="integ-detail-head">
+      <div class="integ-detail-copy">
+        <h1 class="t-h2">${esc(item.name)}</h1>
+        <p class="t-subtle dim integ-detail-sub">${esc(item.desc)}</p>
+      </div>
+      <div class="integ-detail-actions">
+        ${on
+          ? `<button type="button" class="fw-btn fw-btn--outline fw-btn--sm" onclick="askDisconnectIntegration('${item.id}')">Disconnect</button>`
+          : `<button type="button" class="fw-btn fw-btn--primary fw-btn--sm" onclick="toggleIntegration('${item.id}', true)">${I.plus(14)} Connect</button>`}
+        ${on?`<div class="menu-wrap${menuOpen?" open":""}">
+          <button type="button" class="iconbtn" aria-label="More actions" aria-haspopup="menu" aria-expanded="${menuOpen}"
+            onclick="toggleIntegMenu('${item.id}', event)">${I.more(18)}</button>
+          ${menuOpen?`<div class="menu" role="menu">
+            ${inNav
+              ? `<button type="button" role="menuitem" onclick="setIntegrationNav('${item.id}', false)">${I.eye(16)} Hide from navigation</button>`
+              : `<button type="button" role="menuitem" onclick="setIntegrationNav('${item.id}', true)">${I.eye(16)} Show in navigation</button>`}
+            <a class="menu-link" role="menuitem" href="${item.hash}">${I.arrow(16)} Open ${esc(item.name)}</a>
+          </div>`:""}
+        </div>`:""}
+      </div>
+    </div>
+    <div class="integ-detail-body">
+      <div>
+        <p class="integ-about">${esc(item.about)}</p>
+        <div class="fw-alert fw-alert--info integ-note">
+          <span class="fw-alert__icon">${I.info(20)}</span>
+          <p class="fw-alert__desc">Hiding an integration removes it from the top navigation. It stays connected until you disconnect it.</p>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function disconnectConfirm(id){
+  const item = INTEGRATIONS.find(i=>i.id===id);
+  if(!item) return "";
+  return `
+  <div class="scrim" style="z-index:54"></div>
+  <div class="dialog-wrap" onclick="closeDisconnectIntegration()">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="disconnect-title" aria-describedby="disconnect-desc"
+      onclick="event.stopPropagation()">
+      <h2 class="t-h4" id="disconnect-title">Disconnect ${esc(item.name)}?</h2>
+      <p class="t-body dim mt8" id="disconnect-desc">${esc(item.name)} will leave the top navigation. You can connect it again from Integrations.</p>
+      <div class="dialog-actions">
+        <button type="button" class="fw-btn fw-btn--outline" onclick="closeDisconnectIntegration()">Cancel</button>
+        <button type="button" class="fw-btn fw-btn--primary" onclick="confirmDisconnectIntegration()">Disconnect</button>
+      </div>
+    </div>
+  </div>`;
+}
+function askDisconnectIntegration(id){
+  if(!INTEGRATIONS.some(i=>i.id===id) || !state.integrations[id]) return;
+  state.integMenu = null;
+  state.disconnectIntegration = id;
+  render();
+}
+function closeDisconnectIntegration(){
+  if(!state.disconnectIntegration) return;
+  state.disconnectIntegration = null;
+  render();
+}
+function confirmDisconnectIntegration(){
+  const id = state.disconnectIntegration;
+  const item = INTEGRATIONS.find(i=>i.id===id);
+  state.disconnectIntegration = null;
+  state.integMenu = null;
+  if(!item){ render(); return; }
+  state.integrations[id] = false;
+  state.integrationNav[id] = false;
+  if((location.hash||"#/")!=="#/settings") go("#/settings");
+  toast(`${item.name} disconnected.`);
+}
+function openSettings(){
+  if((location.hash||"#/")==="#/settings"){ scrollPageTop(); return; }
+  go("#/settings");
+}
+function toggleIntegMenu(id, e){
+  if(e) e.stopPropagation();
+  state.integMenu = state.integMenu===id ? null : id;
+  render();
+}
+function setIntegrationNav(id, visible){
+  const item = INTEGRATIONS.find(i=>i.id===id);
+  state.integMenu = null;
+  if(!item || !state.integrations[id] || !!state.integrationNav[id]===visible){
+    render();
+    return;
+  }
+  state.integrationNav[id] = visible;
+  toast(visible
+    ? `${item.name} shown in navigation`
+    : `${item.name} hidden from navigation`);
+}
+function toggleIntegration(id, on){
+  const item = INTEGRATIONS.find(i=>i.id===id);
+  state.integMenu = null;
+  if(!item || !!state.integrations[id]===on){
+    render();
+    return;
+  }
+  state.integrations[id] = on;
+  state.integrationNav[id] = on;
+  toast(on
+    ? `${item.name} enabled — added to navigation`
+    : `${item.name} disabled — removed from navigation`);
 }
 
 function triggerStatusBadge(k){
@@ -6323,8 +6581,18 @@ function render(){
   let body;
   if(h==="#/alerts") body = viewAlerts();
   else if(h==="#/triggers"){ go("#/"); return; }
-  else if(h==="#/scorecard") body = viewScorecard();
-  else if(h==="#/blink") body = viewBlink();
+  else if(h==="#/settings" || h.startsWith("#/settings/")){
+    if(h.startsWith("#/settings/") && !integrationFromRoute()){ go("#/settings"); return; }
+    body = viewSettings();
+  }
+  else if(h==="#/scorecard" || h==="#/blink"){
+    const item = INTEGRATIONS.find(i=>i.hash===h);
+    if(!item || !state.integrations[item.id]){
+      go("#/settings");
+      return;
+    }
+    body = h==="#/scorecard" ? viewScorecard() : viewBlink();
+  }
   else if(h==="#/surveys") body = viewSurveysIndex();
   else if(isResponsesRoute(h)) body = viewSurveyResponses();
   else if(h.startsWith("#/surveys/")) body = viewSurveys();
@@ -6361,6 +6629,8 @@ window.addEventListener("hashchange", ()=>{
   state.navOpen = false;
   state.scrollPreserve = null;
   state.crewSelectOpen = false;
+  state.integMenu = null;
+  state.disconnectIntegration = null;
   state.routeEnter = true;
   const vt = withViewTransition(()=>render());
   /* Scroll after the transition finishes — scrolling inside the update
@@ -6388,6 +6658,8 @@ window.addEventListener("keydown", e=>{
   if(state.editIntro){ closeEditIntro(); return; }
   if(state.testSms){ closeTestSms(); return; }
   if(state.editingSurveyName){ cancelInlineRename(); return; }
+  if(state.disconnectIntegration){ closeDisconnectIntegration(); return; }
+  if(state.integMenu){ state.integMenu = null; render(); return; }
   if(state.surveyMenu){ closeSurveyMenu(); return; }
   if(state.deleteSurvey){ closeDeleteSurvey(); return; }
   if(state.stopSurvey){ closeStopSurvey(); return; }
@@ -6396,6 +6668,10 @@ window.addEventListener("keydown", e=>{
   if(state.openAlert){ closeAlert(); }
 });
 window.addEventListener("mousedown", e=>{
+  if(state.integMenu && !e.target.closest(".menu-wrap")){
+    state.integMenu = null;
+    render();
+  }
   if(state.surveyMenu && !e.target.closest(".menu-wrap")){
     state.surveyMenu = null;
     render();

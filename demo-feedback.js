@@ -64,6 +64,8 @@
       page = "Scorecard";
     } else if (hash === "#/blink") {
       page = "Blink";
+    } else if (hash === "#/settings" || hash.startsWith("#/settings/")) {
+      page = "Settings";
     } else if (hash === "#/surveys") {
       page = "Surveys";
     } else if (hash.startsWith("#/surveys/")) {
