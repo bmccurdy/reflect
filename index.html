@@ -766,6 +766,13 @@ button.num-link{
   .dialog-actions__end .fw-btn{flex:1;min-width:0}
 }
 .dialog--edit-q{width:min(520px,100%)}
+.test-sms-dialog .fw-dialog__header{padding-right:48px}
+.test-sms-names{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.test-sms-phone{margin-top:16px}
+.test-sms-dialog .fw-label{font-weight:700}
+@media (max-width:480px){
+  .test-sms-names{grid-template-columns:1fr}
+}
 .edit-q-switch{
   display:flex;align-items:center;justify-content:space-between;gap:16px;
   margin-top:16px;padding:12px 14px;
@@ -2258,6 +2265,8 @@ const state = {
   renameSurvey:null,
   editQuestion:null,
   editIntro:null,
+  testSms:null,
+  testSmsDraft:null,
   editingSurveyName:null,
   surveyMenu:null,
   previewSurvey:false,
@@ -2411,6 +2420,7 @@ function shell(body){
   ${state.renameSurvey?renameDialog(state.renameSurvey):""}
   ${state.editQuestion?editQuestionDialog(state.editQuestion):""}
   ${state.editIntro?editIntroDialog(state.editIntro):""}
+  ${state.testSms?testSmsDialog(state.testSms):""}
   ${state.previewSurvey?surveyPreview():""}
   ${state.toast?`<div class="fw-toaster" role="status"><div class="fw-toast fw-toast--success"><span class="fw-toast__icon">${I.check(16)}</span><p class="fw-toast__title">${esc(state.toast)}</p></div></div>`:""}`;
 }
@@ -4034,6 +4044,10 @@ function publishSurvey(id){
     toast("This version is locked. Duplicate & edit to make changes.");
     return;
   }
+  if(!(state.surveyQuestions[id]||[]).length){
+    toast("Add a question before publishing.");
+    return;
+  }
   if(!s.triggerId || !findTriggerDef(s.triggerId)){
     toast("Choose a trigger before publishing.");
     state.triggerSelectOpen = true;
@@ -4221,15 +4235,25 @@ function viewSurveys(){
   const surveyLocked = isSurveyLocked(s);
   const previewIdx = previewQIndex();
   const meta = surveyTitleMeta(s);
+  const hasQuestions = qs.length > 0;
+  const previewBtn = `<button class="fw-btn fw-btn--outline" type="button"${hasQuestions
+    ? ` onclick="openSurveyPreview()"`
+    : ` disabled title="Add a question to preview"`}>${I.eye(16)} Preview</button>`;
+  const publishBtn = `<button class="fw-btn fw-btn--primary" type="button"${hasQuestions
+    ? ` onclick="publishSurvey('${s.id}')"`
+    : ` disabled title="Add a question to publish"`}>Publish</button>`;
+  const testSmsBtn = s.status==="Live" ? "" : `<button class="fw-btn fw-btn--outline" type="button" onclick="openTestSms('${s.id}')">${I.phone(16)} Send test SMS</button>`;
   const pageActions = surveyLocked
     ? `${s.status!=="Draft"?`<a class="fw-btn fw-btn--outline" href="#/surveys/${s.id}/responses">${I.inbox(16)} Responses</a>`:""}
-        <button class="fw-btn fw-btn--outline" onclick="openSurveyPreview()">${I.eye(16)} Preview</button>
+        ${testSmsBtn}
+        ${previewBtn}
         ${s.status==="Live"
           ? `<button class="fw-btn fw-btn--outline" onclick="askStopSurvey('${s.id}')">${I.octagon(16)} Stop survey</button>
              <button class="fw-btn fw-btn--primary" onclick="duplicateAndEdit('${s.id}')">${I.copy(16)} Duplicate &amp; edit</button>`
           : `<button class="fw-btn fw-btn--primary" onclick="duplicateAndEdit('${s.id}')">${I.copy(16)} Duplicate &amp; edit</button>`}`
-    : `<button class="fw-btn fw-btn--outline" onclick="openSurveyPreview()">${I.eye(16)} Preview</button>
-        <button class="fw-btn fw-btn--primary" onclick="publishSurvey('${s.id}')">Publish</button>`;
+    : `${testSmsBtn}
+        ${previewBtn}
+        ${publishBtn}`;
   return `
   <div class="page-head">
     <div class="crumbs"><a href="#/">Overview</a><span class="sep">/</span><a href="#/surveys">Surveys</a>
@@ -5850,6 +5874,100 @@ function confirmEditIntro(){
   render();
   toast("Welcome screen updated.");
 }
+function defaultTestSmsDraft(){
+  return { first:"", last:"", phone:"" };
+}
+function testSmsDialog(id){
+  const s = state.surveys.find(x=>x.id===id);
+  if(!s || s.status==="Live") return "";
+  const draft = state.testSmsDraft || defaultTestSmsDraft();
+  return `
+  <div class="fw-overlay fw-overlay--center" onclick="closeTestSms()">
+    <div class="fw-dialog fw-dialog-rel test-sms-dialog" role="dialog" aria-modal="true"
+      aria-labelledby="test-sms-title" aria-describedby="test-sms-desc"
+      onclick="event.stopPropagation()">
+      <button class="fw-dialog__x" type="button" onclick="closeTestSms()" aria-label="Close">${I.x(16)}</button>
+      <div class="fw-dialog__header">
+        <h2 class="fw-dialog__title" id="test-sms-title">Send test SMS</h2>
+        <p class="fw-dialog__desc" id="test-sms-desc">Creates a dummy SurveyCase for the selected survey and sends the survey link to the phone number below.</p>
+      </div>
+      <div class="fw-dialog__body">
+        <div class="test-sms-names">
+          <div class="fw-field">
+            <label class="fw-label" for="test-sms-first">First name</label>
+            <input class="fw-input" id="test-sms-first" autocomplete="off" placeholder="First name"
+              value="${esc(draft.first)}" oninput="syncTestSmsDraft()" onkeydown="testSmsKey(event)">
+          </div>
+          <div class="fw-field">
+            <label class="fw-label" for="test-sms-last">Last name</label>
+            <input class="fw-input" id="test-sms-last" autocomplete="off" placeholder="Last name"
+              value="${esc(draft.last)}" oninput="syncTestSmsDraft()" onkeydown="testSmsKey(event)">
+          </div>
+        </div>
+        <div class="fw-field test-sms-phone">
+          <label class="fw-label" for="test-sms-phone">Phone number</label>
+          <input class="fw-input" id="test-sms-phone" type="tel" inputmode="tel" autocomplete="tel"
+            placeholder="+18885550000" value="${esc(draft.phone)}"
+            oninput="syncTestSmsDraft()" onkeydown="testSmsKey(event)">
+          <p class="t-detail dim">Use E.164 format when possible, for example +18885550000.</p>
+        </div>
+      </div>
+      <div class="fw-dialog__footer">
+        <button class="fw-btn fw-btn--outline" type="button" onclick="closeTestSms()">Cancel</button>
+        <button class="fw-btn fw-btn--primary" type="button" onclick="confirmTestSms()">Send test</button>
+      </div>
+    </div>
+  </div>`;
+}
+function syncTestSmsDraft(){
+  if(!state.testSmsDraft) state.testSmsDraft = defaultTestSmsDraft();
+  const first = document.getElementById("test-sms-first");
+  const last = document.getElementById("test-sms-last");
+  const phone = document.getElementById("test-sms-phone");
+  if(first) state.testSmsDraft.first = first.value;
+  if(last) state.testSmsDraft.last = last.value;
+  if(phone) state.testSmsDraft.phone = phone.value;
+}
+function testSmsKey(e){
+  if(e.key==="Enter"){ e.preventDefault(); confirmTestSms(); }
+}
+function openTestSms(id){
+  const s = state.surveys.find(x=>x.id===id);
+  if(!s || s.status==="Live") return;
+  state.testSms = id;
+  state.testSmsDraft = defaultTestSmsDraft();
+  render();
+  requestAnimationFrame(()=>{
+    const input = document.getElementById("test-sms-first");
+    if(input) input.focus();
+  });
+}
+function closeTestSms(){
+  state.testSms = null;
+  state.testSmsDraft = null;
+  render();
+}
+function confirmTestSms(){
+  if(!state.testSms) return;
+  syncTestSmsDraft();
+  const draft = state.testSmsDraft;
+  const first = (draft.first || "").trim();
+  const last = (draft.last || "").trim();
+  const phone = (draft.phone || "").trim().replace(/\s/g,"");
+  draft.first = first;
+  draft.last = last;
+  draft.phone = phone;
+  if(!first){ toast("Enter your first name."); document.getElementById("test-sms-first")?.focus(); return; }
+  if(!last){ toast("Enter your last name."); document.getElementById("test-sms-last")?.focus(); return; }
+  if(!/^\+[1-9]\d{7,14}$/.test(phone)){
+    toast("Use E.164 format, for example +18885550000.");
+    document.getElementById("test-sms-phone")?.focus();
+    return;
+  }
+  state.testSms = null;
+  state.testSmsDraft = null;
+  toast(`Test SMS sent to ${phone}.`);
+}
 function applySurveyName(id, raw){
   const name = (raw || "").trim();
   if(!name){ toast("Give the survey a name."); return {ok:false, changed:false}; }
@@ -6208,6 +6326,8 @@ window.addEventListener("hashchange", ()=>{
   state.stopSurvey = null;
   state.renameSurvey = null;
   state.editIntro = null;
+  state.testSms = null;
+  state.testSmsDraft = null;
   state.editingSurveyName = null;
   state.surveyMenu = null;
   state.previewSurvey = false;
@@ -6247,6 +6367,7 @@ window.addEventListener("keydown", e=>{
   if(state.renameSurvey){ closeRenameSurvey(); return; }
   if(state.editQuestion){ closeEditQuestion(); return; }
   if(state.editIntro){ closeEditIntro(); return; }
+  if(state.testSms){ closeTestSms(); return; }
   if(state.editingSurveyName){ cancelInlineRename(); return; }
   if(state.surveyMenu){ closeSurveyMenu(); return; }
   if(state.deleteSurvey){ closeDeleteSurvey(); return; }
