@@ -1032,6 +1032,19 @@ button.num-link{
 .qcard-select.locked.selected{
   background:color-mix(in srgb,var(--accent) 55%,var(--muted));
 }
+.intro-screen{cursor:pointer;transition:border-color var(--dur-micro) var(--ease-out),
+  box-shadow var(--dur-micro) var(--ease-out),
+  background-color var(--dur-micro) var(--ease-out)}
+.intro-screen:hover{border-color:var(--muted-foreground)}
+.intro-screen.selected{
+  border-color:var(--primary);
+  box-shadow:0 0 0 1px var(--primary);
+  background:var(--accent);
+}
+.intro-screen-copy{min-width:0}
+.intro-excerpt{
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
 .qcard.added{background:var(--muted);opacity:.7}
 .qcard.added:hover{border-color:var(--border);box-shadow:none}
 .lib-filters{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
@@ -1153,7 +1166,8 @@ html[data-theme="dark"] .patient{
 }
 .patient--embed{min-height:0;padding:20px 16px 28px}
 .patient--embed .p-opt,
-.patient--embed .p-scale-btn{pointer-events:none}
+.patient--embed .p-scale-btn,
+.patient--embed .p-next{pointer-events:none}
 .p-wrap{width:100%;max-width:520px}
 .p-lock{
   display:flex;align-items:center;gap:8px;justify-content:center;
@@ -2246,6 +2260,7 @@ const state = {
   stopSurvey:null,
   renameSurvey:null,
   editQuestion:null,
+  editIntro:null,
   editingSurveyName:null,
   surveyMenu:null,
   previewSurvey:false,
@@ -2398,6 +2413,7 @@ function shell(body){
   ${state.stopSurvey?stopSurveyDialog(state.stopSurvey):""}
   ${state.renameSurvey?renameDialog(state.renameSurvey):""}
   ${state.editQuestion?editQuestionDialog(state.editQuestion):""}
+  ${state.editIntro?editIntroDialog(state.editIntro):""}
   ${state.previewSurvey?surveyPreview():""}
   ${state.toast?`<div class="fw-toaster" role="status"><div class="fw-toast fw-toast--success"><span class="fw-toast__icon">${I.check(16)}</span><p class="fw-toast__title">${esc(state.toast)}</p></div></div>`:""}`;
 }
@@ -3334,11 +3350,87 @@ function syncQuestionCount(id){
   const s = state.surveys.find(x=>x.id===id);
   if(s) s.questions = (state.surveyQuestions[id]||[]).length;
 }
+function previewingIntro(){ return state.previewQId==="intro"; }
 function previewQIndex(){
+  if(previewingIntro()) return -1;
   const qs = qList();
   if(!qs.length) return -1;
   const i = qs.findIndex(q=>q.id===state.previewQId);
   return i>=0 ? i : 0;
+}
+function applyIntroTokens(text, vars){
+  let s = String(text||"");
+  if(vars){
+    Object.keys(vars).forEach(k=>{
+      s = s.replace(new RegExp("\\{"+k+"\\}","g"), String(vars[k]));
+    });
+  }
+  return s;
+}
+function introEnglishRaw(s){
+  const title = s && typeof s.introTitle==="string" && s.introTitle.trim();
+  const body = s && typeof s.introBody==="string" && s.introBody.trim();
+  return {
+    title: title || P_UI.en.introTitle,
+    body: body || P_UI.en.introBody
+  };
+}
+function introResolved(s, total){
+  const en = pLocale()==="en";
+  const pack = P_UI[pLocale()] || P_UI.en;
+  const custom = introEnglishRaw(s);
+  const raw = {
+    title: en ? custom.title : pack.introTitle,
+    body: en ? custom.body : pack.introBody
+  };
+  const vars = { agency: AGENCY.name, n: total };
+  return {
+    title: applyIntroTokens(raw.title, vars),
+    body: applyIntroTokens(raw.body, vars)
+  };
+}
+function introStaffCopy(s, total){
+  const raw = introEnglishRaw(s);
+  const vars = { agency: AGENCY.name, n: total };
+  return {
+    title: applyIntroTokens(raw.title, vars),
+    body: applyIntroTokens(raw.body, vars)
+  };
+}
+function selectPreviewIntro(){
+  if(state.suppressQClick || state.dragQId) return;
+  if(previewingIntro()) return;
+  state.previewQId = "intro";
+  render();
+}
+function previewIntroKey(e){
+  if(e.target!==e.currentTarget) return;
+  if(e.key!=="Enter" && e.key!==" ") return;
+  e.preventDefault();
+  selectPreviewIntro();
+}
+function introScreenCard(s){
+  const surveyLocked = isSurveyLocked(s);
+  const selected = previewingIntro();
+  const copy = introStaffCopy(s, (state.surveyQuestions[s.id]||[]).length);
+  return `
+  <div class="fw-card sec intro-screen${selected?" selected":""}"
+    tabindex="0"${selected?` aria-current="true"`:""}
+    onclick="selectPreviewIntro()" onkeydown="previewIntroKey(event)">
+    <div class="between between--inline">
+      <div class="intro-screen-copy">
+        <h2 class="t-h4">Welcome screen</h2>
+        <p class="t-subtle dim mt8">Patients see this before the first question.</p>
+      </div>
+      ${surveyLocked?"":`<div class="qbtns" onclick="event.stopPropagation()">
+        <button type="button" class="iconbtn" aria-label="Edit welcome screen" onclick="openEditIntro()">${I.pencil(16)}</button>
+      </div>`}
+    </div>
+    <div class="mt16">
+      <div class="t-pui" style="font-weight:700">${esc(copy.title)}</div>
+      <p class="t-subtle dim mt8 intro-excerpt">${esc(copy.body)}</p>
+    </div>
+  </div>`;
 }
 function selectPreviewQ(id){
   if(state.suppressQClick || state.dragQId) return;
@@ -4196,6 +4288,7 @@ function viewSurveys(){
   <div class="split">
     <div>
       ${triggerAssocCard(s)}
+      ${introScreenCard(s)}
       <div class="fw-card sec">
         <div class="between between--inline" style="margin-bottom:16px">
           <div>
@@ -4207,7 +4300,7 @@ function viewSurveys(){
           <span class="fw-badge fw-badge--outline">${qs.filter(q=>q.required).length} required</span>
         </div>
         ${qs.length?qs.map((q,i)=>`
-          <div class="qcard qcard-select ${q.locked||surveyLocked?"locked":""} ${i===previewIdx?"selected":""}"
+          <div class="qcard qcard-select ${q.locked?"locked":""} ${i===previewIdx?"selected":""}"
             data-qid="${q.id}" tabindex="0" aria-current="${i===previewIdx?"true":"false"}"
             onclick="selectPreviewQ('${q.id}')" onkeydown="previewQKey(event,'${q.id}')"
             ${surveyLocked?"":`ondragover="qDragOver(event)" ondragenter="qDragEnter(event)" ondrop="qDrop(event)"`}>
@@ -4305,7 +4398,9 @@ function viewSurveys(){
     <div class="preview-col">
       <div class="preview-sticky">
         <div class="phone-frame">
-          <div class="cap">${I.radio(16)} ${previewIdx>=0
+          <div class="cap">${I.radio(16)} ${previewingIntro()
+            ? "Welcome — what the patient sees"
+            : previewIdx>=0
             ? `Question ${previewIdx+1} of ${qs.length} — what the patient sees`
             : "Live preview — what the patient sees"}</div>
           <div style="max-height:640px;overflow-y:auto">${patientPreview()}</div>
@@ -4978,7 +5073,35 @@ function pQuestionFields(q, {interactive=false, val}={}){
   </div>`;
 }
 
+function pIntroContent(total, embed){
+  const copy = introResolved(currentSurvey(), total);
+  return `
+    <h1 class="t-h2">${esc(copy.title)}</h1>
+    <p class="t-body dim mt16">${esc(copy.body)}</p>
+    <div class="fw-alert fw-alert--info mt16">
+      <span class="fw-alert__icon">${I.shield(20)}</span>
+      <p class="fw-alert__desc">${esc(pT("introAlert"))}</p>
+    </div>
+    <div class="p-actions">
+      <div class="p-cta">
+        <button type="button" class="fw-btn fw-btn--primary fw-btn--lg p-next"${embed?` tabindex="-1"`:` onclick="pStart()"`}>${esc(pT("start"))}</button>
+      </div>
+    </div>`;
+}
+function patientIntroPreview(){
+  const total = qList().length;
+  return `<div class="patient patient--embed" lang="${esc(pLocale())}">
+    <div class="p-wrap">
+      ${pLangSwitch()}
+      <div class="p-lock">${I.lock(12)} ${esc(pT("private",{agency:AGENCY.name}))}</div>
+      <div class="p-card">
+        ${pIntroContent(total, true)}
+      </div>
+    </div>
+  </div>`;
+}
 function patientPreview(){
+  if(previewingIntro()) return patientIntroPreview();
   const qs = qList();
   const idx = previewQIndex();
   const q = idx>=0 ? qs[idx] : null;
@@ -5017,17 +5140,7 @@ function viewPatient(){
       ${pViewTag()}
         <div class="p-lock">${I.lock(12)} ${esc(pT("private",{agency}))}</div>
         <div class="p-card">
-          <h1 class="t-h2">${esc(pT("introTitle",{agency}))}</h1>
-          <p class="t-body dim mt16">${esc(pT("introBody",{n:total}))}</p>
-          <div class="fw-alert fw-alert--info mt16">
-            <span class="fw-alert__icon">${I.shield(20)}</span>
-            <p class="fw-alert__desc">${esc(pT("introAlert"))}</p>
-          </div>
-          <div class="p-actions">
-            <div class="p-cta">
-              <button class="fw-btn fw-btn--primary fw-btn--lg p-next" onclick="pStart()">${esc(pT("start"))}</button>
-            </div>
-          </div>
+          ${pIntroContent(total, false)}
         </div>
         <p class="p-foot">${esc(pT("footRef",{agency, ref:"9F3C1A"}))}</p>
       </div>
@@ -5509,6 +5622,8 @@ function duplicateAndEdit(id, { silent=false, claimTrigger=null }={}){
     version,
     clonedFromId:s.id,
     schedule:cloneSchedule(s.schedule),
+    introTitle: s.introTitle || null,
+    introBody: s.introBody || null,
     publishedAt:null,
     endsAt:null,
     stoppedAt:null,
@@ -5679,6 +5794,76 @@ function confirmEditQuestion(){
   state.editQuestion = null;
   render();
   toast("Question updated.");
+}
+function editIntroDialog(id){
+  const s = state.surveys.find(x=>x.id===id);
+  if(!s || isSurveyLocked(s)) return "";
+  const raw = introEnglishRaw(s);
+  return `
+  <div class="scrim" style="z-index:54"></div>
+  <div class="dialog-wrap" onclick="closeEditIntro()">
+    <div class="dialog dialog--edit-q" role="dialog" aria-modal="true" aria-labelledby="edit-intro-title-h"
+      onclick="event.stopPropagation()">
+      <h2 class="t-h4" id="edit-intro-title-h">Edit welcome screen</h2>
+      <p class="t-subtle dim mt8">Shown before the first question. Patients who pick Spanish still see the standard Spanish introduction.</p>
+      <div class="edit-q-field">
+        <label class="t-subtle" for="edit-intro-title">Heading</label>
+        <input class="fw-input" id="edit-intro-title" maxlength="160" value="${esc(raw.title)}">
+      </div>
+      <div class="edit-q-field">
+        <label class="t-subtle" for="edit-intro-body">Introductory text</label>
+        <textarea class="fw-input" id="edit-intro-body" rows="3" maxlength="400">${esc(raw.body)}</textarea>
+        <p class="t-detail dim mt8">Use {agency} for the agency name and {n} for the number of questions. Both fill in when the patient opens the survey.</p>
+      </div>
+      <div class="dialog-actions dialog-actions--split">
+        <button class="fw-btn fw-btn--ghost" type="button" onclick="resetIntroDraft()">Use standard wording</button>
+        <div class="dialog-actions__end">
+          <button class="fw-btn fw-btn--outline" type="button" onclick="closeEditIntro()">Cancel</button>
+          <button class="fw-btn fw-btn--primary" type="button" onclick="confirmEditIntro()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+function openEditIntro(){
+  const s = currentSurvey();
+  if(!s || isSurveyLocked(s)){ toast("This version is locked."); return; }
+  state.previewQId = "intro";
+  state.editIntro = s.id;
+  render();
+  requestAnimationFrame(()=>{
+    const input = document.getElementById("edit-intro-title");
+    if(input){ input.focus(); input.select(); }
+  });
+}
+function closeEditIntro(){
+  state.editIntro = null;
+  render();
+}
+function resetIntroDraft(){
+  const title = document.getElementById("edit-intro-title");
+  const body = document.getElementById("edit-intro-body");
+  if(title) title.value = P_UI.en.introTitle;
+  if(body) body.value = P_UI.en.introBody;
+  if(title) title.focus();
+}
+function confirmEditIntro(){
+  const id = state.editIntro;
+  const s = id && state.surveys.find(x=>x.id===id);
+  if(!s || isSurveyLocked(s)){ state.editIntro = null; render(); return; }
+  const titleEl = document.getElementById("edit-intro-title");
+  const bodyEl = document.getElementById("edit-intro-body");
+  const title = ((titleEl && titleEl.value) || "").trim();
+  const body = ((bodyEl && bodyEl.value) || "").trim();
+  if(!title){ toast("Write a heading."); if(titleEl) titleEl.focus(); return; }
+  if(!body){ toast("Write the introductory text."); if(bodyEl) bodyEl.focus(); return; }
+  s.introTitle = title===P_UI.en.introTitle ? null : title;
+  s.introBody = body===P_UI.en.introBody ? null : body;
+  s.updated = NOW;
+  state.editIntro = null;
+  state.previewQId = "intro";
+  render();
+  toast("Welcome screen updated.");
 }
 function applySurveyName(id, raw){
   const name = (raw || "").trim();
@@ -6037,6 +6222,7 @@ window.addEventListener("hashchange", ()=>{
   state.deleteSurvey = null;
   state.stopSurvey = null;
   state.renameSurvey = null;
+  state.editIntro = null;
   state.editingSurveyName = null;
   state.surveyMenu = null;
   state.previewSurvey = false;
@@ -6075,6 +6261,7 @@ window.addEventListener("keydown", e=>{
   if(state.previewSurvey){ closeSurveyPreview(); return; }
   if(state.renameSurvey){ closeRenameSurvey(); return; }
   if(state.editQuestion){ closeEditQuestion(); return; }
+  if(state.editIntro){ closeEditIntro(); return; }
   if(state.editingSurveyName){ cancelInlineRename(); return; }
   if(state.surveyMenu){ closeSurveyMenu(); return; }
   if(state.deleteSurvey){ closeDeleteSurvey(); return; }
