@@ -1898,6 +1898,22 @@ function normalizeSurvey(s){
 function isSurveyLocked(s){
   return !!s && s.status!=="Draft";
 }
+function surveyPageChanged(s){
+  if(!s) return false;
+  if((s.name||"").trim() !== "Untitled survey") return true;
+  if(s.triggerId) return true;
+  const sch = s.schedule || defaultSchedule();
+  if(sch.mode !== "ongoing") return true;
+  if(Number(sch.durationDays) !== 30) return true;
+  if(sch.startAt || sch.endAt) return true;
+  if(String(s.introTitle||"").trim() || String(s.introBody||"").trim()) return true;
+  return false;
+}
+function canSendTestSms(s, qs){
+  if(!s || s.status==="Live") return false;
+  if(!s.fresh) return true;
+  return (qs||[]).length > 0 || surveyPageChanged(s);
+}
 function isSurveyCollecting(s){
   return !!s && s.status==="Live";
 }
@@ -4242,7 +4258,10 @@ function viewSurveys(){
   const publishBtn = `<button class="fw-btn fw-btn--primary" type="button"${hasQuestions
     ? ` onclick="publishSurvey('${s.id}')"`
     : ` disabled title="Add a question to publish"`}>Publish</button>`;
-  const testSmsBtn = s.status==="Live" ? "" : `<button class="fw-btn fw-btn--outline" type="button" onclick="openTestSms('${s.id}')">${I.phone(16)} Send test SMS</button>`;
+  const canTest = canSendTestSms(s, qs);
+  const testSmsBtn = s.status==="Live" ? "" : `<button class="fw-btn fw-btn--outline" type="button"${canTest
+    ? ` onclick="openTestSms('${s.id}')"`
+    : ` disabled title="Add a question or edit this survey to send a test"`}>${I.phone(16)} Send test SMS</button>`;
   const pageActions = surveyLocked
     ? `${s.status!=="Draft"?`<a class="fw-btn fw-btn--outline" href="#/surveys/${s.id}/responses">${I.inbox(16)} Responses</a>`:""}
         ${testSmsBtn}
@@ -5590,7 +5609,7 @@ function newSurvey(){
     familyId:id, version:1, clonedFromId:null,
     schedule:defaultSchedule(),
     publishedAt:null, endsAt:null, stoppedAt:null,
-    questions:0, responses:0, rate:0, sent:0, starred:false, updated:NOW
+    questions:0, responses:0, rate:0, sent:0, starred:false, fresh:true, updated:NOW
   }));
   state.surveyQuestions[id] = [];
   state.responses[id] = [];
@@ -5933,7 +5952,7 @@ function testSmsKey(e){
 }
 function openTestSms(id){
   const s = state.surveys.find(x=>x.id===id);
-  if(!s || s.status==="Live") return;
+  if(!canSendTestSms(s, state.surveyQuestions[id]||[])) return;
   state.testSms = id;
   state.testSmsDraft = defaultTestSmsDraft();
   render();
