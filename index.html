@@ -6262,10 +6262,17 @@ function confirmEditIntro(){
 function defaultTestSmsDraft(){
   return { first:"", last:"", phone:"" };
 }
+function testSmsReady(draft){
+  const first = (draft && draft.first || "").trim();
+  const last = (draft && draft.last || "").trim();
+  const phone = (draft && draft.phone || "").trim().replace(/\s/g,"");
+  return !!(first && last && /^\+[1-9]\d{7,14}$/.test(phone));
+}
 function testSmsDialog(id){
   const s = state.surveys.find(x=>x.id===id);
   if(!s || s.status==="Live") return "";
   const draft = state.testSmsDraft || defaultTestSmsDraft();
+  const canSend = testSmsReady(draft);
   return `
   <div class="fw-overlay fw-overlay--center" onclick="closeTestSms()">
     <div class="fw-dialog fw-dialog-rel test-sms-dialog" role="dialog" aria-modal="true"
@@ -6280,43 +6287,29 @@ function testSmsDialog(id){
         <div class="test-sms-names">
           <div class="fw-field">
             <label class="fw-label" for="test-sms-first">First name <span class="fw-label__req" aria-hidden="true">*</span></label>
-            <input class="fw-input" id="test-sms-first" autocomplete="off" placeholder="First name"
-              required aria-required="true" value="${esc(draft.first)}"
-              oninput="syncTestSmsDraft()" onkeydown="testSmsKey(event)">
+            <input class="fw-input" id="test-sms-first" autocomplete="off" placeholder="First name" required
+              value="${esc(draft.first)}" oninput="syncTestSmsDraft()" onkeydown="testSmsKey(event)">
           </div>
           <div class="fw-field">
             <label class="fw-label" for="test-sms-last">Last name <span class="fw-label__req" aria-hidden="true">*</span></label>
-            <input class="fw-input" id="test-sms-last" autocomplete="off" placeholder="Last name"
-              required aria-required="true" value="${esc(draft.last)}"
-              oninput="syncTestSmsDraft()" onkeydown="testSmsKey(event)">
+            <input class="fw-input" id="test-sms-last" autocomplete="off" placeholder="Last name" required
+              value="${esc(draft.last)}" oninput="syncTestSmsDraft()" onkeydown="testSmsKey(event)">
           </div>
         </div>
         <div class="fw-field test-sms-phone">
           <label class="fw-label" for="test-sms-phone">Phone number <span class="fw-label__req" aria-hidden="true">*</span></label>
-          <input class="fw-input" id="test-sms-phone" type="tel" inputmode="tel" autocomplete="tel"
-            placeholder="+18885550000" required aria-required="true" value="${esc(draft.phone)}"
+          <input class="fw-input" id="test-sms-phone" type="tel" inputmode="tel" autocomplete="tel" required
+            placeholder="+18885550000" value="${esc(draft.phone)}"
             oninput="syncTestSmsDraft()" onkeydown="testSmsKey(event)">
           <p class="t-detail dim">Use E.164 format when possible, for example +18885550000.</p>
         </div>
       </div>
       <div class="fw-dialog__footer">
         <button class="fw-btn fw-btn--outline" type="button" onclick="closeTestSms()">Cancel</button>
-        <button class="fw-btn fw-btn--primary" type="button" onclick="confirmTestSms()"${testSmsReady(draft)?"":" disabled"}>Send test</button>
+        <button class="fw-btn fw-btn--primary" type="button" onclick="confirmTestSms()"${canSend?"":" disabled"}>Send test</button>
       </div>
     </div>
   </div>`;
-}
-function testSmsValues(draft){
-  const src = draft || {};
-  return {
-    first: (src.first || "").trim(),
-    last: (src.last || "").trim(),
-    phone: (src.phone || "").trim().replace(/\s/g,"")
-  };
-}
-function testSmsReady(draft){
-  const v = testSmsValues(draft);
-  return !!(v.first && v.last && /^\+[1-9]\d{7,14}$/.test(v.phone));
 }
 function syncTestSmsDraft(){
   if(!state.testSmsDraft) state.testSmsDraft = defaultTestSmsDraft();
@@ -6326,7 +6319,7 @@ function syncTestSmsDraft(){
   if(first) state.testSmsDraft.first = first.value;
   if(last) state.testSmsDraft.last = last.value;
   if(phone) state.testSmsDraft.phone = phone.value;
-  const send = document.querySelector(".test-sms-dialog .fw-dialog__footer .fw-btn--primary");
+  const send = document.querySelector(".test-sms-dialog .fw-btn--primary");
   if(send) send.disabled = !testSmsReady(state.testSmsDraft);
 }
 function testSmsKey(e){
@@ -6354,12 +6347,21 @@ function closeTestSms(){
 function confirmTestSms(){
   if(!state.testSms) return;
   syncTestSmsDraft();
+  if(!testSmsReady(state.testSmsDraft)) return;
   const draft = state.testSmsDraft;
-  const { first, last, phone } = testSmsValues(draft);
+  const first = (draft.first || "").trim();
+  const last = (draft.last || "").trim();
+  const phone = (draft.phone || "").trim().replace(/\s/g,"");
   draft.first = first;
   draft.last = last;
   draft.phone = phone;
-  if(!testSmsReady(draft)) return;
+  if(!first){ toast("Enter your first name."); document.getElementById("test-sms-first")?.focus(); return; }
+  if(!last){ toast("Enter your last name."); document.getElementById("test-sms-last")?.focus(); return; }
+  if(!/^\+[1-9]\d{7,14}$/.test(phone)){
+    toast("Use E.164 format, for example +18885550000.");
+    document.getElementById("test-sms-phone")?.focus();
+    return;
+  }
   state.testSms = null;
   state.testSmsDraft = null;
   toast(`Test SMS sent to ${phone}.`);
