@@ -171,7 +171,7 @@
    Card
    ========================================================= */
 .fw-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md); display: flex; flex-direction: column; }
+  box-shadow: var(--shadow-sm); display: flex; flex-direction: column; }
 .fw-card--flat { box-shadow: none; }
 .fw-card__header { padding: 24px 24px 0; display: flex; flex-direction: column; gap: 6px; }
 .fw-card__title { font-family: var(--font-sans); font-size: 20px; font-weight: 700; letter-spacing: -.01em; color: var(--fg); margin: 0; }
