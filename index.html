@@ -150,10 +150,6 @@ a.fw-btn{text-decoration:none}
 .topbar .seg button[aria-pressed="true"]{background:var(--base-white);color:var(--fw-navy);box-shadow:none}
 .topbar .iconbtn{color:color-mix(in srgb,var(--base-white) 80%,transparent)}
 .topbar .iconbtn:hover{background:color-mix(in srgb,var(--base-white) 12%,transparent);color:var(--base-white)}
-.topbar .iconbtn[aria-current="page"]{
-  background:color-mix(in srgb,var(--base-white) 16%,transparent);
-  color:var(--base-white);
-}
 .topbar-tools{display:flex;align-items:center;gap:4px}
 .iconbtn.nav-toggle{display:none}
 
@@ -207,69 +203,6 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 
 .main{flex:1;padding:32px 24px 96px;max-width:1512px;width:100%;margin:0 auto;background:var(--muted);overflow-x:clip;min-width:0}
 .page-head{margin-bottom:24px}
-.settings-wrap{width:100%}
-.settings-tabs{margin-bottom:20px}
-.settings-tabs .fw-tablist--line{display:flex;width:100%}
-.integ-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.fw-card.integ-tile{position:relative;padding:0;overflow:hidden;background:transparent}
-.fw-card.integ-tile:hover{background:var(--background)}
-.integ-tile-link{
-  display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;
-  padding:16px 52px 16px 16px;
-  color:inherit;text-decoration:none;border-radius:inherit;
-}
-.integ-ico,
-.integ-tile:hover .integ-ico{
-  width:40px;height:40px;flex:0 0 auto;
-  display:grid;place-items:center;
-  border-radius:var(--r-md);
-  border:1px solid var(--border);
-  background:var(--base);color:var(--primary);
-}
-.integ-name{display:block;font-size:14px;line-height:20px;font-weight:600}
-.integ-desc{
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
-  overflow:hidden;margin-top:2px;
-  font-size:13px;line-height:18px;color:var(--muted-foreground);
-}
-.integ-mark{
-  position:absolute;top:12px;right:12px;z-index:1;
-  width:28px;height:28px;padding:0;border:1px solid var(--border);border-radius:var(--r-md);
-  display:grid;place-items:center;
-  background:var(--base-white);color:var(--muted-foreground);cursor:pointer;
-}
-.integ-mark:hover{
-  background:var(--surface-hover);
-  border-color:var(--border-strong);
-  color:var(--foreground);
-}
-.integ-mark.integ-mark--on,
-.integ-mark.integ-mark--on:hover{
-  border-color:transparent;
-  background:color-mix(in srgb, var(--semantic-success) 10%, transparent);
-  color:var(--green-600);
-  cursor:default;
-}
-.integ-back{
-  display:inline-flex;align-items:center;gap:4px;margin-bottom:20px;
-  color:var(--muted-foreground);font-size:14px;font-weight:500;text-decoration:none;
-}
-.integ-back:hover{color:var(--foreground)}
-.integ-detail-head{
-  display:flex;align-items:center;gap:16px;
-  padding-bottom:20px;border-bottom:1px solid var(--border);
-}
-.integ-detail-copy{min-width:0}
-.integ-detail-sub{margin-top:4px}
-.integ-detail-actions{margin-left:auto;display:flex;align-items:center;gap:8px;flex:0 0 auto}
-.integ-detail-body{padding-top:24px;width:100%}
-.integ-about{font-size:14px;line-height:22px;margin:0}
-.integ-note{margin-top:24px}
-@media (max-width:720px){
-  .integ-grid{grid-template-columns:1fr}
-  .integ-detail-head{flex-wrap:wrap}
-  .integ-detail-actions{margin-left:0}
-}
 .title-edit{display:flex;align-items:center;gap:8px;min-width:0;max-width:100%}
 .survey-readonly-pill{
   flex:0 0 auto;
@@ -554,9 +487,6 @@ a.rs-excerpt:hover{text-decoration:underline}
 }
 .menu button:hover,
 .menu .menu-link:hover{background:var(--muted)}
-.integ-detail-actions .menu{width:fit-content;min-width:0}
-.integ-detail-actions .menu button,
-.integ-detail-actions .menu .menu-link{white-space:nowrap;width:100%}
 .menu button.danger{color:var(--destructive)}
 .menu button.danger:hover{background:var(--status-critical-wash)}
 .menu-sep{height:1px;background:var(--border);margin:6px 4px}
@@ -1874,17 +1804,6 @@ document.getElementById("gate-form").addEventListener("submit", async e=>{
    1. MOCK DATA — seeded, deterministic. No PHI. All synthetic.
    ============================================================ */
 const AGENCY = { name:"Prime County", id:"ag_cedar", short:"PC" };
-const INTEGRATIONS = [
-  { id:"scorecard", name:"Scorecard", hash:"#/scorecard", icon:"thumbUp",
-    desc:"Crew operations and patient feedback for the last 30 days.",
-    about:"Open a crew member’s operations and patient survey results side by side. Compare chute time, response, and transfer of care with the agency average, then review protocol compliance for the last 30 days.",
-  },
-  { id:"blink", name:"Blink", hash:"#/blink", icon:"bolt",
-    desc:"Review patient commendations and send them to crew boards.",
-    about:"Read commendations patients leave on surveys, then post the ones you approve to the crew Blink board. Sent notes stay on the board so the crew can see them.",
-  }
-];
-
 const NOW = new Date("2026-01-31T00:00:00");
 const mins = n => new Date(NOW.getTime() - n*60000);
 const ago = d => {
@@ -1900,44 +1819,37 @@ const day = d => d.toLocaleDateString("en-US",{month:"short",day:"numeric"});
 const ALERTS = [
   { id:"A-4471", status:"critical", unit:"M-12", call:"Chest pain", crew:"Alvarez / Nwosu",
     reason:"Rated 1 of 5 on respect, plus a written complaint",
-    quote:"Nobody told me where we were going or what the medicine was. I asked twice. I'm 78 years old and I was scared the whole ride.",
-    scores:{respect:1,listening:2,comfort:2}, at:mins(38), age:"78", band:"75+", lang:"English",
+    quote:"Nobody told me where we were going or what the medicine was. I asked twice. I'm 78 years old and I was scared the whole ride.", at:mins(38), age:"78", band:"75+", lang:"English",
     phone:"(516) 555-0142", zone:"Manhasset", assigned:"You", log:[] },
   { id:"A-4470", status:"critical", unit:"E-7", call:"Fall, hip",
     crew:"Boyd / Trần",
     reason:"Rated 1 of 5 on comfort, mentions being dropped",
-    quote:"The stretcher slipped when they loaded me and nobody said sorry. My hip hurt worse after than before.",
-    scores:{respect:3,listening:3,comfort:1}, at:mins(96), age:"64", band:"55-64", lang:"English",
+    quote:"The stretcher slipped when they loaded me and nobody said sorry. My hip hurt worse after than before.", at:mins(96), age:"64", band:"55-64", lang:"English",
     phone:"(516) 555-0198", zone:"Great Neck", assigned:"You", log:[] },
   { id:"A-4468", status:"elevated", unit:"M-3", call:"Difficulty breathing",
     crew:"Okafor / Reyes",
     reason:"Would not call 911 again",
-    quote:"They were fine but it took a long time and I could not breathe. I would drive myself next time.",
-    scores:{respect:4,listening:4,comfort:3}, at:mins(174), age:"51", band:"45-54", lang:"Spanish",
+    quote:"They were fine but it took a long time and I could not breathe. I would drive myself next time.", at:mins(174), age:"51", band:"45-54", lang:"Spanish",
     phone:"(516) 555-0174", zone:"New Hyde Park", assigned:"Unassigned", log:[] },
   { id:"A-4465", status:"elevated", unit:"M-12", call:"Diabetic emergency",
     crew:"Alvarez / Nwosu",
     reason:"Second low score for M-12 this week",
-    quote:"Rushed. I felt like a task on a list.",
-    scores:{respect:2,listening:2,comfort:3}, at:mins(320), age:"43", band:"35-44", lang:"English",
+    quote:"Rushed. I felt like a task on a list.", at:mins(320), age:"43", band:"35-44", lang:"English",
     phone:"(516) 555-0116", zone:"Manhasset", assigned:"Unassigned", log:[] },
   { id:"A-4462", status:"elevated", unit:"E-2", call:"MVC, no transport",
     crew:"Halloran / Pike",
     reason:"Free text flagged for review",
-    quote:"I did not want to go to the hospital and I felt pressured about it. Everything else was good.",
-    scores:{respect:3,listening:2,comfort:4}, at:mins(410), age:"29", band:"25-34", lang:"English",
+    quote:"I did not want to go to the hospital and I felt pressured about it. Everything else was good.", at:mins(410), age:"29", band:"25-34", lang:"English",
     phone:"(516) 555-0133", zone:"Port Washington", assigned:"K. Doyle", log:[] },
   { id:"A-4459", status:"elevated", unit:"M-8", call:"Chest pain",
     crew:"Sowande / Kim",
     reason:"Rated 2 of 5 on listening",
-    quote:"I told them about my allergy three times.",
-    scores:{respect:3,listening:2,comfort:3}, at:mins(1180), age:"67", band:"65-74", lang:"English",
+    quote:"I told them about my allergy three times.", at:mins(1180), age:"67", band:"65-74", lang:"English",
     phone:"(516) 555-0187", zone:"Great Neck", assigned:"Unassigned", log:[] },
   { id:"A-4455", status:"resolved", unit:"M-3", call:"Seizure",
     crew:"Okafor / Reyes",
     reason:"Rated 1 of 5 on comfort",
-    quote:"Freezing cold in the back and no blanket until I asked.",
-    scores:{respect:4,listening:4,comfort:1}, at:mins(1610), age:"38", band:"35-44", lang:"English",
+    quote:"Freezing cold in the back and no blanket until I asked.", at:mins(1610), age:"38", band:"35-44", lang:"English",
     phone:"(516) 555-0155", zone:"New Hyde Park", assigned:"You",
     log:[
       { who:"You", at:mins(1520), text:"Called and spoke with the patient. Apologized. She was satisfied with the call." },
@@ -1947,8 +1859,7 @@ const ALERTS = [
   { id:"A-4451", status:"resolved", unit:"E-7", call:"Fall, wrist",
     crew:"Boyd / Trần",
     reason:"Would not call 911 again",
-    quote:"Long wait. The crew themselves were kind.",
-    scores:{respect:5,listening:4,comfort:3}, at:mins(2900), age:"81", band:"75+", lang:"English",
+    quote:"Long wait. The crew themselves were kind.", at:mins(2900), age:"81", band:"75+", lang:"English",
     phone:"(516) 555-0129", zone:"Manhasset", assigned:"K. Doyle",
     log:[{ who:"K. Doyle", at:mins(2760), text:"Left voicemail. Response time was 14 min — traffic on Northern Blvd. No action for crew." }] }
 ];
@@ -2402,10 +2313,6 @@ const state = {
   navOpen:false,
   scrollPreserve:null,
   scorecardCrew:0,
-  integrations:{ scorecard:true, blink:true },
-  integrationNav:{ scorecard:true, blink:true },
-  integMenu:null,
-  disconnectIntegration:null,
   crewSelectOpen:false,
   crewSelectActive:0,
   pSlide:null,
@@ -2463,8 +2370,7 @@ const I = {
   trendUp:    s=>ic('<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',s),
   trendDown:  s=>ic('<polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/>',s),
   menu:       s=>ic('<line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/>',s),
-  globe:      s=>ic('<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 1 0 20 14.5 14.5 0 0 1 0-20"/><path d="M2 12h20"/>',s),
-  settings:   s=>ic('<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',s)
+  globe:      s=>ic('<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 1 0 20 14.5 14.5 0 0 1 0-20"/><path d="M2 12h20"/>',s)
 };
 
 const STATUS = {
@@ -2488,12 +2394,12 @@ const critCount = () => state.alerts.filter(a=>a.status==="critical").length;
 function shell(body){
   const c = openCount();
   const compactNav = window.matchMedia("(max-width: 1199px)").matches;
-  const onSettings = state.route.startsWith("#/settings");
   const nav = [
     ["#/","Overview"],
     ["#/surveys","Surveys"],
     ["#/alerts","Alerts"],
-    ...INTEGRATIONS.filter(i=>state.integrations[i.id] && state.integrationNav[i.id]).map(i=>[i.hash, i.name])
+    ["#/scorecard","Scorecard"],
+    ["#/blink","Blink"]
   ];
   const navLinks = nav.map(([h,l])=>{
     const on = h==="#/surveys" ? state.route.startsWith("#/surveys") : state.route===h;
@@ -2533,10 +2439,6 @@ function shell(body){
         <span class="brand-sub">${AGENCY.name}</span>
       </div>
       <div class="topbar-tools">
-        <button class="iconbtn" type="button" onclick="openSettings()" aria-label="Settings"
-          ${onSettings?'aria-current="page"':""}>
-          ${I.settings(18)}
-        </button>
         <button class="iconbtn" type="button" onclick="toggleTheme()" aria-label="Switch theme">
           ${state.theme==="light"?I.moon(18):I.sun(18)}
         </button>
@@ -2547,7 +2449,6 @@ function shell(body){
   ${state.openAlert?drawer(state.openAlert):""}
   ${state.openResponse?responseDrawer(state.openResponse):""}
   ${state.openTrigger?triggerDrawer(state.openTrigger):""}
-  ${state.disconnectIntegration?disconnectConfirm(state.disconnectIntegration):""}
   ${state.deleteSurvey?deleteConfirm(state.deleteSurvey):""}
   ${state.stopSurvey?stopSurveyDialog(state.stopSurvey):""}
   ${state.renameSurvey?renameDialog(state.renameSurvey):""}
@@ -3080,168 +2981,6 @@ function viewBlink(){
   </div>`;
 }
 
-function integrationIcon(item, size){
-  const draw = I[item.icon];
-  return draw ? draw(size) : I.bolt(size);
-}
-function integrationFromRoute(){
-  const m = (state.route || "").match(/^#\/settings\/([^/]+)$/);
-  if(!m) return null;
-  const id = decodeURIComponent(m[1]);
-  return INTEGRATIONS.find(i=>i.id===id) || null;
-}
-
-function viewSettings(){
-  const item = integrationFromRoute();
-  if((state.route || "").startsWith("#/settings/") && item) return viewIntegrationDetail(item);
-  return `
-  <div class="settings-wrap">
-    <div class="page-head">
-      <h1 class="t-h2">Settings</h1>
-      <p class="t-p dim">Review crew operations and patient feedback, and share commendations with crews.</p>
-    </div>
-    <div class="fw-tabs settings-tabs">
-      <div class="fw-tablist fw-tablist--line" role="tablist" aria-label="Settings">
-        <button type="button" class="fw-tab" role="tab" id="settings-tab-integrations"
-          aria-selected="true" data-active tabindex="0">Integrations</button>
-      </div>
-    </div>
-    <div class="integ-grid" role="tabpanel" aria-labelledby="settings-tab-integrations">
-      ${INTEGRATIONS.map(entry=>{
-        const on = !!state.integrations[entry.id];
-        return `
-        <article class="fw-card fw-card--flat integ-tile">
-          <a class="integ-tile-link" href="#/settings/${entry.id}">
-            <span class="integ-ico" aria-hidden="true">${integrationIcon(entry, 20)}</span>
-            <span>
-              <span class="integ-name">${esc(entry.name)}</span>
-              <span class="integ-desc">${esc(entry.desc)}</span>
-            </span>
-          </a>
-          ${on
-            ? `<span class="integ-mark integ-mark--on">${I.check(14)}<span class="sr">Connected</span></span>`
-            : `<button type="button" class="integ-mark" aria-label="Connect ${esc(entry.name)}"
-                onclick="toggleIntegration('${entry.id}', true)">${I.plus(16)}</button>`}
-        </article>`;
-      }).join("")}
-    </div>
-  </div>`;
-}
-
-function viewIntegrationDetail(item){
-  const on = !!state.integrations[item.id];
-  const inNav = on && !!state.integrationNav[item.id];
-  const menuOpen = state.integMenu===item.id;
-  return `
-  <div class="settings-wrap">
-    <a class="integ-back" href="#/settings">${I.chevronLeft(16)} Integrations</a>
-    <div class="integ-detail-head">
-      <div class="integ-detail-copy">
-        <h1 class="t-h2">${esc(item.name)}</h1>
-        <p class="t-subtle dim integ-detail-sub">${esc(item.desc)}</p>
-      </div>
-      <div class="integ-detail-actions">
-        ${on
-          ? `<button type="button" class="fw-btn fw-btn--outline fw-btn--sm" onclick="askDisconnectIntegration('${item.id}')">Disconnect</button>`
-          : `<button type="button" class="fw-btn fw-btn--primary fw-btn--sm" onclick="toggleIntegration('${item.id}', true)">${I.plus(14)} Connect</button>`}
-        ${on?`<div class="menu-wrap${menuOpen?" open":""}">
-          <button type="button" class="iconbtn" aria-label="More actions" aria-haspopup="menu" aria-expanded="${menuOpen}"
-            onclick="toggleIntegMenu('${item.id}', event)">${I.more(18)}</button>
-          ${menuOpen?`<div class="menu" role="menu">
-            ${inNav
-              ? `<button type="button" role="menuitem" onclick="setIntegrationNav('${item.id}', false)">${I.eye(16)} Hide from navigation</button>`
-              : `<button type="button" role="menuitem" onclick="setIntegrationNav('${item.id}', true)">${I.eye(16)} Show in navigation</button>`}
-            <a class="menu-link" role="menuitem" href="${item.hash}">${I.arrow(16)} Open ${esc(item.name)}</a>
-          </div>`:""}
-        </div>`:""}
-      </div>
-    </div>
-    <div class="integ-detail-body">
-      <div>
-        <p class="integ-about">${esc(item.about)}</p>
-        <div class="fw-alert fw-alert--info integ-note">
-          <span class="fw-alert__icon">${I.info(20)}</span>
-          <p class="fw-alert__desc">Hiding an integration removes it from the top navigation. It stays connected until you disconnect it.</p>
-        </div>
-      </div>
-    </div>
-  </div>`;
-}
-
-function disconnectConfirm(id){
-  const item = INTEGRATIONS.find(i=>i.id===id);
-  if(!item) return "";
-  return `
-  <div class="scrim" style="z-index:54"></div>
-  <div class="dialog-wrap" onclick="closeDisconnectIntegration()">
-    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="disconnect-title" aria-describedby="disconnect-desc"
-      onclick="event.stopPropagation()">
-      <h2 class="t-h4" id="disconnect-title">Disconnect ${esc(item.name)}?</h2>
-      <p class="t-body dim mt8" id="disconnect-desc">${esc(item.name)} will leave the top navigation. You can connect it again from Integrations.</p>
-      <div class="dialog-actions">
-        <button type="button" class="fw-btn fw-btn--outline" onclick="closeDisconnectIntegration()">Cancel</button>
-        <button type="button" class="fw-btn fw-btn--destructive" onclick="confirmDisconnectIntegration()">Disconnect</button>
-      </div>
-    </div>
-  </div>`;
-}
-function askDisconnectIntegration(id){
-  if(!INTEGRATIONS.some(i=>i.id===id) || !state.integrations[id]) return;
-  state.integMenu = null;
-  state.disconnectIntegration = id;
-  render();
-}
-function closeDisconnectIntegration(){
-  if(!state.disconnectIntegration) return;
-  state.disconnectIntegration = null;
-  render();
-}
-function confirmDisconnectIntegration(){
-  const id = state.disconnectIntegration;
-  const item = INTEGRATIONS.find(i=>i.id===id);
-  state.disconnectIntegration = null;
-  state.integMenu = null;
-  if(!item){ render(); return; }
-  state.integrations[id] = false;
-  state.integrationNav[id] = false;
-  if((location.hash||"#/")!=="#/settings") go("#/settings");
-  toast(`${item.name} disconnected.`);
-}
-function openSettings(){
-  if((location.hash||"#/")==="#/settings"){ scrollPageTop(); return; }
-  go("#/settings");
-}
-function toggleIntegMenu(id, e){
-  if(e) e.stopPropagation();
-  state.integMenu = state.integMenu===id ? null : id;
-  render();
-}
-function setIntegrationNav(id, visible){
-  const item = INTEGRATIONS.find(i=>i.id===id);
-  state.integMenu = null;
-  if(!item || !state.integrations[id] || !!state.integrationNav[id]===visible){
-    render();
-    return;
-  }
-  state.integrationNav[id] = visible;
-  toast(visible
-    ? `${item.name} shown in navigation`
-    : `${item.name} hidden from navigation`);
-}
-function toggleIntegration(id, on){
-  const item = INTEGRATIONS.find(i=>i.id===id);
-  state.integMenu = null;
-  if(!item || !!state.integrations[id]===on){
-    render();
-    return;
-  }
-  state.integrations[id] = on;
-  state.integrationNav[id] = on;
-  toast(on
-    ? `${item.name} enabled — added to navigation`
-    : `${item.name} disabled — removed from navigation`);
-}
-
 function triggerStatusBadge(k){
   const s = TRIGGER_STATUS[k];
   return `<span class="${s.cls}">${s.label}</span>`;
@@ -3564,14 +3303,6 @@ function viewAlerts(){
 function drawer(id){
   const a = state.alerts.find(x=>x.id===id);
   if(!a) return "";
-  const sc = (k,v) => `
-    <div class="row" style="gap:8px">
-      <span style="width:76px" class="dim t-subtle">${k}</span>
-      <span class="row" style="gap:3px">${[1,2,3,4,5].map(n=>`
-        <span style="width:14px;height:14px;border-radius:var(--r-sm);
-          background:${n<=v?(v<=2?"var(--status-critical)":v===3?"var(--status-elevated)":"var(--primary)"):"var(--muted)"}"></span>`).join("")}</span>
-      <span class="t-subtle" style="font-weight:700">${v} of 5</span>
-    </div>`;
   return `
   <div class="scrim" onclick="closeAlert()"></div>
   <aside class="drawer" role="dialog" aria-modal="true" aria-label="Alert ${a.id}">
@@ -3586,9 +3317,6 @@ function drawer(id){
     <div class="drawer-body">
       ${alertSourceBlock(a)}
       <div class="quote">“${esc(a.quote)}”</div>
-      <div class="mt24" style="display:flex;flex-direction:column;gap:8px">
-        ${sc("Respect",a.scores.respect)}${sc("Listening",a.scores.listening)}${sc("Comfort",a.scores.comfort)}
-      </div>
       <dl class="kv mt24">
         <dt>Unit / crew</dt><dd>${esc(a.unit)} — ${esc(a.crew)}</dd>
         <dt>Call type</dt><dd>${esc(a.call)}</dd>
@@ -6702,19 +6430,9 @@ function render(){
   }
   let body;
   if(h==="#/alerts") body = viewAlerts();
-  else if(h==="#/triggers"){ go("#/"); return; }
-  else if(h==="#/settings" || h.startsWith("#/settings/")){
-    if(h.startsWith("#/settings/") && !integrationFromRoute()){ go("#/settings"); return; }
-    body = viewSettings();
-  }
-  else if(h==="#/scorecard" || h==="#/blink"){
-    const item = INTEGRATIONS.find(i=>i.hash===h);
-    if(!item || !state.integrations[item.id]){
-      go("#/settings");
-      return;
-    }
-    body = h==="#/scorecard" ? viewScorecard() : viewBlink();
-  }
+  else if(h==="#/triggers" || h==="#/settings" || h.startsWith("#/settings/")){ go("#/"); return; }
+  else if(h==="#/scorecard") body = viewScorecard();
+  else if(h==="#/blink") body = viewBlink();
   else if(h==="#/surveys") body = viewSurveysIndex();
   else if(isResponsesRoute(h)) body = viewSurveyResponses();
   else if(h.startsWith("#/surveys/")) body = viewSurveys();
@@ -6751,8 +6469,6 @@ window.addEventListener("hashchange", ()=>{
   state.navOpen = false;
   state.scrollPreserve = null;
   state.crewSelectOpen = false;
-  state.integMenu = null;
-  state.disconnectIntegration = null;
   state.routeEnter = true;
   const vt = withViewTransition(()=>render());
   /* Scroll after the transition finishes — scrolling inside the update
@@ -6780,8 +6496,6 @@ window.addEventListener("keydown", e=>{
   if(state.editIntro){ closeEditIntro(); return; }
   if(state.testSms){ closeTestSms(); return; }
   if(state.editingSurveyName){ cancelInlineRename(); return; }
-  if(state.disconnectIntegration){ closeDisconnectIntegration(); return; }
-  if(state.integMenu){ state.integMenu = null; render(); return; }
   if(state.surveyMenu){ closeSurveyMenu(); return; }
   if(state.deleteSurvey){ closeDeleteSurvey(); return; }
   if(state.stopSurvey){ closeStopSurvey(); return; }
@@ -6790,10 +6504,6 @@ window.addEventListener("keydown", e=>{
   if(state.openAlert){ closeAlert(); }
 });
 window.addEventListener("mousedown", e=>{
-  if(state.integMenu && !e.target.closest(".menu-wrap")){
-    state.integMenu = null;
-    render();
-  }
   if(state.surveyMenu && !e.target.closest(".menu-wrap")){
     state.surveyMenu = null;
     render();
