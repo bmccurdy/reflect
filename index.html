@@ -6551,9 +6551,10 @@ function pAnswer(id,v,el){
     group.querySelectorAll("[aria-pressed]").forEach(b=>b.setAttribute("aria-pressed","false"));
     el.setAttribute("aria-pressed","true");
   }
-  const next = document.querySelector(".p-card .p-next");
+  const card = el && el.closest(".p-card");
+  const next = card && card.querySelector(".p-next");
   if(next) next.disabled = false;
-  const hint = document.querySelector("[data-need-answer]");
+  const hint = card && card.querySelector("[data-need-answer]");
   if(hint) hint.remove();
 }
 function pText(id,v){ state.survey.answers[id] = v;
