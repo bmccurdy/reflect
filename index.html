@@ -2982,16 +2982,6 @@ function crewScoreAggregate(){
     flags: crew.reduce((n,c)=>n+c.flags,0)
   };
 }
-function kpiMetricGrid(rows, cols){
-  return `<div class="funnel-stats funnel-stats--${cols}">
-    ${rows.map(h=>`
-      <div>
-        <div class="stat-k">${esc(h.k)}</div>
-        <div class="kpi-v">${esc(h.v)}</div>
-        <p class="stat-sub">${h.sub}</p>
-      </div>`).join("")}
-  </div>`;
-}
 function kpiTargetLine(ok, target, highIsBad){
   const label = esc(`Target ${target}`);
   if(ok) return `On target · ${label}`;
@@ -3026,25 +3016,17 @@ function cardCrewScorecard(){
     { name:"Flagged responses", sub: kpiTargetLine(flags<=flagCap, `≤ ${flagCap}`, true),
       val:String(flags), pct: (flags/Math.max(flagCap,1))*100, target:100, invert:true }
   ];
+  const ledgerRows = rows.map(r=>({
+    ...r,
+    warn: !!(r.invert && flags>flagCap)
+  }));
   return `
   <section class="ov-card" aria-labelledby="crew-kpi-heading">
     <div class="ov-card-head">
       <h2 class="t-h4" id="crew-kpi-heading">Key metrics</h2>
       <p class="t-subtle dim">${surveys.toLocaleString("en-US")} responses · ${a.crewCount} crew</p>
     </div>
-    <div class="ov-ledger">
-      ${rows.map(r=>{
-        const meter = ovMeter(r.pct, {target:r.target, warn:r.invert && flags>flagCap});
-        return `<div class="ov-metric">
-          <div class="ov-metric-copy">
-            <div class="ov-metric-name">${esc(r.name)}</div>
-            <div class="ov-metric-sub">${r.sub}</div>
-          </div>
-          <div class="ov-metric-val">${esc(r.val)}</div>
-          ${meter}
-        </div>`;
-      }).join("")}
-    </div>
+    ${ovMetricsLedger(ledgerRows)}
   </section>`;
 }
 
@@ -3077,28 +3059,54 @@ function viewOverview(){
 `;
 }
 
-function scorecardSurveyRows(c){
+function scorecardSurveyMetrics(c){
   const rows = [
-    { k:"Avg care rating (Q1)", v:`${c.q1.toFixed(1)} / 5`,
-      sub: kpiCompareLine(c.q1>=4.0, "Agency avg: 4.2 / 5") },
-    { k:"Likelihood to recommend (Q2)", v:`${c.rec}%`,
-      sub: kpiCompareLine(c.rec>=65, "Agency avg: 69%") }
+    { name:"Average care · Q1",
+      sub: kpiCompareLine(c.q1>=4.0, "Agency avg: 4.2 / 5"),
+      val:`${c.q1.toFixed(1)} / 5`, pct:(c.q1/5)*100, target:(4.2/5)*100 },
+    { name:"Would recommend · Q2",
+      sub: kpiCompareLine(c.rec>=65, "Agency avg: 69%"),
+      val:`${c.rec}%`, pct:c.rec, target:69 }
   ];
   if(c.listen!=null){
-    rows.push({ k:"Felt listened to (Q3)", v:`${c.listen}% yes`,
-      sub: kpiCompareLine(c.listen>=80, "Agency avg: 79%") });
+    rows.push({ name:"Felt listened to · Q3",
+      sub: kpiCompareLine(c.listen>=80, "Agency avg: 79%"),
+      val:`${c.listen}% yes`, pct:c.listen, target:79 });
   }
   if(c.care!=null){
-    rows.push({ k:"Felt cared for (Q4)", v:`${c.care}% yes`,
-      sub: kpiCompareLine(c.care>=80, "Agency avg: 81%") });
+    rows.push({ name:"Felt cared for · Q4",
+      sub: kpiCompareLine(c.care>=80, "Agency avg: 81%"),
+      val:`${c.care}% yes`, pct:c.care, target:81 });
   }
   rows.push(
-    { k:"Commendations", v:String(c.commend),
-      sub: kpiCompareLine(true, "Agency avg: 6.4 per crew") },
-    { k:"Flagged responses", v:String(c.flags),
-      sub: kpiCompareLine(c.flags<=3, "Agency avg: 3.8 · lower is better", true) }
+    { name:"Commendations",
+      sub: kpiCompareLine(true, "Agency avg: 6.4 per crew"),
+      val:String(c.commend),
+      pct: Math.min(100, Math.max(0, Math.ceil(c.commend/4))/25*100),
+      target: Math.min(100, Math.ceil(6.4/4)/25*100) },
+    { name:"Flagged responses",
+      sub: kpiCompareLine(c.flags<=3, "Agency avg: 3.8 · lower is better", true),
+      val:String(c.flags),
+      pct: Math.min(100, (c.flags/6)*100),
+      target: Math.min(100, (3.8/6)*100),
+      warn: c.flags>3 }
   );
   return rows;
+}
+function ovMetricsLedger(rows){
+  return `<div class="ov-ledger">
+    ${rows.map(r=>{
+      const meter = ovMeter(r.pct, {target:r.target, warn:!!r.warn});
+      return `<div class="ov-metric">
+        <div class="ov-metric-copy">
+          <div class="ov-metric-name">${esc(r.name)}</div>
+          <div class="ov-metric-sub">${r.sub}</div>
+        </div>
+        <div class="ov-metric-val">${esc(r.val)}</div>
+        ${meter}
+      </div>`;
+    }).join("")}
+  </div>`;
 }
 
 function scoreHeroIdentity(c){
@@ -3205,7 +3213,7 @@ function selectScorecardCrew(i){
 
 function viewScorecard(){
   const selected = SCORECARD_CREW[state.scorecardCrew] || SCORECARD_CREW[0];
-  const surveyRows = scorecardSurveyRows(selected);
+  const surveyRows = scorecardSurveyMetrics(selected);
   const hasOps = Array.isArray(selected.ops) && selected.ops.length;
   const hasProtos = Array.isArray(selected.protos) && selected.protos.length;
 
@@ -3214,7 +3222,7 @@ function viewScorecard(){
     <div class="crumbs"><a href="#/">Overview</a><span class="sep">/</span><span>Scorecard</span></div>
     <div>
       <h1 class="t-h2">Crew scorecard</h1>
-      <p class="t-p dim">Last 30 days · operations and patient feedback for each crew member</p>
+      <p class="t-p dim">Operations and patient feedback for each crew member</p>
     </div>
   </div>
 
@@ -3224,7 +3232,7 @@ function viewScorecard(){
         <div class="fw-card-head">
           <div>
             <h2 class="t-h4">Crew</h2>
-            <p class="t-subtle dim mt8">Last 30 days. Select a name to see their scorecard.</p>
+            <p class="t-subtle dim mt8">Select a name to see their scorecard.</p>
           </div>
         </div>
         <ul class="crew-list">
@@ -3254,10 +3262,12 @@ function viewScorecard(){
       </section>
       </div>
 
-      <section class="fw-card sec">
-        <h2 class="t-h4">Patient survey results</h2>
-        <p class="t-subtle dim mt8">${esc(selected.name)} vs. ${esc(AGENCY.name)} average · last 30 days</p>
-        ${kpiMetricGrid(surveyRows, 2)}
+      <section class="ov-card sec" aria-labelledby="score-survey-heading">
+        <div class="ov-card-head">
+          <h2 class="t-h4" id="score-survey-heading">Patient survey results</h2>
+          <p class="t-subtle dim">${esc(selected.name)} vs. ${esc(AGENCY.name)} average</p>
+        </div>
+        ${ovMetricsLedger(surveyRows)}
       </section>
 
       <section class="fw-card sec">
