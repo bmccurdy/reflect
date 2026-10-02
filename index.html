@@ -107,19 +107,29 @@ a.fw-btn{text-decoration:none}
 /* ---------- app shell ---------- */
 .shell{min-height:100vh;display:flex;flex-direction:column;background:var(--muted);min-width:0}
 .topbar{
-  height:56px;flex:0 0 auto;display:flex;align-items:center;gap:16px;
-  padding:0 24px;background:var(--fw-navy);color:var(--base-white);
+  height:56px;flex:0 0 auto;
+  background:var(--fw-navy);color:var(--base-white);
   position:sticky;top:0;z-index:40;
 }
+.topbar-inner{
+  max-width:1512px;width:100%;height:100%;margin:0 auto;
+  display:flex;align-items:center;gap:16px;
+  padding:0 24px;position:relative;
+}
 .topbar :focus-visible{outline-color:var(--base-white)}
-.brand{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:-.01em;font-size:16px;color:var(--base-white)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:-.01em;font-size:16px;color:var(--base-white);position:relative;z-index:1}
 .brand-mark{
   width:24px;height:24px;display:block;flex:0 0 auto;
 }
 .brand-sub{color:color-mix(in srgb,var(--base-white) 72%,transparent);font-weight:400;font-size:14px}
-.nav{display:flex;gap:4px;margin-left:8px}
+.nav{
+  display:flex;align-items:center;
+  gap:4px;height:32px;
+  position:absolute;left:50%;transform:translateX(-50%);
+}
 .nav a{
-  display:flex;align-items:center;height:32px;padding:0 12px;
+  display:inline-flex;align-items:center;justify-content:center;
+  height:32px;padding:0 12px;line-height:1;
   border-radius:var(--r-sm);font-size:14px;font-weight:500;
   color:color-mix(in srgb,var(--base-white) 72%,transparent);
   transition:background-color var(--dur-micro) var(--ease-out),color var(--dur-micro) var(--ease-out);
@@ -129,13 +139,13 @@ a.fw-btn{text-decoration:none}
 .nav .count,
 .nav-drawer-links .count{
   margin-left:6px;min-width:18px;height:18px;padding:0 5px;border-radius:var(--r-full);
-  background:var(--status-critical);color:var(--base-white);font-size:11px;line-height:18px;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:var(--status-critical);color:var(--base-white);font-size:11px;line-height:1;
   text-align:center;font-weight:700;
 }
 .spacer{flex:1}
-
 /* demo-only affordance — see docs/decisions.md #1 */
-.demo-switch{display:flex;align-items:center;gap:8px}
+.demo-switch{display:flex;align-items:center;gap:8px;position:relative;z-index:1}
 .seg{display:flex;background:var(--neutral-200);border-radius:var(--r-md);padding:4px;gap:2px}
 .seg button{
   height:28px;padding:0 10px;border:0;background:transparent;border-radius:var(--r-sm);
@@ -148,7 +158,7 @@ a.fw-btn{text-decoration:none}
 .topbar .seg button[aria-pressed="true"]{background:var(--base-white);color:var(--fw-navy);box-shadow:none}
 .topbar .iconbtn{color:color-mix(in srgb,var(--base-white) 80%,transparent)}
 .topbar .iconbtn:hover{background:color-mix(in srgb,var(--base-white) 12%,transparent);color:var(--base-white)}
-.topbar-tools{display:flex;align-items:center;gap:4px}
+.topbar-tools{display:flex;align-items:center;gap:4px;position:relative;z-index:1}
 .iconbtn.nav-toggle{display:none}
 
 .nav-scrim{
@@ -458,7 +468,7 @@ html[data-theme="dark"] .ov-reading .ov-label{
 .ov-queue > div{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
 .ov-segments{
   display:flex;gap:4px;align-items:center;flex-wrap:nowrap;
-  width:100%;
+  width:100%;height:20px;
 }
 .ov-segments span{
   flex:1 1 0;min-width:0;height:8px;
@@ -1473,7 +1483,7 @@ html[data-theme="dark"] .patient{
   .iconbtn.nav-toggle{display:grid}
   .topbar .nav{display:none}
   .topbar .brand-sub{display:none}
-  .topbar{padding:0 16px;gap:8px}
+  .topbar-inner{padding:0 16px;gap:8px}
   .topbar .demo-switch{display:none}
   .nav-drawer-foot{display:flex}
 }
@@ -1519,7 +1529,7 @@ html[data-theme="dark"] .patient{
   .score-crew-select .fw-select__menu{max-height:min(360px,50vh)}
   .preview-col,.preview-sticky{position:static;align-self:auto;z-index:auto}
   .main{padding:24px 16px 120px}
-  .topbar{padding:0 12px;gap:8px}
+  .topbar-inner{padding:0 12px;gap:8px}
   .topbar .demo-switch{display:none}
   .nav-drawer-foot{display:flex}
   .g-4,.g-3,.g-2{grid-template-columns:minmax(0,1fr)}
@@ -2554,6 +2564,7 @@ function shell(body){
       </div>
     </aside>`:""}
     <header class="topbar">
+      <div class="topbar-inner">
       ${compactNav?`<button class="iconbtn nav-toggle" type="button" onclick="toggleNav()"
               aria-label="${state.navOpen?"Close menu":"Open menu"}"
               aria-expanded="${state.navOpen}" aria-controls="app-nav">
@@ -2572,6 +2583,7 @@ function shell(body){
         <button class="iconbtn" type="button" onclick="toggleTheme()" aria-label="Switch theme">
           ${state.theme==="light"?I.moon(18):I.sun(18)}
         </button>
+      </div>
       </div>
     </header>
     <main class="main">${body}</main>
