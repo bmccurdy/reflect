@@ -83,8 +83,6 @@ ul{margin:0;padding:0;list-style:none}
 /* Kit cards are slot-based; this prototype uses one padded box. */
 .fw-card{padding:24px}
 .bento .fw-card,.grid .fw-card{box-shadow:none}
-.grid .fw-card.bento-lowest,
-.grid .fw-card.bento-demo{box-shadow:var(--shadow-sm)}
 .fw-card-tight{padding:16px}
 .fw-navy{background:var(--fw-navy);color:var(--base-white)}
 textarea.fw-input{height:auto;min-height:88px;padding:12px;resize:vertical;line-height:24px}
@@ -342,12 +340,7 @@ a.rs-excerpt:hover{text-decoration:underline}
 .bento > *,
 .grid > *,
 .funnel-stats > *,
-.spot-split > *{min-width:0}
-.funnel-strip{margin:16px 0 0;overflow:hidden}
-.crew-kpi-strip{margin:16px 0 0}
-.crew-kpi-strip .crew-kpi-head{
-  display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;
-}
+.ov-row > *{min-width:0}
 .funnel-stats{
   display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
   gap:0;margin-top:16px;
@@ -410,28 +403,161 @@ a.rs-excerpt:hover{text-decoration:underline}
   color:var(--muted-foreground);font-size:12px;line-height:16px;
 }
 .kpi-foot .row{gap:6px}
-.bento{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  grid-template-rows:auto 1fr;
-  gap:16px;
-  align-items:stretch;
+
+/* Overview — matches Reflect Figma operations workspace */
+.ov-stack{display:flex;flex-direction:column;gap:24px}
+.ov-row{
+  display:grid;gap:24px;align-items:stretch;
+  grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);
 }
-.kpi-spot{
-  display:grid;
-  grid-template-rows:subgrid;
-  grid-row:span 2;
-  gap:16px;
-  padding:0;
+.ov-row--local{
+  grid-template-columns:minmax(0,0.85fr) minmax(0,1.15fr);
 }
-.bento .fw-card.kpi-spot{box-shadow:var(--shadow-sm);padding:0}
-.kpi-spot .kpi-top{align-items:flex-start;padding:20px 24px 0}
-.kpi-head{flex:1;min-width:0}
-.kpi-head .t-subtle{margin-top:4px}
-.kpi-spot--good .kpi-delta{color:var(--status-resolved)}
-.spot-split{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end;align-self:end;min-width:0;padding:0 24px 20px}
-.kpi-spot .kpi-foot{padding:12px 24px 20px}
-.spot-split > div + div{border-left:1px solid var(--border);padding-left:16px}
+.ov-card{
+  display:flex;flex-direction:column;gap:24px;
+  background:var(--card);color:var(--foreground);
+  border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:24px;min-width:0;
+}
+.ov-card--warn{
+  border-top:2px solid var(--status-elevated);
+  background:color-mix(in srgb,var(--status-elevated) 6%,var(--card));
+}
+.ov-card-head{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ov-card-head .t-h4{margin:0}
+.ov-readings{
+  display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);
+  gap:32px;align-items:start;
+}
+.ov-reading{display:flex;flex-direction:column;gap:12px;min-width:0}
+.ov-value{
+  font-size:36px;line-height:40px;font-weight:700;letter-spacing:-.01em;
+  color:var(--primary);white-space:nowrap;min-height:40px;
+}
+.ov-value--md{
+  font-size:28px;line-height:40px;font-weight:600;
+  display:flex;align-items:baseline;gap:8px;
+  color:var(--foreground);min-height:40px;
+}
+.ov-value--md .stat-unit,
+.ov-value--md .ov-unit{
+  font-size:14px;line-height:20px;font-weight:400;color:var(--muted-foreground);
+}
+.ov-value--warn{color:var(--status-elevated)}
+.ov-label{
+  font-size:12px;line-height:20px;font-weight:500;color:var(--muted-foreground);
+}
+.ov-reading .ov-label{
+  color:var(--neutral-600);
+}
+html[data-theme="dark"] .ov-reading .ov-label{
+  color:var(--neutral-200);
+}
+.ov-note{font-size:12px;line-height:20px;color:var(--muted-foreground);margin:0}
+.ov-queue{display:flex;gap:32px;align-items:flex-start}
+.ov-queue > div{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.ov-segments{
+  display:flex;gap:4px;align-items:center;flex-wrap:nowrap;
+  width:100%;
+}
+.ov-segments span{
+  flex:1 1 0;min-width:0;height:8px;
+  border-radius:0;
+  background:var(--muted);
+}
+.ov-segments span.is-on{background:var(--primary)}
+.ov-segments--sm span{height:8px}
+.ov-metric .ov-segments{width:100%}
+.ov-meter{
+  position:relative;height:20px;width:100%;max-width:210px;
+}
+.ov-meter--wide{max-width:none}
+.ov-meter--care{max-width:none;width:100%}
+.ov-meter--funnel{max-width:none}
+.ov-meter__track{
+  position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
+  height:8px;border-radius:var(--r-full);background:var(--muted);
+}
+.ov-meter__fill{
+  position:absolute;left:0;top:50%;transform:translateY(-50%);
+  height:8px;border-radius:var(--r-full);background:var(--primary);
+  max-width:100%;
+}
+.ov-meter__fill.is-warn{background:var(--status-elevated)}
+.ov-meter__mark{
+  position:absolute;top:2px;bottom:2px;width:2px;
+  border-radius:var(--r-full);
+  background:var(--primary);transform:translateX(-50%);
+}
+.ov-meter__mark.is-warn{background:var(--status-elevated)}
+.ov-ledger{display:flex;flex-direction:column;width:100%}
+.ov-metric{
+  display:grid;
+  grid-template-columns:minmax(140px,224px) minmax(72px,100px) minmax(120px,1fr);
+  gap:20px;align-items:center;
+  padding:15px 0;border-top:1px solid var(--border);
+}
+.ov-metric-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ov-metric-name{
+  font-size:12px;line-height:20px;font-weight:500;color:var(--muted-foreground);
+}
+.ov-metric-sub{
+  font-size:12px;line-height:20px;font-weight:400;color:var(--muted-foreground);
+}
+.ov-metric-val{
+  font-size:20px;line-height:28px;font-weight:600;color:var(--foreground);
+}
+.ov-metric .ov-meter{max-width:none;width:100%}
+.ov-funnel{display:flex;flex-direction:column;gap:22px}
+.ov-funnel-stage{display:flex;flex-direction:column;gap:8px}
+.ov-funnel-row{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+}
+.ov-funnel-row .ov-label{font-weight:500}
+.ov-funnel-row .ov-metric-val{font-size:20px;line-height:28px}
+.ov-funnel-detail{
+  display:flex;flex-direction:column;gap:12px;
+  padding-top:20px;border-top:1px solid var(--border);
+}
+.ov-funnel-detail .ov-funnel-row{align-items:baseline}
+.ov-status-warn{
+  font-size:12px;line-height:20px;font-weight:600;color:var(--status-elevated);margin:0;
+}
+.ov-score-list{display:flex;flex-direction:column;gap:14px;width:100%}
+.ov-score-row{
+  display:grid;
+  grid-template-columns:minmax(120px,184px) minmax(0,1fr) 32px;
+  gap:16px;align-items:center;
+}
+.ov-score-label{font-size:14px;line-height:20px;color:var(--foreground);min-width:0}
+.ov-score-val{
+  font-size:14px;line-height:20px;font-weight:700;text-align:right;
+  color:var(--foreground);
+}
+.ov-score-val.is-warn{color:var(--status-elevated)}
+.ov-score-scale{
+  position:relative;height:20px;width:100%;
+}
+.ov-score-scale__track{
+  position:absolute;left:0;right:0;top:6px;height:8px;
+  border-radius:var(--r-full);background:var(--muted);
+}
+.ov-score-scale__fill{
+  position:absolute;left:0;top:6px;height:8px;
+  border-radius:var(--r-full);background:var(--primary);max-width:100%;
+}
+.ov-score-scale__fill.is-warn{background:var(--status-elevated)}
+.ov-score-scale__end{
+  position:absolute;top:2px;width:4px;height:16px;
+  border-radius:var(--r-full);
+  background:var(--primary);transform:translateX(-100%);
+}
+.ov-score-scale__end.is-warn{background:var(--status-elevated)}
+.ov-score-legend{
+  display:flex;justify-content:space-between;gap:8px;
+  padding-left:calc(184px + 16px);padding-right:48px;
+  font-size:12px;line-height:20px;color:var(--muted-foreground);
+}
 .al-reason{font-weight:700;text-align:left}
 .al-meta{display:none;margin-top:8px;color:var(--muted-foreground);font-size:13px;line-height:20px}
 
@@ -1397,17 +1523,23 @@ html[data-theme="dark"] .patient{
   .topbar .demo-switch{display:none}
   .nav-drawer-foot{display:flex}
   .g-4,.g-3,.g-2{grid-template-columns:minmax(0,1fr)}
-  .bento{grid-template-columns:minmax(0,1fr);grid-template-rows:none}
-  .kpi-spot{display:flex;flex-direction:column;grid-row:auto;padding:16px}
-  .bento .fw-card.kpi-spot{padding:16px}
-  .kpi-spot .kpi-top,
-  .kpi-spot .spot-split{padding:0;align-self:stretch}
-  .kpi-spot .kpi-foot{padding:8px 0 0}
+  .ov-row,.ov-row--local{grid-template-columns:minmax(0,1fr)}
+  .ov-readings{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+  .ov-metric{
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:8px 16px;
+  }
+  .ov-metric .ov-meter{grid-column:1 / -1;max-width:none}
+  .ov-score-row{
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:6px 12px;
+  }
+  .ov-score-scale{grid-column:1 / -1}
+  .ov-score-legend{padding-left:0;padding-right:0}
   .funnel-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
   .funnel-stats > div:nth-child(n+3){padding-top:16px;border-top:1px solid var(--border)}
   .funnel-stats > div:nth-child(odd){padding-left:0;border-left:0}
   .funnel-stats > div:nth-child(even){padding-left:16px;border-left:1px solid var(--border)}
-  .kpi-spot .kpi-top{flex-wrap:wrap}
   .page-head .row,.kpi-foot{flex-wrap:wrap}
   .page-actions{width:100%}
   .page-actions .fw-btn{flex:1 1 calc(50% - 8px)}
@@ -1462,7 +1594,6 @@ html[data-theme="dark"] .patient{
   .tbl--stack tbody tr:first-child td,
   .tbl--stack tbody tr:last-child td{padding-top:0;padding-bottom:0;border-bottom:0}
   .fw-card-flush .fw-card-head{padding:16px}
-  .kpi-spot{padding:16px}
   .tbl--stack,
   .tbl--stack tbody{display:block;width:100%}
   .tbl--stack thead{
@@ -1707,7 +1838,6 @@ html[data-theme="dark"] .patient{
 }
 
 @media (max-height:500px) and (max-width:1080px){
-  .bento{grid-template-columns:minmax(0,1fr);grid-template-rows:none}
   .patient{padding:16px 20px 24px}
   .p-actions{
     position:sticky;bottom:0;padding:12px 0 max(12px,env(safe-area-inset-bottom));
@@ -2488,101 +2618,150 @@ function oldestOpenWait(){
   const oldest = open.reduce((a,b)=>a.at<b.at?a:b);
   return ago(oldest.at).replace(" ago","");
 }
+function ovSegments(on, total, size){
+  const n = Math.max(0, total|0);
+  const filled = Math.max(0, Math.min(n, on|0));
+  return `<div class="ov-segments${size==="sm"?" ov-segments--sm":""}" aria-hidden="true">${
+    Array.from({length:n},(_,i)=>`<span class="${i<filled?"is-on":""}"></span>`).join("")
+  }</div>`;
+}
+function ovMeter(pct, {target, warn, tone, wide, care, funnel}={}){
+  const p = Math.max(0, Math.min(100, Number(pct)||0));
+  const t = target==null ? null : Math.max(0, Math.min(100, Number(target)));
+  const bad = !!(warn || tone==="warn");
+  const cls = [
+    "ov-meter",
+    wide||funnel?"ov-meter--wide":"",
+    care?"ov-meter--care":"",
+    funnel?"ov-meter--funnel":""
+  ].filter(Boolean).join(" ");
+  return `<div class="${cls}" aria-hidden="true">
+    <span class="ov-meter__track"></span>
+    <span class="ov-meter__fill${bad?" is-warn":""}" style="width:${p.toFixed(1)}%"></span>
+    ${t==null?"":`<span class="ov-meter__mark${bad?" is-warn":""}" style="left:${t.toFixed(1)}%"></span>`}
+  </div>`;
+}
+function ovScoreBar(score, {max=5, warn}={}){
+  const pct = Math.max(0, Math.min(100, (Number(score)/max)*100));
+  const bad = !!warn;
+  return `<div class="ov-score-scale" aria-hidden="true">
+    <span class="ov-score-scale__track"></span>
+    <span class="ov-score-scale__fill${bad?" is-warn":""}" style="width:${pct.toFixed(1)}%"></span>
+    <span class="ov-score-scale__end${bad?" is-warn":""}" style="left:${pct.toFixed(1)}%"></span>
+  </div>`;
+}
 function cardFunnel(){
-  const period = surveyPeriod();
+  const period = surveyPeriod().replace(" – ", "–");
   const { live, completed, invited, rate } = liveSurveyStats();
   const near = rate < 30;
   const low = rate < 25;
-  const rateLabel = low ? "Low" : near ? "Near target" : "On target";
+  const rateLabel = low ? "Below target" : near ? "Near target" : "On target";
+  const gap = Math.max(0, 30 - rate);
+  const completedPct = invited ? (completed/invited)*100 : 0;
   return `
-  <section class="fw-card funnel-strip" aria-labelledby="funnel-heading">
-    <h2 class="t-h4" id="funnel-heading">Survey response</h2>
-    <p class="t-subtle dim mt8">${live.length} live surveys · ${period}</p>
-    <div class="funnel-stats">
+  <section class="ov-card" aria-labelledby="funnel-heading">
+    <div class="ov-card-head">
+      <h2 class="t-h4" id="funnel-heading">Survey response</h2>
+      <p class="t-subtle dim">${live.length} live surveys · ${period}</p>
+    </div>
+    <div class="ov-funnel">
+      <div class="ov-funnel-stage">
+        <div class="ov-funnel-row">
+          <span class="ov-label">Invited</span>
+          <span class="ov-metric-val">${invited.toLocaleString("en-US")}</span>
+        </div>
+        ${ovMeter(100, {funnel:true})}
+        <p class="ov-note">Invitations delivered</p>
+      </div>
+      <div class="ov-funnel-stage">
+        <div class="ov-funnel-row">
+          <span class="ov-label">Completed</span>
+          <span class="ov-metric-val">${completed.toLocaleString("en-US")}</span>
+        </div>
+        ${ovMeter(completedPct, {funnel:true})}
+        <p class="ov-note">Of ${invited.toLocaleString("en-US")} invited</p>
+      </div>
+    </div>
+    <div class="ov-funnel-detail">
+      <div class="ov-funnel-row">
+        <span class="ov-label">Response rate</span>
+        <span class="ov-metric-val${near?" ov-value--warn":""}">${rate}%</span>
+      </div>
+      <p class="${near?"ov-status-warn":"ov-note"}">${rateLabel}</p>
+      <p class="ov-note">Target 30%${gap?` · ${gap} percentage point${gap===1?"":"s"} to go`:""}</p>
+      <div class="ov-funnel-row" style="padding-top:12px">
+        <span class="ov-label">Average time</span>
+        <span class="ov-metric-val">10 min</span>
+      </div>
+      <p class="ov-note">Per completed survey</p>
+    </div>
+  </section>`;
+}
+function cardCallback(){
+  const open = openCount();
+  const wait = oldestOpenWait();
+  const urgent = open > 0;
+  return `
+  <section class="ov-card${urgent?" ov-card--warn":""}" aria-labelledby="callback-heading">
+    <div class="ov-card-head">
+      <h2 class="t-h4" id="callback-heading">Callback queue</h2>
+      <p class="t-subtle dim">Open alerts awaiting a patient follow-up.</p>
+    </div>
+    <div class="ov-queue">
       <div>
-        <div class="stat-k">Invited</div>
-        <div class="kpi-v">${invited.toLocaleString("en-US")}</div>
-        <p class="stat-sub">Invitations sent</p>
+        <div class="ov-value--md${urgent?" ov-value--warn":""}">${open}</div>
+        <div class="ov-label">Open</div>
       </div>
       <div>
-        <div class="stat-k">Completed</div>
-        <div class="kpi-v">${completed.toLocaleString("en-US")}</div>
-        <p class="stat-sub">Of ${invited.toLocaleString("en-US")} invited</p>
+        <div class="ov-value--md${urgent?" ov-value--warn":""}">${esc(wait)}</div>
+        <div class="ov-label">Oldest wait</div>
       </div>
-      <div>
-        <div class="stat-k">Response rate</div>
-        <div class="kpi-v">${rate}%</div>
-        <p class="stat-sub"><span class="kpi-delta${near?" is-down":""}">${near?I.trendDown(14):I.trendUp(14)} ${rateLabel}</span> · Target 30%</p>
+    </div>
+    <p class="ov-note">Prioritize the longest-waiting patient.</p>
+  </section>`;
+}
+function cardQuality(){
+  return `
+  <section class="ov-card" aria-labelledby="quality-heading">
+    <div class="ov-card-head">
+      <h2 class="t-h4" id="quality-heading">Quality at a glance</h2>
+      <p class="t-subtle dim">Patient ratings for the current reporting period.</p>
+    </div>
+    <div class="ov-readings">
+      <div class="ov-reading">
+        <div class="ov-value">96%</div>
+        <div class="ov-label">Recommended</div>
+        ${ovSegments(24, 25)}
       </div>
-      <div>
-        <div class="stat-k">Avg time</div>
-        <div class="kpi-v">10 min</div>
-        <p class="stat-sub">Per completed survey</p>
+      <div class="ov-reading">
+        <div class="ov-value--md">4.2 <span class="ov-unit">of 5</span></div>
+        <div class="ov-label">Care</div>
+        ${ovMeter(84, {care:true})}
       </div>
     </div>
   </section>`;
 }
-function cardCallback({lead=false}={}){
-  const open = openCount();
-  const crit = critCount();
-  const wait = oldestOpenWait();
-  const urgent = crit > 0;
-  return `
-    <section class="fw-card kpi-spot${urgent?" kpi-spot--urgent":""}">
-      <div class="kpi-top">
-        <div class="kpi-head">
-          <h2 class="t-h4">Needs a callback</h2>
-          <p class="t-subtle dim">Open alerts waiting in the queue.</p>
-        </div>
-      </div>
-      <div class="spot-split">
-        <div>
-          <div class="kpi-v${lead?" kpi-v--lead":""}">${open}</div>
-          <div class="stat-k">Open</div>
-        </div>
-        <div>
-          <div class="kpi-v">${wait}</div>
-          <div class="stat-k">Oldest wait</div>
-        </div>
-      </div>
-    </section>`;
-}
-function cardQuality({lead=false}={}){
-  return `
-    <section class="fw-card kpi-spot bento-quality">
-      <div class="kpi-top">
-        <div class="kpi-head">
-          <h2 class="t-h4">Quality</h2>
-          <p class="t-subtle dim">Patient scores this period.</p>
-        </div>
-      </div>
-      <div class="spot-split">
-        <div>
-          <div class="kpi-v${lead?" kpi-v--lead":""}">96%</div>
-          <div class="stat-k">Recommended</div>
-        </div>
-        <div>
-          <div class="kpi-v">4.2 <span class="stat-unit">of 5</span></div>
-          <div class="stat-k">Care</div>
-        </div>
-      </div>
-    </section>`;
-}
 function cardLowestScores(){
   return `
-    <section class="fw-card bento-lowest">
-      <h2 class="t-h4">Where scores are lowest</h2>
-      <p class="t-subtle dim mt8">Average respect + listening score, last 30 days. By area.</p>
-      <div class="bars mt16">
-      ${ZONES.map((z,i)=>`
-        <div class="bar-row">
-          <span>${esc(z.label)} <span class="dim">(${z.n})</span></span>
-          <span class="bar"><i style="width:${(z.score/5*100).toFixed(0)}%;animation-delay:${i*60}ms;
-            background:${z.score<4?"var(--status-elevated)":"var(--primary)"}"></i></span>
-          <span style="text-align:right;font-weight:700">${z.score.toFixed(1)}</span>
-        </div>`).join("")}
+  <section class="ov-card" aria-labelledby="lowest-heading">
+    <div class="ov-card-head">
+      <h2 class="t-h4" id="lowest-heading">Where scores are lowest</h2>
+      <p class="t-subtle dim">Mean respect + listening score by area, last 30 days.</p>
+    </div>
+    <div class="ov-score-list">
+      ${ZONES.map(z=>{
+        const warn = z.score < 4;
+        return `<div class="ov-score-row">
+          <span class="ov-score-label">${esc(z.label)} (${z.n})</span>
+          ${ovScoreBar(z.score, {warn})}
+          <span class="ov-score-val${warn?" is-warn":""}">${z.score.toFixed(1)}</span>
+        </div>`;
+      }).join("")}
+      <div class="ov-score-legend" aria-hidden="true">
+        <span>0</span><span>Score out of 5</span><span>5</span>
       </div>
-    </section>`;
+    </div>
+  </section>`;
 }
 
 function crewScoreAggregate(){
@@ -2627,51 +2806,66 @@ function cardCrewScorecard(){
   const a = crewScoreAggregate();
   const flagCap = 3 * a.crewCount;
   const rows = [
-    { k:"Avg care rating (Q1)", v:`${a.q1.toFixed(1)} / 5`,
-      sub: kpiTargetLine(a.q1>=4.0, "4.0 / 5") },
-    { k:"Likelihood to recommend (Q2)", v:`${a.rec}%`,
-      sub: kpiTargetLine(a.rec>=65, "65%") },
-    { k:"Felt listened to (Q3)", v:`${a.listen}% yes`,
-      sub: kpiTargetLine(a.listen>=80, "80%") },
-    { k:"Felt cared for (Q4)", v:`${a.care}% yes`,
-      sub: kpiTargetLine(a.care>=80, "80%") },
-    { k:"Commendations", v:String(a.commend),
-      sub: "Total across all crew" },
-    { k:"Flagged responses", v:String(a.flags),
-      sub: kpiTargetLine(a.flags<=flagCap, `≤ ${flagCap}`, true) }
+    { name:"Average care · Q1", sub: kpiTargetLine(a.q1>=4.0, "4.0 / 5"),
+      val:`${a.q1.toFixed(1)} / 5`, pct:(a.q1/5)*100, target:(4.0/5)*100 },
+    { name:"Would recommend · Q2", sub: kpiTargetLine(a.rec>=65, "65%"),
+      val:`${a.rec}%`, pct:a.rec, target:65 },
+    { name:"Felt listened to · Q3", sub: kpiTargetLine(a.listen>=80, "80%"),
+      val:`${a.listen}% yes`, pct:a.listen, target:80 },
+    { name:"Felt cared for · Q4", sub: kpiTargetLine(a.care>=80, "80%"),
+      val:`${a.care}% yes`, pct:a.care, target:80 },
+    { name:"Commendations", sub:"Total across all crew",
+      val:String(a.commend),
+      segmentsOn: Math.min(25, Math.max(0, Math.ceil(a.commend/4))),
+      segmentsTotal: 25 },
+    { name:"Flagged responses", sub: kpiTargetLine(a.flags<=flagCap, `≤ ${flagCap}`, true),
+      val:String(a.flags), pct: (a.flags/Math.max(flagCap,1))*100, target:100, invert:true }
   ];
   return `
-  <section class="fw-card crew-kpi-strip" aria-labelledby="crew-kpi-heading">
-    <div class="crew-kpi-head">
-      <div>
-        <h2 class="t-h4" id="crew-kpi-heading">Key metrics</h2>
-        <p class="t-subtle dim mt8">Last 30 days · ${a.surveys.toLocaleString("en-US")} responses · ${a.crewCount} crew</p>
-      </div>
+  <section class="ov-card" aria-labelledby="crew-kpi-heading">
+    <div class="ov-card-head">
+      <h2 class="t-h4" id="crew-kpi-heading">Key metrics</h2>
+      <p class="t-subtle dim">Last 30 days · ${a.surveys.toLocaleString("en-US")} responses · ${a.crewCount} crew</p>
     </div>
-    ${kpiMetricGrid(rows, 3)}
+    <div class="ov-ledger">
+      ${rows.map(r=>{
+        const meter = r.segmentsTotal!=null
+          ? ovSegments(r.segmentsOn, r.segmentsTotal, "sm")
+          : ovMeter(r.pct, {target:r.target, warn:r.invert && a.flags>flagCap});
+        return `<div class="ov-metric">
+          <div class="ov-metric-copy">
+            <div class="ov-metric-name">${esc(r.name)}</div>
+            <div class="ov-metric-sub">${r.sub}</div>
+          </div>
+          <div class="ov-metric-val">${esc(r.val)}</div>
+          ${meter}
+        </div>`;
+      }).join("")}
+    </div>
   </section>`;
 }
 
 function viewOverview(){
-  const work = `${cardQuality({lead:true})}${cardCallback()}`;
-  const crewKpis = cardCrewScorecard();
-  const funnel = cardFunnel();
-  const charts = `
-  <div class="grid g-2 mt16" aria-label="Score charts">
-    ${cardLowestScores()}
-    ${cardByDemographic()}
-  </div>`;
-
   return `
   <div class="page-head">
     <h1 class="t-h2">Reflect overview</h1>
-    <p class="t-p dim">Patient experience across ${AGENCY.name}, ${day(mins(43200))} to today.</p>
+    <p class="t-p dim">${AGENCY.name} patient experience · ${day(mins(43200))} to today</p>
   </div>
   ${staleBanner()}
-  <div class="bento" aria-label="System health">${work}</div>
-  ${crewKpis}
-  ${funnel}
-  ${charts}
+  <div class="ov-stack" aria-label="System health">
+    <div class="ov-row" aria-label="Priority signals">
+      ${cardQuality()}
+      ${cardCallback()}
+    </div>
+    <div class="ov-row" aria-label="Performance and participation">
+      ${cardCrewScorecard()}
+      ${cardFunnel()}
+    </div>
+    <div class="ov-row ov-row--local" aria-label="Local experience">
+      ${cardLowestScores()}
+      ${cardByDemographic()}
+    </div>
+  </div>
 `;
 }
 
@@ -4802,21 +4996,23 @@ function openAlertFromResponse(id){
    ============================================================ */
 function cardByDemographic(){
   return `
-    <section class="fw-card bento-demo">
-      <h2 class="t-h4">By demographic</h2>
-      <p class="t-subtle dim mt8">Average score. Optional questions, so not every respondent is counted.</p>
-      <div class="bars mt16">
-        ${EQUITY.map((e,i)=>{
-          const gap = e.base - e.score;
-          return `<div class="bar-row">
-            <span>${esc(e.label)} <span class="dim">(${e.n})</span></span>
-            <span class="bar"><i style="width:${(e.score/5*100).toFixed(0)}%;animation-delay:${i*50}ms;
-              background:${gap>=.4?"var(--status-elevated)":"var(--primary)"}"></i></span>
-            <span style="text-align:right" class="${gap>=.4?"gap-flag":""}">${e.score.toFixed(1)}</span>
-          </div>`;}).join("")}
-      </div>
-      <p class="t-detail dim mt16">Groups with fewer than 10 responses are hidden to protect anonymity.</p>
-    </section>`;
+  <section class="ov-card" aria-labelledby="demo-heading">
+    <div class="ov-card-head">
+      <h2 class="t-h4" id="demo-heading">By demographic</h2>
+      <p class="t-subtle dim">Average scores from optional questions; not every respondent is included.</p>
+    </div>
+    <div class="ov-score-list">
+      ${EQUITY.map(e=>{
+        const warn = e.score < 4;
+        return `<div class="ov-score-row">
+          <span class="ov-score-label">${esc(e.label)} (${e.n})</span>
+          ${ovScoreBar(e.score, {warn})}
+          <span class="ov-score-val${warn?" is-warn":""}">${e.score.toFixed(1)}</span>
+        </div>`;
+      }).join("")}
+    </div>
+    <p class="ov-note">Groups with fewer than 10 responses are withheld to preserve patient anonymity.</p>
+  </section>`;
 }
 
 /* ============================================================
