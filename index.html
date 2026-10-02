@@ -415,6 +415,34 @@ a.rs-excerpt:hover{text-decoration:underline}
 .kpi-foot .row{gap:6px}
 
 /* Overview — matches Reflect Figma operations workspace */
+.ov-period-wrap{
+  flex:0 0 auto;display:flex;flex-direction:row;flex-wrap:nowrap;
+  align-items:center;gap:8px;min-width:0;max-width:100%;
+}
+.ov-period.fw-select{
+  flex:0 0 auto;width:220px;max-width:100%;
+}
+.ov-period .fw-select__trigger{
+  display:flex;align-items:center;gap:8px;
+  width:100%;min-height:40px;padding-right:36px;
+  font-size:14px;line-height:20px;font-weight:500;
+}
+.ov-period .fw-select__trigger svg{flex:0 0 auto;color:var(--muted-foreground)}
+.ov-period .fw-select__label{
+  flex:1 1 auto;min-width:0;text-align:left;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.ov-period .fw-select__menu{
+  left:0;right:auto;width:100%;min-width:220px;z-index:40;
+}
+.ov-period-custom{
+  display:flex;flex-direction:row;flex-wrap:nowrap;
+  align-items:center;gap:8px;flex:0 0 auto;min-width:0;
+}
+.ov-period-custom .fw-field{min-width:0;margin:0}
+.ov-period-custom .fw-input{
+  width:auto;min-width:9.75rem;max-width:11rem;min-height:40px;
+}
 .ov-stack{display:flex;flex-direction:column;gap:24px}
 .ov-row{
   display:grid;gap:24px;align-items:stretch;
@@ -1565,6 +1593,8 @@ html[data-theme="dark"] .patient{
     flex-direction:row;align-items:flex-start;gap:12px;
   }
   .between--inline .fw-badge{flex:0 0 auto}
+  .ov-period-wrap{flex-wrap:wrap}
+  .ov-period.fw-select{width:min(220px,100%)}
   .crumbs{display:none}
   .page-back{display:inline-flex}
   .rs-filters{width:100%}
@@ -2443,6 +2473,11 @@ const state = {
   scorecardCrew:0,
   crewSelectOpen:false,
   crewSelectActive:0,
+  overviewPeriod:"30d",
+  overviewPeriodOpen:false,
+  overviewPeriodActive:1,
+  overviewCustomStart:"",
+  overviewCustomEnd:"",
   pSlide:null,
   pBusy:false,
   pSelectOpen:null,
@@ -2602,8 +2637,178 @@ const staleBanner = () => state.hideStale ? "" : `
 /* ============================================================
    4. OVERVIEW (landing)
    ============================================================ */
+const OVERVIEW_PERIODS = [
+  { key:"7d",  label:"Last 7 days", days:7 },
+  { key:"30d", label:"Last 30 days", days:30 },
+  { key:"60d", label:"Last 60 days", days:60 },
+  { key:"ytd", label:"Year to date" },
+  { key:"custom", label:"Custom" }
+];
+function overviewStartOfDay(d){
+  const x = d instanceof Date ? d : new Date(d);
+  return new Date(x.getFullYear(), x.getMonth(), x.getDate());
+}
+function overviewToday(){
+  return localToday();
+}
+/** Inclusive rolling window ending today: last N calendar days. */
+function overviewRollingStart(days, end){
+  const start = overviewStartOfDay(end || overviewToday());
+  start.setDate(start.getDate() - (Math.max(1, days|0) - 1));
+  return start;
+}
+function overviewPeriodBounds(){
+  const key = OVERVIEW_PERIODS.some(p=>p.key===state.overviewPeriod)
+    ? state.overviewPeriod : "30d";
+  const end = overviewToday();
+  if(key==="7d") return { key, start:overviewRollingStart(7, end), end };
+  if(key==="30d") return { key, start:overviewRollingStart(30, end), end };
+  if(key==="60d") return { key, start:overviewRollingStart(60, end), end };
+  if(key==="ytd") return { key, start:new Date(end.getFullYear(), 0, 1), end };
+  if(key==="custom"){
+    const fallback = overviewPeriodBoundsFallback();
+    let start = parseDateInput(state.overviewCustomStart) || fallback.start;
+    let customEnd = parseDateInput(state.overviewCustomEnd) || fallback.end;
+    start = overviewStartOfDay(start);
+    customEnd = overviewStartOfDay(customEnd);
+    if(start > customEnd){ const tmp = start; start = customEnd; customEnd = tmp; }
+    return { key, start, end:customEnd };
+  }
+  return { key, start:overviewRollingStart(30, end), end };
+}
+function overviewPeriodBoundsFallback(){
+  const end = overviewToday();
+  return { start:overviewRollingStart(30, end), end };
+}
+function overviewPeriodRangeLabel(bounds){
+  const b = bounds || overviewPeriodBounds();
+  const endDay = overviewStartOfDay(b.end);
+  const today = overviewToday();
+  const endLabel = endDay.getTime()===today.getTime() ? "Today" : day(b.end);
+  return `${day(b.start)} – ${endLabel}`;
+}
+function overviewPeriodDays(bounds){
+  const b = bounds || overviewPeriodBounds();
+  const ms = overviewStartOfDay(b.end) - overviewStartOfDay(b.start);
+  return Math.max(1, Math.round(ms/86400000) + 1);
+}
+function overviewPeriodFactor(){
+  return overviewPeriodDays() / 30;
+}
+function overviewScaleCount(n, factor){
+  const f = factor==null ? overviewPeriodFactor() : factor;
+  return Math.max(0, Math.round(Number(n||0) * f));
+}
 function surveyPeriod(){
-  return `${day(mins(43200))} – ${day(NOW)}`;
+  return overviewPeriodRangeLabel();
+}
+function overviewPeriodControl(){
+  const open = !!state.overviewPeriodOpen;
+  const bounds = overviewPeriodBounds();
+  const rows = OVERVIEW_PERIODS;
+  const active = Math.min(rows.length-1, Math.max(0, state.overviewPeriodActive|0));
+  const shown = overviewPeriodRangeLabel(bounds);
+  const custom = bounds.key==="custom";
+  const maxDate = toDateInputValue(overviewToday());
+  return `<div class="ov-period-wrap">
+    <div class="fw-select ov-period${open?" is-open":""}">
+      <button type="button" class="fw-select__trigger" id="ov-period-trigger"
+        aria-haspopup="listbox" aria-expanded="${open}"
+        aria-controls="ov-period-list"
+        aria-label="Date range"
+        ${open?`aria-activedescendant="ov-period-opt-${active}"`:""}
+        onclick="overviewPeriodToggle(event)"
+        onkeydown="overviewPeriodKey(event)">
+        ${I.calendar(16)}
+        <span class="fw-select__label">${esc(shown)}</span>
+      </button>
+      <span class="fw-select__chevron" aria-hidden="true">${I.down(16)}</span>
+      ${open?`<div class="fw-select__menu" id="ov-period-list" role="listbox" aria-label="Date range">
+        ${rows.map((r,i)=>{
+          const on = r.key===bounds.key;
+          return `<div class="fw-select__opt" role="option" id="ov-period-opt-${i}"
+            aria-selected="${on}"${i===active?" data-active":""}
+            onmousedown="event.preventDefault()"
+            onclick="overviewPeriodPick('${r.key}')">${esc(r.label)}${on?I.check(16):""}</div>`;
+        }).join("")}
+      </div>`:""}
+    </div>
+    ${custom?`<div class="ov-period-custom">
+      <div class="fw-field">
+        <label class="fw-label sr" for="ov-period-start">Start</label>
+        <input class="fw-input" id="ov-period-start" type="date"
+          aria-label="Start date"
+          value="${esc(toDateInputValue(bounds.start))}" max="${esc(maxDate)}"
+          onchange="overviewPeriodSetCustom('start', this.value)">
+      </div>
+      <div class="fw-field">
+        <label class="fw-label sr" for="ov-period-end">End</label>
+        <input class="fw-input" id="ov-period-end" type="date"
+          aria-label="End date"
+          value="${esc(toDateInputValue(bounds.end))}" max="${esc(maxDate)}"
+          onchange="overviewPeriodSetCustom('end', this.value)">
+      </div>
+    </div>`:""}
+  </div>`;
+}
+function overviewPeriodToggle(e){
+  if(e){ e.preventDefault(); e.stopPropagation(); }
+  state.overviewPeriodOpen = !state.overviewPeriodOpen;
+  if(state.overviewPeriodOpen){
+    const idx = OVERVIEW_PERIODS.findIndex(r=>r.key===overviewPeriodBounds().key);
+    state.overviewPeriodActive = idx>=0 ? idx : 1;
+  }
+  render();
+  if(state.overviewPeriodOpen){
+    document.getElementById("ov-period-trigger")?.focus();
+    document.querySelector("#ov-period-list .fw-select__opt[data-active]")?.scrollIntoView({block:"nearest"});
+  }
+}
+function overviewPeriodPick(key){
+  const next = OVERVIEW_PERIODS.some(p=>p.key===key) ? key : "30d";
+  if(next==="custom"){
+    const prev = overviewPeriodBounds();
+    if(!state.overviewCustomStart) state.overviewCustomStart = toDateInputValue(prev.start);
+    if(!state.overviewCustomEnd) state.overviewCustomEnd = toDateInputValue(prev.end);
+  }
+  state.overviewPeriod = next;
+  state.overviewPeriodOpen = false;
+  const idx = OVERVIEW_PERIODS.findIndex(r=>r.key===next);
+  state.overviewPeriodActive = idx>=0 ? idx : 0;
+  render();
+}
+function overviewPeriodSetCustom(which, value){
+  const parsed = parseDateInput(value);
+  if(!parsed) return;
+  const iso = toDateInputValue(parsed);
+  if(which==="start") state.overviewCustomStart = iso;
+  else state.overviewCustomEnd = iso;
+  state.overviewPeriod = "custom";
+  render();
+}
+function overviewPeriodKey(e){
+  const open = !!state.overviewPeriodOpen;
+  const n = OVERVIEW_PERIODS.length;
+  if(e.key==="Escape"){
+    if(open){ e.preventDefault(); state.overviewPeriodOpen = false; render(); }
+    return;
+  }
+  if(e.key==="ArrowDown" || e.key==="ArrowUp"){
+    e.preventDefault();
+    if(!open){ overviewPeriodToggle(e); return; }
+    const delta = e.key==="ArrowDown" ? 1 : -1;
+    state.overviewPeriodActive = (state.overviewPeriodActive + delta + n) % n;
+    render();
+    document.getElementById("ov-period-trigger")?.focus();
+    document.querySelector("#ov-period-list .fw-select__opt[data-active]")?.scrollIntoView({block:"nearest"});
+    return;
+  }
+  if(e.key==="Enter" || e.key===" "){
+    e.preventDefault();
+    if(!open){ overviewPeriodToggle(e); return; }
+    const row = OVERVIEW_PERIODS[state.overviewPeriodActive];
+    if(row) overviewPeriodPick(row.key);
+  }
 }
 function liveSurveyStats(){
   const live = state.surveys.filter(s=>s.status==="Live");
@@ -2644,8 +2849,10 @@ function ovScoreBar(score, {max=5, warn}={}){
   </div>`;
 }
 function cardFunnel(){
-  const period = surveyPeriod().replace(" – ", "–");
-  const { live, completed, invited, rate } = liveSurveyStats();
+  const factor = overviewPeriodFactor();
+  const { live, completed: rawCompleted, invited: rawInvited, rate } = liveSurveyStats();
+  const invited = overviewScaleCount(rawInvited, factor);
+  const completed = overviewScaleCount(rawCompleted, factor);
   const near = rate < 30;
   const low = rate < 25;
   const rateLabel = low ? "Below target" : near ? "Near target" : "On target";
@@ -2655,7 +2862,7 @@ function cardFunnel(){
   <section class="ov-card" aria-labelledby="funnel-heading">
     <div class="ov-card-head">
       <h2 class="t-h4" id="funnel-heading">Survey response</h2>
-      <p class="t-subtle dim">${live.length} live surveys · ${period}</p>
+      <p class="t-subtle dim">${live.length} live surveys</p>
     </div>
     <div class="ov-funnel">
       <div class="ov-funnel-stage">
@@ -2718,7 +2925,7 @@ function cardQuality(){
   <section class="ov-card" aria-labelledby="quality-heading">
     <div class="ov-card-head">
       <h2 class="t-h4" id="quality-heading">Quality at a glance</h2>
-      <p class="t-subtle dim">Patient ratings for the current reporting period.</p>
+      <p class="t-subtle dim">Patient ratings from completed surveys.</p>
     </div>
     <div class="ov-readings">
       <div class="ov-reading">
@@ -2735,17 +2942,19 @@ function cardQuality(){
   </section>`;
 }
 function cardLowestScores(){
+  const factor = overviewPeriodFactor();
   return `
   <section class="ov-card" aria-labelledby="lowest-heading">
     <div class="ov-card-head">
       <h2 class="t-h4" id="lowest-heading">Where scores are lowest</h2>
-      <p class="t-subtle dim">Mean respect + listening score by area, last 30 days.</p>
+      <p class="t-subtle dim">Mean respect + listening score by area.</p>
     </div>
     <div class="ov-score-list">
       ${ZONES.map(z=>{
         const warn = z.score < 4;
+        const n = Math.max(10, overviewScaleCount(z.n, factor));
         return `<div class="ov-score-row">
-          <span class="ov-score-label">${esc(z.label)} (${z.n})</span>
+          <span class="ov-score-label">${esc(z.label)} (${n})</span>
           ${ovScoreBar(z.score, {warn})}
           <span class="ov-score-val${warn?" is-warn":""}">${z.score.toFixed(1)}</span>
         </div>`;
@@ -2797,6 +3006,10 @@ function kpiCompareLine(ok, detail, highIsBad){
 }
 function cardCrewScorecard(){
   const a = crewScoreAggregate();
+  const factor = overviewPeriodFactor();
+  const surveys = overviewScaleCount(a.surveys, factor);
+  const commend = overviewScaleCount(a.commend, factor);
+  const flags = overviewScaleCount(a.flags, factor);
   const flagCap = 3 * a.crewCount;
   const rows = [
     { name:"Average care · Q1", sub: kpiTargetLine(a.q1>=4.0, "4.0 / 5"),
@@ -2808,20 +3021,20 @@ function cardCrewScorecard(){
     { name:"Felt cared for · Q4", sub: kpiTargetLine(a.care>=80, "80%"),
       val:`${a.care}% yes`, pct:a.care, target:80 },
     { name:"Commendations", sub:"Total across all crew",
-      val:String(a.commend),
-      pct: Math.min(100, Math.max(0, Math.ceil(a.commend/4))/25*100) },
-    { name:"Flagged responses", sub: kpiTargetLine(a.flags<=flagCap, `≤ ${flagCap}`, true),
-      val:String(a.flags), pct: (a.flags/Math.max(flagCap,1))*100, target:100, invert:true }
+      val:String(commend),
+      pct: Math.min(100, Math.max(0, Math.ceil(commend/4))/25*100) },
+    { name:"Flagged responses", sub: kpiTargetLine(flags<=flagCap, `≤ ${flagCap}`, true),
+      val:String(flags), pct: (flags/Math.max(flagCap,1))*100, target:100, invert:true }
   ];
   return `
   <section class="ov-card" aria-labelledby="crew-kpi-heading">
     <div class="ov-card-head">
       <h2 class="t-h4" id="crew-kpi-heading">Key metrics</h2>
-      <p class="t-subtle dim">Last 30 days · ${a.surveys.toLocaleString("en-US")} responses · ${a.crewCount} crew</p>
+      <p class="t-subtle dim">${surveys.toLocaleString("en-US")} responses · ${a.crewCount} crew</p>
     </div>
     <div class="ov-ledger">
       ${rows.map(r=>{
-        const meter = ovMeter(r.pct, {target:r.target, warn:r.invert && a.flags>flagCap});
+        const meter = ovMeter(r.pct, {target:r.target, warn:r.invert && flags>flagCap});
         return `<div class="ov-metric">
           <div class="ov-metric-copy">
             <div class="ov-metric-name">${esc(r.name)}</div>
@@ -2838,8 +3051,13 @@ function cardCrewScorecard(){
 function viewOverview(){
   return `
   <div class="page-head">
-    <h1 class="t-h2">Reflect overview</h1>
-    <p class="t-p dim">${AGENCY.name} patient experience · ${day(mins(43200))} to today</p>
+    <div class="between">
+      <div>
+        <h1 class="t-h2">Reflect overview</h1>
+        <p class="t-p dim">${esc(AGENCY.name)} patient experience · ${esc(overviewPeriodRangeLabel())}</p>
+      </div>
+      ${overviewPeriodControl()}
+    </div>
   </div>
   ${staleBanner()}
   <div class="ov-stack" aria-label="System health">
@@ -4985,6 +5203,7 @@ function openAlertFromResponse(id){
    7. OVERVIEW SCORE CARDS
    ============================================================ */
 function cardByDemographic(){
+  const factor = overviewPeriodFactor();
   return `
   <section class="ov-card" aria-labelledby="demo-heading">
     <div class="ov-card-head">
@@ -4994,8 +5213,9 @@ function cardByDemographic(){
     <div class="ov-score-list">
       ${EQUITY.map(e=>{
         const warn = e.score < 4;
+        const n = Math.max(10, overviewScaleCount(e.n, factor));
         return `<div class="ov-score-row">
-          <span class="ov-score-label">${esc(e.label)} (${e.n})</span>
+          <span class="ov-score-label">${esc(e.label)} (${n})</span>
           ${ovScoreBar(e.score, {warn})}
           <span class="ov-score-val${warn?" is-warn":""}">${e.score.toFixed(1)}</span>
         </div>`;
@@ -6676,6 +6896,7 @@ window.addEventListener("keydown", e=>{
   if(e.key!=="Escape") return;
   if(state.triggerSelectOpen){ state.triggerSelectOpen = false; triggerSelectPaint(); return; }
   if(state.scheduleDurationOpen){ state.scheduleDurationOpen = false; scheduleDurationPaint(); return; }
+  if(state.overviewPeriodOpen){ state.overviewPeriodOpen = false; render(); return; }
   if(state.pSelectOpen){ state.pSelectOpen = null; pSelectPaint(); return; }
   if(state.crewSelectOpen){ state.crewSelectOpen = false; crewSelectPaint(); return; }
   if(state.navOpen){ closeNav(); return; }
@@ -6704,6 +6925,10 @@ window.addEventListener("mousedown", e=>{
   if(state.scheduleDurationOpen && !e.target.closest(".schedule-duration-select")){
     state.scheduleDurationOpen = false;
     scheduleDurationPaint(false);
+  }
+  if(state.overviewPeriodOpen && !e.target.closest(".ov-period-wrap")){
+    state.overviewPeriodOpen = false;
+    render();
   }
   if(state.pSelectOpen && !e.target.closest(".fw-select")){
     state.pSelectOpen = null;
