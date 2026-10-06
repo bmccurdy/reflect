@@ -926,6 +926,17 @@ button.num-link{
 .drawer-foot .fw-btn{flex:1}
 .drawer-foot--alert{flex-wrap:wrap}
 .drawer-foot--alert .fw-btn{flex:1 1 auto}
+.drawer-nav{
+  display:flex;align-items:center;gap:8px;width:100%;
+}
+.drawer-nav .fw-btn{flex:1}
+.drawer-foot__actions{
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px;width:100%;
+}
+.drawer-foot__actions .fw-btn{flex:1 1 auto}
+.drawer-foot--stacked{
+  flex-direction:column;align-items:stretch;gap:12px;
+}
 .drawer-pos{
   flex:0 0 auto;min-width:4.5rem;text-align:center;
   font-size:13px;line-height:20px;color:var(--muted-foreground);
@@ -2320,12 +2331,14 @@ const RESPONSES = {
       answers:{ q1:"Fine", q2:"Not likely", q3:"Yes", q4:"Yes",
         q5:"They were calm.", q6:"They were fine but it took a long time and I could not breathe. I would drive myself next time.", q7:"No" } },
     { id:"R-9907", at:mins(220), band:"35–44", lang:"English", zone:"Port Washington", alert:null,
+      unit:"E-4", crew:"Mercer / Li", call:"Fall, assisted", phone:"(516) 555-0107",
       answers:{ q1:"Exceptional", q2:"Very likely", q3:"Yes", q4:"Yes",
         q5:"They explained every step and asked if I was cold.", q6:"", q7:"No" } },
     { id:"R-9906", at:mins(320), band:"35–44", lang:"English", zone:"Manhasset", alert:"A-4465",
       answers:{ q1:"Poor", q2:"Not sure", q3:"No", q4:"No",
         q5:"", q6:"Rushed. I felt like a task on a list.", q7:"No" } },
     { id:"R-9905", at:mins(480), band:"18–34", lang:"English", zone:"Great Neck", alert:null,
+      unit:"M-7", crew:"Baptiste / Lee", call:"MVC, minor", phone:"(516) 555-0112",
       answers:{ q1:"Good", q2:"Somewhat likely", q3:"Yes", q4:"Yes",
         q5:"Got me there quickly.", q6:"A little loud in the back.", q7:"No" } },
     { id:"R-9904", at:mins(1180), band:"65–74", lang:"English", zone:"Great Neck", alert:"A-4459",
@@ -2335,39 +2348,49 @@ const RESPONSES = {
       answers:{ q1:"Good", q2:"Very likely", q3:"Yes", q4:"Yes",
         q5:"Kind crew.", q6:"Freezing cold in the back and no blanket until I asked.", q7:"No" } },
     { id:"R-9902", at:mins(2100), band:"55–64", lang:"English", zone:"Manhasset", alert:null,
+      unit:"M-8", crew:"Sowande / Kim", call:"Weakness", phone:"(516) 555-0121",
       answers:{ q1:"Exceptional", q2:"Very likely", q3:"Yes", q4:"Yes", q5:"Everything. Thank you.", q6:"", q7:"No" } },
     { id:"R-9901", at:mins(2900), band:"75+", lang:"English", zone:"Manhasset", alert:"A-4451",
       answers:{ q1:"Fine", q2:"Not likely", q3:"Yes", q4:"Yes",
         q5:"The crew themselves were kind.", q6:"Long wait.", q7:"No" } },
     { id:"R-9899", at:mins(3600), band:"25–34", lang:"English", zone:"New Hyde Park", alert:null,
+      unit:"M-3", crew:"Okafor / Reyes", call:"Abdominal pain", phone:"(516) 555-0138",
       answers:{ q1:"Good", q2:"Very likely", q3:"Yes", q4:"Yes", q5:"", q6:"", q7:"No" } },
     { id:"R-9898", at:mins(4200), band:"45–54", lang:"English", zone:"Port Washington", alert:null,
+      unit:"E-2", crew:"Halloran / Pike", call:"Chest pain", phone:"(516) 555-0144",
       answers:{ q1:"Good", q2:"Somewhat likely", q3:"Yes", q4:"Yes",
         q5:"Quick and kind.", q6:"", q7:"No" } },
     { id:"R-9897", at:mins(5100), band:"65–74", lang:"Spanish", zone:"Manhasset", alert:null,
+      unit:"M-12", crew:"Alvarez / Nwosu", call:"Difficulty breathing", phone:"(516) 555-0152",
       answers:{ q1:"Fine", q2:"Not sure", q3:"Yes", q4:"No",
         q5:"", q6:"I did not understand the questions they asked in the ambulance.", q7:"Yes" } },
     { id:"R-9896", at:mins(6000), band:"18–34", lang:"English", zone:"Great Neck", alert:null,
+      unit:"E-7", crew:"Boyd / Trần", call:"Anxiety / panic", phone:"(516) 555-0166",
       answers:{ q1:"Exceptional", q2:"Very likely", q3:"Yes", q4:"Yes",
         q5:"They let my sister ride along.", q6:"", q7:"No" } },
     { id:"R-9895", at:mins(7200), band:"55–64", lang:"English", zone:"New Hyde Park", alert:null,
+      unit:"M-19", crew:"Sanchez / Tran", call:"Chest pain", phone:"(516) 555-0177",
       answers:{ q1:"Poor", q2:"Not likely", q3:"No", q4:"Yes",
         q5:"", q6:"Drove too fast. I was already scared.", q7:"No" } },
     { id:"R-9894", at:mins(8400), band:"75+", lang:"English", zone:"Manhasset", alert:null,
+      unit:"M-8", crew:"Sowande / Kim", call:"Fall, assisted", phone:"(516) 555-0183",
       answers:{ q1:"Good", q2:"Very likely", q3:"Yes", q4:"Yes", q5:"", q6:"", q7:"No" } }
   ],
   sv_notrans: [
     { id:"R-4404", at:mins(410), band:"25–34", lang:"English", zone:"Port Washington", alert:"A-4462",
       answers:{ n1:"No", n2:"Yes", n3:"Yes", n4:"No" } },
     { id:"R-4403", at:mins(900), band:"65–74", lang:"English", zone:"Great Neck", alert:null,
+      unit:"E-7", crew:"Boyd / Trần", call:"Fall, refused", phone:"(516) 555-0191",
       answers:{ n1:"Yes", n2:"Yes", n3:"Yes", n4:"No" } },
     { id:"R-4402", at:mins(1400), band:"45–54", lang:"Spanish", zone:"New Hyde Park", alert:"A-4472",
       answers:{ n1:"No", n2:"Yes", n3:"No", n4:"Yes" } },
     { id:"R-4401", at:mins(2200), band:"75+", lang:"English", zone:"Manhasset", alert:null,
+      unit:"M-12", crew:"Alvarez / Nwosu", call:"Weakness, refused", phone:"(516) 555-0194",
       answers:{ n1:"Yes", n2:"Yes", n3:"Yes", n4:"No" } },
     { id:"R-4400", at:mins(3100), band:"35–44", lang:"English", zone:"Manhasset", alert:"A-4474",
       answers:{ n1:"Yes", n2:"Yes", n3:"Yes", n4:"Yes" } },
     { id:"R-4399", at:mins(4000), band:"18–34", lang:"English", zone:"Great Neck", alert:null,
+      unit:"M-7", crew:"Baptiste / Lee", call:"Anxiety, refused", phone:"(516) 555-0199",
       answers:{ n1:"Yes", n2:"Yes", n3:"Yes", n4:"Yes" } },
     { id:"R-4398", at:mins(5200), band:"55–64", lang:"Spanish", zone:"New Hyde Park", alert:"A-4473",
       answers:{ n1:"No", n2:"No", n3:"No", n4:"Yes" } }
@@ -3790,28 +3813,35 @@ function caseSurveyLine(ctx){
 }
 function caseMetaLine(ctx){
   const { alert, response } = ctx;
-  if(alert) return ago(alert.at);
-  if(response){
-    return [ago(response.at), response.zone, response.band, response.lang].filter(Boolean).join(" · ");
-  }
-  return "";
+  const at = response?.at || alert?.at;
+  return at ? ago(at) : "";
+}
+function caseDetailFields(ctx){
+  const { alert, response } = ctx;
+  if(!alert && !response) return null;
+  return {
+    unit: alert?.unit || response?.unit || "",
+    crew: alert?.crew || response?.crew || "",
+    call: alert?.call || response?.call || "",
+    zone: response?.zone || alert?.zone || "",
+    band: response?.band || alert?.band || "",
+    lang: response?.lang || alert?.lang || "",
+    phone: response?.phone || alert?.phone || ""
+  };
 }
 function caseIncidentKv(ctx){
-  const { alert, response } = ctx;
-  if(alert){
-    return `<dl class="kv">
-      <dt>Unit / crew</dt><dd>${esc(alert.unit)} — ${esc(alert.crew)}</dd>
-      <dt>Call type</dt><dd>${esc(alert.call)}</dd>
-      <dt>Area</dt><dd>${esc(alert.zone)}</dd>
-      <dt>Age band</dt><dd>${esc(alert.band)}</dd>
-      <dt>Language</dt><dd>${esc(alert.lang)}</dd>
-      <dt>Phone #</dt><dd>${alert.phone?esc(alert.phone):`<span class="dim">—</span>`}</dd>
+  const d = caseDetailFields(ctx);
+  if(!d) return "";
+  const unitCrew = [d.unit, d.crew].filter(Boolean).join(" — ");
+  const dash = `<span class="dim">—</span>`;
+  return `<dl class="kv">
+      <dt>Unit / crew</dt><dd>${unitCrew?esc(unitCrew):dash}</dd>
+      <dt>Call type</dt><dd>${d.call?esc(d.call):dash}</dd>
+      <dt>Area</dt><dd>${d.zone?esc(d.zone):dash}</dd>
+      <dt>Age band</dt><dd>${d.band?esc(d.band):dash}</dd>
+      <dt>Language</dt><dd>${d.lang?esc(d.lang):dash}</dd>
+      <dt>Phone #</dt><dd>${d.phone?esc(d.phone):dash}</dd>
     </dl>`;
-  }
-  if(response){
-    return "";
-  }
-  return "";
 }
 function caseAnswersHtml(response, qs, quote){
   if(!response){
@@ -3865,13 +3895,29 @@ function caseDrawer(){
     : (alert ? alertDisplayTitle(alert) : "Survey response");
   const meta = caseMetaLine(ctx);
   const incident = caseIncidentKv(ctx);
+  const details = caseDetailFields(ctx);
+  const preferLang = details?.lang && details.lang!=="English" ? details.lang : "";
   const idLine = alert
     ? `Alert <span style="font-weight:700">${esc(alert.id)}</span>${response?` · Response <span style="font-weight:700">${esc(response.id)}</span>`:""}`
     : (response ? `Response <span style="font-weight:700">${esc(response.id)}</span>` : "");
   const showCallbackFoot = !!(alert && alert.status!=="resolved");
   const nav = entry==="response" && response ? responseNeighbors(state.openResponse) : null;
-  const showNavFoot = !showCallbackFoot && nav && nav.total>1;
+  const showNavFoot = !!(nav && nav.total>1);
   const paging = entry==="response" && isResponsePaging();
+  const navHtml = showNavFoot?`
+      <div class="drawer-nav" role="navigation" aria-label="Response">
+        <button class="fw-btn fw-btn--outline drawer-prev" type="button" ${nav.prev?"":"disabled"}
+          onclick="openResponseNeighbor('prev')">${I.chevronLeft(16)} Previous</button>
+        <span class="drawer-pos" aria-live="polite">${nav.index+1} of ${nav.total}</span>
+        <button class="fw-btn fw-btn--outline drawer-next" type="button" ${nav.next?"":"disabled"}
+          onclick="openResponseNeighbor('next')">Next ${I.chevronRight(16)}</button>
+      </div>`:"";
+  const callbackHtml = showCallbackFoot?`
+      <div class="drawer-foot__actions">
+        <button class="fw-btn fw-btn--primary" onclick="logAndResolve('${alert.id}')">
+          ${I.checkCircle(16)} Log and mark followed up</button>
+        <button class="fw-btn fw-btn--outline" onclick="logOnly('${alert.id}')">Log without closing</button>
+      </div>`:"";
   return `
   <div class="scrim" onclick="closeCase()"></div>
   <aside class="drawer drawer--case${entry==="response"?" drawer--response":""}${paging?" is-open is-paging":""}"
@@ -3889,26 +3935,18 @@ function caseDrawer(){
     <div class="drawer-body">
       ${caseSurveyLine(ctx)}
       ${call?`<div class="stale">${I.phone(16)} They asked for a call.</div>`:""}
-      ${alert && alert.lang && alert.lang!=="English"?`<div class="stale"${call?` style="margin-top:12px"`:""}>
-        ${I.users(16)} Patient prefers ${esc(alert.lang)}. Use the interpreter line for the callback.</div>`:""}
+      ${preferLang?`<div class="stale"${call?` style="margin-top:12px"`:""}>
+        ${I.users(16)} Patient prefers ${esc(preferLang)}. Use the interpreter line for the callback.</div>`:""}
       ${quote?`<div class="quote">“${esc(quote)}”</div>`:""}
-      ${incident?`<div class="${quote||call?"mt24":""}">${incident}</div>`:""}
+      ${incident?`<div class="${quote||call||preferLang?"mt24":""}">${incident}</div>`:""}
       ${caseCallbackHtml(alert)}
       <div class="case-section" id="case-answers">
         <h3 class="case-section__title">Survey answers</h3>
         ${caseAnswersHtml(response, qs, quote)}
       </div>
     </div>
-    ${showCallbackFoot?`<div class="drawer-foot drawer-foot--alert">
-      <button class="fw-btn fw-btn--primary" onclick="logAndResolve('${alert.id}')">
-        ${I.checkCircle(16)} Log and mark followed up</button>
-      <button class="fw-btn fw-btn--outline" onclick="logOnly('${alert.id}')">Log without closing</button>
-    </div>`: showNavFoot?`<div class="drawer-foot">
-      <button class="fw-btn fw-btn--outline drawer-prev" type="button" ${nav.prev?"":"disabled"}
-        onclick="openResponseNeighbor('prev')">${I.chevronLeft(16)} Previous</button>
-      <span class="drawer-pos" aria-live="polite">${nav.index+1} of ${nav.total}</span>
-      <button class="fw-btn fw-btn--outline drawer-next" type="button" ${nav.next?"":"disabled"}
-        onclick="openResponseNeighbor('next')">Next ${I.chevronRight(16)}</button>
+    ${showNavFoot||showCallbackFoot?`<div class="drawer-foot${showCallbackFoot&&showNavFoot?" drawer-foot--stacked":""}${showCallbackFoot&&!showNavFoot?" drawer-foot--alert":""}">
+      ${navHtml}${callbackHtml}
     </div>`:""}
   </aside>`;
 }
