@@ -635,11 +635,23 @@ html[data-theme="dark"] .ov-reading .ov-label{
 .tbl--surveys .sv-rate,
 .tbl--surveys .sv-schedule{vertical-align:middle}
 .tbl--alerts td{vertical-align:middle}
-.tbl--alerts .al-assigned,
-.tbl--alerts .al-opened{
-  font-size:14px;line-height:20px;color:var(--muted-foreground);
+.tbl--alerts{
+  table-layout:fixed;width:100%;
 }
-.tbl--alerts .al-assigned:not(.dim){color:var(--foreground)}
+.tbl--alerts .al-why{width:46%}
+.tbl--alerts .al-survey{width:26%}
+.tbl--alerts .al-unit{width:18%}
+.tbl--alerts .al-opened{
+  width:10%;
+  font-size:14px;line-height:20px;color:var(--muted-foreground);
+  white-space:nowrap;
+}
+.tbl--alerts .al-why .snip{max-width:none;width:100%}
+.tbl--alerts .al-reason{max-width:100%}
+.tbl--alerts .al-survey-name{
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.tbl--alerts .al-unit > span{white-space:nowrap}
 .tbl--responses td{vertical-align:middle}
 .star-btn{color:var(--muted-foreground)}
 .star-btn:hover{color:var(--fw-gold)}
@@ -671,7 +683,7 @@ html[data-theme="dark"] .ov-reading .ov-label{
 .menu-sep{height:1px;background:var(--border);margin:6px 4px}
 .tbl tbody tr.resolving{animation:resolveOut var(--dur-layout) var(--ease-out) forwards}
 @keyframes resolveOut{to{opacity:0;transform:translateX(8px)}}
-.snip{color:var(--muted-foreground);font-size:14px;line-height:20px;max-width:420px}
+.snip{color:var(--muted-foreground);font-size:14px;line-height:20px;max-width:100%}
 .mono{font-family:var(--font-mono);font-size:14px;font-weight:700}
 
 .fw-card-flush{padding:0;overflow:visible}
@@ -1041,6 +1053,20 @@ button.num-link{
 .al-survey-name{display:block;font-weight:700;font-size:14px;line-height:20px}
 .alert-source{margin-bottom:20px}
 .alert-source dd{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px}
+.case-survey{
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;
+  margin-bottom:16px;font-size:14px;line-height:20px;
+}
+.case-survey__name{font-weight:700;color:var(--foreground);text-decoration:none}
+.case-survey__name:hover{text-decoration:underline;color:var(--primary)}
+.case-section{
+  margin-top:24px;padding-top:16px;border-top:1px solid var(--border);
+}
+.case-section__title{
+  margin:0 0 12px;font-size:14px;line-height:20px;font-weight:700;color:var(--foreground);
+}
+.case-section .ans:first-child{padding-top:0}
+.case-section .log{border-top:0;margin-top:16px;padding-top:0}
 .log{border-top:1px solid var(--border);margin-top:24px;padding-top:16px}
 .log li{padding:12px 0;border-bottom:1px solid var(--border);font-size:14px;line-height:20px}
 .log li:last-child{border-bottom:0}
@@ -1627,13 +1653,13 @@ html[data-theme="dark"] .patient{
   .rs-filters{width:100%}
   .rs-filters button{flex:1;padding:0 6px}
   .drawer-back{display:flex}
-  .drawer--response .drawer-x{display:none}
+  .drawer--response .drawer-x,
+  .drawer--case.drawer--response .drawer-x{display:none}
   .drawer-head{padding:12px 16px 16px;padding-top:max(12px,env(safe-area-inset-top))}
   .drawer-body{padding:16px;padding-bottom:max(16px,env(safe-area-inset-bottom))}
   .drawer-foot{padding:12px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom))}
   .drawer-foot .fw-btn{min-height:44px}
-  .drawer--response .stale{flex-wrap:wrap;align-items:flex-start}
-  .drawer--response .stale__action{margin-left:0;margin-top:8px}
+  .drawer--case .stale{flex-wrap:wrap;align-items:flex-start}
   .fw-card-head{flex-wrap:wrap}
   .kv{grid-template-columns:1fr}
   .t-h1{font-size:34px;line-height:38px}
@@ -1760,13 +1786,13 @@ html[data-theme="dark"] .patient{
     font-size:13px;line-height:20px;
   }
   .tbl--alerts tbody tr{align-items:flex-start;padding:16px 0;gap:8px 12px}
-  .tbl--alerts .al-why{display:contents}
+  .tbl--alerts .al-why{display:contents;width:auto}
   .tbl--alerts .al-reason{
     order:1;flex:1 1 0;min-width:0;
     font-size:16px;line-height:24px;font-weight:600;
   }
   .tbl--alerts .al-opened{
-    order:2;flex:0 0 auto;margin-left:auto;
+    order:2;flex:0 0 auto;width:auto;margin-left:auto;
     font-size:13px;line-height:20px;padding-top:2px;
   }
   .tbl--alerts .al-why .snip{
@@ -1780,26 +1806,19 @@ html[data-theme="dark"] .patient{
   .tbl--alerts .al-survey{
     order:4;flex:1 1 100%;width:100%;
   }
-  .tbl--alerts .al-unit,
-  .tbl--alerts .al-assigned{
-    flex:0 0 auto;
-    color:var(--muted-foreground);
-    font-size:13px;line-height:20px;
+  .tbl--alerts .al-survey-name{
+    white-space:normal;overflow:visible;text-overflow:unset;
   }
   .tbl--alerts .al-unit{
-    order:5;
+    order:5;flex:0 0 auto;width:auto;
     display:inline-flex;flex-wrap:wrap;align-items:baseline;
+    color:var(--muted-foreground);
+    font-size:13px;line-height:20px;
   }
   .tbl--alerts .al-unit .t-subtle{display:inline}
   .tbl--alerts .al-unit .t-subtle::before{
     content:"·";
     margin:0 8px;
-    color:var(--muted-foreground);
-  }
-  .tbl--alerts .al-assigned{order:6}
-  .tbl--alerts .al-assigned::before{
-    content:"·";
-    margin-right:8px;
     color:var(--muted-foreground);
   }
   .tbl--ops tbody tr{align-items:flex-start;padding:12px 0}
@@ -2001,53 +2020,53 @@ const ALERTS = [
   { id:"A-4471", status:"critical", unit:"M-12", call:"Chest pain", crew:"Alvarez / Nwosu",
     reason:"Rated 1 of 5 on respect, plus a written complaint",
     quote:"Nobody told me where we were going or what the medicine was. I asked twice. I'm 78 years old and I was scared the whole ride.", at:mins(38), age:"78", band:"75+", lang:"English",
-    phone:"(516) 555-0142", zone:"Manhasset", assigned:"You", log:[] },
+    phone:"(516) 555-0142", zone:"Manhasset", log:[] },
   { id:"A-4470", status:"critical", unit:"E-7", call:"Fall, hip",
     crew:"Boyd / Trần",
     reason:"Rated 1 of 5 on comfort, mentions being dropped",
     quote:"The stretcher slipped when they loaded me and nobody said sorry. My hip hurt worse after than before.", at:mins(96), age:"64", band:"55-64", lang:"English",
-    phone:"(516) 555-0198", zone:"Great Neck", assigned:"You", log:[] },
+    phone:"(516) 555-0198", zone:"Great Neck", log:[] },
   { id:"A-4468", status:"elevated", unit:"M-3", call:"Difficulty breathing",
     crew:"Okafor / Reyes",
     reason:"Would not call 911 again",
     quote:"They were fine but it took a long time and I could not breathe. I would drive myself next time.", at:mins(174), age:"51", band:"45-54", lang:"Spanish",
-    phone:"(516) 555-0174", zone:"New Hyde Park", assigned:"Unassigned", log:[] },
+    phone:"(516) 555-0174", zone:"New Hyde Park", log:[] },
   { id:"A-4465", status:"elevated", unit:"M-12", call:"Diabetic emergency",
     crew:"Alvarez / Nwosu",
     reason:"Second low score for M-12 this week",
     quote:"Rushed. I felt like a task on a list.", at:mins(320), age:"43", band:"35-44", lang:"English",
-    phone:"(516) 555-0116", zone:"Manhasset", assigned:"Unassigned", log:[] },
+    phone:"(516) 555-0116", zone:"Manhasset", log:[] },
   { id:"A-4462", status:"elevated", unit:"E-2", call:"MVC, no transport",
     crew:"Halloran / Pike",
     reason:"Free text flagged for review",
     quote:"I did not want to go to the hospital and I felt pressured about it. Everything else was good.", at:mins(410), age:"29", band:"25-34", lang:"English",
-    phone:"(516) 555-0133", zone:"Port Washington", assigned:"K. Doyle", log:[] },
+    phone:"(516) 555-0133", zone:"Port Washington", log:[] },
   { id:"A-4472", status:"critical", unit:"M-3", call:"Abdominal pain, refused",
     crew:"Okafor / Reyes",
     reason:"Rated no on listening after transport refusal",
     quote:"I said I didn't want to go and they kept asking like I didn't mean it. Nobody asked why I was scared of the hospital.", at:mins(140), age:"52", band:"45-54", lang:"Spanish",
-    phone:"(516) 555-0161", zone:"New Hyde Park", assigned:"You", log:[] },
+    phone:"(516) 555-0161", zone:"New Hyde Park", log:[] },
   { id:"A-4473", status:"elevated", unit:"E-4", call:"Syncope, refused transport",
     crew:"Mercer / Li",
     reason:"No explanation of risks if patient stayed home",
     quote:"They left quickly. I still don't know what could have happened if I stayed. I wouldn't call again.", at:mins(5200), age:"58", band:"55-64", lang:"Spanish",
-    phone:"(516) 555-0149", zone:"New Hyde Park", assigned:"Unassigned", log:[] },
+    phone:"(516) 555-0149", zone:"New Hyde Park", log:[] },
   { id:"A-4474", status:"resolved", unit:"M-8", call:"Weakness, refused",
     crew:"Sowande / Kim",
     reason:"Requested callback after refusal",
     quote:"I wanted someone to explain my options in plain language. The follow-up call helped.", at:mins(3100), age:"44", band:"35-44", lang:"English",
-    phone:"(516) 555-0171", zone:"Manhasset", assigned:"K. Doyle",
+    phone:"(516) 555-0171", zone:"Manhasset",
     log:[{ who:"K. Doyle", at:mins(3000), text:"Called patient. Reviewed AMA documentation and next steps. No crew action needed." }] },
   { id:"A-4459", status:"elevated", unit:"M-8", call:"Chest pain",
     crew:"Sowande / Kim",
     reason:"Rated 2 of 5 on listening",
     quote:"I told them about my allergy three times.", at:mins(1180), age:"67", band:"65-74", lang:"English",
-    phone:"(516) 555-0187", zone:"Great Neck", assigned:"Unassigned", log:[] },
+    phone:"(516) 555-0187", zone:"Great Neck", log:[] },
   { id:"A-4455", status:"resolved", unit:"M-3", call:"Seizure",
     crew:"Okafor / Reyes",
     reason:"Rated 1 of 5 on comfort",
     quote:"Freezing cold in the back and no blanket until I asked.", at:mins(1610), age:"38", band:"35-44", lang:"English",
-    phone:"(516) 555-0155", zone:"New Hyde Park", assigned:"You",
+    phone:"(516) 555-0155", zone:"New Hyde Park",
     log:[
       { who:"You", at:mins(1520), text:"Called and spoke with the patient. Apologized. She was satisfied with the call." },
       { who:"You", at:mins(1518), text:"Blanket stock on M-3 checked — restocked and flagged to shift lead." },
@@ -2057,7 +2076,7 @@ const ALERTS = [
     crew:"Boyd / Trần",
     reason:"Would not call 911 again",
     quote:"Long wait. The crew themselves were kind.", at:mins(2900), age:"81", band:"75+", lang:"English",
-    phone:"(516) 555-0129", zone:"Manhasset", assigned:"K. Doyle",
+    phone:"(516) 555-0129", zone:"Manhasset",
     log:[{ who:"K. Doyle", at:mins(2760), text:"Left voicemail. Response time was 14 min — traffic on Northern Blvd. No action for crew." }] }
 ];
 
@@ -2564,7 +2583,6 @@ const I = {
   chevronLeft:s=>ic('<path d="m15 18-6-6 6-6"/>',s),
   chevronRight:s=>ic('<path d="m9 18 6-6-6-6"/>',s),
   users:      s=>ic('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/>',s),
-  userPlus:   s=>ic('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/>',s),
   chart:      s=>ic('<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>',s),
   thumbUp:    s=>ic('<path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/>',s),
   pencil:     s=>ic('<path d="M21.2 3.8a2.7 2.7 0 0 0-3.8 0L4 17v4h4L21.2 7.6a2.7 2.7 0 0 0 0-3.8Z"/>',s),
@@ -2657,8 +2675,7 @@ function shell(body){
     </header>
     <main class="main">${body}</main>
   </div>
-  ${state.openAlert?drawer(state.openAlert):""}
-  ${state.openResponse?responseDrawer(state.openResponse):""}
+  ${state.openAlert||state.openResponse?caseDrawer():""}
   ${state.openTrigger?triggerDrawer(state.openTrigger):""}
   ${state.deleteSurvey?deleteConfirm(state.deleteSurvey):""}
   ${state.stopSurvey?stopSurveyDialog(state.stopSurvey):""}
@@ -3701,19 +3718,165 @@ function alertSurveyCell(a){
     ${trig?`<div class="t-subtle">${surveyTriggerCell(src.survey)}</div>`:""}
   </td>`;
 }
-function alertSourceBlock(a){
-  const src = alertSource(a.id);
-  if(!src?.survey) return "";
-  const id = surveyDisplayTriggerId(src.survey);
+function caseContext(){
+  if(state.openAlert){
+    const alert = state.alerts.find(x=>x.id===state.openAlert);
+    if(!alert) return null;
+    const src = alertSource(alert.id);
+    const surveyId = src?.surveyId || null;
+    const responseId = src?.responseId || null;
+    const survey = src?.survey || (surveyId ? state.surveys.find(s=>s.id===surveyId) : null);
+    const response = surveyId && responseId
+      ? responsesFor(surveyId).find(r=>r.id===responseId) || null
+      : null;
+    return { entry:"alert", alert, survey, surveyId, response, responseId };
+  }
+  if(state.openResponse){
+    const surveyId = state.openResponse.surveyId;
+    const responseId = state.openResponse.id;
+    const survey = state.surveys.find(s=>s.id===surveyId) || null;
+    const response = responsesFor(surveyId).find(r=>r.id===responseId) || null;
+    if(!survey || !response) return null;
+    const alert = response.alert
+      ? state.alerts.find(a=>a.id===response.alert) || null
+      : null;
+    return { entry:"response", alert, survey, surveyId, response, responseId };
+  }
+  return null;
+}
+function caseSurveyLine(ctx){
+  const { survey, surveyId } = ctx;
+  if(!survey || !surveyId) return "";
+  const id = surveyDisplayTriggerId(survey);
   const t = id ? findTriggerDef(id) : null;
-  const trigger = id
-    ? `${surveyTriggerCell(src.survey)}${t?`<span>${esc(t.name)}</span>`:""}`
-    : `<span class="dim">—</span>`;
-  return `<dl class="kv alert-source">
-    <dt>Survey</dt><dd><a href="#/surveys/${esc(src.surveyId)}" onclick="closeAlert()">${esc(src.survey.name)}</a></dd>
-    <dt>Trigger</dt><dd>${trigger}</dd>
-    <dt>Response</dt><dd><button type="button" class="num-link" onclick="openResponseFromAlert('${esc(src.surveyId)}','${esc(src.responseId)}')">${esc(src.responseId)}</button></dd>
-  </dl>`;
+  return `<div class="case-survey">
+    <a class="case-survey__name" href="#/surveys/${esc(surveyId)}" onclick="closeCase()">${esc(survey.name)}</a>
+    ${id?`<span class="t-subtle">${surveyTriggerCell(survey)}${t?` · ${esc(t.name)}`:""}</span>`:""}
+  </div>`;
+}
+function caseMetaLine(ctx){
+  const { alert, response } = ctx;
+  if(alert) return ago(alert.at);
+  if(response){
+    return [ago(response.at), response.zone, response.band, response.lang].filter(Boolean).join(" · ");
+  }
+  return "";
+}
+function caseIncidentKv(ctx){
+  const { alert, response } = ctx;
+  if(alert){
+    return `<dl class="kv">
+      <dt>Unit / crew</dt><dd>${esc(alert.unit)} — ${esc(alert.crew)}</dd>
+      <dt>Call type</dt><dd>${esc(alert.call)}</dd>
+      <dt>Area</dt><dd>${esc(alert.zone)}</dd>
+      <dt>Age band</dt><dd>${esc(alert.band)}</dd>
+      <dt>Language</dt><dd>${esc(alert.lang)}</dd>
+      <dt>Phone #</dt><dd>${alert.phone?esc(alert.phone):`<span class="dim">—</span>`}</dd>
+    </dl>`;
+  }
+  if(response){
+    return "";
+  }
+  return "";
+}
+function caseAnswersHtml(response, qs, quote){
+  if(!response){
+    return `<p class="t-subtle dim">No linked survey response.</p>`;
+  }
+  if(!qs.length){
+    return `<p class="t-subtle dim">No questions on this survey.</p>`;
+  }
+  return qs.filter(q=>!(quote && String(response.answers[q.id]||"")===quote)).map(q=>{
+    const v = response.answers[q.id];
+    const empty = v===undefined || v==="";
+    return `<div class="ans">
+      <div class="t-subtle dim">${esc(questionLabel(q))}</div>
+      <div class="t-pui" style="font-weight:700;margin-top:4px">${empty?`<span class="dim">Skipped</span>`:esc(String(v))}</div>
+    </div>`;
+  }).join("");
+}
+function caseCallbackHtml(alert){
+  if(!alert) return "";
+  const open = alert.status!=="resolved";
+  return `
+  <div class="case-section" id="case-callback">
+    <h3 class="case-section__title">Callback</h3>
+    ${open?`
+    <label class="t-subtle" style="font-weight:700;display:block;margin-bottom:8px" for="note-${alert.id}">
+      What happened on the callback?</label>
+    <textarea class="fw-input" id="note-${alert.id}"
+      placeholder="Who you reached, what they said, anything you changed."></textarea>`:`
+    <div class="stale" style="background:var(--status-resolved-wash);color:var(--status-resolved);
+         border-color:currentColor;margin-bottom:0">
+      ${I.checkCircle(16)} Followed up.
+    </div>`}
+    <div class="log">
+      <h4 class="t-subtle" style="font-weight:700;margin-bottom:4px">Activity</h4>
+      ${alert.log.length?`<ul>${alert.log.map(l=>`<li>
+          <div style="font-weight:700">${esc(l.who)} <span class="dim" style="font-weight:400">· ${ago(l.at)}</span></div>
+          <div class="dim">${esc(l.text)}</div></li>`).join("")}</ul>`
+        :`<p class="t-subtle dim">Nothing logged yet.</p>`}
+    </div>
+  </div>`;
+}
+function caseDrawer(){
+  const ctx = caseContext();
+  if(!ctx) return "";
+  const { entry, alert, survey, surveyId, response } = ctx;
+  const qs = surveyId ? (state.surveyQuestions[surveyId] || []) : [];
+  const call = response ? responseWantsCall(response, qs) : false;
+  const quote = alert?.quote || (response ? responseQuote(response, qs) : "");
+  const title = alert
+    ? alert.reason
+    : responseTitle(response, qs, null);
+  const meta = caseMetaLine(ctx);
+  const incident = caseIncidentKv(ctx);
+  const idLine = alert
+    ? `Alert <span style="font-weight:700">${esc(alert.id)}</span>${response?` · Response <span style="font-weight:700">${esc(response.id)}</span>`:""}`
+    : (response ? `Response <span style="font-weight:700">${esc(response.id)}</span>` : "");
+  const showCallbackFoot = !!(alert && alert.status!=="resolved");
+  const nav = entry==="response" && response ? responseNeighbors(state.openResponse) : null;
+  const showNavFoot = !showCallbackFoot && nav && nav.total>1;
+  const paging = entry==="response" && isResponsePaging();
+  return `
+  <div class="scrim" onclick="closeCase()"></div>
+  <aside class="drawer drawer--case${entry==="response"?" drawer--response":""}${paging?" is-open is-paging":""}"
+    role="dialog" aria-modal="true" aria-labelledby="case-title">
+    <div class="drawer-head">
+      <div>
+        ${entry==="response"
+          ? `<button type="button" class="drawer-back" onclick="closeCase()">${I.chevronLeft(16)} Responses</button>`
+          : ""}
+        <h2 class="t-h4" id="case-title">${esc(title)}</h2>
+        <p class="t-subtle dim">${idLine}${meta?`${idLine?" · ":""}${esc(meta)}`:""}</p>
+      </div>
+      <button class="iconbtn drawer-x" onclick="closeCase()" aria-label="Close">${I.x(18)}</button>
+    </div>
+    <div class="drawer-body">
+      ${caseSurveyLine(ctx)}
+      ${call?`<div class="stale">${I.phone(16)} They asked for a call.</div>`:""}
+      ${alert && alert.lang && alert.lang!=="English"?`<div class="stale"${call?` style="margin-top:12px"`:""}>
+        ${I.users(16)} Patient prefers ${esc(alert.lang)}. Use the interpreter line for the callback.</div>`:""}
+      ${quote?`<div class="quote">“${esc(quote)}”</div>`:""}
+      ${incident?`<div class="${quote||call?"mt24":""}">${incident}</div>`:""}
+      ${caseCallbackHtml(alert)}
+      <div class="case-section" id="case-answers">
+        <h3 class="case-section__title">Survey answers</h3>
+        ${caseAnswersHtml(response, qs, quote)}
+      </div>
+    </div>
+    ${showCallbackFoot?`<div class="drawer-foot drawer-foot--alert">
+      <button class="fw-btn fw-btn--primary" onclick="logAndResolve('${alert.id}')">
+        ${I.checkCircle(16)} Log and mark followed up</button>
+      <button class="fw-btn fw-btn--outline" onclick="logOnly('${alert.id}')">Log without closing</button>
+    </div>`: showNavFoot?`<div class="drawer-foot">
+      <button class="fw-btn fw-btn--outline drawer-prev" type="button" ${nav.prev?"":"disabled"}
+        onclick="openResponseNeighbor('prev')">${I.chevronLeft(16)} Previous</button>
+      <span class="drawer-pos" aria-live="polite">${nav.index+1} of ${nav.total}</span>
+      <button class="fw-btn fw-btn--outline drawer-next" type="button" ${nav.next?"":"disabled"}
+        onclick="openResponseNeighbor('next')">Next ${I.chevronRight(16)}</button>
+    </div>`:""}
+  </aside>`;
 }
 
 function viewAlerts(){
@@ -3766,9 +3929,10 @@ function viewAlerts(){
     <div class="tbl-inset">
     <table class="tbl tbl--stack tbl--alerts">
       <thead><tr>
-        <th>Reason</th>
-        <th style="width:220px">Survey</th>
-        <th style="width:96px">Unit</th><th style="width:132px">Assigned</th><th style="width:104px">Opened</th>
+        <th class="al-why">Reason</th>
+        <th class="al-survey">Survey</th>
+        <th class="al-unit">Unit</th>
+        <th class="al-opened">Opened</th>
       </tr></thead>
       <tbody aria-live="polite">
         ${list.map(a=>`
@@ -3776,11 +3940,10 @@ function viewAlerts(){
             <td class="al-why">
               <button type="button" class="al-reason num-link" onclick="openAlert('${a.id}')">${esc(a.reason)}</button>
               <div class="snip">${esc(a.quote)}</div>
-              <div class="al-meta">${a.unit} · ${esc(a.assigned)} · ${ago(a.at)}</div>
+              <div class="al-meta">${a.unit} · ${ago(a.at)}</div>
             </td>
             ${alertSurveyCell(a)}
             <td class="al-unit"><span style="font-weight:700;font-size:14px;line-height:20px">${esc(a.unit)}</span><div class="t-subtle dim">${esc(a.call)}</div></td>
-            <td class="al-assigned${a.assigned==="Unassigned"?" dim":""}">${esc(a.assigned)}</td>
             <td class="dim al-opened">${ago(a.at)}</td>
           </tr>`).join("")}
       </tbody>
@@ -3792,64 +3955,6 @@ function viewAlerts(){
       <div class="s t-p">${emptySub}</div>
     </div>`}
   </div>`;
-}
-
-function drawer(id){
-  const a = state.alerts.find(x=>x.id===id);
-  if(!a) return "";
-  return `
-  <div class="scrim" onclick="closeAlert()"></div>
-  <aside class="drawer" role="dialog" aria-modal="true" aria-label="Alert ${a.id}">
-    <div class="drawer-head">
-      <div>
-        <h2 class="t-h4">${esc(a.reason)}</h2>
-        <p class="t-subtle dim">Alert <span style="font-weight:700">${esc(a.id)}</span> · opened ${ago(a.at)} · ${clock(a.at)}</p>
-      </div>
-      <button class="iconbtn" onclick="closeAlert()" aria-label="Close">${I.x(18)}</button>
-    </div>
-    <div class="drawer-body">
-      ${alertSourceBlock(a)}
-      <div class="quote">“${esc(a.quote)}”</div>
-      <dl class="kv mt24">
-        <dt>Unit / crew</dt><dd>${esc(a.unit)} — ${esc(a.crew)}</dd>
-        <dt>Call type</dt><dd>${esc(a.call)}</dd>
-        <dt>Area</dt><dd>${esc(a.zone)}</dd>
-        <dt>Age band</dt><dd>${a.band}</dd>
-        <dt>Language</dt><dd>${a.lang}</dd>
-        <dt>Phone #</dt><dd>${a.phone?esc(a.phone):`<span class="dim">—</span>`}</dd>
-        <dt>Assigned</dt><dd>${esc(a.assigned)}</dd>
-      </dl>
-      ${a.lang!=="English"?`<div class="stale mt16" style="margin-bottom:0">
-        ${I.users(16)} Patient prefers ${a.lang}. Use the interpreter line for the callback.</div>`:""}
-
-      ${a.status!=="resolved"?`
-      <div class="mt24">
-        <label class="t-subtle" style="font-weight:700;display:block;margin-bottom:8px" for="note-${a.id}">
-          What happened on the callback?</label>
-        <textarea class="fw-input" id="note-${a.id}"
-          placeholder="Who you reached, what they said, anything you changed."></textarea>
-      </div>`:`
-      <div class="stale mt24" style="background:var(--status-resolved-wash);color:var(--status-resolved);
-           border-color:currentColor;margin-bottom:0">
-        ${I.checkCircle(16)} Followed up by ${esc(a.assigned)}.
-      </div>`}
-
-      <div class="log">
-        <h3 class="t-subtle" style="font-weight:700;margin-bottom:4px">Activity</h3>
-        ${a.log.length?`<ul>${a.log.map(l=>`<li>
-            <div style="font-weight:700">${esc(l.who)} <span class="dim" style="font-weight:400">· ${ago(l.at)}</span></div>
-            <div class="dim">${esc(l.text)}</div></li>`).join("")}</ul>`
-          :`<p class="t-subtle dim">Nothing logged yet.</p>`}
-      </div>
-    </div>
-    ${a.status!=="resolved"?`<div class="drawer-foot drawer-foot--alert">
-      <button class="fw-btn fw-btn--primary" onclick="logAndResolve('${a.id}')">
-        ${I.checkCircle(16)} Log and mark followed up</button>
-      <button class="fw-btn fw-btn--outline" onclick="logOnly('${a.id}')">Log without closing</button>
-      <button class="fw-btn fw-btn--ghost" onclick="claim('${a.id}')"
-        ${a.assigned!=="Unassigned"?"disabled":""}>${I.userPlus(16)} Assign to me</button>
-    </div>`:""}
-  </aside>`;
 }
 </script>
 <script>
@@ -5122,14 +5227,15 @@ function responseNeighbors(ref){
     total: list.length
   };
 }
-function focusResponseDrawer(){
-  const drawer = document.querySelector(".drawer--response");
+function focusCaseDrawer(){
+  const drawer = document.querySelector(".drawer--case");
   if(!drawer) return;
   const back = drawer.querySelector(".drawer-back");
   const close = drawer.querySelector(".drawer-x");
   if(back && getComputedStyle(back).display!=="none") back.focus();
   else if(close) close.focus();
 }
+function focusResponseDrawer(){ focusCaseDrawer(); }
 
 function viewSurveyResponses(){
   const s = currentSurvey();
@@ -5217,58 +5323,18 @@ function viewSurveyResponses(){
     </div>`}`;
 }
 
-function responseDrawer(ref){
-  const s = state.surveys.find(x=>x.id===ref.surveyId);
-  const r = responsesFor(ref.surveyId).find(x=>x.id===ref.id);
-  if(!s || !r) return "";
-  const qs = state.surveyQuestions[ref.surveyId] || [];
-  const alert = r.alert && state.alerts.find(a=>a.id===r.alert);
-  const call = responseWantsCall(r, qs);
-  const quote = responseQuote(r, qs);
-  const title = responseTitle(r, qs, alert);
-  const meta = [ago(r.at), r.zone, r.band, r.lang].filter(Boolean).join(" · ");
-  const nav = responseNeighbors(ref);
-  return `
-  <div class="scrim" onclick="closeResponse()"></div>
-  <aside class="drawer drawer--response${isResponsePaging()?" is-open is-paging":""}" role="dialog" aria-modal="true" aria-labelledby="response-title">
-    <div class="drawer-head">
-      <div>
-        <button type="button" class="drawer-back" onclick="closeResponse()">${I.chevronLeft(16)} Responses</button>
-        <h2 class="t-h4" id="response-title">${esc(title)}</h2>
-        <p class="t-subtle dim">${esc(meta)}</p>
-      </div>
-      <button class="iconbtn drawer-x" onclick="closeResponse()" aria-label="Close">${I.x(18)}</button>
-    </div>
-    <div class="drawer-body">
-      ${alert?`<div class="stale">
-        ${I.flag(16)} Flagged as ${alert.status==="resolved"?"followed up":alert.status}.${call?" They asked for a call.":""}
-        <button class="fw-btn fw-btn--primary fw-btn--sm stale__action" type="button" onclick="openAlertFromResponse('${alert.id}')">Open alert</button>
-      </div>`: call?`<div class="stale">${I.phone(16)} They asked for a call.</div>`:""}
-      ${quote?`<div class="quote">“${esc(quote)}”</div>`:""}
-      <div class="${quote||alert||call?"mt24":""}">
-        ${qs.filter(q=>!(quote && String(r.answers[q.id]||"")===quote)).map(q=>{
-          const v = r.answers[q.id];
-          const empty = v===undefined || v==="";
-          return `<div class="ans">
-            <div class="t-subtle dim">${esc(questionLabel(q))}</div>
-            <div class="t-pui" style="font-weight:700;margin-top:4px">${empty?`<span class="dim">Skipped</span>`:esc(String(v))}</div>
-          </div>`;
-        }).join("")}
-      </div>
-    </div>
-    ${nav.total>1?`<div class="drawer-foot">
-      <button class="fw-btn fw-btn--outline drawer-prev" type="button" ${nav.prev?"":"disabled"}
-        onclick="openResponseNeighbor('prev')">${I.chevronLeft(16)} Previous</button>
-      <span class="drawer-pos" aria-live="polite">${nav.index+1} of ${nav.total}</span>
-      <button class="fw-btn fw-btn--outline drawer-next" type="button" ${nav.next?"":"disabled"}
-        onclick="openResponseNeighbor('next')">Next ${I.chevronRight(16)}</button>
-    </div>`:""}
-  </aside>`;
-}
 function openResponse(surveyId, id){
+  state.openAlert = null;
+  state.openTrigger = null;
   state.openResponse = { surveyId, id };
   render();
-  requestAnimationFrame(focusResponseDrawer);
+  requestAnimationFrame(()=>{
+    focusCaseDrawer();
+    const ctx = caseContext();
+    if(ctx?.entry==="response" && ctx.alert){
+      document.getElementById("case-answers")?.scrollIntoView({ block:"nearest" });
+    }
+  });
 }
 function openResponseNeighbor(dir){
   const ref = state.openResponse;
@@ -5279,12 +5345,12 @@ function openResponseNeighbor(dir){
   state.openResponse = { surveyId: ref.surveyId, id: target.id };
   render();
   requestAnimationFrame(()=>{
-    const body = document.querySelector(".drawer--response .drawer-body");
+    const body = document.querySelector(".drawer--case .drawer-body");
     if(body) body.scrollTop = 0;
     const sel = dir==="next" ? ".drawer-next" : ".drawer-prev";
     const btn = document.querySelector(sel);
     if(btn && !btn.disabled) btn.focus();
-    else focusResponseDrawer();
+    else focusCaseDrawer();
   });
 }
 function closeResponse(){
@@ -5296,10 +5362,25 @@ function closeResponse(){
     if(link) link.focus();
   });
 }
-function openAlertFromResponse(id){
+function closeCase(){
+  if(state.openResponse){ closeResponse(); return; }
+  if(state.openAlert){ closeAlert(); }
+}
+function openAlert(id){
   state.openResponse = null;
+  state.openTrigger = null;
   state.openAlert = id;
   render();
+  requestAnimationFrame(focusCaseDrawer);
+}
+function closeAlert(){
+  const id = state.openAlert;
+  state.openAlert = null;
+  render();
+  requestAnimationFrame(()=>{
+    const btn = id && document.querySelector(`#row-${CSS.escape(id)} .al-reason`);
+    if(btn) btn.focus();
+  });
 }
 
 /* ============================================================
@@ -6028,22 +6109,6 @@ function blinkSend(id){
   toast("Sent to Blink feed.");
 }
 
-function openAlert(id){ state.openAlert = id; render(); }
-function openResponseFromAlert(surveyId, id){
-  state.openAlert = null;
-  state.openTrigger = null;
-  openResponse(surveyId, id);
-}
-function closeAlert(){
-  const id = state.openAlert;
-  state.openAlert = null;
-  render();
-  requestAnimationFrame(()=>{
-    const btn = id && document.querySelector(`#row-${CSS.escape(id)} .al-reason`);
-    if(btn) btn.focus();
-  });
-}
-
 function noteFor(id){
   const el = document.getElementById("note-"+id);
   return el ? el.value.trim() : "";
@@ -6061,17 +6126,13 @@ function logAndResolve(id){
   if(!t){ toast("Add a note before closing this out."); return; }
   a.log.unshift({ who:"You", at:NOW, text:t });
   a.status = "resolved";
-  if(a.assigned==="Unassigned") a.assigned = "You";
   state.openAlert = null;
+  state.openResponse = null;
   const row = document.getElementById("row-"+id);
   if(row && !matchMedia("(prefers-reduced-motion: reduce)").matches){
     row.classList.add("resolving");
     setTimeout(()=>{ render(); toast("Marked followed up."); }, 180);
   } else { render(); toast("Marked followed up."); }
-}
-function claim(id){
-  const a = state.alerts.find(x=>x.id===id);
-  a.assigned = "You"; render(); toast("Assigned to you.");
 }
 
 function moveQTo(from, to){
@@ -7071,9 +7132,8 @@ window.addEventListener("keydown", e=>{
   if(state.surveyMenu){ closeSurveyMenu(); return; }
   if(state.deleteSurvey){ closeDeleteSurvey(); return; }
   if(state.stopSurvey){ closeStopSurvey(); return; }
-  if(state.openResponse){ closeResponse(); return; }
+  if(state.openResponse || state.openAlert){ closeCase(); return; }
   if(state.openTrigger){ closeTrigger(); return; }
-  if(state.openAlert){ closeAlert(); }
 });
 window.addEventListener("mousedown", e=>{
   if(state.surveyMenu && !e.target.closest(".menu-wrap")){
