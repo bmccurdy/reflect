@@ -138,7 +138,7 @@ a.fw-btn{text-decoration:none}
 .nav a[aria-current="page"]{background:color-mix(in srgb,var(--base-white) 16%,transparent);color:var(--base-white)}
 .nav .count,
 .nav-drawer-links .count{
-  margin-left:6px;min-width:18px;height:18px;padding:0 5px;border-radius:var(--r-full);
+  margin-left:6px;min-width:18px;height:18px;padding:0 6px 2px 4px;border-radius:var(--r-full);
   display:inline-flex;align-items:center;justify-content:center;
   background:var(--status-critical);color:var(--base-white);font-size:11px;line-height:1;
   text-align:center;font-weight:700;
@@ -222,6 +222,25 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .survey-readonly-pill svg{flex:0 0 auto;color:currentColor}
 .survey-title-pill{flex:0 0 auto}
 .survey-title-meta{margin-top:6px}
+.survey-desc{
+  margin-top:6px;max-width:36rem;
+  font-size:14px;line-height:20px;color:var(--muted-foreground);
+}
+.survey-desc-hit{
+  display:block;width:100%;max-width:36rem;margin:6px 0 0;padding:0;
+  border:0;background:transparent;font:inherit;text-align:left;cursor:pointer;
+  border-radius:var(--r-sm);color:var(--muted-foreground);
+}
+.survey-desc-hit:hover,.survey-desc-hit:focus-visible{color:var(--foreground)}
+.survey-desc-hit--empty{font-style:italic;color:var(--muted-foreground)}
+.survey-desc-hit--empty:hover,.survey-desc-hit--empty:focus-visible{color:var(--primary)}
+.survey-desc-edit{margin-top:6px;max-width:36rem;position:relative}
+.survey-desc-edit .fw-textarea{
+  width:100%;min-height:56px;padding:8px 12px;padding-right:76px;
+  font-size:14px;line-height:20px;resize:vertical;
+}
+.survey-desc-edit .title-edit-actions{top:10px;transform:none}
+.sv-desc{margin-top:2px;font-weight:400}
 html[data-theme="dark"] .survey-readonly-pill{
   background:var(--neutral-800);
   color:var(--neutral-100);
@@ -2022,19 +2041,23 @@ const ALERTS = [
     log:[{ who:"K. Doyle", at:mins(2760), text:"Left voicemail. Response time was 14 min — traffic on Northern Blvd. No action for crew." }] }
 ];
 
+const SURVEY_DESC_MAX = 180;
 const SURVEYS = [
   { id:"sv_post", name:"Post-transport experience", status:"Live", triggerId:"43063",
     familyId:"sv_post", version:1, clonedFromId:null,
+    description:"Follow-up after transport to a hospital or facility.",
     schedule:{ mode:"ongoing", durationDays:30, startAt:null, endAt:null },
     publishedAt:mins(4320), endsAt:null, stoppedAt:null,
     questions:7, responses:84, rate:31, sent:271, updated:mins(4320) },
   { id:"sv_notrans", name:"Refused transport follow-up", status:"Live", triggerId:"78396",
     familyId:"sv_notrans", version:1, clonedFromId:null,
+    description:"Check-in when a patient declines transport.",
     schedule:{ mode:"duration", durationDays:90, startAt:null, endAt:null },
     publishedAt:mins(11400), endsAt:new Date("2026-03-15T00:00:00"), stoppedAt:null,
     questions:4, responses:19, rate:22, sent:86, updated:mins(11400) },
   { id:"sv_q3", name:"Q3 community perception", status:"Draft", triggerId:null,
     familyId:"sv_q3", version:1, clonedFromId:null,
+    description:"",
     schedule:{ mode:"duration", durationDays:30, startAt:null, endAt:null },
     publishedAt:null, endsAt:null, stoppedAt:null,
     questions:9, responses:0, rate:0, sent:0, updated:mins(220) }
@@ -2065,6 +2088,7 @@ function normalizeSurvey(s){
     ? String(out.priorTriggerId).replace(/^#/,"")
     : null;
   out.patientQuestions = out.patientQuestions !== false;
+  out.description = typeof out.description==="string" ? out.description : "";
   return out;
 }
 function isSurveyLocked(s){
@@ -2079,6 +2103,7 @@ function surveyPageChanged(s){
   if(Number(sch.durationDays) !== 30) return true;
   if(sch.startAt || sch.endAt) return true;
   if(String(s.introTitle||"").trim() || String(s.introBody||"").trim()) return true;
+  if(String(s.description||"").trim()) return true;
   if(s.patientQuestions === false) return true;
   return false;
 }
@@ -2457,6 +2482,7 @@ const state = {
   testSms:null,
   testSmsDraft:null,
   editingSurveyName:null,
+  editingSurveyDesc:null,
   surveyMenu:null,
   previewSurvey:false,
   previewEnter:false,
@@ -4687,7 +4713,7 @@ function viewSurveysIndex(){
     <table class="tbl tbl--stack tbl--surveys">
       <thead><tr>
         <th class="fav"><span class="sr">Favorite</span></th>
-        <th>Survey</th><th>Trigger ID</th><th>Status</th><th>Schedule</th><th>Responses</th><th>Rate</th>
+        <th>Survey</th><th>Trigger ID</th><th>Status</th><th>Schedule</th><th>Responses</th><th>Response rate</th>
         <th class="morecol"><span class="sr">Actions</span></th>
       </tr></thead>
       <tbody>
@@ -4700,6 +4726,7 @@ function viewSurveysIndex(){
             </td>
             <td class="sv-name">
               <a class="sv-title" href="#/surveys/${s.id}">${esc(s.name)}</a>
+              ${s.description?`<div class="t-subtle dim sv-desc">${esc(s.description)}</div>`:""}
               <div class="t-subtle dim">${s.questions} questions${s.version>1?` · v${s.version}`:""}</div>
             </td>
             <td class="sv-trigger">${surveyTriggerCell(s)}</td>
@@ -4782,6 +4809,23 @@ function viewSurveys(){
           ${s.status==="Live"?`<span class="fw-badge fw-badge--success survey-title-pill">${I.checkCircle(12)} Live</span>`:""}
           ${s.status==="Stopped"?`<span class="fw-badge survey-readonly-pill">${I.lock(12)} Read only</span>`:""}
         </h1>`}
+        ${!surveyLocked && state.editingSurveyDesc===s.id?`
+        <div class="survey-desc-edit">
+          <label class="sr" for="survey-desc-input">Survey description</label>
+          <textarea class="fw-input fw-textarea" id="survey-desc-input" rows="2"
+            maxlength="${SURVEY_DESC_MAX}"
+            onkeydown="surveyDescKey(event)" onblur="onSurveyDescBlur()">${esc(s.description||"")}</textarea>
+          <div class="title-edit-actions">
+            <button type="button" class="iconbtn title-edit-save" aria-label="Save description"
+              onmousedown="event.preventDefault()" onclick="confirmInlineDesc()">${I.check(18)}</button>
+            <button type="button" class="iconbtn title-edit-cancel" aria-label="Cancel description"
+              onmousedown="event.preventDefault()" onclick="cancelInlineDesc()">${I.x(18)}</button>
+          </div>
+        </div>`: surveyLocked
+          ? (s.description?`<p class="survey-desc">${esc(s.description)}</p>`:"")
+          : `<button type="button" class="survey-desc-hit${s.description?"":" survey-desc-hit--empty"}"
+              title="${s.description?"Edit description":"Add description"}"
+              onclick="startInlineDesc('${s.id}')">${s.description?esc(s.description):"Add description"}</button>`}
         <p class="t-subtle dim survey-title-meta">${meta}</p>
       </div>
       <div class="row page-actions" style="gap:8px">
@@ -6119,6 +6163,7 @@ function newSurvey(){
   state.surveys.unshift(normalizeSurvey({
     id, name:"Untitled survey", status:"Draft", triggerId:null,
     familyId:id, version:1, clonedFromId:null,
+    description:"",
     schedule:defaultSchedule(),
     publishedAt:null, endsAt:null, stoppedAt:null,
     questions:0, responses:0, rate:0, sent:0, starred:false, fresh:true, updated:NOW
@@ -6164,6 +6209,7 @@ function duplicateAndEdit(id, { silent=false, claimTrigger=null }={}){
     schedule:cloneSchedule(s.schedule),
     introTitle: s.introTitle || null,
     introBody: s.introBody || null,
+    description: s.description || "",
     patientQuestions: s.patientQuestions !== false,
     publishedAt:null,
     endsAt:null,
@@ -6522,6 +6568,15 @@ function applySurveyName(id, raw){
   if(changed){ s.name = name; s.updated = NOW; }
   return {ok:true, changed};
 }
+function applySurveyDesc(id, raw){
+  const description = (raw || "").trim().slice(0, SURVEY_DESC_MAX);
+  const s = state.surveys.find(x=>x.id===id);
+  if(!s) return {ok:false, changed:false};
+  if(isSurveyLocked(s)){ toast("This version is locked."); return {ok:false, changed:false}; }
+  const changed = (s.description || "") !== description;
+  if(changed){ s.description = description; s.updated = NOW; }
+  return {ok:true, changed};
+}
 function askRenameSurvey(id){
   const s = state.surveys.find(x=>x.id===id);
   if(!s || isSurveyLocked(s)){ toast("This version is locked."); return; }
@@ -6547,6 +6602,7 @@ let skipSurveyNameBlur = false;
 function startInlineRename(id){
   const s = state.surveys.find(x=>x.id===id);
   if(!s || isSurveyLocked(s)){ toast("This version is locked."); return; }
+  state.editingSurveyDesc = null;
   state.editingSurveyName = id;
   render();
   const input = document.getElementById("survey-name-input");
@@ -6582,6 +6638,51 @@ function onSurveyNameBlur(){
 function surveyNameKey(e){
   if(e.key==="Enter"){ e.preventDefault(); confirmInlineRename(); }
   if(e.key==="Escape"){ e.preventDefault(); e.stopPropagation(); cancelInlineRename(); }
+}
+
+let skipSurveyDescBlur = false;
+function startInlineDesc(id){
+  const s = state.surveys.find(x=>x.id===id);
+  if(!s || isSurveyLocked(s)){ toast("This version is locked."); return; }
+  state.editingSurveyName = null;
+  state.editingSurveyDesc = id;
+  render();
+  const input = document.getElementById("survey-desc-input");
+  if(input){ input.focus(); input.setSelectionRange(input.value.length, input.value.length); }
+}
+function cancelInlineDesc(){
+  if(!state.editingSurveyDesc) return;
+  skipSurveyDescBlur = true;
+  state.editingSurveyDesc = null;
+  render();
+}
+function confirmInlineDesc(){
+  const id = state.editingSurveyDesc;
+  if(!id) return;
+  const input = document.getElementById("survey-desc-input");
+  skipSurveyDescBlur = true;
+  const result = applySurveyDesc(id, input && input.value);
+  if(!result.ok){
+    const el = document.getElementById("survey-desc-input");
+    if(el) el.focus();
+    skipSurveyDescBlur = false;
+    return;
+  }
+  state.editingSurveyDesc = null;
+  render();
+  skipSurveyDescBlur = false;
+  if(result.changed){
+    const has = !!(input && input.value || "").trim();
+    toast(has ? "Description saved." : "Description cleared.");
+  }
+}
+function onSurveyDescBlur(){
+  if(skipSurveyDescBlur){ skipSurveyDescBlur = false; return; }
+  confirmInlineDesc();
+}
+function surveyDescKey(e){
+  if(e.key==="Escape"){ e.preventDefault(); e.stopPropagation(); cancelInlineDesc(); }
+  if(e.key==="Enter" && (e.metaKey || e.ctrlKey)){ e.preventDefault(); confirmInlineDesc(); }
 }
 
 function deleteConfirm(id){
@@ -6875,6 +6976,7 @@ window.addEventListener("hashchange", ()=>{
   state.testSms = null;
   state.testSmsDraft = null;
   state.editingSurveyName = null;
+  state.editingSurveyDesc = null;
   state.surveyMenu = null;
   state.previewSurvey = false;
   state.openResponse = null;
@@ -6916,6 +7018,7 @@ window.addEventListener("keydown", e=>{
   if(state.editIntro){ closeEditIntro(); return; }
   if(state.testSms){ closeTestSms(); return; }
   if(state.editingSurveyName){ cancelInlineRename(); return; }
+  if(state.editingSurveyDesc){ cancelInlineDesc(); return; }
   if(state.surveyMenu){ closeSurveyMenu(); return; }
   if(state.deleteSurvey){ closeDeleteSurvey(); return; }
   if(state.stopSurvey){ closeStopSurvey(); return; }
