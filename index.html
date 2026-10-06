@@ -309,7 +309,7 @@ html[data-theme="dark"] .survey-readonly-pill{
 }
 .rs-more{padding:8px 16px 16px;text-align:center}
 .rs-excerpt{
-  font-size:16px;line-height:24px;font-weight:600;
+  font-size:16px;line-height:24px;font-weight:400;
   max-width:42rem;
   display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;
   overflow:hidden;
@@ -318,10 +318,9 @@ a.rs-excerpt{color:var(--primary);text-decoration:none}
 a.rs-excerpt:hover{text-decoration:underline}
 .rs-call{
   display:inline-flex;align-items:center;gap:6px;
-  margin-top:6px;color:var(--foreground);font-weight:500;
+  margin-top:4px;
 }
 .rs-meta{display:none}
-.rs-flags{white-space:nowrap}
 .row{display:flex;align-items:center;gap:12px}
 .between{display:flex;align-items:flex-start;justify-content:space-between;gap:24px}
 .page-head .between > div:first-child{flex:1 1 auto;min-width:0}
@@ -606,7 +605,7 @@ html[data-theme="dark"] .ov-reading .ov-label{
   padding-left:calc(184px + 16px);padding-right:48px;
   font-size:12px;line-height:20px;color:var(--muted-foreground);
 }
-.al-reason{font-weight:700;text-align:left}
+.al-reason{font-weight:400;text-align:left}
 .al-meta{display:none;margin-top:8px;color:var(--muted-foreground);font-size:13px;line-height:20px}
 
 /* queue table */
@@ -653,6 +652,14 @@ html[data-theme="dark"] .ov-reading .ov-label{
 }
 .tbl--alerts .al-unit > span{white-space:nowrap}
 .tbl--responses td{vertical-align:middle}
+.tbl--responses .rs-when,
+.tbl--responses .rs-lang{
+  font-size:14px;line-height:20px;color:var(--muted-foreground);
+  white-space:nowrap;
+}
+.tbl--responses .rs-area-name{
+  font-size:14px;line-height:20px;font-weight:400;
+}
 .star-btn{color:var(--muted-foreground)}
 .star-btn:hover{color:var(--fw-gold)}
 .star-btn[aria-pressed="true"]{color:var(--fw-gold)}
@@ -854,16 +861,16 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 
 .ans{padding:12px 0;border-bottom:1px solid var(--border)}
 .ans:last-child{border-bottom:0}
-.num-link{color:var(--primary);font-weight:700;text-decoration:none}
+.num-link{color:var(--primary);font-weight:400;text-decoration:none}
 .num-link:hover{text-decoration:underline}
-.num-link--muted{color:var(--muted-foreground);font-weight:600}
+.num-link--muted{color:var(--muted-foreground);font-weight:400}
 .num-link--muted:hover{color:var(--foreground)}
 button.num-link{
   background:none;border:0;padding:0;margin:0;font:inherit;cursor:pointer;
-  color:var(--primary);font-weight:700;
+  color:var(--primary);font-weight:400;
 }
 .sv-title{
-  color:var(--primary);font-weight:700;text-decoration:none;
+  color:var(--primary);font-weight:400;text-decoration:none;
 }
 .sv-title:hover{text-decoration:underline}
 
@@ -1050,7 +1057,7 @@ button.num-link{
   border-left:3px solid var(--primary);padding:4px 0 4px 16px;margin:0 0 16px;
   font-size:16px;line-height:28px;
 }
-.al-survey-name{display:block;font-weight:700;font-size:14px;line-height:20px}
+.al-survey-name{display:block;font-weight:400;font-size:14px;line-height:20px}
 .alert-source{margin-bottom:20px}
 .alert-source dd{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px}
 .case-survey{
@@ -1771,17 +1778,13 @@ html[data-theme="dark"] .patient{
     order:1;flex:1 1 0;min-width:0;
   }
   .tbl--responses .rs-excerpt{max-width:none}
-  .tbl--responses .rs-flags{
-    order:2;flex:0 0 auto;margin-left:auto;
-    text-align:right;padding-top:2px;
-  }
-  .tbl--responses .rs-flags:empty{display:none}
   .tbl--responses .rs-when,
   .tbl--responses .rs-area,
   .tbl--responses .rs-lang{display:none !important}
   .tbl--responses .rs-meta{
     display:block;
     order:4;flex:1 1 100%;width:100%;
+    margin-top:0;
     color:var(--muted-foreground);
     font-size:13px;line-height:20px;
   }
@@ -1789,7 +1792,7 @@ html[data-theme="dark"] .patient{
   .tbl--alerts .al-why{display:contents;width:auto}
   .tbl--alerts .al-reason{
     order:1;flex:1 1 0;min-width:0;
-    font-size:16px;line-height:24px;font-weight:600;
+    font-size:16px;line-height:24px;font-weight:400;
   }
   .tbl--alerts .al-opened{
     order:2;flex:0 0 auto;width:auto;margin-left:auto;
@@ -3959,7 +3962,7 @@ function viewAlerts(){
               <div class="al-meta">${a.unit} · ${ago(a.at)}</div>
             </td>
             ${alertSurveyCell(a)}
-            <td class="al-unit"><span style="font-weight:700;font-size:14px;line-height:20px">${esc(a.unit)}</span><div class="t-subtle dim">${esc(a.call)}</div></td>
+            <td class="al-unit"><span style="font-size:14px;line-height:20px">${esc(a.unit)}</span><div class="t-subtle dim">${esc(a.call)}</div></td>
             <td class="dim al-opened">${ago(a.at)}</td>
           </tr>`;
         }).join("")}
@@ -5347,23 +5350,21 @@ function viewSurveyResponses(){
   ${visible.length?`<div class="fw-card fw-card-flush">
     <div class="tbl-inset">
     <table class="tbl tbl--stack tbl--responses">
-      <thead><tr><th>What they said</th><th>Status</th><th>When</th><th>Area</th><th>Language</th></tr></thead>
+      <thead><tr><th>What they said</th><th>When</th><th>Area</th><th>Language</th></tr></thead>
       <tbody>
         ${visible.map(r=>{
           const excerpt = responseExcerpt(r, qs);
           const call = responseWantsCall(r, qs);
-          const alert = r.alert && state.alerts.find(a=>a.id===r.alert);
           const meta = [ago(r.at), r.zone, r.band, r.lang].filter(Boolean).join(" · ");
           return `
           <tr id="row-${r.id}">
             <td class="rs-quote">
               <a class="rs-excerpt" href="#/surveys/${esc(s.id)}/responses"
                 onclick="event.preventDefault(); openResponse('${esc(s.id)}','${esc(r.id)}')">${esc(excerpt)}</a>
-              ${call && excerpt!=="Asked for a call"?`<div class="rs-call t-detail">${I.phone(12)} Asked for a call</div>`:""}
+              ${call && excerpt!=="Asked for a call"?`<div class="rs-call t-subtle dim">${I.phone(14)} Asked for a call</div>`:""}
             </td>
-            <td class="rs-flags">${alert?statusBadge(alert.status):""}</td>
-            <td class="dim rs-when" style="white-space:nowrap">${ago(r.at)}</td>
-            <td class="rs-area">${esc(r.zone||"—")}<div class="t-detail dim">${esc(r.band||"")}</div></td>
+            <td class="dim rs-when">${ago(r.at)}</td>
+            <td class="rs-area"><span class="rs-area-name">${esc(r.zone||"—")}</span><div class="t-subtle dim">${esc(r.band||"")}</div></td>
             <td class="dim rs-lang">${esc(r.lang||"—")}</td>
             <td class="rs-meta">${esc(meta)}</td>
           </tr>`;
