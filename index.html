@@ -304,6 +304,9 @@ html[data-theme="dark"] .survey-readonly-pill{
 .drawer-back:hover{background:var(--surface-hover)}
 .rs-filters{margin-top:16px}
 .rs-filters button{white-space:nowrap}
+.al-survey-filters{
+  margin-top:12px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+}
 .rs-more{padding:8px 16px 16px;text-align:center}
 .rs-excerpt{
   font-size:16px;line-height:24px;font-weight:600;
@@ -632,6 +635,11 @@ html[data-theme="dark"] .ov-reading .ov-label{
 .tbl--surveys .sv-rate,
 .tbl--surveys .sv-schedule{vertical-align:middle}
 .tbl--alerts td{vertical-align:middle}
+.tbl--alerts .al-assigned,
+.tbl--alerts .al-opened{
+  font-size:14px;line-height:20px;color:var(--muted-foreground);
+}
+.tbl--alerts .al-assigned:not(.dim){color:var(--foreground)}
 .tbl--responses td{vertical-align:middle}
 .star-btn{color:var(--muted-foreground)}
 .star-btn:hover{color:var(--fw-gold)}
@@ -1757,10 +1765,6 @@ html[data-theme="dark"] .patient{
     order:1;flex:1 1 0;min-width:0;
     font-size:16px;line-height:24px;font-weight:600;
   }
-  .tbl--alerts .al-status{
-    order:2;flex:0 0 auto;margin-left:auto;
-    text-align:right;padding-top:2px;
-  }
   .tbl--alerts .al-opened{
     order:2;flex:0 0 auto;margin-left:auto;
     font-size:13px;line-height:20px;padding-top:2px;
@@ -2018,6 +2022,22 @@ const ALERTS = [
     reason:"Free text flagged for review",
     quote:"I did not want to go to the hospital and I felt pressured about it. Everything else was good.", at:mins(410), age:"29", band:"25-34", lang:"English",
     phone:"(516) 555-0133", zone:"Port Washington", assigned:"K. Doyle", log:[] },
+  { id:"A-4472", status:"critical", unit:"M-3", call:"Abdominal pain, refused",
+    crew:"Okafor / Reyes",
+    reason:"Rated no on listening after transport refusal",
+    quote:"I said I didn't want to go and they kept asking like I didn't mean it. Nobody asked why I was scared of the hospital.", at:mins(140), age:"52", band:"45-54", lang:"Spanish",
+    phone:"(516) 555-0161", zone:"New Hyde Park", assigned:"You", log:[] },
+  { id:"A-4473", status:"elevated", unit:"E-4", call:"Syncope, refused transport",
+    crew:"Mercer / Li",
+    reason:"No explanation of risks if patient stayed home",
+    quote:"They left quickly. I still don't know what could have happened if I stayed. I wouldn't call again.", at:mins(5200), age:"58", band:"55-64", lang:"Spanish",
+    phone:"(516) 555-0149", zone:"New Hyde Park", assigned:"Unassigned", log:[] },
+  { id:"A-4474", status:"resolved", unit:"M-8", call:"Weakness, refused",
+    crew:"Sowande / Kim",
+    reason:"Requested callback after refusal",
+    quote:"I wanted someone to explain my options in plain language. The follow-up call helped.", at:mins(3100), age:"44", band:"35-44", lang:"English",
+    phone:"(516) 555-0171", zone:"Manhasset", assigned:"K. Doyle",
+    log:[{ who:"K. Doyle", at:mins(3000), text:"Called patient. Reviewed AMA documentation and next steps. No crew action needed." }] },
   { id:"A-4459", status:"elevated", unit:"M-8", call:"Chest pain",
     crew:"Sowande / Kim",
     reason:"Rated 2 of 5 on listening",
@@ -2312,15 +2332,15 @@ const RESPONSES = {
       answers:{ n1:"No", n2:"Yes", n3:"Yes", n4:"No" } },
     { id:"R-4403", at:mins(900), band:"65–74", lang:"English", zone:"Great Neck", alert:null,
       answers:{ n1:"Yes", n2:"Yes", n3:"Yes", n4:"No" } },
-    { id:"R-4402", at:mins(1400), band:"45–54", lang:"Spanish", zone:"New Hyde Park", alert:null,
-      answers:{ n1:"Yes", n2:"Yes", n3:"No", n4:"Yes" } },
+    { id:"R-4402", at:mins(1400), band:"45–54", lang:"Spanish", zone:"New Hyde Park", alert:"A-4472",
+      answers:{ n1:"No", n2:"Yes", n3:"No", n4:"Yes" } },
     { id:"R-4401", at:mins(2200), band:"75+", lang:"English", zone:"Manhasset", alert:null,
       answers:{ n1:"Yes", n2:"Yes", n3:"Yes", n4:"No" } },
-    { id:"R-4400", at:mins(3100), band:"35–44", lang:"English", zone:"Manhasset", alert:null,
-      answers:{ n1:"No", n2:"Yes", n3:"Yes", n4:"No" } },
+    { id:"R-4400", at:mins(3100), band:"35–44", lang:"English", zone:"Manhasset", alert:"A-4474",
+      answers:{ n1:"Yes", n2:"Yes", n3:"Yes", n4:"Yes" } },
     { id:"R-4399", at:mins(4000), band:"18–34", lang:"English", zone:"Great Neck", alert:null,
       answers:{ n1:"Yes", n2:"Yes", n3:"Yes", n4:"Yes" } },
-    { id:"R-4398", at:mins(5200), band:"55–64", lang:"Spanish", zone:"New Hyde Park", alert:null,
+    { id:"R-4398", at:mins(5200), band:"55–64", lang:"Spanish", zone:"New Hyde Park", alert:"A-4473",
       answers:{ n1:"No", n2:"No", n3:"No", n4:"Yes" } }
   ],
   sv_q3: []
@@ -3642,8 +3662,15 @@ function closeTrigger(){
    5. ALERT QUEUE + DETAIL
    ============================================================ */
 let queueFilter = "open";
+let alertSurveyFilter = "all";
 function setFilter(f){ queueFilter = f; render(); }
+function setAlertSurveyFilter(id){ alertSurveyFilter = id; render(); }
 
+function alertsForStatusFilter(alerts, bucket){
+  if(bucket==="all") return alerts;
+  if(bucket==="resolved") return alerts.filter(a=>a.status==="resolved");
+  return alerts.filter(a=>a.status!=="resolved");
+}
 function alertSource(alertId){
   const responses = state.responses || {};
   for(const surveyId of Object.keys(responses)){
@@ -3656,6 +3683,14 @@ function alertSource(alertId){
     };
   }
   return null;
+}
+function alertSurveyId(a){
+  return alertSource(a.id)?.surveyId || null;
+}
+function alertSurveyChipLabel(s){
+  if(s.id==="sv_post") return "Post-transport";
+  if(s.id==="sv_notrans") return "Refused transport";
+  return s.name;
 }
 function alertSurveyCell(a){
   const src = alertSource(a.id);
@@ -3683,12 +3718,26 @@ function alertSourceBlock(a){
 
 function viewAlerts(){
   const all = state.alerts;
-  const list = queueFilter==="all" ? all
-    : queueFilter==="resolved" ? all.filter(a=>a.status==="resolved")
-    : all.filter(a=>a.status!=="resolved");
+  const statusList = alertsForStatusFilter(all, queueFilter);
+  const liveSurveys = state.surveys.filter(s=>s.status==="Live");
+  const liveSurveyIds = new Set(liveSurveys.map(s=>s.id));
+  const surveyFilter = alertSurveyFilter!=="all" && !liveSurveyIds.has(alertSurveyFilter)
+    ? "all"
+    : alertSurveyFilter;
+  const list = surveyFilter==="all"
+    ? statusList
+    : statusList.filter(a=>alertSurveyId(a)===surveyFilter);
   const o = openCount();
+  const surveyCount = sid => statusList.filter(a=>alertSurveyId(a)===sid).length;
 
   const tabs = [["open","Open",o],["resolved","Followed up",all.filter(a=>a.status==="resolved").length],["all","All",all.length]];
+
+  const emptyTitle = statusList.length && surveyFilter!=="all"
+    ? "No alerts for this survey in this view."
+    : "Nothing needs a callback right now.";
+  const emptySub = statusList.length && surveyFilter!=="all"
+    ? "Try all surveys or another status tab."
+    : "New alerts show up here as responses come in.";
 
   return `
   <div class="page-head">
@@ -3699,8 +3748,16 @@ function viewAlerts(){
         <p class="t-p dim">Survey answers that need a person to follow up.</p>
       </div>
     </div>
-    <div class="seg rs-filters" role="group" aria-label="Filter alerts">
+    <div class="seg rs-filters" role="group" aria-label="Filter alerts by status">
       ${tabs.map(([k,l,n])=>`<button aria-pressed="${queueFilter===k}" onclick="setFilter('${k}')">${l} (${n})</button>`).join("")}
+    </div>
+    <div class="al-survey-filters" role="group" aria-label="Filter alerts by survey">
+      <button type="button" class="lib-chip" aria-pressed="${surveyFilter==="all"}"
+        onclick="setAlertSurveyFilter('all')">All surveys (${statusList.length})</button>
+      ${liveSurveys.map(s=>`
+      <button type="button" class="lib-chip" aria-pressed="${surveyFilter===s.id}"
+        title="${esc(s.name)}"
+        onclick="setAlertSurveyFilter('${s.id}')">${esc(alertSurveyChipLabel(s))} (${surveyCount(s.id)})</button>`).join("")}
     </div>
   </div>
   ${staleBanner()}
@@ -3709,14 +3766,13 @@ function viewAlerts(){
     <div class="tbl-inset">
     <table class="tbl tbl--stack tbl--alerts">
       <thead><tr>
-        <th style="width:132px">Status</th><th>Reason</th>
+        <th>Reason</th>
         <th style="width:220px">Survey</th>
         <th style="width:96px">Unit</th><th style="width:132px">Assigned</th><th style="width:104px">Opened</th>
       </tr></thead>
       <tbody aria-live="polite">
         ${list.map(a=>`
           <tr id="row-${a.id}">
-            <td class="al-status">${statusBadge(a.status)}</td>
             <td class="al-why">
               <button type="button" class="al-reason num-link" onclick="openAlert('${a.id}')">${esc(a.reason)}</button>
               <div class="snip">${esc(a.quote)}</div>
@@ -3732,8 +3788,8 @@ function viewAlerts(){
     </div>`:`
     <div class="empty">
       <div class="dim" style="display:flex;justify-content:center;margin-bottom:12px">${I.inbox(32)}</div>
-      <div class="t">Nothing needs a callback right now.</div>
-      <div class="s t-p">New alerts show up here as responses come in.</div>
+      <div class="t">${emptyTitle}</div>
+      <div class="s t-p">${emptySub}</div>
     </div>`}
   </div>`;
 }
@@ -3746,8 +3802,7 @@ function drawer(id){
   <aside class="drawer" role="dialog" aria-modal="true" aria-label="Alert ${a.id}">
     <div class="drawer-head">
       <div>
-        ${statusBadge(a.status)}
-        <h2 class="t-h4 mt8">${esc(a.reason)}</h2>
+        <h2 class="t-h4">${esc(a.reason)}</h2>
         <p class="t-subtle dim">Alert <span style="font-weight:700">${esc(a.id)}</span> · opened ${ago(a.at)} · ${clock(a.at)}</p>
       </div>
       <button class="iconbtn" onclick="closeAlert()" aria-label="Close">${I.x(18)}</button>
@@ -4705,7 +4760,7 @@ function viewSurveysIndex(){
         <h1 class="t-h2">Surveys</h1>
         <p class="t-p dim">${live} live · ${drafts} draft${ended?` · ${ended} ended`:""}</p>
       </div>
-      <button class="fw-btn fw-btn--primary" onclick="newSurvey()">${I.plus(16)} New survey</button>
+      <button class="fw-btn fw-btn--primary" onclick="newSurvey()">${I.plus(16)} Create new survey</button>
     </div>
   </div>
   ${state.surveys.length?`<div class="fw-card" style="padding:0">
@@ -5172,11 +5227,6 @@ function responseDrawer(ref){
   const quote = responseQuote(r, qs);
   const title = responseTitle(r, qs, alert);
   const meta = [ago(r.at), r.zone, r.band, r.lang].filter(Boolean).join(" · ");
-  const badge = alert
-    ? statusBadge(alert.status)
-    : (call
-      ? `<span class="fw-badge fw-badge--outline">${I.phone(12)} Asked for a call</span>`
-      : `<span class="fw-badge fw-badge--outline">Response</span>`);
   const nav = responseNeighbors(ref);
   return `
   <div class="scrim" onclick="closeResponse()"></div>
@@ -5184,8 +5234,7 @@ function responseDrawer(ref){
     <div class="drawer-head">
       <div>
         <button type="button" class="drawer-back" onclick="closeResponse()">${I.chevronLeft(16)} Responses</button>
-        ${badge}
-        <h2 class="t-h4 mt8" id="response-title">${esc(title)}</h2>
+        <h2 class="t-h4" id="response-title">${esc(title)}</h2>
         <p class="t-subtle dim">${esc(meta)}</p>
       </div>
       <button class="iconbtn drawer-x" onclick="closeResponse()" aria-label="Close">${I.x(18)}</button>
