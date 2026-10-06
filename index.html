@@ -310,15 +310,16 @@ html[data-theme="dark"] .survey-readonly-pill{
 .rs-more{padding:8px 16px 16px;text-align:center}
 .rs-excerpt{
   font-size:16px;line-height:24px;font-weight:400;
-  max-width:42rem;
   display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;
   overflow:hidden;
+  width:100%;max-width:100%;
+  box-sizing:border-box;
 }
 a.rs-excerpt{color:var(--primary);text-decoration:none}
 a.rs-excerpt:hover{text-decoration:underline}
 .rs-call{
-  display:inline-flex;align-items:center;gap:6px;
-  margin-top:4px;
+  font-size:14px;line-height:20px;color:var(--muted-foreground);
+  white-space:nowrap;
 }
 .rs-meta{display:none}
 .row{display:flex;align-items:center;gap:12px}
@@ -653,12 +654,24 @@ html[data-theme="dark"] .ov-reading .ov-label{
 .tbl--alerts .al-unit > span{white-space:nowrap}
 .tbl--responses td{vertical-align:middle}
 .tbl--responses .rs-when,
+.tbl--responses .rs-band,
 .tbl--responses .rs-lang{
   font-size:14px;line-height:20px;color:var(--muted-foreground);
   white-space:nowrap;
 }
-.tbl--responses .rs-area-name{
-  font-size:14px;line-height:20px;font-weight:400;
+.tbl--responses .rs-area,
+.tbl--responses .rs-flagged{
+  font-size:14px;line-height:20px;
+}
+.tbl--responses .rs-area{
+  white-space:nowrap;
+}
+.tbl--responses .rs-quote{
+  width:100%;
+}
+.tbl--responses .rs-quote .rs-excerpt{
+  width:100%;
+  max-width:none;
 }
 .star-btn{color:var(--muted-foreground)}
 .star-btn:hover{color:var(--fw-gold)}
@@ -1777,9 +1790,14 @@ html[data-theme="dark"] .patient{
   .tbl--responses .rs-quote{
     order:1;flex:1 1 0;min-width:0;
   }
-  .tbl--responses .rs-excerpt{max-width:none}
+  .tbl--responses .rs-flagged{
+    order:2;flex:0 0 auto;margin-left:auto;
+    text-align:right;padding-top:2px;
+  }
+  .tbl--responses .rs-flagged:empty{display:none}
   .tbl--responses .rs-when,
   .tbl--responses .rs-area,
+  .tbl--responses .rs-band,
   .tbl--responses .rs-lang{display:none !important}
   .tbl--responses .rs-meta{
     display:block;
@@ -5350,7 +5368,7 @@ function viewSurveyResponses(){
   ${visible.length?`<div class="fw-card fw-card-flush">
     <div class="tbl-inset">
     <table class="tbl tbl--stack tbl--responses">
-      <thead><tr><th>What they said</th><th>When</th><th>Area</th><th>Language</th></tr></thead>
+      <thead><tr><th>What they said</th><th>Flagged</th><th>When</th><th>Area</th><th>Age</th><th>Language</th></tr></thead>
       <tbody>
         ${visible.map(r=>{
           const excerpt = responseExcerpt(r, qs);
@@ -5361,10 +5379,11 @@ function viewSurveyResponses(){
             <td class="rs-quote">
               <a class="rs-excerpt" href="#/surveys/${esc(s.id)}/responses"
                 onclick="event.preventDefault(); openResponse('${esc(s.id)}','${esc(r.id)}')">${esc(excerpt)}</a>
-              ${call && excerpt!=="Asked for a call"?`<div class="rs-call t-subtle dim">${I.phone(14)} Asked for a call</div>`:""}
             </td>
+            <td class="rs-flagged">${call?`<span class="rs-call">Asked for a call</span>`:""}</td>
             <td class="dim rs-when">${ago(r.at)}</td>
-            <td class="rs-area"><span class="rs-area-name">${esc(r.zone||"—")}</span><div class="t-subtle dim">${esc(r.band||"")}</div></td>
+            <td class="rs-area">${esc(r.zone||"—")}</td>
+            <td class="dim rs-band">${esc(r.band||"—")}</td>
             <td class="dim rs-lang">${esc(r.lang||"—")}</td>
             <td class="rs-meta">${esc(meta)}</td>
           </tr>`;
