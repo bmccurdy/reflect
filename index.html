@@ -2018,53 +2018,43 @@ const day = d => d.toLocaleDateString("en-US",{month:"short",day:"numeric"});
 
 const ALERTS = [
   { id:"A-4471", status:"critical", unit:"M-12", call:"Chest pain", crew:"Alvarez / Nwosu",
-    reason:"Rated 1 of 5 on respect, plus a written complaint",
     quote:"Nobody told me where we were going or what the medicine was. I asked twice. I'm 78 years old and I was scared the whole ride.", at:mins(38), age:"78", band:"75+", lang:"English",
     phone:"(516) 555-0142", zone:"Manhasset", log:[] },
   { id:"A-4470", status:"critical", unit:"E-7", call:"Fall, hip",
     crew:"Boyd / Trần",
-    reason:"Rated 1 of 5 on comfort, mentions being dropped",
     quote:"The stretcher slipped when they loaded me and nobody said sorry. My hip hurt worse after than before.", at:mins(96), age:"64", band:"55-64", lang:"English",
     phone:"(516) 555-0198", zone:"Great Neck", log:[] },
   { id:"A-4468", status:"elevated", unit:"M-3", call:"Difficulty breathing",
     crew:"Okafor / Reyes",
-    reason:"Would not call 911 again",
     quote:"They were fine but it took a long time and I could not breathe. I would drive myself next time.", at:mins(174), age:"51", band:"45-54", lang:"Spanish",
     phone:"(516) 555-0174", zone:"New Hyde Park", log:[] },
   { id:"A-4465", status:"elevated", unit:"M-12", call:"Diabetic emergency",
     crew:"Alvarez / Nwosu",
-    reason:"Second low score for M-12 this week",
     quote:"Rushed. I felt like a task on a list.", at:mins(320), age:"43", band:"35-44", lang:"English",
     phone:"(516) 555-0116", zone:"Manhasset", log:[] },
   { id:"A-4462", status:"elevated", unit:"E-2", call:"MVC, no transport",
     crew:"Halloran / Pike",
-    reason:"Free text flagged for review",
     quote:"I did not want to go to the hospital and I felt pressured about it. Everything else was good.", at:mins(410), age:"29", band:"25-34", lang:"English",
     phone:"(516) 555-0133", zone:"Port Washington", log:[] },
   { id:"A-4472", status:"critical", unit:"M-3", call:"Abdominal pain, refused",
     crew:"Okafor / Reyes",
-    reason:"Rated no on listening after transport refusal",
     quote:"I said I didn't want to go and they kept asking like I didn't mean it. Nobody asked why I was scared of the hospital.", at:mins(140), age:"52", band:"45-54", lang:"Spanish",
     phone:"(516) 555-0161", zone:"New Hyde Park", log:[] },
   { id:"A-4473", status:"elevated", unit:"E-4", call:"Syncope, refused transport",
     crew:"Mercer / Li",
-    reason:"No explanation of risks if patient stayed home",
     quote:"They left quickly. I still don't know what could have happened if I stayed. I wouldn't call again.", at:mins(5200), age:"58", band:"55-64", lang:"Spanish",
     phone:"(516) 555-0149", zone:"New Hyde Park", log:[] },
   { id:"A-4474", status:"resolved", unit:"M-8", call:"Weakness, refused",
     crew:"Sowande / Kim",
-    reason:"Requested callback after refusal",
     quote:"I wanted someone to explain my options in plain language. The follow-up call helped.", at:mins(3100), age:"44", band:"35-44", lang:"English",
     phone:"(516) 555-0171", zone:"Manhasset",
     log:[{ who:"K. Doyle", at:mins(3000), text:"Called patient. Reviewed AMA documentation and next steps. No crew action needed." }] },
   { id:"A-4459", status:"elevated", unit:"M-8", call:"Chest pain",
     crew:"Sowande / Kim",
-    reason:"Rated 2 of 5 on listening",
     quote:"I told them about my allergy three times.", at:mins(1180), age:"67", band:"65-74", lang:"English",
     phone:"(516) 555-0187", zone:"Great Neck", log:[] },
   { id:"A-4455", status:"resolved", unit:"M-3", call:"Seizure",
     crew:"Okafor / Reyes",
-    reason:"Rated 1 of 5 on comfort",
     quote:"Freezing cold in the back and no blanket until I asked.", at:mins(1610), age:"38", band:"35-44", lang:"English",
     phone:"(516) 555-0155", zone:"New Hyde Park",
     log:[
@@ -2074,7 +2064,6 @@ const ALERTS = [
     ] },
   { id:"A-4451", status:"resolved", unit:"E-7", call:"Fall, wrist",
     crew:"Boyd / Trần",
-    reason:"Would not call 911 again",
     quote:"Long wait. The crew themselves were kind.", at:mins(2900), age:"81", band:"75+", lang:"English",
     phone:"(516) 555-0129", zone:"Manhasset",
     log:[{ who:"K. Doyle", at:mins(2760), text:"Left voicemail. Response time was 14 min — traffic on Northern Blvd. No action for crew." }] }
@@ -3704,6 +3693,30 @@ function alertSource(alertId){
 function alertSurveyId(a){
   return alertSource(a.id)?.surveyId || null;
 }
+function alertLinkedResponse(a){
+  const src = alertSource(a.id);
+  if(!src?.surveyId || !src.responseId) return null;
+  const r = responsesFor(src.surveyId).find(x=>x.id===src.responseId);
+  if(!r) return null;
+  return {
+    surveyId: src.surveyId,
+    response: r,
+    qs: state.surveyQuestions[src.surveyId] || []
+  };
+}
+function alertDisplayTitle(a){
+  const linked = alertLinkedResponse(a);
+  if(linked) return alertTitleFromResponse(linked.response, linked.qs);
+  return "Survey response";
+}
+function alertDisplayQuote(a){
+  const linked = alertLinkedResponse(a);
+  if(linked){
+    const q = responseQuote(linked.response, linked.qs);
+    if(q) return q;
+  }
+  return a.quote || "";
+}
 function alertSurveyChipLabel(s){
   if(s.id==="sv_post") return "Post-transport";
   if(s.id==="sv_notrans") return "Refused transport";
@@ -3825,10 +3838,10 @@ function caseDrawer(){
   const { entry, alert, survey, surveyId, response } = ctx;
   const qs = surveyId ? (state.surveyQuestions[surveyId] || []) : [];
   const call = response ? responseWantsCall(response, qs) : false;
-  const quote = alert?.quote || (response ? responseQuote(response, qs) : "");
-  const title = alert
-    ? alert.reason
-    : responseTitle(response, qs, null);
+  const quote = (response ? responseQuote(response, qs) : "") || (alert && alert.quote) || "";
+  const title = response
+    ? alertTitleFromResponse(response, qs)
+    : (alert ? alertDisplayTitle(alert) : "Survey response");
   const meta = caseMetaLine(ctx);
   const incident = caseIncidentKv(ctx);
   const idLine = alert
@@ -3935,17 +3948,21 @@ function viewAlerts(){
         <th class="al-opened">Opened</th>
       </tr></thead>
       <tbody aria-live="polite">
-        ${list.map(a=>`
+        ${list.map(a=>{
+          const title = alertDisplayTitle(a);
+          const quote = alertDisplayQuote(a);
+          return `
           <tr id="row-${a.id}">
             <td class="al-why">
-              <button type="button" class="al-reason num-link" onclick="openAlert('${a.id}')">${esc(a.reason)}</button>
-              <div class="snip">${esc(a.quote)}</div>
+              <button type="button" class="al-reason num-link" onclick="openAlert('${a.id}')">${esc(title)}</button>
+              ${quote?`<div class="snip">${esc(quote)}</div>`:""}
               <div class="al-meta">${a.unit} · ${ago(a.at)}</div>
             </td>
             ${alertSurveyCell(a)}
             <td class="al-unit"><span style="font-weight:700;font-size:14px;line-height:20px">${esc(a.unit)}</span><div class="t-subtle dim">${esc(a.call)}</div></td>
             <td class="dim al-opened">${ago(a.at)}</td>
-          </tr>`).join("")}
+          </tr>`;
+        }).join("")}
       </tbody>
     </table>
     </div>`:`
@@ -5181,6 +5198,58 @@ function responseQuote(r, qs){
   if(other) return String(r.answers[other.id]);
   return texts[0] ? String(r.answers[texts[0].id]) : "";
 }
+function negativeSeverity(q, v){
+  if(!q) return 0;
+  if(q.type==="choice"){
+    const opts = q.options || [];
+    const idx = opts.findIndex(o=>o===v);
+    if(idx<0) return /unacceptable|definitely not|poor|unsafe/i.test(String(v)) ? 1 : 0.7;
+    return (idx + 1) / Math.max(opts.length, 1);
+  }
+  if(q.type==="yesno") return 0.55;
+  if(q.type==="scale"){
+    const n = Number(v);
+    if(!Number.isFinite(n)) return 0.5;
+    return Math.max(0, Math.min(1, (6 - n) / 5));
+  }
+  return 0.4;
+}
+function alertYesNoTitle(q, v){
+  const label = questionLabel(q);
+  const s = String(v).toLowerCase();
+  if(s==="no"){
+    if(/listened about staying/i.test(label)) return "Did not feel heard about refusing transport";
+    if(/listened/i.test(label)) return "Did not feel listened to";
+    if(/cared/i.test(label)) return "Did not feel cared for";
+    if(/explained staying/i.test(label)) return "Risks of staying not explained";
+    return `${label}: No`;
+  }
+  if(s==="yes"){
+    if(/barrier/i.test(q.text||"")) return "Language is a barrier";
+    if(/call you/i.test(q.text||"")) return "Asked for a call";
+  }
+  return `${label}: ${v}`;
+}
+/** Primary alert/response title from survey answers — not hand-authored copy. */
+function alertTitleFromResponse(r, qs){
+  if(!r) return "Survey response";
+  const list = qs || [];
+  const negatives = list
+    .filter(q=>isNegativeAnswer(q, r.answers[q.id]))
+    .slice()
+    .sort((a,b)=>negativeSeverity(b, r.answers[b.id]) - negativeSeverity(a, r.answers[a.id]));
+  const primary = negatives[0];
+  if(primary){
+    const v = r.answers[primary.id];
+    if(primary.type==="yesno") return alertYesNoTitle(primary, v);
+    return `${questionLabel(primary)}: ${v}`;
+  }
+  if(responseWantsCall(r, qs)) return "Asked for a call";
+  if(responseQuote(r, qs)) return "Written feedback";
+  const first = list.find(q=>r.answers[q.id]!==undefined && r.answers[q.id]!=="");
+  if(first) return `${questionLabel(first)}: ${r.answers[first.id]}`;
+  return "Survey response";
+}
 function responseExcerpt(r, qs){
   const quote = responseQuote(r, qs);
   if(quote) return quote;
@@ -5194,8 +5263,7 @@ function responseExcerpt(r, qs){
   return "No answers";
 }
 function responseTitle(r, qs, alert){
-  if(alert) return alert.reason;
-  if(responseWantsCall(r, qs)) return "Asked for a call";
+  if(r) return alertTitleFromResponse(r, qs);
   return "Survey response";
 }
 function loadedResponses(id){
