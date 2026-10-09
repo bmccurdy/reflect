@@ -437,6 +437,8 @@ a.rs-excerpt:hover{text-decoration:underline}
 .kpi-foot .row{gap:6px}
 
 /* Overview — matches Reflect Figma operations workspace */
+.ov-controls{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:12px}
+.ov-survey-wrap,
 .ov-period-wrap{
   flex:0 0 auto;display:flex;flex-direction:row;flex-wrap:nowrap;
   align-items:center;gap:8px;min-width:0;max-width:100%;
@@ -444,6 +446,8 @@ a.rs-excerpt:hover{text-decoration:underline}
 .ov-period.fw-select{
   flex:0 0 auto;width:220px;max-width:100%;
 }
+.ov-period.ov-survey.fw-select{width:280px}
+.ov-period.ov-survey .fw-select__menu{min-width:280px}
 .ov-period .fw-select__trigger{
   display:flex;align-items:center;gap:8px;
   width:100%;min-height:40px;padding-right:36px;
@@ -1689,7 +1693,9 @@ html[data-theme="dark"] .patient{
     flex-direction:row;align-items:flex-start;gap:12px;
   }
   .between--inline .fw-badge{flex:0 0 auto}
-  .ov-period-wrap{flex-wrap:wrap}
+  .ov-period-wrap,.ov-survey-wrap{flex-wrap:wrap}
+  .ov-controls{justify-content:flex-start}
+  .ov-period.ov-survey.fw-select{width:min(280px,100%)}
   .ov-period.fw-select{width:min(220px,100%)}
   .crumbs{display:none}
   .page-back{display:inline-flex}
@@ -2580,6 +2586,9 @@ const state = {
   scorecardCrew:0,
   crewSelectOpen:false,
   crewSelectActive:0,
+  overviewSurvey:null,
+  overviewSurveyOpen:false,
+  overviewSurveyActive:0,
   overviewPeriod:"30d",
   overviewPeriodOpen:false,
   overviewPeriodActive:1,
@@ -2755,7 +2764,7 @@ function overviewStartOfDay(d){
   return new Date(x.getFullYear(), x.getMonth(), x.getDate());
 }
 function overviewToday(){
-  return localToday();
+  return overviewStartOfDay(NOW);
 }
 /** Inclusive rolling window ending today: last N calendar days. */
 function overviewRollingStart(days, end){
@@ -2797,13 +2806,6 @@ function overviewPeriodDays(bounds){
   const b = bounds || overviewPeriodBounds();
   const ms = overviewStartOfDay(b.end) - overviewStartOfDay(b.start);
   return Math.max(1, Math.round(ms/86400000) + 1);
-}
-function overviewPeriodFactor(){
-  return overviewPeriodDays() / 30;
-}
-function overviewScaleCount(n, factor){
-  const f = factor==null ? overviewPeriodFactor() : factor;
-  return Math.max(0, Math.round(Number(n||0) * f));
 }
 function surveyPeriod(){
   return overviewPeriodRangeLabel();
@@ -2860,6 +2862,7 @@ function overviewPeriodControl(){
 function overviewPeriodToggle(e){
   if(e){ e.preventDefault(); e.stopPropagation(); }
   state.overviewPeriodOpen = !state.overviewPeriodOpen;
+  if(state.overviewPeriodOpen) state.overviewSurveyOpen = false;
   if(state.overviewPeriodOpen){
     const idx = OVERVIEW_PERIODS.findIndex(r=>r.key===overviewPeriodBounds().key);
     state.overviewPeriodActive = idx>=0 ? idx : 1;
@@ -2916,19 +2919,6 @@ function overviewPeriodKey(e){
     if(row) overviewPeriodPick(row.key);
   }
 }
-function liveSurveyStats(){
-  const live = state.surveys.filter(s=>s.status==="Live");
-  const completed = live.reduce((n,s)=>n+s.responses,0);
-  const invited = live.reduce((n,s)=>n+s.sent,0);
-  const rate = invited ? Math.round(completed/invited*100) : 0;
-  return { live, completed, invited, rate };
-}
-function oldestOpenWait(){
-  const open = state.alerts.filter(a=>a.status!=="resolved");
-  if(!open.length) return "—";
-  const oldest = open.reduce((a,b)=>a.at<b.at?a:b);
-  return ago(oldest.at).replace(" ago","");
-}
 function ovMeter(pct, {warn, tone, wide, care, funnel, soft}={}){
   const p = Math.max(0, Math.min(100, Number(pct)||0));
   const bad = !!(warn || tone==="warn");
@@ -2952,23 +2942,247 @@ function ovScoreBar(score, {max=5, warn}={}){
     <span class="ov-score-scale__fill${bad?" is-warn":""}" style="width:${pct.toFixed(1)}%"></span>
   </div>`;
 }
-function cardFunnel(){
-  const factor = overviewPeriodFactor();
-  const { live, completed: rawCompleted, invited: rawInvited, rate } = liveSurveyStats();
-  const invited = overviewScaleCount(rawInvited, factor);
-  const completed = overviewScaleCount(rawCompleted, factor);
-  const completedPct = invited ? (completed/invited)*100 : 0;
+/* ---- Overview data: one survey at a time, computed from its responses ---- */
+const OVERVIEW_METRICS = {
+  sv_post: [
+    { q:"q1", kind:"mean", name:"Average care" },
+    { q:"q2", kind:"top2", name:"Would recommend" },
+    { q:"q3", kind:"yes",  name:"Felt listened to" },
+    { q:"q4", kind:"yes",  name:"Felt cared for" }
+  ],
+  sv_notrans: [
+    { q:"n1", kind:"yes", name:"Felt listened to" },
+    { q:"n2", kind:"yes", name:"Felt cared for" },
+    { q:"n3", kind:"yes", name:"Explained what could happen" }
+  ],
+  sv_q3: [
+    { q:"c1", kind:"top2", name:"Feel safe calling 911" },
+    { q:"c2", kind:"top2", name:"Would recommend" },
+    { q:"c3", kind:"yes",  name:"Trust crews to be respectful" },
+    { q:"c4", kind:"yes",  name:"Crews listen" }
+  ]
+};
+const OVERVIEW_BAND_GROUP = {
+  "75+":"Age 75+", "65–74":"Age 55–74", "55–64":"Age 55–74",
+  "45–54":"Age 35–54", "35–44":"Age 35–54", "25–34":"Age 18–34", "18–34":"Age 18–34"
+};
+const OVERVIEW_GROUP_ORDER = [
+  "Age 75+","Age 55–74","Age 35–54","Age 18–34","Spanish preferred","English preferred"
+];
+const OVERVIEW_MIN_GROUP = 10;
+/* Sample ePCR payor mix (share of completed surveys). Responses don't carry a payor field yet. */
+const OVERVIEW_PAYORS = [
+  { label:"Medicare",             share:0.34 },
+  { label:"Medicaid",             share:0.22 },
+  { label:"Commercial / private", share:0.18 },
+  { label:"Self-pay",             share:0.10 },
+  { label:"Medicare Advantage",   share:0.08 },
+  { label:"VA",                   share:0.05 },
+  { label:"TRICARE",              share:0.03 }
+];
+
+function overviewSurveyId(){
+  if(state.surveys.some(x=>x.id===state.overviewSurvey)) return state.overviewSurvey;
+  const live = state.surveys.find(x=>x.status==="Live");
+  return (live || state.surveys[0] || {}).id || null;
+}
+function overviewSurvey(){
+  const id = overviewSurveyId();
+  return state.surveys.find(x=>x.id===id) || null;
+}
+function overviewMetricSpecs(survey){
+  const qs = state.surveyQuestions[survey.id] || [];
+  const base = OVERVIEW_METRICS[survey.id] || qs
+    .filter(q=>q.type==="choice" || (q.type==="yesno" && q.required))
+    .slice(0,6)
+    .map(q=>({
+      q:q.id, kind:q.type==="choice" ? "top2" : "yes",
+      name:q.text.length>28 ? q.text.slice(0,27).trimEnd()+"…" : q.text
+    }));
+  return base.map(m=>{
+    const idx = qs.findIndex(q=>q.id===m.q);
+    return { ...m, label: idx>=0 ? `${m.name} · Q${idx+1}` : m.name };
+  }).filter(m=>qs.some(q=>q.id===m.q));
+}
+function overviewOptionScore(q, answer){
+  const opts = q.options || [];
+  const idx = opts.indexOf(answer);
+  if(idx<0 || opts.length<2) return null;
+  return 5 - idx*4/(opts.length-1);
+}
+function overviewResponseScore(row, specs, qs){
+  const vals = [];
+  specs.forEach(m=>{
+    const q = qs.find(x=>x.id===m.q);
+    const a = row.answers[m.q];
+    if(!q || a==null || a==="") return;
+    if(q.type==="yesno") vals.push(a==="Yes" ? 5 : 1);
+    else { const v = overviewOptionScore(q, a); if(v!=null) vals.push(v); }
+  });
+  return vals.length ? vals.reduce((x,y)=>x+y,0)/vals.length : null;
+}
+function overviewMetricValue(m, rows, qs){
+  const q = qs.find(x=>x.id===m.q);
+  const answered = rows.filter(r=>r.answers[m.q]!=null && r.answers[m.q]!=="");
+  if(!q || !answered.length) return { ...m, n:0, pct:0, text:"—", mean:null };
+  if(m.kind==="mean"){
+    const scores = answered.map(r=>overviewOptionScore(q, r.answers[m.q])).filter(v=>v!=null);
+    if(!scores.length) return { ...m, n:0, pct:0, text:"—", mean:null };
+    const mean = scores.reduce((x,y)=>x+y,0)/scores.length;
+    return { ...m, n:scores.length, mean, pct:(mean/5)*100, text:`${mean.toFixed(1)} / 5` };
+  }
+  const good = answered.filter(r=>{
+    const a = r.answers[m.q];
+    return m.kind==="yes" ? a==="Yes" : (q.options||[]).indexOf(a)>=0 && (q.options||[]).indexOf(a)<2;
+  }).length;
+  const pct = Math.round(good/answered.length*100);
+  return { ...m, n:answered.length, mean:null, pct, text: m.kind==="yes" ? `${pct}% yes` : `${pct}%` };
+}
+function overviewInPeriod(row, bounds){
+  const t = row.at.getTime();
+  const end = new Date(overviewStartOfDay(bounds.end).getTime() + 86400000);
+  return t >= overviewStartOfDay(bounds.start).getTime() && t < end.getTime();
+}
+function overviewGroupScores(rows, specs, qs, keyFn, scale){
+  const map = new Map();
+  rows.forEach(r=>{
+    const key = keyFn(r);
+    const score = overviewResponseScore(r, specs, qs);
+    if(!key || score==null) return;
+    const g = map.get(key) || { label:key, sum:0, count:0 };
+    g.sum += score; g.count += 1;
+    map.set(key, g);
+  });
+  return [...map.values()].map(g=>({
+    label:g.label, score:g.sum/g.count, n:Math.max(1, Math.round(g.count*scale))
+  }));
+}
+/** Everything the Overview cards need for the selected survey and date range. */
+function overviewData(){
+  const survey = overviewSurvey();
+  if(!survey) return null;
+  const qs = state.surveyQuestions[survey.id] || [];
+  const all = responsesFor(survey.id);
+  const bounds = overviewPeriodBounds();
+  const rows = all.filter(r=>overviewInPeriod(r, bounds));
+  const share = all.length ? rows.length/all.length : 0;
+  const scale = all.length ? survey.responses/all.length : 0;
+  const completed = Math.round(survey.responses*share);
+  const invited = Math.round(survey.sent*share);
+  const specs = overviewMetricSpecs(survey);
+  const metrics = specs.map(m=>overviewMetricValue(m, rows, qs));
+  const textIds = qs.filter(q=>q.type==="text").map(q=>q.id);
+  const comments = rows.filter(r=>textIds.some(id=>(r.answers[id]||"").trim())).length;
+  const hasText = textIds.length>0;
+  const flagged = rows.filter(r=>r.alert).length;
+  const alertIds = new Set(all.map(r=>r.alert).filter(Boolean));
+  const openAlerts = state.alerts.filter(a=>alertIds.has(a.id) && a.status!=="resolved");
+  const payors = OVERVIEW_PAYORS
+    .map(x=>({ label:x.label, n:Math.round(completed*x.share) }))
+    .sort((a,b)=>b.n-a.n);
+  const groupScores = [
+    ...overviewGroupScores(rows, specs, qs, r=>OVERVIEW_BAND_GROUP[r.band]||null, scale),
+    ...overviewGroupScores(rows, specs, qs, r=>r.lang==="Spanish" ? "Spanish preferred" : "English preferred", scale)
+  ].sort((a,b)=>OVERVIEW_GROUP_ORDER.indexOf(a.label)-OVERVIEW_GROUP_ORDER.indexOf(b.label));
+  return {
+    survey, rows, scale, completed, invited, metrics, comments, hasText, flagged,
+    rate: invited ? Math.round(completed/invited*100) : 0,
+    openAlerts, payors, groups:groupScores
+  };
+}
+function overviewOldestWait(alerts){
+  if(!alerts.length) return "—";
+  const oldest = alerts.reduce((a,b)=>a.at<b.at?a:b);
+  return ago(oldest.at).replace(" ago","");
+}
+
+/* ---- Survey switcher ---- */
+function overviewSurveyControl(){
+  const open = !!state.overviewSurveyOpen;
+  const rows = state.surveys;
+  const cur = overviewSurvey();
+  const active = Math.min(rows.length-1, Math.max(0, state.overviewSurveyActive|0));
+  return `<div class="ov-survey-wrap">
+    <div class="fw-select ov-period ov-survey${open?" is-open":""}">
+      <button type="button" class="fw-select__trigger" id="ov-survey-trigger"
+        aria-haspopup="listbox" aria-expanded="${open}"
+        aria-controls="ov-survey-list" aria-label="Survey"
+        ${open?`aria-activedescendant="ov-survey-opt-${active}"`:""}
+        onclick="overviewSurveyToggle(event)"
+        onkeydown="overviewSurveyKey(event)">
+        ${I.inbox(16)}
+        <span class="fw-select__label">${esc(cur?cur.name:"No surveys")}</span>
+      </button>
+      <span class="fw-select__chevron" aria-hidden="true">${I.down(16)}</span>
+      ${open?`<div class="fw-select__menu" id="ov-survey-list" role="listbox" aria-label="Survey">
+        ${rows.map((r,i)=>{
+          const on = cur && r.id===cur.id;
+          return `<div class="fw-select__opt" role="option" id="ov-survey-opt-${i}"
+            aria-selected="${on}"${i===active?" data-active":""}
+            onmousedown="event.preventDefault()"
+            onclick="overviewSurveyPick('${esc(r.id)}')">${esc(r.name)} <span class="dim">· ${esc(r.status)}</span>${on?I.check(16):""}</div>`;
+        }).join("")}
+      </div>`:""}
+    </div>
+  </div>`;
+}
+function overviewSurveyToggle(e){
+  if(e){ e.preventDefault(); e.stopPropagation(); }
+  state.overviewSurveyOpen = !state.overviewSurveyOpen;
+  if(state.overviewSurveyOpen){
+    state.overviewPeriodOpen = false;
+    const idx = state.surveys.findIndex(x=>x.id===overviewSurveyId());
+    state.overviewSurveyActive = idx>=0 ? idx : 0;
+  }
+  render();
+  if(state.overviewSurveyOpen){
+    document.getElementById("ov-survey-trigger")?.focus();
+    document.querySelector("#ov-survey-list .fw-select__opt[data-active]")?.scrollIntoView({block:"nearest"});
+  }
+}
+function overviewSurveyPick(id){
+  if(state.surveys.some(x=>x.id===id)) state.overviewSurvey = id;
+  state.overviewSurveyOpen = false;
+  render();
+}
+function overviewSurveyKey(e){
+  const open = !!state.overviewSurveyOpen;
+  const n = state.surveys.length;
+  if(!n) return;
+  if(e.key==="Escape"){
+    if(open){ e.preventDefault(); state.overviewSurveyOpen = false; render(); }
+    return;
+  }
+  if(e.key==="ArrowDown" || e.key==="ArrowUp"){
+    e.preventDefault();
+    if(!open){ overviewSurveyToggle(e); return; }
+    const delta = e.key==="ArrowDown" ? 1 : -1;
+    state.overviewSurveyActive = (state.overviewSurveyActive + delta + n) % n;
+    render();
+    document.getElementById("ov-survey-trigger")?.focus();
+    document.querySelector("#ov-survey-list .fw-select__opt[data-active]")?.scrollIntoView({block:"nearest"});
+    return;
+  }
+  if(e.key==="Enter" || e.key===" "){
+    e.preventDefault();
+    if(!open){ overviewSurveyToggle(e); return; }
+    const row = state.surveys[state.overviewSurveyActive];
+    if(row) overviewSurveyPick(row.id);
+  }
+}
+function cardFunnel(d){
+  const completedPct = d.invited ? (d.completed/d.invited)*100 : 0;
   return `
   <section class="ov-card" aria-labelledby="funnel-heading">
     <div class="ov-card-head">
       <h2 class="t-h4" id="funnel-heading">Survey response</h2>
-      <p class="t-subtle dim">${live.length} live surveys</p>
+      <p class="t-subtle dim">${esc(d.survey.status)} survey · ${d.rate}% response rate</p>
     </div>
     <div class="ov-funnel">
       <div class="ov-funnel-stage">
         <div class="ov-funnel-row">
           <span class="ov-label">Invited</span>
-          <span class="ov-metric-val">${invited.toLocaleString("en-US")}</span>
+          <span class="ov-metric-val">${d.invited.toLocaleString("en-US")}</span>
         </div>
         ${ovMeter(100, {funnel:true, soft:true})}
         <p class="ov-note">Invitations delivered</p>
@@ -2976,23 +3190,23 @@ function cardFunnel(){
       <div class="ov-funnel-stage">
         <div class="ov-funnel-row">
           <span class="ov-label">Completed</span>
-          <span class="ov-metric-val">${completed.toLocaleString("en-US")}</span>
+          <span class="ov-metric-val">${d.completed.toLocaleString("en-US")}</span>
         </div>
         ${ovMeter(completedPct, {funnel:true})}
-        <p class="ov-note">Of ${invited.toLocaleString("en-US")} invited</p>
+        <p class="ov-note">Of ${d.invited.toLocaleString("en-US")} invited</p>
       </div>
     </div>
   </section>`;
 }
-function cardCallback(){
-  const open = openCount();
-  const wait = oldestOpenWait();
+function cardCallback(d){
+  const open = d.openAlerts.length;
+  const wait = overviewOldestWait(d.openAlerts);
   const urgent = open > 0;
   return `
   <section class="ov-card${urgent?" ov-card--warn":""}" aria-labelledby="callback-heading">
     <div class="ov-card-head">
       <h2 class="t-h4" id="callback-heading">Callback queue</h2>
-      <p class="t-subtle dim">Open alerts awaiting a patient follow-up.</p>
+      <p class="t-subtle dim">Open alerts from this survey awaiting a patient follow-up.</p>
     </div>
     <div class="ov-queue">
       <div>
@@ -3004,138 +3218,119 @@ function cardCallback(){
         <div class="ov-label">Oldest wait</div>
       </div>
     </div>
-    <p class="ov-note">Prioritize the longest-waiting patient.</p>
+    ${urgent?`<p class="ov-note">Prioritize the longest-waiting patient.</p>`:""}
   </section>`;
 }
-function cardQuality(){
+function cardQuality(d){
+  const pctMetrics = d.metrics.filter(m=>m.kind!=="mean" && m.n);
+  const meanMetrics = d.metrics.filter(m=>m.kind==="mean" && m.n);
+  const pair = [pctMetrics[0], meanMetrics[0] || pctMetrics[1]].filter(Boolean);
+  const reading = (m, i)=>`
+      <div class="ov-reading">
+        <div class="${i===0?"ov-value":"ov-value--md"}">${m.kind==="mean"
+          ? `${m.mean.toFixed(1)} <span class="ov-unit">of 5</span>` : esc(m.text)}</div>
+        <div class="ov-label">${esc(m.name)}</div>
+        ${ovMeter(m.pct, {care:true})}
+      </div>`;
   return `
   <section class="ov-card" aria-labelledby="quality-heading">
     <div class="ov-card-head">
       <h2 class="t-h4" id="quality-heading">Quality at a glance</h2>
       <p class="t-subtle dim">Patient ratings from completed surveys.</p>
     </div>
-    <div class="ov-readings">
-      <div class="ov-reading">
-        <div class="ov-value">96%</div>
-        <div class="ov-label">Recommended</div>
-        ${ovMeter(96, {care:true})}
-      </div>
-      <div class="ov-reading">
-        <div class="ov-value--md">4.2 <span class="ov-unit">of 5</span></div>
-        <div class="ov-label">Care</div>
-        ${ovMeter(84, {care:true})}
-      </div>
+    <div class="ov-readings">${pair.map(reading).join("")}
     </div>
   </section>`;
 }
-function cardLowestScores(){
-  const factor = overviewPeriodFactor();
+function cardPayorSurveys(d){
+  const max = Math.max(1, ...d.payors.map(x=>x.n));
   return `
-  <section class="ov-card" aria-labelledby="lowest-heading">
+  <section class="ov-card" aria-labelledby="payor-heading">
     <div class="ov-card-head">
-      <h2 class="t-h4" id="lowest-heading">Where scores are lowest</h2>
-      <p class="t-subtle dim">Mean respect + listening score by area.</p>
+      <h2 class="t-h4" id="payor-heading">Completed surveys by payor</h2>
+      <p class="t-subtle dim">Completed surveys by ePCR payor for the selected survey and date range.</p>
     </div>
     <div class="ov-score-list">
-      ${ZONES.map(z=>{
-        const warn = z.score < 4;
-        const n = Math.max(10, overviewScaleCount(z.n, factor));
-        return `<div class="ov-score-row">
-          <span class="ov-score-label">${esc(z.label)} <span class="ov-score-n">${n}</span></span>
-          ${ovScoreBar(z.score, {warn})}
-          <span class="ov-score-val${warn?" is-warn":""}">${z.score.toFixed(1)}</span>
-        </div>`;
-      }).join("")}
-      <div class="ov-score-legend" aria-hidden="true">
-        <span>0</span><span>Score out of 5</span><span>5</span>
-      </div>
+      ${d.payors.map(x=>`<div class="ov-score-row">
+          <span class="ov-score-label">${esc(x.label)}</span>
+          ${ovScoreBar(x.n, {max})}
+          <span class="ov-score-val">${x.n.toLocaleString("en-US")}</span>
+        </div>`).join("")}
     </div>
   </section>`;
 }
 
-function crewScoreAggregate(){
-  const crew = SCORECARD_CREW;
-  const surveys = crew.reduce((n,c)=>n+c.surveys,0);
-  const weight = surveys || 1;
-  const wavg = key => crew.reduce((n,c)=>n+(Number(c[key])||0)*c.surveys,0)/weight;
-  return {
-    surveys,
-    crewCount: crew.length,
-    q1: wavg("q1"),
-    rec: Math.round(wavg("rec")),
-    listen: Math.round(wavg("listen")),
-    care: Math.round(wavg("care")),
-    commend: crew.reduce((n,c)=>n+c.commend,0),
-    flags: crew.reduce((n,c)=>n+c.flags,0)
-  };
-}
 function kpiCompareLine(ok, detail, highIsBad){
   const text = esc(detail);
   if(ok) return text;
   const word = highIsBad ? "Above average" : "Below average";
   return `<span class="kpi-delta is-down">${word}</span> · ${text}`;
 }
-function cardCrewScorecard(){
-  const a = crewScoreAggregate();
-  const factor = overviewPeriodFactor();
-  const surveys = overviewScaleCount(a.surveys, factor);
-  const commend = overviewScaleCount(a.commend, factor);
-  const flags = overviewScaleCount(a.flags, factor);
-  const flagCap = 3 * a.crewCount;
-  const rows = [
-    { name:"Average care · Q1", sub:"",
-      val:`${a.q1.toFixed(1)} / 5`, pct:(a.q1/5)*100 },
-    { name:"Would recommend · Q2", sub:"",
-      val:`${a.rec}%`, pct:a.rec },
-    { name:"Felt listened to · Q3", sub:"",
-      val:`${a.listen}% yes`, pct:a.listen },
-    { name:"Felt cared for · Q4", sub:"",
-      val:`${a.care}% yes`, pct:a.care },
-    { name:"Commendations", sub:"Total across all crew",
-      val:String(commend),
-      pct: Math.min(100, Math.max(0, Math.ceil(commend/4))/25*100) },
+function cardCrewScorecard(d){
+  const rows = d.metrics.map(m=>({ name:m.label, sub:"", val:m.text, pct:m.pct }));
+  const total = d.rows.length || 1;
+  if(d.hasText) rows.push(
+    { name:"Written comments", sub:"Responses with open feedback",
+      val:String(Math.round(d.comments*d.scale)), pct:(d.comments/total)*100 });
+  rows.push(
     { name:"Flagged responses", sub:"Lower is better",
-      val:String(flags), pct: (flags/Math.max(flagCap,1))*100, invert:true }
-  ];
-  const ledgerRows = rows.map(r=>({
-    ...r,
-    warn: !!(r.invert && flags>flagCap)
-  }));
+      val:String(Math.round(d.flagged*d.scale)), pct:(d.flagged/total)*100 }
+  );
   return `
   <section class="ov-card" aria-labelledby="crew-kpi-heading">
     <div class="ov-card-head">
       <h2 class="t-h4" id="crew-kpi-heading">Key metrics</h2>
-      <p class="t-subtle dim">${surveys.toLocaleString("en-US")} responses · ${a.crewCount} crew</p>
+      <p class="t-subtle dim">${d.completed.toLocaleString("en-US")} responses</p>
     </div>
-    ${ovMetricsLedger(ledgerRows)}
+    ${ovMetricsLedger(rows)}
   </section>`;
 }
 
+function overviewEmptyCard(d){
+  const msg = !d
+    ? "Create a survey to see results here."
+    : d.survey.status==="Draft"
+      ? "This survey is still a draft and hasn't collected responses yet."
+      : "No responses for this survey in the selected date range. Try a longer range.";
+  return `
+  <section class="ov-card" aria-labelledby="ov-empty-heading">
+    <div class="ov-card-head">
+      <h2 class="t-h4" id="ov-empty-heading">No responses to show</h2>
+      <p class="t-subtle dim">${esc(msg)}</p>
+    </div>
+  </section>`;
+}
 function viewOverview(){
+  const d = overviewData();
+  const hasData = !!(d && d.rows.length);
   return `
   <div class="page-head">
     <div class="between">
       <div>
         <h1 class="t-h2">Reflect overview</h1>
-        <p class="t-p dim">${esc(AGENCY.name)} patient experience · ${esc(overviewPeriodRangeLabel())}</p>
+        <p class="t-p dim">${esc(d?d.survey.name:AGENCY.name)} · ${esc(overviewPeriodRangeLabel())}</p>
       </div>
-      ${overviewPeriodControl()}
+      <div class="ov-controls">
+        ${overviewSurveyControl()}
+        ${overviewPeriodControl()}
+      </div>
     </div>
   </div>
   ${staleBanner()}
-  <div class="ov-stack" aria-label="System health">
+  <div class="ov-stack" aria-label="Survey results">
+    ${hasData?`
     <div class="ov-row" aria-label="Priority signals">
-      ${cardQuality()}
-      ${cardCallback()}
+      ${cardQuality(d)}
+      ${cardCallback(d)}
     </div>
     <div class="ov-row" aria-label="Performance and participation">
-      ${cardCrewScorecard()}
-      ${cardFunnel()}
+      ${cardCrewScorecard(d)}
+      ${cardFunnel(d)}
     </div>
     <div class="ov-row ov-row--local" aria-label="Local experience">
-      ${cardLowestScores()}
-      ${cardByDemographic()}
-    </div>
+      ${cardPayorSurveys(d)}
+      ${cardByDemographic(d)}
+    </div>`:overviewEmptyCard(d)}
   </div>
 `;
 }
@@ -5506,8 +5701,7 @@ function closeAlert(){
 /* ============================================================
    7. OVERVIEW SCORE CARDS
    ============================================================ */
-function cardByDemographic(){
-  const factor = overviewPeriodFactor();
+function cardByDemographic(d){
   return `
   <section class="ov-card" aria-labelledby="demo-heading">
     <div class="ov-card-head">
@@ -5515,20 +5709,20 @@ function cardByDemographic(){
       <p class="t-subtle dim">Average scores from optional questions; not every respondent is included.</p>
     </div>
     <div class="ov-score-list">
-      ${EQUITY.map(e=>{
-        const warn = e.score < 4;
-        const n = Math.max(10, overviewScaleCount(e.n, factor));
+      ${d.groups.map(g=>{
+        const held = g.n < OVERVIEW_MIN_GROUP;
+        const warn = !held && g.score < 4;
         return `<div class="ov-score-row">
-          <span class="ov-score-label">${esc(e.label)} <span class="ov-score-n">${n}</span></span>
-          ${ovScoreBar(e.score, {warn})}
-          <span class="ov-score-val${warn?" is-warn":""}">${e.score.toFixed(1)}</span>
+          <span class="ov-score-label">${esc(g.label)} <span class="ov-score-n">${g.n}</span></span>
+          ${held?`<span class="ov-note">Withheld</span>`:ovScoreBar(g.score, {warn})}
+          <span class="ov-score-val${warn?" is-warn":""}">${held?"—":g.score.toFixed(1)}</span>
         </div>`;
       }).join("")}
       <div class="ov-score-legend" aria-hidden="true">
         <span>0</span><span>Score out of 5</span><span>5</span>
       </div>
     </div>
-    <p class="ov-note">Groups with fewer than 10 responses are withheld to preserve patient anonymity.</p>
+    <p class="ov-note">Groups with fewer than ${OVERVIEW_MIN_GROUP} responses are withheld to preserve patient anonymity.</p>
   </section>`;
 }
 
@@ -7230,6 +7424,7 @@ window.addEventListener("keydown", e=>{
   if(state.triggerSelectOpen){ state.triggerSelectOpen = false; triggerSelectPaint(); return; }
   if(state.scheduleDurationOpen){ state.scheduleDurationOpen = false; scheduleDurationPaint(); return; }
   if(state.overviewPeriodOpen){ state.overviewPeriodOpen = false; render(); return; }
+  if(state.overviewSurveyOpen){ state.overviewSurveyOpen = false; render(); return; }
   if(state.pSelectOpen){ state.pSelectOpen = null; pSelectPaint(); return; }
   if(state.crewSelectOpen){ state.crewSelectOpen = false; crewSelectPaint(); return; }
   if(state.navOpen){ closeNav(); return; }
@@ -7261,6 +7456,10 @@ window.addEventListener("mousedown", e=>{
   }
   if(state.overviewPeriodOpen && !e.target.closest(".ov-period-wrap")){
     state.overviewPeriodOpen = false;
+    render();
+  }
+  if(state.overviewSurveyOpen && !e.target.closest(".ov-survey-wrap")){
+    state.overviewSurveyOpen = false;
     render();
   }
   if(state.pSelectOpen && !e.target.closest(".fw-select")){
