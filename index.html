@@ -79,6 +79,7 @@ ul{margin:0;padding:0;list-style:none}
 .t-small{font-size:14px;line-height:14px;font-weight:400}
 .t-detail{font-size:12px;line-height:20px;font-weight:400;letter-spacing:.01em}
 .dim{color:var(--muted-foreground)}
+.sv-meta{color:var(--fg-subtle)}
 
 /* Kit cards are slot-based; this prototype uses one padded box. */
 .fw-card{padding:24px}
@@ -5153,7 +5154,7 @@ function viewSurveysIndex(){
             <td class="sv-name">
               <a class="sv-title" href="#/surveys/${s.id}">${esc(s.name)}</a>
               ${s.description?`<div class="t-subtle dim sv-desc">${esc(s.description)}</div>`:""}
-              <div class="t-subtle dim">${s.questions} questions${s.version>1?` · v${s.version}`:""}</div>
+              <div class="t-subtle sv-meta">${s.questions} questions${s.version>1?` · v${s.version}`:""}</div>
             </td>
             <td class="sv-trigger">${surveyTriggerCell(s)}</td>
             <td class="sv-status">${surveyStatusBadge(s)}</td>
