@@ -130,7 +130,7 @@ a.fw-btn{text-decoration:none}
 .nav a{
   display:inline-flex;align-items:center;justify-content:center;
   height:32px;padding:0 12px;line-height:1;
-  border-radius:var(--r-sm);font-size:14px;font-weight:500;
+  border-radius:var(--r-md);font-size:14px;font-weight:500;
   color:color-mix(in srgb,var(--base-white) 72%,transparent);
   transition:background-color var(--dur-micro) var(--ease-out),color var(--dur-micro) var(--ease-out);
 }
@@ -522,6 +522,7 @@ html[data-theme="dark"] .ov-reading .ov-label{
 .ov-meter--wide{max-width:none}
 .ov-meter--care{max-width:none;width:100%}
 .ov-meter--funnel{max-width:none}
+.ov-meter--soft .ov-meter__fill{opacity:.3}
 .ov-meter__track{
   position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
   height:8px;border-radius:var(--r-full);background:var(--muted);
@@ -532,54 +533,45 @@ html[data-theme="dark"] .ov-reading .ov-label{
   max-width:100%;
 }
 .ov-meter__fill.is-warn{background:var(--status-elevated)}
-.ov-meter__mark{
-  position:absolute;top:2px;bottom:2px;width:2px;
-  border-radius:var(--r-full);
-  background:var(--primary);transform:translateX(-50%);
-}
-.ov-meter__mark.is-warn{background:var(--status-elevated)}
 .ov-ledger{display:flex;flex-direction:column;width:100%}
 .ov-metric{
   display:grid;
-  grid-template-columns:minmax(140px,224px) minmax(72px,100px) minmax(120px,1fr);
-  gap:20px;align-items:center;
+  grid-template-columns:minmax(140px,224px) minmax(88px,128px) minmax(120px,1fr);
+  gap:20px;align-items:baseline;
   padding:15px 0;border-top:1px solid var(--border);
 }
-.ov-metric-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ov-metric-copy{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ov-metric > .ov-meter{align-self:center}
 .ov-metric-name{
-  font-size:12px;line-height:20px;font-weight:500;color:var(--muted-foreground);
+  font-size:14px;line-height:28px;font-weight:500;color:var(--foreground);
 }
 .ov-metric-sub{
   font-size:12px;line-height:20px;font-weight:400;color:var(--muted-foreground);
 }
 .ov-metric-val{
-  font-size:20px;line-height:28px;font-weight:600;color:var(--foreground);
+  font-size:18px;line-height:28px;font-weight:600;color:var(--foreground);
 }
 .ov-metric .ov-meter{max-width:none;width:100%}
-.ov-funnel{display:flex;flex-direction:column;gap:22px}
-.ov-funnel-stage{display:flex;flex-direction:column;gap:8px}
+.ov-funnel{display:flex;flex-direction:column;gap:24px}
+.ov-funnel-stage{display:flex;flex-direction:column;gap:6px}
 .ov-funnel-row{
-  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  display:flex;align-items:baseline;justify-content:space-between;gap:12px;
 }
-.ov-funnel-row .ov-label{font-weight:500}
-.ov-funnel-row .ov-metric-val{font-size:20px;line-height:28px}
-.ov-funnel-detail{
-  display:flex;flex-direction:column;gap:12px;
-  padding-top:20px;border-top:1px solid var(--border);
-}
-.ov-funnel-detail .ov-funnel-row{align-items:baseline}
+.ov-funnel-row .ov-label{font-size:14px;line-height:28px;font-weight:500;color:var(--foreground)}
+.ov-funnel-row .ov-metric-val{font-size:18px;line-height:28px}
 .ov-status-warn{
   font-size:12px;line-height:20px;font-weight:600;color:var(--status-elevated);margin:0;
 }
-.ov-score-list{display:flex;flex-direction:column;gap:14px;width:100%}
+.ov-score-list{display:flex;flex-direction:column;gap:16px;width:100%}
 .ov-score-row{
   display:grid;
   grid-template-columns:minmax(120px,184px) minmax(0,1fr) 32px;
   gap:16px;align-items:center;
 }
 .ov-score-label{font-size:14px;line-height:20px;color:var(--foreground);min-width:0}
+.ov-score-n{font-size:12px;color:var(--muted-foreground);margin-left:4px}
 .ov-score-val{
-  font-size:14px;line-height:20px;font-weight:700;text-align:right;
+  font-size:16px;line-height:20px;font-weight:600;text-align:right;
   color:var(--foreground);
 }
 .ov-score-val.is-warn{color:var(--status-elevated)}
@@ -595,12 +587,6 @@ html[data-theme="dark"] .ov-reading .ov-label{
   border-radius:var(--r-full);background:var(--primary);max-width:100%;
 }
 .ov-score-scale__fill.is-warn{background:var(--status-elevated)}
-.ov-score-scale__end{
-  position:absolute;top:2px;width:4px;height:16px;
-  border-radius:var(--r-full);
-  background:var(--primary);transform:translateX(-100%);
-}
-.ov-score-scale__end.is-warn{background:var(--status-elevated)}
 .ov-score-legend{
   display:flex;justify-content:space-between;gap:8px;
   padding-left:calc(184px + 16px);padding-right:48px;
@@ -627,13 +613,16 @@ html[data-theme="dark"] .ov-reading .ov-label{
 @media (hover:hover){
   .tbl tbody tr.clickable:hover{background:var(--accent)}
 }
-.tbl .fav{width:52px;padding-left:12px;padding-right:0;vertical-align:middle}
 .tbl .morecol{width:52px;padding-left:8px;padding-right:12px;text-align:right;vertical-align:middle}
 .tbl--surveys .sv-trigger,
 .tbl--surveys .sv-status,
 .tbl--surveys .sv-responses,
 .tbl--surveys .sv-rate,
 .tbl--surveys .sv-schedule{vertical-align:middle}
+.tbl--surveys .sv-trigger,
+.tbl--surveys .sv-responses,
+.tbl--surveys .sv-rate,
+.tbl--surveys .sv-schedule{font-size:14px;line-height:20px}
 .tbl--alerts td{vertical-align:middle}
 .tbl--alerts{
   table-layout:fixed;width:100%;
@@ -673,10 +662,6 @@ html[data-theme="dark"] .ov-reading .ov-label{
   width:100%;
   max-width:none;
 }
-.star-btn{color:var(--muted-foreground)}
-.star-btn:hover{color:var(--fw-gold)}
-.star-btn[aria-pressed="true"]{color:var(--fw-gold)}
-.star-btn[aria-pressed="true"]:hover{color:var(--fw-gold-light)}
 
 .menu-wrap{position:relative;display:inline-flex}
 .menu-wrap.open{z-index:31}
@@ -878,6 +863,32 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 .num-link:hover{text-decoration:underline}
 .num-link--muted{color:var(--muted-foreground);font-weight:400}
 .num-link--muted:hover{color:var(--foreground)}
+.trig-tip{
+  position:relative;display:inline-block;cursor:help;
+  color:var(--foreground);
+  text-decoration:underline dotted;text-underline-offset:4px;text-decoration-thickness:1.5px;
+}
+.trig-tip:focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:var(--radius-sm,4px)}
+.trig-tip__card{
+  position:absolute;left:0;top:calc(100% + 10px);z-index:30;
+  display:none;flex-direction:column;gap:6px;
+  min-width:220px;max-width:320px;padding:12px 16px;
+  background:var(--fw-navy);color:var(--base-white);
+  border-radius:var(--radius-md);box-shadow:var(--shadow-lg, 0 8px 24px rgba(0,0,0,.2));
+  text-decoration:none;text-align:left;white-space:normal;cursor:help;
+}
+.trig-tip__card::before{
+  content:"";position:absolute;left:22px;top:-6px;width:12px;height:12px;
+  background:var(--fw-navy);transform:rotate(45deg);border-radius:2px;
+}
+.trig-tip:hover .trig-tip__card,
+.trig-tip:focus .trig-tip__card,
+.trig-tip:focus-within .trig-tip__card{display:flex}
+.trig-tip__label,.trig-tip__meta{
+  font-size:12px;line-height:16px;font-weight:400;
+  color:color-mix(in srgb, var(--base-white) 65%, transparent);
+}
+.trig-tip__name{font-size:14px;line-height:20px;font-weight:600;color:var(--base-white)}
 button.num-link{
   background:none;border:0;padding:0;margin:0;font:inherit;cursor:pointer;
   color:var(--primary);font-weight:400;
@@ -1087,6 +1098,7 @@ button.num-link{
 .case-survey{
   display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;
   margin-bottom:16px;font-size:14px;line-height:20px;
+  position:relative;z-index:5;
 }
 .case-survey__name{font-weight:700;color:var(--foreground);text-decoration:none}
 .case-survey__name:hover{text-decoration:underline;color:var(--primary)}
@@ -1759,9 +1771,6 @@ html[data-theme="dark"] .patient{
   .tbl--surveys tbody tr::before{
     content:"";
     order:6;flex:0 0 100%;width:100%;height:0;
-  }
-  .tbl--surveys .sv-fav{
-    order:1;flex:0 0 auto;width:auto;padding:0;
   }
   .tbl--surveys .sv-name{
     order:2;flex:1 1 0;min-width:0;
@@ -2602,6 +2611,7 @@ const I = {
   lock:       s=>ic('<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',s), 
   radio:      s=>ic('<path d="M16.247 7.761a6 6 0 0 1 0 8.478"/><path d="M19.075 4.933a10 10 0 0 1 0 14.134"/><path d="M4.925 19.067a10 10 0 0 1 0-14.134"/><path d="M7.753 16.239a6 6 0 0 1 0-8.478"/><circle cx="12" cy="12" r="2"/>',s),
   eye:        s=>ic('<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',s),
+  externalLink: s=>ic('<path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6"/><path d="m15 3 6 0 0 6"/><path d="M10 14 21 3"/>',s),
   plus:       s=>ic('<path d="M5 12h14"/><path d="M12 5v14"/>',s),
   copy:       s=>ic('<rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',s),
   trash:      s=>ic('<path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',s),
@@ -2919,20 +2929,19 @@ function oldestOpenWait(){
   const oldest = open.reduce((a,b)=>a.at<b.at?a:b);
   return ago(oldest.at).replace(" ago","");
 }
-function ovMeter(pct, {target, warn, tone, wide, care, funnel}={}){
+function ovMeter(pct, {warn, tone, wide, care, funnel, soft}={}){
   const p = Math.max(0, Math.min(100, Number(pct)||0));
-  const t = target==null ? null : Math.max(0, Math.min(100, Number(target)));
   const bad = !!(warn || tone==="warn");
   const cls = [
     "ov-meter",
     wide||funnel?"ov-meter--wide":"",
     care?"ov-meter--care":"",
-    funnel?"ov-meter--funnel":""
+    funnel?"ov-meter--funnel":"",
+    soft?"ov-meter--soft":""
   ].filter(Boolean).join(" ");
   return `<div class="${cls}" aria-hidden="true">
     <span class="ov-meter__track"></span>
     <span class="ov-meter__fill${bad?" is-warn":""}" style="width:${p.toFixed(1)}%"></span>
-    ${t==null?"":`<span class="ov-meter__mark${bad?" is-warn":""}" style="left:${t.toFixed(1)}%"></span>`}
   </div>`;
 }
 function ovScoreBar(score, {max=5, warn}={}){
@@ -2941,7 +2950,6 @@ function ovScoreBar(score, {max=5, warn}={}){
   return `<div class="ov-score-scale" aria-hidden="true">
     <span class="ov-score-scale__track"></span>
     <span class="ov-score-scale__fill${bad?" is-warn":""}" style="width:${pct.toFixed(1)}%"></span>
-    <span class="ov-score-scale__end${bad?" is-warn":""}" style="left:${pct.toFixed(1)}%"></span>
   </div>`;
 }
 function cardFunnel(){
@@ -2949,10 +2957,6 @@ function cardFunnel(){
   const { live, completed: rawCompleted, invited: rawInvited, rate } = liveSurveyStats();
   const invited = overviewScaleCount(rawInvited, factor);
   const completed = overviewScaleCount(rawCompleted, factor);
-  const near = rate < 30;
-  const low = rate < 25;
-  const rateLabel = low ? "Below target" : near ? "Near target" : "On target";
-  const gap = Math.max(0, 30 - rate);
   const completedPct = invited ? (completed/invited)*100 : 0;
   return `
   <section class="ov-card" aria-labelledby="funnel-heading">
@@ -2966,7 +2970,7 @@ function cardFunnel(){
           <span class="ov-label">Invited</span>
           <span class="ov-metric-val">${invited.toLocaleString("en-US")}</span>
         </div>
-        ${ovMeter(100, {funnel:true})}
+        ${ovMeter(100, {funnel:true, soft:true})}
         <p class="ov-note">Invitations delivered</p>
       </div>
       <div class="ov-funnel-stage">
@@ -2977,19 +2981,6 @@ function cardFunnel(){
         ${ovMeter(completedPct, {funnel:true})}
         <p class="ov-note">Of ${invited.toLocaleString("en-US")} invited</p>
       </div>
-    </div>
-    <div class="ov-funnel-detail">
-      <div class="ov-funnel-row">
-        <span class="ov-label">Response rate</span>
-        <span class="ov-metric-val${near?" ov-value--warn":""}">${rate}%</span>
-      </div>
-      <p class="${near?"ov-status-warn":"ov-note"}">${rateLabel}</p>
-      <p class="ov-note">Target 30%${gap?` · ${gap} percentage point${gap===1?"":"s"} to go`:""}</p>
-      <div class="ov-funnel-row" style="padding-top:12px">
-        <span class="ov-label">Average time</span>
-        <span class="ov-metric-val">10 min</span>
-      </div>
-      <p class="ov-note">Per completed survey</p>
     </div>
   </section>`;
 }
@@ -3050,7 +3041,7 @@ function cardLowestScores(){
         const warn = z.score < 4;
         const n = Math.max(10, overviewScaleCount(z.n, factor));
         return `<div class="ov-score-row">
-          <span class="ov-score-label">${esc(z.label)} (${n})</span>
+          <span class="ov-score-label">${esc(z.label)} <span class="ov-score-n">${n}</span></span>
           ${ovScoreBar(z.score, {warn})}
           <span class="ov-score-val${warn?" is-warn":""}">${z.score.toFixed(1)}</span>
         </div>`;
@@ -3078,16 +3069,10 @@ function crewScoreAggregate(){
     flags: crew.reduce((n,c)=>n+c.flags,0)
   };
 }
-function kpiTargetLine(ok, target, highIsBad){
-  const label = esc(`Target ${target}`);
-  if(ok) return `On target · ${label}`;
-  const word = highIsBad ? "Above target" : "Below target";
-  return `<span class="kpi-delta is-down">${word}</span> · ${label}`;
-}
 function kpiCompareLine(ok, detail, highIsBad){
   const text = esc(detail);
   if(ok) return text;
-  const word = highIsBad ? "Above target" : "Below target";
+  const word = highIsBad ? "Above average" : "Below average";
   return `<span class="kpi-delta is-down">${word}</span> · ${text}`;
 }
 function cardCrewScorecard(){
@@ -3098,19 +3083,19 @@ function cardCrewScorecard(){
   const flags = overviewScaleCount(a.flags, factor);
   const flagCap = 3 * a.crewCount;
   const rows = [
-    { name:"Average care · Q1", sub: kpiTargetLine(a.q1>=4.0, "4.0 / 5"),
-      val:`${a.q1.toFixed(1)} / 5`, pct:(a.q1/5)*100, target:(4.0/5)*100 },
-    { name:"Would recommend · Q2", sub: kpiTargetLine(a.rec>=65, "65%"),
-      val:`${a.rec}%`, pct:a.rec, target:65 },
-    { name:"Felt listened to · Q3", sub: kpiTargetLine(a.listen>=80, "80%"),
-      val:`${a.listen}% yes`, pct:a.listen, target:80 },
-    { name:"Felt cared for · Q4", sub: kpiTargetLine(a.care>=80, "80%"),
-      val:`${a.care}% yes`, pct:a.care, target:80 },
+    { name:"Average care · Q1", sub:"",
+      val:`${a.q1.toFixed(1)} / 5`, pct:(a.q1/5)*100 },
+    { name:"Would recommend · Q2", sub:"",
+      val:`${a.rec}%`, pct:a.rec },
+    { name:"Felt listened to · Q3", sub:"",
+      val:`${a.listen}% yes`, pct:a.listen },
+    { name:"Felt cared for · Q4", sub:"",
+      val:`${a.care}% yes`, pct:a.care },
     { name:"Commendations", sub:"Total across all crew",
       val:String(commend),
       pct: Math.min(100, Math.max(0, Math.ceil(commend/4))/25*100) },
-    { name:"Flagged responses", sub: kpiTargetLine(flags<=flagCap, `≤ ${flagCap}`, true),
-      val:String(flags), pct: (flags/Math.max(flagCap,1))*100, target:100, invert:true }
+    { name:"Flagged responses", sub:"Lower is better",
+      val:String(flags), pct: (flags/Math.max(flagCap,1))*100, invert:true }
   ];
   const ledgerRows = rows.map(r=>({
     ...r,
@@ -3159,32 +3144,30 @@ function scorecardSurveyMetrics(c){
   const rows = [
     { name:"Average care · Q1",
       sub: kpiCompareLine(c.q1>=4.0, "Agency avg: 4.2 / 5"),
-      val:`${c.q1.toFixed(1)} / 5`, pct:(c.q1/5)*100, target:(4.2/5)*100 },
+      val:`${c.q1.toFixed(1)} / 5`, pct:(c.q1/5)*100 },
     { name:"Would recommend · Q2",
       sub: kpiCompareLine(c.rec>=65, "Agency avg: 69%"),
-      val:`${c.rec}%`, pct:c.rec, target:69 }
+      val:`${c.rec}%`, pct:c.rec }
   ];
   if(c.listen!=null){
     rows.push({ name:"Felt listened to · Q3",
       sub: kpiCompareLine(c.listen>=80, "Agency avg: 79%"),
-      val:`${c.listen}% yes`, pct:c.listen, target:79 });
+      val:`${c.listen}% yes`, pct:c.listen });
   }
   if(c.care!=null){
     rows.push({ name:"Felt cared for · Q4",
       sub: kpiCompareLine(c.care>=80, "Agency avg: 81%"),
-      val:`${c.care}% yes`, pct:c.care, target:81 });
+      val:`${c.care}% yes`, pct:c.care });
   }
   rows.push(
     { name:"Commendations",
       sub: kpiCompareLine(true, "Agency avg: 6.4 per crew"),
       val:String(c.commend),
-      pct: Math.min(100, Math.max(0, Math.ceil(c.commend/4))/25*100),
-      target: Math.min(100, Math.ceil(6.4/4)/25*100) },
+      pct: Math.min(100, Math.max(0, Math.ceil(c.commend/4))/25*100) },
     { name:"Flagged responses",
       sub: kpiCompareLine(c.flags<=3, "Agency avg: 3.8 · lower is better", true),
       val:String(c.flags),
       pct: Math.min(100, (c.flags/6)*100),
-      target: Math.min(100, (3.8/6)*100),
       warn: c.flags>3 }
   );
   return rows;
@@ -3192,11 +3175,11 @@ function scorecardSurveyMetrics(c){
 function ovMetricsLedger(rows){
   return `<div class="ov-ledger">
     ${rows.map(r=>{
-      const meter = ovMeter(r.pct, {target:r.target, warn:!!r.warn});
+      const meter = ovMeter(r.pct, {warn:!!r.warn});
       return `<div class="ov-metric">
         <div class="ov-metric-copy">
           <div class="ov-metric-name">${esc(r.name)}</div>
-          <div class="ov-metric-sub">${r.sub}</div>
+          ${r.sub?`<div class="ov-metric-sub">${r.sub}</div>`:""}
         </div>
         <div class="ov-metric-val">${esc(r.val)}</div>
         ${meter}
@@ -3673,8 +3656,8 @@ function triggerDrawer(callId){
           ? `<span class="fw-badge fw-badge--secondary">${esc(t.type||"Trigger")}</span>`
           : `<span class="fw-badge fw-badge--secondary">Unknown</span>`}
         <h2 class="t-h4 mt8 trigger-id-line" id="trigger-title">
-          <span class="t-subtle dim" style="font-weight:400">Trigger ID</span>
-          <span class="mono">${esc(call)}</span>
+          <span class="t-subtle dim" style="font-weight:400;font-size:14px">Trigger ID</span>
+          <span style="font-family:var(--font-sans);font-weight:400;font-size:14px">${esc(call)}</span>
         </h2>
         <p class="t-subtle dim">${t?esc(t.name):"No matching trigger definition"}</p>
       </div>
@@ -3816,6 +3799,13 @@ function caseMetaLine(ctx){
   const at = response?.at || alert?.at;
   return at ? ago(at) : "";
 }
+function placeholderIncidentNo(seed){
+  let h = 2166136261;
+  for(const ch of String(seed)){ h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
+  const letter = String.fromCharCode(65 + h % 26);
+  const digits = String(Math.imul(h, 2654435761) >>> 0).padStart(6,"0").slice(-6);
+  return letter + digits;
+}
 function caseDetailFields(ctx){
   const { alert, response } = ctx;
   if(!alert && !response) return null;
@@ -3826,7 +3816,9 @@ function caseDetailFields(ctx){
     zone: response?.zone || alert?.zone || "",
     band: response?.band || alert?.band || "",
     lang: response?.lang || alert?.lang || "",
-    phone: response?.phone || alert?.phone || ""
+    phone: response?.phone || alert?.phone || "",
+    incident: alert?.incident || response?.incident
+      || placeholderIncidentNo(`${alert?.id||""}|${response?.id||""}|${alert?.phone||response?.phone||""}`)
   };
 }
 function caseIncidentKv(ctx){
@@ -3835,6 +3827,7 @@ function caseIncidentKv(ctx){
   const unitCrew = [d.unit, d.crew].filter(Boolean).join(" — ");
   const dash = `<span class="dim">—</span>`;
   return `<dl class="kv">
+      <dt>Incident #</dt><dd>${esc(d.incident)}</dd>
       <dt>Unit / crew</dt><dd>${unitCrew?esc(unitCrew):dash}</dd>
       <dt>Call type</dt><dd>${d.call?esc(d.call):dash}</dd>
       <dt>Area</dt><dd>${d.zone?esc(d.zone):dash}</dd>
@@ -4217,8 +4210,15 @@ function surveyTriggerCell(s){
   const id = surveyDisplayTriggerId(s);
   if(!id) return `<span class="dim">—</span>`;
   const t = findTriggerDef(id);
-  const label = `Open trigger ${formatTriggerId(id)}${t?`, ${t.name}`:""}`;
-  return `<button type="button" class="num-link" onclick="openTrigger('${esc(id)}')" aria-label="${esc(label)}">${esc(formatTriggerId(id))}</button>`;
+  const num = formatTriggerId(id);
+  const tipId = `trig-tip-${esc(String(id).replace(/^#/,""))}-${esc(s.id||"")}`;
+  return `<span class="trig-tip" tabindex="0" aria-describedby="${tipId}">${esc(num)}
+    <span class="trig-tip__card" role="tooltip" id="${tipId}">
+      <span class="trig-tip__label">Trigger name</span>
+      <span class="trig-tip__name">${esc(t?t.name:"Unknown trigger")}</span>
+      <span class="trig-tip__meta">ID ${esc(String(id).replace(/^#/,""))} (internal)</span>
+    </span>
+  </span>`;
 }
 function surveyTriggerMeta(s){
   const id = surveyDisplayTriggerId(s);
@@ -4948,18 +4948,12 @@ function viewSurveysIndex(){
     <div class="tbl-inset">
     <table class="tbl tbl--stack tbl--surveys">
       <thead><tr>
-        <th class="fav"><span class="sr">Favorite</span></th>
         <th>Survey</th><th>Trigger ID</th><th>Status</th><th>Schedule</th><th>Responses</th><th>Response rate</th>
         <th class="morecol"><span class="sr">Actions</span></th>
       </tr></thead>
       <tbody>
         ${state.surveys.map(s=>`
           <tr>
-            <td class="fav sv-fav">
-              <button class="iconbtn star-btn" aria-pressed="${!!s.starred}"
-                aria-label="${s.starred?"Remove from favorites":"Add to favorites"}"
-                onclick="toggleStar('${s.id}')">${s.starred?I.starFill(18):I.star(18)}</button>
-            </td>
             <td class="sv-name">
               <a class="sv-title" href="#/surveys/${s.id}">${esc(s.name)}</a>
               ${s.description?`<div class="t-subtle dim sv-desc">${esc(s.description)}</div>`:""}
@@ -5525,7 +5519,7 @@ function cardByDemographic(){
         const warn = e.score < 4;
         const n = Math.max(10, overviewScaleCount(e.n, factor));
         return `<div class="ov-score-row">
-          <span class="ov-score-label">${esc(e.label)} (${n})</span>
+          <span class="ov-score-label">${esc(e.label)} <span class="ov-score-n">${n}</span></span>
           ${ovScoreBar(e.score, {warn})}
           <span class="ov-score-val${warn?" is-warn":""}">${e.score.toFixed(1)}</span>
         </div>`;
@@ -6477,9 +6471,8 @@ function surveyRowMenu(s){
     <button type="button" class="iconbtn" aria-label="More actions" aria-haspopup="menu" aria-expanded="${open}"
       onclick="toggleSurveyMenu('${s.id}',event)">${I.more(18)}</button>
     ${open?`<div class="menu" role="menu">
-      <button type="button" role="menuitem" onclick="toggleStar('${s.id}')">${I.star(16)} ${s.starred?"Unstar":"Star"}</button>
-      <div class="menu-sep"></div>
       ${locked?"":`<button type="button" role="menuitem" onclick="askRenameSurvey('${s.id}')">${I.pencil(16)} Rename</button>`}
+      ${surveyDisplayTriggerId(s)?`<button type="button" role="menuitem" onclick="event.preventDefault()">${I.externalLink(16)} View trigger</button>`:""}
       ${s.status!=="Draft"?`<button type="button" role="menuitem" onclick="go('#/surveys/${s.id}/responses')">${I.inbox(16)} View responses</button>`:""}
       ${s.status==="Live"?`<button type="button" role="menuitem" onclick="askStopSurvey('${s.id}')">${I.octagon(16)} Stop survey</button>`:""}
       <button type="button" role="menuitem" onclick="duplicateAndEdit('${s.id}')">${I.copy(16)} Duplicate &amp; edit</button>
@@ -6493,14 +6486,6 @@ function toggleSurveyMenu(id, e){
   render();
 }
 function closeSurveyMenu(){ if(!state.surveyMenu) return; state.surveyMenu = null; render(); }
-function toggleStar(id){
-  const s = state.surveys.find(x=>x.id===id);
-  if(!s) return;
-  s.starred = !s.starred;
-  state.surveyMenu = null;
-  render();
-}
-
 function renameDialog(id){
   const s = state.surveys.find(x=>x.id===id);
   if(!s) return "";
