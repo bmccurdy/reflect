@@ -1104,8 +1104,8 @@ button.num-link{
   margin-bottom:16px;font-size:14px;line-height:20px;
   position:relative;z-index:5;
 }
-.case-survey__name{font-weight:700;color:var(--foreground);text-decoration:none}
-.case-survey__name:hover{text-decoration:underline;color:var(--primary)}
+.case-survey__name{font-weight:700;color:var(--primary);text-decoration:none}
+.case-survey__name:hover{text-decoration:underline}
 .case-section{
   margin-top:24px;padding-top:16px;border-top:1px solid var(--border);
 }
@@ -2066,44 +2066,44 @@ const day = d => d.toLocaleDateString("en-US",{month:"short",day:"numeric"});
 const ALERTS = [
   { id:"A-4471", status:"critical", unit:"M-12", call:"Chest pain", crew:"Alvarez / Nwosu",
     quote:"Nobody told me where we were going or what the medicine was. I asked twice. I'm 78 years old and I was scared the whole ride.", at:mins(38), age:"78", band:"75+", lang:"English",
-    phone:"(516) 555-0142", zone:"Manhasset", log:[] },
+    phone:"(516) 555-0142", payor:"Medicare", zone:"Manhasset", log:[] },
   { id:"A-4470", status:"critical", unit:"E-7", call:"Fall, hip",
     crew:"Boyd / Trần",
     quote:"The stretcher slipped when they loaded me and nobody said sorry. My hip hurt worse after than before.", at:mins(96), age:"64", band:"55-64", lang:"English",
-    phone:"(516) 555-0198", zone:"Great Neck", log:[] },
+    phone:"(516) 555-0198", payor:"Medicaid", zone:"Great Neck", log:[] },
   { id:"A-4468", status:"elevated", unit:"M-3", call:"Difficulty breathing",
     crew:"Okafor / Reyes",
     quote:"They were fine but it took a long time and I could not breathe. I would drive myself next time.", at:mins(174), age:"51", band:"45-54", lang:"Spanish",
-    phone:"(516) 555-0174", zone:"New Hyde Park", log:[] },
+    phone:"(516) 555-0174", payor:"Medicare Advantage", zone:"New Hyde Park", log:[] },
   { id:"A-4465", status:"elevated", unit:"M-12", call:"Diabetic emergency",
     crew:"Alvarez / Nwosu",
     quote:"Rushed. I felt like a task on a list.", at:mins(320), age:"43", band:"35-44", lang:"English",
-    phone:"(516) 555-0116", zone:"Manhasset", log:[] },
+    phone:"(516) 555-0116", payor:"Commercial / private", zone:"Manhasset", log:[] },
   { id:"A-4462", status:"elevated", unit:"E-2", call:"MVC, no transport",
     crew:"Halloran / Pike",
     quote:"I did not want to go to the hospital and I felt pressured about it. Everything else was good.", at:mins(410), age:"29", band:"25-34", lang:"English",
-    phone:"(516) 555-0133", zone:"Port Washington", log:[] },
+    phone:"(516) 555-0133", payor:"Self-pay", zone:"Port Washington", log:[] },
   { id:"A-4472", status:"critical", unit:"M-3", call:"Abdominal pain, refused",
     crew:"Okafor / Reyes",
     quote:"I said I didn't want to go and they kept asking like I didn't mean it. Nobody asked why I was scared of the hospital.", at:mins(140), age:"52", band:"45-54", lang:"Spanish",
-    phone:"(516) 555-0161", zone:"New Hyde Park", log:[] },
+    phone:"(516) 555-0161", payor:"Medicare", zone:"New Hyde Park", log:[] },
   { id:"A-4473", status:"elevated", unit:"E-4", call:"Syncope, refused transport",
     crew:"Mercer / Li",
     quote:"They left quickly. I still don't know what could have happened if I stayed. I wouldn't call again.", at:mins(5200), age:"58", band:"55-64", lang:"Spanish",
-    phone:"(516) 555-0149", zone:"New Hyde Park", log:[] },
+    phone:"(516) 555-0149", payor:"VA", zone:"New Hyde Park", log:[] },
   { id:"A-4474", status:"resolved", unit:"M-8", call:"Weakness, refused",
     crew:"Sowande / Kim",
     quote:"I wanted someone to explain my options in plain language. The follow-up call helped.", at:mins(3100), age:"44", band:"35-44", lang:"English",
-    phone:"(516) 555-0171", zone:"Manhasset",
+    phone:"(516) 555-0171", payor:"Medicaid", zone:"Manhasset",
     log:[{ who:"K. Doyle", at:mins(3000), text:"Called patient. Reviewed AMA documentation and next steps. No crew action needed." }] },
   { id:"A-4459", status:"elevated", unit:"M-8", call:"Chest pain",
     crew:"Sowande / Kim",
     quote:"I told them about my allergy three times.", at:mins(1180), age:"67", band:"65-74", lang:"English",
-    phone:"(516) 555-0187", zone:"Great Neck", log:[] },
+    phone:"(516) 555-0187", payor:"TRICARE", zone:"Great Neck", log:[] },
   { id:"A-4455", status:"resolved", unit:"M-3", call:"Seizure",
     crew:"Okafor / Reyes",
     quote:"Freezing cold in the back and no blanket until I asked.", at:mins(1610), age:"38", band:"35-44", lang:"English",
-    phone:"(516) 555-0155", zone:"New Hyde Park",
+    phone:"(516) 555-0155", payor:"Commercial / private", zone:"New Hyde Park",
     log:[
       { who:"You", at:mins(1520), text:"Called and spoke with the patient. Apologized. She was satisfied with the call." },
       { who:"You", at:mins(1518), text:"Blanket stock on M-3 checked — restocked and flagged to shift lead." },
@@ -2112,7 +2112,7 @@ const ALERTS = [
   { id:"A-4451", status:"resolved", unit:"E-7", call:"Fall, wrist",
     crew:"Boyd / Trần",
     quote:"Long wait. The crew themselves were kind.", at:mins(2900), age:"81", band:"75+", lang:"English",
-    phone:"(516) 555-0129", zone:"Manhasset",
+    phone:"(516) 555-0129", payor:"Medicare", zone:"Manhasset",
     log:[{ who:"K. Doyle", at:mins(2760), text:"Left voicemail. Response time was 14 min — traffic on Northern Blvd. No action for crew." }] }
 ];
 
@@ -3983,10 +3983,9 @@ function caseSurveyLine(ctx){
   const { survey, surveyId } = ctx;
   if(!survey || !surveyId) return "";
   const id = surveyDisplayTriggerId(survey);
-  const t = id ? findTriggerDef(id) : null;
   return `<div class="case-survey">
     <a class="case-survey__name" href="#/surveys/${esc(surveyId)}" onclick="closeCase()">${esc(survey.name)}</a>
-    ${id?`<span class="t-subtle">${surveyTriggerCell(survey)}${t?` · ${esc(t.name)}`:""}</span>`:""}
+    ${id?`<span class="t-subtle">${surveyTriggerCell(survey)}</span>`:""}
   </div>`;
 }
 function caseMetaLine(ctx){
@@ -4012,6 +4011,7 @@ function caseDetailFields(ctx){
     band: response?.band || alert?.band || "",
     lang: response?.lang || alert?.lang || "",
     phone: response?.phone || alert?.phone || "",
+    payor: alert?.payor || response?.payor || "",
     incident: alert?.incident || response?.incident
       || placeholderIncidentNo(`${alert?.id||""}|${response?.id||""}|${alert?.phone||response?.phone||""}`)
   };
@@ -4029,6 +4029,7 @@ function caseIncidentKv(ctx){
       <dt>Age band</dt><dd>${d.band?esc(d.band):dash}</dd>
       <dt>Language</dt><dd>${d.lang?esc(d.lang):dash}</dd>
       <dt>Phone #</dt><dd>${d.phone?esc(d.phone):dash}</dd>
+      <dt>Payor</dt><dd>${d.payor?esc(d.payor):dash}</dd>
     </dl>`;
 }
 function caseAnswersHtml(response, qs, quote){
