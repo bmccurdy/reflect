@@ -600,6 +600,7 @@ html[data-theme="dark"] .ov-reading .ov-label{
 
 /* Reflect overview — combined frame */
 .main:has(.ovx){padding-top:0;padding-bottom:32px;background:var(--neutral-50)}
+.shell:has(.ovx){background:var(--neutral-50)}
 .ovx{padding-top:22px;color:var(--foreground)}
 .ovx-head{padding-bottom:16px}
 .ovx-head h1{font-size:26px;line-height:1.2;font-weight:700;letter-spacing:0}
@@ -764,14 +765,6 @@ html[data-theme="dark"] .ov-reading .ov-label{
   font-size:13px;line-height:normal;font-weight:700;color:var(--primary);
 }
 .ovx-link svg{display:block}
-.ovx-billing{
-  display:flex;flex-direction:column;align-items:flex-start;gap:5px;
-  width:100%;padding:14px 20px;border:0;border-top:1px solid var(--border);
-  background:transparent;text-align:left;cursor:pointer;color:inherit;
-}
-.ovx-billing small{font-size:11px;line-height:normal;color:var(--muted-foreground)}
-.ovx-billing strong{font-size:14px;line-height:normal;font-weight:700;color:var(--amber-700)}
-.ovx-billing span{font-size:12px;line-height:normal;color:var(--muted-foreground)}
 .ovx-part{display:flex;flex-direction:column;gap:16px;padding:20px;flex:1}
 .ovx-part h2{font-size:16px;line-height:normal;font-weight:700}
 .ovx-part__row{display:flex;align-items:center;justify-content:space-between;gap:16px}
@@ -2280,6 +2273,7 @@ document.getElementById("gate-form").addEventListener("submit", async e=>{
 const AGENCY = { name:"Prime County", id:"ag_cedar", short:"PC" };
 const NOW = new Date("2026-01-31T00:00:00");
 const mins = n => new Date(NOW.getTime() - n*60000);
+const daysAgo = n => new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate() - n, 12, 0, 0, 0);
 const ago = d => {
   const m = Math.round((NOW-d)/60000);
   if (m < 60) return m + "m ago";
@@ -2349,13 +2343,13 @@ const SURVEYS = [
     familyId:"sv_post", version:1, clonedFromId:null,
     description:"Follow-up after transport to a hospital or facility.",
     schedule:{ mode:"ongoing", durationDays:30, startAt:null, endAt:null },
-    publishedAt:mins(4320), endsAt:null, stoppedAt:null,
+    publishedAt:daysAgo(75), endsAt:null, stoppedAt:null,
     questions:7, responses:84, rate:31, sent:271, updated:mins(4320) },
   { id:"sv_notrans", name:"Refused transport follow-up", status:"Live", triggerId:"78396",
     familyId:"sv_notrans", version:1, clonedFromId:null,
     description:"Check-in when a patient declines transport.",
     schedule:{ mode:"duration", durationDays:90, startAt:null, endAt:null },
-    publishedAt:mins(11400), endsAt:new Date("2026-03-15T00:00:00"), stoppedAt:null,
+    publishedAt:daysAgo(75), endsAt:new Date("2026-03-15T00:00:00"), stoppedAt:null,
     questions:4, responses:19, rate:22, sent:86, updated:mins(11400) },
   { id:"sv_q3", name:"Q3 community perception", status:"Draft", triggerId:null,
     familyId:"sv_q3", version:1, clonedFromId:null,
@@ -2563,78 +2557,78 @@ const SURVEY_BANK = {
 
 const RESPONSES = {
   sv_post: [
-    { id:"R-9911", at:mins(38), band:"75+", lang:"English", zone:"Manhasset", alert:"A-4471",
+    { id:"R-9911", at:daysAgo(9), band:"75+", lang:"English", zone:"Manhasset", alert:"A-4471",
       answers:{ q1:"Unacceptable", q2:"Definitely not likely", q3:"No", q4:"No",
         q5:"", q6:"Nobody told me where we were going or what the medicine was. I asked twice. I'm 78 years old and I was scared the whole ride.", q7:"Yes" } },
-    { id:"R-9910", at:mins(96), band:"55–64", lang:"English", zone:"Great Neck", alert:"A-4470",
+    { id:"R-9910", at:daysAgo(12), band:"55–64", lang:"English", zone:"Great Neck", alert:"A-4470",
       answers:{ q1:"Poor", q2:"Not likely", q3:"Yes", q4:"No",
         q5:"The crew themselves were trying.", q6:"The stretcher slipped when they loaded me and nobody said sorry. My hip hurt worse after than before.", q7:"Yes" } },
-    { id:"R-9908", at:mins(174), band:"45–54", lang:"Spanish", zone:"New Hyde Park", alert:"A-4468",
+    { id:"R-9908", at:daysAgo(15), band:"45–54", lang:"Spanish", zone:"New Hyde Park", alert:"A-4468",
       answers:{ q1:"Fine", q2:"Not likely", q3:"Yes", q4:"Yes",
         q5:"They were calm.", q6:"They were fine but it took a long time and I could not breathe. I would drive myself next time.", q7:"No" } },
-    { id:"R-9907", at:mins(220), band:"35–44", lang:"English", zone:"Port Washington", alert:null,
+    { id:"R-9907", at:daysAgo(1), band:"35–44", lang:"English", zone:"Port Washington", alert:null,
       unit:"E-4", crew:"Mercer / Li", call:"Fall, assisted", phone:"(516) 555-0107",
       answers:{ q1:"Exceptional", q2:"Very likely", q3:"Yes", q4:"Yes",
         q5:"They explained every step and asked if I was cold.", q6:"", q7:"No" } },
-    { id:"R-9906", at:mins(320), band:"35–44", lang:"English", zone:"Manhasset", alert:"A-4465",
+    { id:"R-9906", at:daysAgo(18), band:"35–44", lang:"English", zone:"Manhasset", alert:"A-4465",
       answers:{ q1:"Poor", q2:"Not sure", q3:"No", q4:"No",
         q5:"", q6:"Rushed. I felt like a task on a list.", q7:"No" } },
-    { id:"R-9905", at:mins(480), band:"18–34", lang:"English", zone:"Great Neck", alert:null,
+    { id:"R-9905", at:daysAgo(2), band:"18–34", lang:"English", zone:"Great Neck", alert:null,
       unit:"M-7", crew:"Baptiste / Lee", call:"MVC, minor", phone:"(516) 555-0112",
       answers:{ q1:"Good", q2:"Somewhat likely", q3:"Yes", q4:"Yes",
         q5:"Got me there quickly.", q6:"A little loud in the back.", q7:"No" } },
-    { id:"R-9904", at:mins(1180), band:"65–74", lang:"English", zone:"Great Neck", alert:"A-4459",
+    { id:"R-9904", at:daysAgo(22), band:"65–74", lang:"English", zone:"Great Neck", alert:"A-4459",
       answers:{ q1:"Fine", q2:"Somewhat likely", q3:"Yes", q4:"No",
         q5:"", q6:"I told them about my allergy three times.", q7:"Yes" } },
-    { id:"R-9903", at:mins(1610), band:"35–44", lang:"English", zone:"New Hyde Park", alert:"A-4455",
+    { id:"R-9903", at:daysAgo(26), band:"35–44", lang:"English", zone:"New Hyde Park", alert:"A-4455",
       answers:{ q1:"Good", q2:"Very likely", q3:"Yes", q4:"Yes",
         q5:"Kind crew.", q6:"Freezing cold in the back and no blanket until I asked.", q7:"No" } },
-    { id:"R-9902", at:mins(2100), band:"55–64", lang:"English", zone:"Manhasset", alert:null,
+    { id:"R-9902", at:daysAgo(3), band:"55–64", lang:"English", zone:"Manhasset", alert:null,
       unit:"M-8", crew:"Sowande / Kim", call:"Weakness", phone:"(516) 555-0121",
       answers:{ q1:"Exceptional", q2:"Very likely", q3:"Yes", q4:"Yes", q5:"Everything. Thank you.", q6:"", q7:"No" } },
-    { id:"R-9901", at:mins(2900), band:"75+", lang:"English", zone:"Manhasset", alert:"A-4451",
+    { id:"R-9901", at:daysAgo(40), band:"75+", lang:"English", zone:"Manhasset", alert:"A-4451",
       answers:{ q1:"Fine", q2:"Not likely", q3:"Yes", q4:"Yes",
         q5:"The crew themselves were kind.", q6:"Long wait.", q7:"No" } },
-    { id:"R-9899", at:mins(3600), band:"25–34", lang:"English", zone:"New Hyde Park", alert:null,
+    { id:"R-9899", at:daysAgo(30), band:"25–34", lang:"English", zone:"New Hyde Park", alert:null,
       unit:"M-3", crew:"Okafor / Reyes", call:"Abdominal pain", phone:"(516) 555-0138",
       answers:{ q1:"Good", q2:"Very likely", q3:"Yes", q4:"Yes", q5:"", q6:"", q7:"No" } },
-    { id:"R-9898", at:mins(4200), band:"45–54", lang:"English", zone:"Port Washington", alert:null,
+    { id:"R-9898", at:daysAgo(30), band:"45–54", lang:"English", zone:"Port Washington", alert:null,
       unit:"E-2", crew:"Halloran / Pike", call:"Chest pain", phone:"(516) 555-0144",
       answers:{ q1:"Good", q2:"Somewhat likely", q3:"Yes", q4:"Yes",
         q5:"Quick and kind.", q6:"", q7:"No" } },
-    { id:"R-9897", at:mins(5100), band:"65–74", lang:"Spanish", zone:"Manhasset", alert:null,
+    { id:"R-9897", at:daysAgo(50), band:"65–74", lang:"Spanish", zone:"Manhasset", alert:null,
       unit:"M-12", crew:"Alvarez / Nwosu", call:"Difficulty breathing", phone:"(516) 555-0152",
       answers:{ q1:"Fine", q2:"Not sure", q3:"Yes", q4:"No",
         q5:"", q6:"I did not understand the questions they asked in the ambulance.", q7:"Yes" } },
-    { id:"R-9896", at:mins(6000), band:"18–34", lang:"English", zone:"Great Neck", alert:null,
+    { id:"R-9896", at:daysAgo(4), band:"18–34", lang:"English", zone:"Great Neck", alert:null,
       unit:"E-7", crew:"Boyd / Trần", call:"Anxiety / panic", phone:"(516) 555-0166",
       answers:{ q1:"Exceptional", q2:"Very likely", q3:"Yes", q4:"Yes",
         q5:"They let my sister ride along.", q6:"", q7:"No" } },
-    { id:"R-9895", at:mins(7200), band:"55–64", lang:"English", zone:"New Hyde Park", alert:null,
+    { id:"R-9895", at:daysAgo(58), band:"55–64", lang:"English", zone:"New Hyde Park", alert:null,
       unit:"M-19", crew:"Sanchez / Tran", call:"Chest pain", phone:"(516) 555-0177",
       answers:{ q1:"Poor", q2:"Not likely", q3:"No", q4:"Yes",
         q5:"", q6:"Drove too fast. I was already scared.", q7:"No" } },
-    { id:"R-9894", at:mins(8400), band:"75+", lang:"English", zone:"Manhasset", alert:null,
+    { id:"R-9894", at:daysAgo(6), band:"75+", lang:"English", zone:"Manhasset", alert:null,
       unit:"M-8", crew:"Sowande / Kim", call:"Fall, assisted", phone:"(516) 555-0183",
       answers:{ q1:"Good", q2:"Very likely", q3:"Yes", q4:"Yes", q5:"", q6:"", q7:"No" } }
   ],
   sv_notrans: [
-    { id:"R-4404", at:mins(410), band:"25–34", lang:"English", zone:"Port Washington", alert:"A-4462",
+    { id:"R-4404", at:daysAgo(10), band:"25–34", lang:"English", zone:"Port Washington", alert:"A-4462",
       answers:{ n1:"No", n2:"Yes", n3:"Yes", n4:"No" } },
-    { id:"R-4403", at:mins(900), band:"65–74", lang:"English", zone:"Great Neck", alert:null,
+    { id:"R-4403", at:daysAgo(2), band:"65–74", lang:"English", zone:"Great Neck", alert:null,
       unit:"E-7", crew:"Boyd / Trần", call:"Fall, refused", phone:"(516) 555-0191",
       answers:{ n1:"Yes", n2:"Yes", n3:"Yes", n4:"No" } },
-    { id:"R-4402", at:mins(1400), band:"45–54", lang:"Spanish", zone:"New Hyde Park", alert:"A-4472",
+    { id:"R-4402", at:daysAgo(16), band:"45–54", lang:"Spanish", zone:"New Hyde Park", alert:"A-4472",
       answers:{ n1:"No", n2:"Yes", n3:"No", n4:"Yes" } },
-    { id:"R-4401", at:mins(2200), band:"75+", lang:"English", zone:"Manhasset", alert:null,
+    { id:"R-4401", at:daysAgo(5), band:"75+", lang:"English", zone:"Manhasset", alert:null,
       unit:"M-12", crew:"Alvarez / Nwosu", call:"Weakness, refused", phone:"(516) 555-0194",
       answers:{ n1:"Yes", n2:"Yes", n3:"Yes", n4:"No" } },
-    { id:"R-4400", at:mins(3100), band:"35–44", lang:"English", zone:"Manhasset", alert:"A-4474",
+    { id:"R-4400", at:daysAgo(45), band:"35–44", lang:"English", zone:"Manhasset", alert:"A-4474",
       answers:{ n1:"Yes", n2:"Yes", n3:"Yes", n4:"Yes" } },
-    { id:"R-4399", at:mins(4000), band:"18–34", lang:"English", zone:"Great Neck", alert:null,
+    { id:"R-4399", at:daysAgo(30), band:"18–34", lang:"English", zone:"Great Neck", alert:null,
       unit:"M-7", crew:"Baptiste / Lee", call:"Anxiety, refused", phone:"(516) 555-0199",
       answers:{ n1:"Yes", n2:"Yes", n3:"Yes", n4:"Yes" } },
-    { id:"R-4398", at:mins(5200), band:"55–64", lang:"Spanish", zone:"New Hyde Park", alert:"A-4473",
+    { id:"R-4398", at:daysAgo(24), band:"55–64", lang:"Spanish", zone:"New Hyde Park", alert:"A-4473",
       answers:{ n1:"No", n2:"No", n3:"No", n4:"Yes" } }
   ],
   sv_q3: []
@@ -3857,11 +3851,6 @@ function ovxKey(which, e){
     if(row) ovxPick(which, row.key);
   }
 }
-function ovxJumpQuestion(surveyId, qid){
-  requestAnimationFrame(()=>{
-    document.getElementById("ovx-q-"+surveyId+"-"+qid)?.scrollIntoView({behavior:"smooth", block:"center"});
-  });
-}
 function viewOverview(){
   const slices = ovxSlices();
   const tagLabel = (OVX_TAGS.find(t=>t.key===state.overviewTag)||OVX_TAGS[0]).label;
@@ -3947,11 +3936,6 @@ function viewOverview(){
               </p>
               <a class="ovx-link" href="#/alerts">Open callback queue ${I.arrow(14)}</a>
             </div>
-            ${attention?`<button type="button" class="ovx-billing" onclick="ovxJumpQuestion('${esc(attention.surveyId)}','${esc(attention.q)}')">
-              <small>${esc(attention.surveyName)}</small>
-              <strong>${esc(attention.name)} needs attention</strong>
-              <span>Review this question in the table below.</span>
-            </button>`:""}
           </section>
           <section class="ovx-card ovx-part" aria-labelledby="ovx-part">
             <h2 id="ovx-part">Survey participation</h2>
