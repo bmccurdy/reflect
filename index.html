@@ -597,6 +597,232 @@ html[data-theme="dark"] .ov-reading .ov-label{
   padding-left:calc(184px + 16px);padding-right:48px;
   font-size:12px;line-height:20px;color:var(--muted-foreground);
 }
+
+/* Reflect overview — combined frame */
+.main:has(.ovx){padding-top:0;padding-bottom:32px;background:var(--neutral-50)}
+.ovx{padding-top:22px;color:var(--foreground)}
+.ovx-head{padding-bottom:16px}
+.ovx-head h1{font-size:26px;line-height:1.2;font-weight:700;letter-spacing:0}
+.ovx-head p{margin-top:5px;font-size:14px;line-height:normal;font-weight:400;color:var(--muted-foreground)}
+.ovx-filters{display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px;padding-bottom:20px}
+.ovx-filters .fw-btn.ovx-clear:not(.fw-btn--icon){
+  margin-left:auto;flex:0 0 auto;
+  height:36px;min-height:36px;padding:0 16px;
+}
+.ovx-field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.ovx-field--scope{width:300px}
+.ovx-field--std{width:220px}
+.ovx-field__label{font-size:12px;line-height:normal;font-weight:400;color:var(--muted-foreground)}
+.ovx-select{position:relative}
+.ovx-select__trigger{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  width:100%;height:36px;padding:0 12px;
+  background:var(--card);color:var(--foreground);
+  border:1px solid var(--border);border-radius:var(--r-md);
+  font-size:14px;line-height:normal;font-weight:400;text-align:left;cursor:pointer;
+}
+.ovx-select__trigger span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ovx-select__trigger svg{flex:0 0 auto;color:var(--muted-foreground)}
+.ovx-select__menu{
+  position:absolute;z-index:30;top:calc(100% + 4px);left:0;right:0;
+  margin:0;padding:4px;list-style:none;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r-md);
+  box-shadow:var(--shadow-md);max-height:420px;overflow:auto;
+}
+.ovx-select__opt{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  width:100%;min-height:32px;padding:6px 8px;border:0;border-radius:var(--r-sm);
+  background:transparent;color:var(--foreground);font-size:14px;line-height:20px;
+  font-weight:400;text-align:left;cursor:pointer;
+}
+.ovx-select__opt[aria-selected="true"]{font-weight:600}
+.ovx-select__opt[data-active],.ovx-select__opt:hover{background:var(--accent)}
+.ovx-select__opt svg{color:var(--primary);flex:0 0 auto}
+.ovx-select__dates{
+  display:flex;flex-direction:column;gap:8px;
+  margin-top:4px;padding:8px 4px 4px;border-top:1px solid var(--border);
+}
+.ovx-select__dates .fw-field{gap:4px}
+.ovx-select__dates .fw-label{
+  font-size:14px;line-height:20px;font-weight:400;color:var(--muted-foreground);
+}
+.ovx-select__dates input[type="date"].fw-input{
+  height:32px;min-height:32px;width:100%;padding:0 8px;
+  font-family:var(--font-sans);font-size:14px;line-height:20px;font-weight:400;
+  color:var(--foreground);
+}
+.ovx-select__dates input[type="date"].fw-input::-webkit-datetime-edit,
+.ovx-select__dates input[type="date"].fw-input::-webkit-datetime-edit-fields-wrapper,
+.ovx-select__dates input[type="date"].fw-input::-webkit-datetime-edit-text,
+.ovx-select__dates input[type="date"].fw-input::-webkit-datetime-edit-month-field,
+.ovx-select__dates input[type="date"].fw-input::-webkit-datetime-edit-day-field,
+.ovx-select__dates input[type="date"].fw-input::-webkit-datetime-edit-year-field{
+  font-size:14px;line-height:20px;font-weight:400;padding:0;
+}
+.ovx-workspace{display:flex;flex-direction:column;gap:20px;padding-bottom:24px}
+.ovx-top{display:grid;grid-template-columns:minmax(0,2.16fr) minmax(280px,1fr);gap:20px;align-items:stretch}
+.ovx-maincol,.ovx-side{display:flex;flex-direction:column;gap:20px;min-width:0}
+.ovx-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);
+  min-width:0;overflow:hidden;
+}
+.ovx-rule{background:var(--border);min-height:100%}
+.ovx-nps{display:flex;align-items:center;gap:14px;margin-top:10px}
+.ovx-nps__value{
+  font-size:52px;line-height:1;font-weight:900;color:var(--primary);letter-spacing:0;
+}
+.ovx-nps__name{font-size:13px;line-height:normal;font-weight:700}
+.ovx-nps__meta{display:flex;flex-direction:column;gap:6px}
+.ovx-delta{display:inline-flex;align-items:center;gap:3px;font-weight:700;line-height:normal}
+.ovx-delta svg{display:block}
+.ovx-delta--up{color:var(--green-700)}
+.ovx-delta--down{color:var(--red-600)}
+.ovx-delta--flat{color:var(--muted-foreground)}
+.ovx-dist{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.ovx-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--neutral-100)}
+.ovx-bar > span{height:8px;min-width:0}
+.ovx-bar__d{background:var(--red-600)}
+.ovx-bar__p{background:var(--neutral-400)}
+.ovx-bar__g{background:var(--primary)}
+.ovx-dist__labels{
+  display:flex;justify-content:space-between;gap:8px;
+  font-size:11px;line-height:normal;font-weight:400;
+}
+.ovx-dist__labels span:first-child{color:var(--red-600)}
+.ovx-dist__labels span:nth-child(2){color:var(--muted-foreground)}
+.ovx-dist__labels span:last-child{color:var(--primary)}
+.ovx-table__head{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:16px 20px;
+}
+.ovx-table__head h2{font-size:16px;line-height:normal;font-weight:700}
+.ovx-table__head p{margin-top:4px;font-size:12px;line-height:normal;color:var(--muted-foreground)}
+.ovx-legend{display:flex;align-items:center;gap:12px;flex:0 0 auto}
+.ovx-legend span{display:inline-flex;align-items:center;gap:5px;font-size:11px;line-height:normal;color:var(--muted-foreground)}
+.ovx-swatch{width:8px;height:8px;border-radius:2px;flex:0 0 auto}
+.ovx-swatch--d{background:var(--red-600)}
+.ovx-swatch--p{background:var(--neutral-400)}
+.ovx-swatch--g{background:var(--primary)}
+.ovx-qhead,.ovx-qrow{
+  display:grid;
+  grid-template-columns:minmax(180px,1.5fr) 112px 78px minmax(160px,1fr);
+  column-gap:16px;align-items:center;padding:0 20px;
+}
+.ovx-qhead.ovx-has-change,.ovx-qrow.ovx-has-change{
+  grid-template-columns:minmax(180px,1.5fr) 112px 72px 78px minmax(160px,1fr);
+}
+.ovx-qhead{
+  height:30px;background:var(--neutral-100);
+  font-size:12px;line-height:normal;font-weight:700;color:var(--muted-foreground);
+}
+.ovx-qrow{padding:12px 20px;border-top:1px solid var(--border);background:var(--card)}
+.ovx-qrow--warn{background:var(--amber-50)}
+.ovx-q{font-size:14px;line-height:1.35;font-weight:500}
+.ovx-qsrc{margin-top:2px;font-size:11px;line-height:normal;font-weight:400;color:var(--muted-foreground)}
+.ovx-qrow--warn .ovx-q{font-weight:700}
+.ovx-qnps{font-size:14px;line-height:normal;font-weight:600}
+.ovx-qrow--warn .ovx-qnps{color:var(--red-600)}
+.ovx-qrow .ovx-delta{font-size:13px}
+.ovx-qn{font-size:12px;line-height:normal;color:var(--muted-foreground)}
+.ovx-qdist{display:flex;align-items:center;min-width:0;height:26px}
+.ovx-qdist .ovx-bar{width:100%;height:26px;border-radius:var(--radius-md)}
+.ovx-qdist .ovx-bar > span{
+  display:flex;align-items:center;justify-content:center;
+  height:26px;min-width:0;overflow:hidden;container-type:inline-size;
+  color:var(--primary-foreground);
+  font-size:12px;line-height:14px;font-weight:700;
+}
+.ovx-qdist .ovx-bar > span b{font-weight:700;white-space:nowrap;visibility:hidden}
+@container (min-width: 32px){
+  .ovx-qdist .ovx-bar > span b{visibility:visible}
+}
+.ovx-caption{
+  display:flex;align-items:center;justify-content:center;height:34px;padding:0 20px;
+  font-size:11px;line-height:normal;color:var(--muted-foreground);text-align:center;
+}
+.ovx-follow{border-color:color-mix(in srgb,var(--amber-700) 32%,var(--amber-200))}
+.ovx-follow__head{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  padding:14px 20px;background:var(--amber-50);
+  font-size:16px;line-height:normal;font-weight:700;
+}
+.ovx-follow__flag{font-size:12px;line-height:normal;font-weight:700;color:var(--amber-700)}
+.ovx-callback{display:flex;flex-direction:column;gap:12px;padding:16px 20px 14px}
+.ovx-kicker{font-size:12px;line-height:normal;font-weight:700;color:var(--muted-foreground)}
+.ovx-queue{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.ovx-queue strong{
+  display:block;font-size:30px;line-height:normal;font-weight:900;color:var(--amber-700);
+}
+.ovx-queue strong.is-quiet{color:var(--foreground)}
+.ovx-queue span{display:block;margin-top:3px;font-size:12px;line-height:normal;font-weight:400;color:var(--muted-foreground)}
+.ovx-callback__note{font-size:13px;line-height:normal}
+.ovx-callback__meta{display:flex;gap:16px;font-size:12px;line-height:normal}
+.ovx-callback__meta .is-hot{color:var(--amber-700)}
+.ovx-callback__meta .is-dim{color:var(--muted-foreground)}
+.ovx-link{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:13px;line-height:normal;font-weight:700;color:var(--primary);
+}
+.ovx-link svg{display:block}
+.ovx-billing{
+  display:flex;flex-direction:column;align-items:flex-start;gap:5px;
+  width:100%;padding:14px 20px;border:0;border-top:1px solid var(--border);
+  background:transparent;text-align:left;cursor:pointer;color:inherit;
+}
+.ovx-billing small{font-size:11px;line-height:normal;color:var(--muted-foreground)}
+.ovx-billing strong{font-size:14px;line-height:normal;font-weight:700;color:var(--amber-700)}
+.ovx-billing span{font-size:12px;line-height:normal;color:var(--muted-foreground)}
+.ovx-part{display:flex;flex-direction:column;gap:16px;padding:20px;flex:1}
+.ovx-part h2{font-size:16px;line-height:normal;font-weight:700}
+.ovx-part__row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.ovx-part__name{font-size:13px;line-height:normal;font-weight:700}
+.ovx-part__sub{margin-top:5px;font-size:12px;line-height:normal;color:var(--muted-foreground)}
+.ovx-part__count{font-size:28px;line-height:normal;font-weight:900}
+.ovx-part__rate{font-size:22px;line-height:normal;font-weight:900;color:var(--primary)}
+.ovx-part__done{font-size:13px;line-height:normal;font-weight:700}
+.ovx-part__invited{font-size:12px;line-height:normal;color:var(--muted-foreground)}
+.ovx-part__block{display:flex;flex-direction:column;gap:9px}
+.ovx-part__note{font-size:11px;line-height:normal;color:var(--muted-foreground)}
+.ovx-hline{height:1px;background:var(--border)}
+.ovx-meter{height:6px;border-radius:3px;background:var(--neutral-100);overflow:hidden}
+.ovx-meter > span{display:block;height:6px;background:var(--primary);border-radius:3px}
+.ovx-meter > span.is-warn{background:var(--amber-700)}
+.ovx-ratebar{height:8px;border-radius:4px;background:var(--neutral-100);overflow:hidden}
+.ovx-ratebar > span{display:block;height:8px;background:var(--primary)}
+.ovx-who{display:flex;flex-direction:column;gap:16px;padding:20px}
+.ovx-who__head{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.ovx-who__head h2{font-size:16px;line-height:normal;font-weight:700}
+.ovx-who__head p{font-size:12px;line-height:normal;font-weight:700;color:var(--muted-foreground)}
+.ovx-who__grid{display:grid;grid-template-columns:minmax(280px,500px) 1px minmax(0,1fr);gap:24px;align-items:stretch}
+.ovx-block{display:flex;flex-direction:column;gap:10px;min-width:0}
+.ovx-block h3{font-size:14px;line-height:normal;font-weight:700}
+.ovx-block .ovx-sub{font-size:12px;line-height:normal;color:var(--muted-foreground)}
+.ovx-prow,.ovx-grow{
+  display:grid;align-items:center;column-gap:12px;height:27px;
+}
+.ovx-prow{grid-template-columns:160px minmax(0,1fr) 32px}
+.ovx-prow span,.ovx-grow span{font-size:13px;line-height:normal}
+.ovx-prow b,.ovx-grow b{font-size:13px;line-height:normal;font-weight:700;text-align:right}
+.ovx-demo-title{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.ovx-demo-title p{font-size:11px;line-height:normal;font-weight:400;color:var(--muted-foreground)}
+.ovx-demohead,.ovx-grow{grid-template-columns:180px 40px minmax(0,1fr) 44px}
+.ovx-demohead{
+  display:grid;align-items:center;column-gap:12px;
+  font-size:11px;line-height:normal;color:var(--muted-foreground);
+}
+.ovx-demohead span:last-child,.ovx-grow b{text-align:right}
+.ovx-grow .ovx-n{font-size:12px;color:var(--muted-foreground)}
+.ovx-grow b{font-size:14px}
+.ovx-grow b.is-warn{color:var(--amber-700)}
+.ovx-withheld{font-size:12px;line-height:normal;color:var(--muted-foreground)}
+.ovx-fine{font-size:11px;line-height:normal;color:var(--muted-foreground)}
+.ovx-empty{padding:8px 0 4px;font-size:13px;line-height:20px;color:var(--muted-foreground)}
+@media (max-width:1100px){
+  .ovx-top,.ovx-who__grid{grid-template-columns:minmax(0,1fr)}
+  .ovx-rule{display:none}
+  .ovx-field--scope,.ovx-field--std{width:min(300px,100%)}
+  .ovx-table__head{align-items:flex-start;flex-direction:column}
+}
 .al-reason{font-weight:400;text-align:left}
 .al-meta{display:none;margin-top:8px;color:var(--muted-foreground);font-size:13px;line-height:20px}
 
@@ -2595,6 +2821,15 @@ const state = {
   overviewPeriodActive:1,
   overviewCustomStart:"",
   overviewCustomEnd:"",
+  overviewScope:"all",
+  overviewScopeOpen:false,
+  overviewScopeActive:0,
+  overviewTag:"all",
+  overviewTagOpen:false,
+  overviewTagActive:0,
+  overviewPayer:"all",
+  overviewPayerOpen:false,
+  overviewPayerActive:0,
   pSlide:null,
   pBusy:false,
   pSelectOpen:null,
@@ -2894,6 +3129,7 @@ function overviewPeriodSetCustom(which, value){
   if(which==="start") state.overviewCustomStart = iso;
   else state.overviewCustomEnd = iso;
   state.overviewPeriod = "custom";
+  state.overviewPeriodOpen = true;
   render();
 }
 function overviewPeriodKey(e){
@@ -3059,8 +3295,8 @@ function overviewGroupScores(rows, specs, qs, keyFn, scale){
   }));
 }
 /** Everything the Overview cards need for the selected survey and date range. */
-function overviewData(){
-  const survey = overviewSurvey();
+function overviewData(survey){
+  survey = survey || overviewSurvey();
   if(!survey) return null;
   const qs = state.surveyQuestions[survey.id] || [];
   const all = responsesFor(survey.id);
@@ -3076,7 +3312,7 @@ function overviewData(){
   const comments = rows.filter(r=>textIds.some(id=>(r.answers[id]||"").trim())).length;
   const hasText = textIds.length>0;
   const flagged = rows.filter(r=>r.alert).length;
-  const alertIds = new Set(all.map(r=>r.alert).filter(Boolean));
+  const alertIds = new Set(rows.map(r=>r.alert).filter(Boolean));
   const openAlerts = state.alerts.filter(a=>alertIds.has(a.id) && a.status!=="resolved");
   const payors = OVERVIEW_PAYORS
     .map(x=>({ label:x.label, n:Math.round(completed*x.share) }))
@@ -3301,39 +3537,480 @@ function overviewEmptyCard(d){
     </div>
   </section>`;
 }
+const OVX_TAGS = [
+  { key:"all", label:"All tags" },
+  { key:"care", label:"Care" },
+  { key:"communication", label:"Communication" },
+  { key:"recommendation", label:"Recommendation" }
+];
+const OVX_FILTERS = {
+  scope:{ value:"overviewScope", open:"overviewScopeOpen", active:"overviewScopeActive" },
+  period:{ value:"overviewPeriod", open:"overviewPeriodOpen", active:"overviewPeriodActive" },
+  tag:{ value:"overviewTag", open:"overviewTagOpen", active:"overviewTagActive" },
+  payer:{ value:"overviewPayer", open:"overviewPayerOpen", active:"overviewPayerActive" }
+};
+function ovxLiveSurveys(){
+  return state.surveys.filter(s=>s.status==="Live");
+}
+function ovxScopeOptions(){
+  return [{ key:"all", label:"All surveys" }].concat(
+    ovxLiveSurveys().map(s=>({ key:s.id, label:s.name }))
+  );
+}
+function ovxPayerOptions(){
+  return [{ key:"all", label:"All payers" }].concat(
+    OVERVIEW_PAYORS.map(p=>({ key:p.label, label:p.label }))
+  );
+}
+function ovxOptions(which){
+  if(which==="scope") return ovxScopeOptions();
+  if(which==="tag") return OVX_TAGS;
+  if(which==="payer") return ovxPayerOptions();
+  return OVERVIEW_PERIODS;
+}
+function ovxNormalizeFilters(){
+  if(!ovxScopeOptions().some(o=>o.key===state.overviewScope)) state.overviewScope = "all";
+  if(!OVX_TAGS.some(o=>o.key===state.overviewTag)) state.overviewTag = "all";
+  if(!ovxPayerOptions().some(o=>o.key===state.overviewPayer)) state.overviewPayer = "all";
+}
+function ovxPeriodLabel(){
+  const p = OVERVIEW_PERIODS.find(x=>x.key===state.overviewPeriod) || OVERVIEW_PERIODS[1];
+  if(p.key==="custom") return overviewPeriodRangeLabel();
+  return p.label;
+}
+function ovxArrow(up){
+  return up
+    ? ic('<path d="M12 19V5"/><path d="m5 12 7-7 7 7"/>', 12)
+    : ic('<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>', 12);
+}
+function ovxDelta(n, tail){
+  if(n==null || Number.isNaN(Number(n))) return `<span class="ovx-delta ovx-delta--flat">—</span>`;
+  const up = n>=0;
+  const abs = Math.abs(n);
+  const num = Number.isInteger(abs) ? String(abs) : abs.toFixed(1);
+  const sign = n>0 ? "+" : n<0 ? "−" : "";
+  const cls = n===0 ? "ovx-delta--flat" : up ? "ovx-delta--up" : "ovx-delta--down";
+  return `<span class="ovx-delta ${cls}">${n===0?"":ovxArrow(up)} ${sign}${num}${tail||""}</span>`;
+}
+function ovxBarSeg(cls, n){
+  return `<span class="${cls}" style="flex:${n} ${n} 0">${n>0?`<b>${n}%</b>`:""}</span>`;
+}
+function ovxBar(d, p, g){
+  return `<div class="ovx-bar" role="img" aria-label="${d}% low, ${p}% middle, ${g}% high">
+    ${ovxBarSeg("ovx-bar__d", d)}
+    ${ovxBarSeg("ovx-bar__p", p)}
+    ${ovxBarSeg("ovx-bar__g", g)}
+  </div>`;
+}
+function ovxQuestionTag(name){
+  const n = String(name||"").toLowerCase();
+  if(n.includes("recommend")) return "recommendation";
+  if(n.includes("listen") || n.includes("explain") || n.includes("communicat")) return "communication";
+  return "care";
+}
+function ovxWarnMetric(m){
+  if(!m || !m.n) return false;
+  if(m.kind==="mean") return m.mean < 4;
+  if(m.kind==="top2") return m.pct < 65;
+  return m.pct < 80;
+}
+function ovxDistribution(q, rows){
+  const answered = rows.filter(r=>r.answers[q.id]!=null && r.answers[q.id]!=="");
+  if(!answered.length) return { d:0, p:0, g:0 };
+  const n = answered.length;
+  const pct = x => Math.round(x / n * 100);
+  let low = 0, mid = 0, high = 0;
+  if(q.type==="yesno"){
+    high = answered.filter(r=>r.answers[q.id]==="Yes").length;
+    low = n - high;
+  } else {
+    const opts = q.options || [];
+    answered.forEach(r=>{
+      const i = opts.indexOf(r.answers[q.id]);
+      if(i<0) return;
+      if(i<=1) high++;
+      else if(i===2) mid++;
+      else low++;
+    });
+  }
+  let d = pct(low), p = pct(mid), g = pct(high);
+  g = Math.max(0, g + (100 - (d + p + g)));
+  return { d, p, g };
+}
+function ovxPriorBounds(){
+  const b = overviewPeriodBounds();
+  const end = new Date(overviewStartOfDay(b.start).getTime() - 86400000);
+  return { start:overviewRollingStart(overviewPeriodDays(b), end), end };
+}
+function ovxSlice(survey){
+  const d = overviewData(survey);
+  if(!d) return null;
+  const qs = state.surveyQuestions[survey.id] || [];
+  const priorRows = responsesFor(survey.id).filter(r=>overviewInPeriod(r, ovxPriorBounds()));
+  const questions = d.metrics.map(m=>{
+    const q = qs.find(x=>x.id===m.q);
+    const idx = qs.findIndex(x=>x.id===m.q);
+    const prior = overviewMetricValue(m, priorRows, qs);
+    let delta = null;
+    if(m.n && prior.n){
+      delta = m.kind==="mean"
+        ? Math.round((m.mean - prior.mean) * 10) / 10
+        : m.pct - prior.pct;
+    }
+    return {
+      ...m,
+      surveyId:survey.id,
+      surveyName:survey.name,
+      qn: idx>=0 ? idx+1 : null,
+      prompt: q ? q.text : m.name,
+      tag: ovxQuestionTag(m.name),
+      dist: q ? ovxDistribution(q, d.rows) : { d:0, p:0, g:0 },
+      delta,
+      shown: Math.max(0, Math.round(m.n * d.scale)),
+      warn: ovxWarnMetric(m)
+    };
+  });
+  return { ...d, questions };
+}
+function ovxSlices(){
+  ovxNormalizeFilters();
+  const live = ovxLiveSurveys();
+  const picked = state.overviewScope==="all" ? live : live.filter(s=>s.id===state.overviewScope);
+  return picked.map(ovxSlice).filter(Boolean);
+}
+function ovxTagged(questions){
+  const tag = state.overviewTag || "all";
+  return questions.filter(q=>tag==="all" || q.tag===tag);
+}
+function ovxPayerShareOf(d){
+  if(state.overviewPayer==="all") return 1;
+  if(!d.completed) return 0;
+  const row = d.payors.find(p=>p.label===state.overviewPayer);
+  return row ? row.n / d.completed : 0;
+}
+function ovxPayorRows(slices){
+  const labels = state.overviewPayer==="all"
+    ? OVERVIEW_PAYORS.map(p=>p.label)
+    : [state.overviewPayer];
+  return labels.map(label=>({
+    label,
+    n: slices.reduce((sum,d)=>{
+      const row = d.payors.find(p=>p.label===label);
+      return sum + (row ? row.n : 0);
+    }, 0)
+  })).sort((a,b)=>b.n - a.n);
+}
+function ovxGroupRows(slices){
+  const map = new Map(OVERVIEW_GROUP_ORDER.map(label=>[label, { label, n:0, sum:0 }]));
+  slices.forEach(d=>{
+    const share = ovxPayerShareOf(d);
+    d.groups.forEach(g=>{
+      const bucket = map.get(g.label);
+      if(!bucket) return;
+      const n = Math.round(g.n * share);
+      bucket.n += n;
+      bucket.sum += g.score * n;
+    });
+  });
+  return OVERVIEW_GROUP_ORDER.map(label=>{
+    const g = map.get(label);
+    const held = g.n < OVERVIEW_MIN_GROUP;
+    const score = g.n ? g.sum / g.n : null;
+    return { label, n:g.n, score:held ? null : score, warn:!held && score<4 };
+  });
+}
+function ovxOpenAlerts(slices){
+  const ids = new Set();
+  slices.forEach(d=>d.rows.forEach(r=>{ if(r.alert) ids.add(r.alert); }));
+  return state.alerts.filter(a=>ids.has(a.id) && a.status!=="resolved");
+}
+function ovxAttention(questions){
+  const warned = questions.filter(q=>q.warn);
+  if(!warned.length) return null;
+  return warned.slice().sort((a,b)=>a.pct-b.pct)[0];
+}
+function ovxSelect(which, label, width){
+  const meta = OVX_FILTERS[which];
+  const options = ovxOptions(which);
+  const open = !!state[meta.open];
+  const current = which==="period" ? ovxPeriodLabel() : (options.find(o=>o.key===state[meta.value])||options[0]).label;
+  const active = Math.min(options.length-1, Math.max(0, state[meta.active]|0));
+  return `<div class="ovx-field ${width}">
+    <span class="ovx-field__label" id="ovx-${which}-label">${esc(label)}</span>
+    <div class="ovx-select${open?" is-open":""}">
+      <button type="button" class="ovx-select__trigger" id="ovx-${which}"
+        aria-haspopup="listbox" aria-expanded="${open}" aria-labelledby="ovx-${which}-label"
+        ${open?`aria-activedescendant="ovx-${which}-opt-${active}"`:""}
+        onclick="ovxToggle('${which}', event)" onkeydown="ovxKey('${which}', event)">
+        <span>${esc(current)}</span>${I.down(16)}
+      </button>
+      ${open?`<div class="ovx-select__menu" role="listbox" aria-labelledby="ovx-${which}-label">
+        ${options.map((o,i)=>{
+          const on = which==="period" ? o.key===state.overviewPeriod : o.key===state[meta.value];
+          return `<button type="button" class="ovx-select__opt" role="option" id="ovx-${which}-opt-${i}"
+            aria-selected="${on}" ${i===active?"data-active":""}
+            onmousedown="event.preventDefault()" onclick="ovxPick('${which}','${esc(o.key)}')">${esc(o.label)}${on?I.check(16):""}</button>`;
+        }).join("")}
+        ${which==="period" && state.overviewPeriod==="custom"?`<div class="ovx-select__dates">
+          <div class="fw-field">
+            <label class="fw-label" for="ov-period-start">Start</label>
+            <input class="fw-input" id="ov-period-start" type="date" aria-label="Start date"
+              value="${esc(toDateInputValue(overviewPeriodBounds().start))}" max="${esc(toDateInputValue(overviewToday()))}"
+              onmousedown="event.stopPropagation()" onchange="overviewPeriodSetCustom('start', this.value)">
+          </div>
+          <div class="fw-field">
+            <label class="fw-label" for="ov-period-end">End</label>
+            <input class="fw-input" id="ov-period-end" type="date" aria-label="End date"
+              value="${esc(toDateInputValue(overviewPeriodBounds().end))}" max="${esc(toDateInputValue(overviewToday()))}"
+              onmousedown="event.stopPropagation()" onchange="overviewPeriodSetCustom('end', this.value)">
+          </div>
+        </div>`:""}
+      </div>`:""}
+    </div>
+  </div>`;
+}
+function ovxFiltersAtDefault(){
+  return state.overviewScope==="all"
+    && state.overviewPeriod==="30d"
+    && !state.overviewCustomStart
+    && !state.overviewCustomEnd
+    && state.overviewTag==="all"
+    && state.overviewPayer==="all";
+}
+function ovxClearFilters(){
+  state.overviewScope = "all";
+  state.overviewScopeActive = 0;
+  state.overviewPeriod = "30d";
+  state.overviewPeriodActive = 1;
+  state.overviewCustomStart = "";
+  state.overviewCustomEnd = "";
+  state.overviewTag = "all";
+  state.overviewTagActive = 0;
+  state.overviewPayer = "all";
+  state.overviewPayerActive = 0;
+  ovxCloseMenus();
+  render();
+}
+function ovxCloseMenus(){
+  state.overviewScopeOpen = false;
+  state.overviewPeriodOpen = false;
+  state.overviewTagOpen = false;
+  state.overviewPayerOpen = false;
+  state.overviewSurveyOpen = false;
+}
+function ovxToggle(which, e){
+  if(e){ e.preventDefault(); e.stopPropagation(); }
+  const meta = OVX_FILTERS[which];
+  const next = !state[meta.open];
+  ovxCloseMenus();
+  state[meta.open] = next;
+  if(next){
+    const options = ovxOptions(which);
+    const cur = state[meta.value];
+    const idx = options.findIndex(o=>o.key===cur);
+    state[meta.active] = idx>=0 ? idx : 0;
+  }
+  render();
+  if(next){
+    document.getElementById("ovx-"+which)?.focus();
+    document.querySelector(`#ovx-${which}-opt-${state[meta.active]}`)?.scrollIntoView({block:"nearest"});
+  }
+}
+function ovxPick(which, key){
+  if(which==="period"){
+    overviewPeriodPick(key);
+    if(key==="custom"){
+      state.overviewPeriodOpen = true;
+      render();
+      document.getElementById("ov-period-start")?.focus();
+    }
+    return;
+  }
+  const meta = OVX_FILTERS[which];
+  if(ovxOptions(which).some(o=>o.key===key)) state[meta.value] = key;
+  state[meta.open] = false;
+  render();
+}
+function ovxKey(which, e){
+  const meta = OVX_FILTERS[which];
+  const options = ovxOptions(which);
+  const open = !!state[meta.open];
+  const n = options.length;
+  if(e.key==="Escape"){
+    if(open){ e.preventDefault(); state[meta.open] = false; render(); document.getElementById("ovx-"+which)?.focus(); }
+    return;
+  }
+  if(e.key==="ArrowDown" || e.key==="ArrowUp"){
+    e.preventDefault();
+    if(!open){ ovxToggle(which, e); return; }
+    const delta = e.key==="ArrowDown" ? 1 : -1;
+    state[meta.active] = (state[meta.active] + delta + n) % n;
+    render();
+    document.getElementById("ovx-"+which)?.focus();
+    document.querySelector(`#ovx-${which}-opt-${state[meta.active]}`)?.scrollIntoView({block:"nearest"});
+    return;
+  }
+  if(e.key==="Enter" || e.key===" "){
+    e.preventDefault();
+    if(!open){ ovxToggle(which, e); return; }
+    const row = options[state[meta.active]];
+    if(row) ovxPick(which, row.key);
+  }
+}
+function ovxJumpQuestion(surveyId, qid){
+  requestAnimationFrame(()=>{
+    document.getElementById("ovx-q-"+surveyId+"-"+qid)?.scrollIntoView({behavior:"smooth", block:"center"});
+  });
+}
 function viewOverview(){
-  const d = overviewData();
-  const hasData = !!(d && d.rows.length);
+  const slices = ovxSlices();
+  const tagLabel = (OVX_TAGS.find(t=>t.key===state.overviewTag)||OVX_TAGS[0]).label;
+  const questions = slices
+    .flatMap(d=>ovxTagged(d.questions))
+    .sort((a,b)=>b.pct-a.pct || b.shown-a.shown);
+  const payors = ovxPayorRows(slices);
+  const payorMax = Math.max(1, ...payors.map(x=>x.n));
+  const groups = ovxGroupRows(slices);
+  const alerts = ovxOpenAlerts(slices);
+  const callbacks = alerts.length;
+  const flagged = slices.reduce((sum,d)=>sum+Math.round(d.flagged*d.scale), 0);
+  const comments = slices.reduce((sum,d)=>sum+(d.hasText ? Math.round(d.comments*d.scale) : 0), 0);
+  const attention = ovxAttention(questions);
+  const showChange = questions.some(q=>q.delta!=null);
+  const period = ovxPeriodLabel();
+  const payer = state.overviewPayer==="all" ? "" : state.overviewPayer;
+  const quietQueue = callbacks===0;
+  const scopeName = slices.length===1 ? slices[0].survey.name : "Live surveys";
   return `
-  <div class="page-head">
-    <div class="between">
-      <div>
-        <h1 class="t-h2">Reflect overview</h1>
-        <p class="t-p dim">${esc(d?d.survey.name:AGENCY.name)} · ${esc(overviewPeriodRangeLabel())}</p>
-      </div>
-      <div class="ov-controls">
-        ${overviewSurveyControl()}
-        ${overviewPeriodControl()}
-      </div>
-    </div>
-  </div>
   ${staleBanner()}
-  <div class="ov-stack" aria-label="Survey results">
-    ${hasData?`
-    <div class="ov-row" aria-label="Priority signals">
-      ${cardQuality(d)}
-      ${cardCallback(d)}
+  <div class="ovx">
+    <header class="ovx-head">
+      <h1>Reflect overview</h1>
+      <p>Patient experience, survey participation and follow-up priorities.</p>
+    </header>
+    <div class="ovx-filters">
+      ${ovxSelect("scope","Survey scope","ovx-field--scope")}
+      ${ovxSelect("period","Date range","ovx-field--std")}
+      ${ovxSelect("tag","Tag","ovx-field--std")}
+      ${ovxSelect("payer","Primary payer","ovx-field--std")}
+      <button type="button" class="fw-btn fw-btn--outline fw-btn--md ovx-clear" onclick="ovxClearFilters()"${ovxFiltersAtDefault()?" disabled":""}>Clear all</button>
     </div>
-    <div class="ov-row" aria-label="Performance and participation">
-      ${cardCrewScorecard(d)}
-      ${cardFunnel(d)}
+    <div class="ovx-workspace">
+      ${slices.length?`<div class="ovx-top">
+        <div class="ovx-maincol">
+          <section class="ovx-card ovx-table" aria-labelledby="ovx-questions">
+            <div class="ovx-table__head">
+              <div>
+                <h2 id="ovx-questions">Question-level sentiment</h2>
+                <p>${esc(scopeName)}${showChange?" · Change vs the previous period":""}${tagLabel==="All tags"?"":" · "+esc(tagLabel)}</p>
+              </div>
+              <div class="ovx-legend" aria-hidden="true">
+                <span><i class="ovx-swatch ovx-swatch--d"></i>Low</span>
+                <span><i class="ovx-swatch ovx-swatch--p"></i>Middle</span>
+                <span><i class="ovx-swatch ovx-swatch--g"></i>High</span>
+              </div>
+            </div>
+            <div class="ovx-qhead${showChange?" ovx-has-change":""}">
+              <span>Question</span><span>Result</span>${showChange?"<span>Change</span>":""}<span>Sample</span><span>Distribution</span>
+            </div>
+            ${questions.length?questions.map(q=>`<div class="ovx-qrow${q.warn?" ovx-qrow--warn":""}${showChange?" ovx-has-change":""}" id="ovx-q-${esc(q.surveyId)}-${esc(q.q)}">
+              <div>
+                <p class="ovx-q">${esc(q.prompt)}</p>
+                <p class="ovx-qsrc">${esc(q.surveyName)}${q.qn?` · Q${q.qn}`:""}</p>
+              </div>
+              <p class="ovx-qnps">${esc(q.n?q.text:"—")}</p>
+              ${showChange?ovxDelta(q.delta):""}
+              <p class="ovx-qn">n = ${q.shown.toLocaleString("en-US")}</p>
+              <div class="ovx-qdist">
+                ${ovxBar(q.dist.d, q.dist.p, q.dist.g)}
+              </div>
+            </div>`).join(""):`<p class="ovx-empty">No questions carry this tag.</p>`}
+            <p class="ovx-caption">Low is a poor or no answer. High is a top-two choice or yes. Sorted by result, highest first.</p>
+          </section>
+        </div>
+        <div class="ovx-side">
+          <section class="ovx-card ovx-follow" aria-labelledby="ovx-follow">
+            <div class="ovx-follow__head">
+              <h2 id="ovx-follow">Follow-up priorities</h2>
+              <p class="ovx-follow__flag">${quietQueue && !attention ? "Clear" : "Needs attention"}</p>
+            </div>
+            <div class="ovx-callback">
+              <p class="ovx-kicker">${esc(scopeName)} · Callback queue</p>
+              <div class="ovx-queue">
+                <p><strong class="${quietQueue?"is-quiet":""}">${callbacks}</strong><span>Open callbacks</span></p>
+                <p><strong class="${quietQueue?"is-quiet":""}">${esc(quietQueue?"—":overviewOldestWait(alerts))}</strong><span>Oldest wait</span></p>
+              </div>
+              <p class="ovx-callback__note">${quietQueue?"No open callbacks in this range.":"Prioritize the longest-waiting patient."}</p>
+              <p class="ovx-callback__meta">
+                <span class="${flagged?"is-hot":"is-dim"}">${flagged.toLocaleString("en-US")} flagged responses</span>
+                <span class="is-dim">${comments.toLocaleString("en-US")} written comments</span>
+              </p>
+              <a class="ovx-link" href="#/alerts">Open callback queue ${I.arrow(14)}</a>
+            </div>
+            ${attention?`<button type="button" class="ovx-billing" onclick="ovxJumpQuestion('${esc(attention.surveyId)}','${esc(attention.q)}')">
+              <small>${esc(attention.surveyName)}</small>
+              <strong>${esc(attention.name)} needs attention</strong>
+              <span>Review this question in the table below.</span>
+            </button>`:""}
+          </section>
+          <section class="ovx-card ovx-part" aria-labelledby="ovx-part">
+            <h2 id="ovx-part">Survey participation</h2>
+            ${slices.map((d,i)=>`${i?`<div class="ovx-hline" aria-hidden="true"></div>`:""}
+              <div class="ovx-part__block">
+                <div class="ovx-part__row">
+                  <p class="ovx-part__name">${esc(d.survey.name)}</p>
+                  <p class="ovx-part__rate">${d.rate}%</p>
+                </div>
+                <div class="ovx-part__row">
+                  <p class="ovx-part__done">${d.completed.toLocaleString("en-US")} completed</p>
+                  <p class="ovx-part__invited">${d.invited.toLocaleString("en-US")} invitations delivered</p>
+                </div>
+                <div class="ovx-ratebar" role="img" aria-label="${d.rate}% response rate"><span style="width:${Math.max(0,Math.min(100,d.rate))}%"></span></div>
+                <p class="ovx-part__note">Live survey · Response rate of those invited</p>
+              </div>`).join("")}
+            ${slices.length>1?`<p class="ovx-part__note">Separate survey populations; totals are not combined.</p>`:""}
+          </section>
+        </div>
+      </div>
+      <section class="ovx-card ovx-who" aria-labelledby="ovx-who">
+        <div class="ovx-who__head">
+          <h2 id="ovx-who">Who is responding</h2>
+          <p>${esc(scopeName)} · ${esc(period)}${payer?` · ${esc(payer)}`:""}</p>
+        </div>
+        <div class="ovx-who__grid">
+          <div class="ovx-block">
+            <div>
+              <h3>Completed surveys by payor</h3>
+              <p class="ovx-sub">ePCR payor for ${slices.length>1?"these surveys":"this survey"} and date range</p>
+            </div>
+            ${payors.some(x=>x.n)?payors.map(x=>`<div class="ovx-prow">
+              <span>${esc(x.label)}</span>
+              <div class="ovx-meter" role="img" aria-label="${esc(x.label)} ${x.n}"><span style="width:${(x.n/payorMax*100).toFixed(1)}%"></span></div>
+              <b>${x.n.toLocaleString("en-US")}</b>
+            </div>`).join(""):`<p class="ovx-empty">No completed surveys in this range.</p>`}
+          </div>
+          <div class="ovx-rule" aria-hidden="true"></div>
+          <div class="ovx-block">
+            <div class="ovx-demo-title">
+              <h3>By demographic</h3>
+              <p>Average score out of 5 · Optional questions</p>
+            </div>
+            <div class="ovx-demohead">
+              <span>Group</span><span>n</span><span>Not every respondent is included</span><span>Score</span>
+            </div>
+            ${groups.map(g=>`<div class="ovx-grow">
+              <span>${esc(g.label)}</span>
+              <span class="ovx-n">${g.n.toLocaleString("en-US")}</span>
+              ${g.score==null
+                ? `<span class="ovx-withheld">Withheld</span><b>—</b>`
+                : `<div class="ovx-meter" role="img" aria-label="${esc(g.label)} ${g.score.toFixed(1)} of 5"><span class="${g.warn?"is-warn":""}" style="width:${(g.score/5*100).toFixed(1)}%"></span></div><b class="${g.warn?"is-warn":""}">${g.score.toFixed(1)}</b>`}
+            </div>`).join("")}
+            <p class="ovx-fine">Groups with fewer than 10 responses are withheld to preserve patient anonymity.</p>
+          </div>
+        </div>
+      </section>`:`<section class="ovx-card"><p class="ovx-empty">No live surveys to summarize.</p></section>`}
     </div>
-    <div class="ov-row ov-row--local" aria-label="Local experience">
-      ${cardPayorSurveys(d)}
-      ${cardByDemographic(d)}
-    </div>`:overviewEmptyCard(d)}
-  </div>
-`;
+  </div>`;
 }
 
 function scorecardSurveyMetrics(c){
@@ -7425,7 +8102,9 @@ window.addEventListener("keydown", e=>{
   if(e.key!=="Escape") return;
   if(state.triggerSelectOpen){ state.triggerSelectOpen = false; triggerSelectPaint(); return; }
   if(state.scheduleDurationOpen){ state.scheduleDurationOpen = false; scheduleDurationPaint(); return; }
-  if(state.overviewPeriodOpen){ state.overviewPeriodOpen = false; render(); return; }
+  if(state.overviewScopeOpen || state.overviewTagOpen || state.overviewPayerOpen || state.overviewPeriodOpen){
+    ovxCloseMenus(); render(); return;
+  }
   if(state.overviewSurveyOpen){ state.overviewSurveyOpen = false; render(); return; }
   if(state.pSelectOpen){ state.pSelectOpen = null; pSelectPaint(); return; }
   if(state.crewSelectOpen){ state.crewSelectOpen = false; crewSelectPaint(); return; }
@@ -7456,8 +8135,9 @@ window.addEventListener("mousedown", e=>{
     state.scheduleDurationOpen = false;
     scheduleDurationPaint(false);
   }
-  if(state.overviewPeriodOpen && !e.target.closest(".ov-period-wrap")){
-    state.overviewPeriodOpen = false;
+  if((state.overviewPeriodOpen || state.overviewScopeOpen || state.overviewTagOpen || state.overviewPayerOpen)
+    && !e.target.closest(".ov-period-wrap") && !e.target.closest(".ovx-select")){
+    ovxCloseMenus();
     render();
   }
   if(state.overviewSurveyOpen && !e.target.closest(".ov-survey-wrap")){
