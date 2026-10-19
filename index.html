@@ -1339,12 +1339,6 @@ button.num-link{
 .log li:last-child{border-bottom:0}
 
 /* builder */
-.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,400px);gap:24px;align-items:start}
-.preview-col{align-self:stretch}
-.preview-sticky{
-  position:sticky;top:72px;z-index:20;
-  background:transparent;
-}
 .trigger-assoc .fw-select{margin-top:0}
 .publish-setup-stack{display:flex;flex-direction:column;gap:20px}
 .publish-setup-label{
@@ -1511,33 +1505,15 @@ button.num-link{
 .qcard-select.locked.selected{
   background:color-mix(in srgb,var(--accent) 55%,var(--muted));
 }
-.intro-screen,
-.patient-module{cursor:pointer;transition:border-color var(--dur-micro) var(--ease-out),
+.intro-screen{transition:border-color var(--dur-micro) var(--ease-out),
   box-shadow var(--dur-micro) var(--ease-out),
   background-color var(--dur-micro) var(--ease-out)}
-.intro-screen:hover,
-.patient-module:hover{border-color:var(--muted-foreground)}
-.intro-screen.selected,
-.patient-module.selected{
+.intro-screen:hover{border-color:var(--muted-foreground)}
+.intro-screen.selected{
   border-color:var(--primary);
   box-shadow:0 0 0 1px var(--primary);
   background:var(--accent);
 }
-.patient-module{
-  border:1px solid var(--border);border-radius:var(--r-lg);background:var(--card);
-  padding:16px;margin-bottom:8px;
-}
-.patient-module-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.patient-module-title{
-  margin:0;font-size:16px;line-height:24px;font-weight:700;
-  letter-spacing:-.01em;color:var(--foreground);
-}
-.patient-module-switch{display:flex;flex:0 0 auto;padding-top:2px}
-.patient-module.is-off:not(.selected){background:var(--muted)}
-.patient-module.is-off .patient-module-body{color:var(--muted-foreground)}
-.patient-module-fields{margin:12px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}
-.patient-module-fields li{font-size:13px;line-height:18px;color:var(--muted-foreground)}
-.phone-frame.is-excluded .patient{opacity:.72}
 .intro-screen-copy{min-width:0}
 .intro-excerpt{
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
@@ -1570,7 +1546,11 @@ button.num-link{
   background:var(--primary);color:var(--primary-foreground);border-color:var(--primary);
 }
 .lib-chip[aria-pressed="true"]:hover{background:var(--primary-hover);color:var(--primary-foreground)}
-.lib-list{margin-top:16px;max-height:360px;overflow-y:auto}
+.lib-list{margin-top:16px;overflow-y:auto}
+.builder-detail .lib-list{
+  min-height:360px;
+  max-height:max(360px, calc(100vh - var(--lib-list-top, 28rem) - 32px));
+}
 .grip{
   color:var(--muted-foreground);cursor:grab;line-height:1;
   padding:4px 2px;margin:-4px 0;flex-shrink:0;user-select:none;
@@ -1596,17 +1576,87 @@ button.num-link{
 .iconbtn svg{pointer-events:none}
 .iconbtn:hover{background:var(--accent);color:var(--accent-foreground)}
 .iconbtn[disabled]{opacity:.5;cursor:not-allowed}
-.phone-frame{
-  height:fit-content;
-  border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;
-  background:var(--muted);
-}
-.phone-frame .cap{
-  display:flex;align-items:center;gap:8px;
-  padding:8px 16px;font-size:12px;line-height:20px;color:var(--muted-foreground);
-  border-bottom:1px solid var(--border);background:var(--card);
-}
 .addrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+
+.builder{
+  display:grid;
+  grid-template-columns:280px minmax(0,1fr);
+  gap:24px;
+  align-items:start;
+}
+.builder-nav{
+  position:sticky;
+  top:16px;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  max-height:calc(100vh - 32px);
+  overflow:auto;
+  padding:8px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+}
+.builder-nav-label{
+  margin:12px 10px 4px;
+  font-size:12px;
+  line-height:16px;
+  font-weight:700;
+  color:var(--muted-foreground);
+}
+.builder-nav-label:first-child{margin-top:4px}
+.builder-nav-item{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  width:100%;
+  margin:0;
+  padding:8px 10px;
+  border:0;
+  border-radius:var(--r-md);
+  background:transparent;
+  color:var(--foreground);
+  font:inherit;
+  font-size:14px;
+  line-height:20px;
+  font-weight:500;
+  text-align:left;
+  cursor:pointer;
+}
+.builder-nav-item:hover{background:var(--surface-hover)}
+.builder-nav-item[aria-current="true"]{
+  background:var(--accent);
+  color:var(--primary);
+  font-weight:700;
+}
+.builder-nav-ico,
+.builder-nav-num{
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  width:16px;
+  height:20px;
+  color:var(--muted-foreground);
+  font-size:12px;
+  font-weight:700;
+  font-variant-numeric:tabular-nums;
+}
+.builder-nav-item[aria-current="true"] .builder-nav-ico,
+.builder-nav-item[aria-current="true"] .builder-nav-num{color:var(--primary)}
+.builder-nav-text{
+  min-width:0;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.builder-detail{min-width:0}
+.builder-detail > .sec{margin-top:0}
+.builder-detail .intro-excerpt{
+  display:block;
+  -webkit-line-clamp:unset;
+  overflow:visible;
+}
 
 .preview-overlay{
   position:fixed;inset:0;z-index:56;
@@ -1824,7 +1874,8 @@ html[data-theme="dark"] .patient{
   .nav-drawer-foot{display:flex}
 }
 @media (max-width:1080px){
-  .split{grid-template-columns:1fr}
+  .builder{grid-template-columns:minmax(0,1fr)}
+  .builder-nav{position:static;max-height:none}
   .score-split{grid-template-columns:minmax(0,1fr)}
   .score-index{display:none}
   .score-hero-static{display:none}
@@ -1863,7 +1914,6 @@ html[data-theme="dark"] .patient{
   }
   .score-crew-opt-meta{font-size:13px;line-height:20px;color:var(--muted-foreground)}
   .score-crew-select .fw-select__menu{max-height:min(360px,50vh)}
-  .preview-col,.preview-sticky{position:static;align-self:auto;z-index:auto}
   .main{padding:24px 16px 120px}
   .topbar-inner{padding:0 12px;gap:8px}
   .topbar .demo-switch{display:none}
@@ -2383,7 +2433,6 @@ function normalizeSurvey(s){
   out.priorTriggerId = out.priorTriggerId != null
     ? String(out.priorTriggerId).replace(/^#/,"")
     : null;
-  out.patientQuestions = out.patientQuestions !== false;
   out.description = typeof out.description==="string" ? out.description : "";
   return out;
 }
@@ -2400,7 +2449,6 @@ function surveyPageChanged(s){
   if(sch.startAt || sch.endAt) return true;
   if(String(s.introTitle||"").trim() || String(s.introBody||"").trim()) return true;
   if(String(s.description||"").trim()) return true;
-  if(s.patientQuestions === false) return true;
   return false;
 }
 function canSendTestSms(s, qs){
@@ -2826,9 +2874,7 @@ const state = {
   overviewPayerActive:0,
   pSlide:null,
   pBusy:false,
-  pSelectOpen:null,
-  pSelectActive:0,
-  survey:{ step:0, answers:{}, showDemo:false, demo:{}, locale:"en" }
+  survey:{ step:0, answers:{}, locale:"en" }
 };
 </script>
 <script>
@@ -2879,6 +2925,7 @@ const I = {
   trendUp:    s=>ic('<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',s),
   trendDown:  s=>ic('<polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/>',s),
   menu:       s=>ic('<line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/>',s),
+  list:       s=>ic('<line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/>',s),
   globe:      s=>ic('<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 1 0 20 14.5 14.5 0 0 1 0-20"/><path d="M2 12h20"/>',s)
 };
 
@@ -4906,13 +4953,8 @@ function syncQuestionCount(id){
   if(s) s.questions = (state.surveyQuestions[id]||[]).length;
 }
 function previewingIntro(){ return state.previewQId==="intro"; }
-function previewingDemo(){ return state.previewQId==="demo"; }
-function surveyIncludesPatientQuestions(s){
-  const survey = s || currentSurvey();
-  return !survey || survey.patientQuestions !== false;
-}
 function previewQIndex(){
-  if(previewingIntro() || previewingDemo()) return -1;
+  if(previewingIntro()) return -1;
   const qs = qList();
   if(!qs.length) return -1;
   const i = qs.findIndex(q=>q.id===state.previewQId);
@@ -4969,67 +5011,11 @@ function previewIntroKey(e){
   e.preventDefault();
   selectPreviewIntro();
 }
-function selectPreviewDemo(){
-  if(state.suppressQClick || state.dragQId) return;
-  if(previewingDemo()) return;
-  state.previewQId = "demo";
-  render();
-}
-function previewDemoKey(e){
-  if(e.target!==e.currentTarget) return;
-  if(e.key!=="Enter" && e.key!==" ") return;
-  e.preventDefault();
-  selectPreviewDemo();
-}
-function togglePatientQuestions(id, on){
-  const s = state.surveys.find(x=>x.id===id);
-  if(!s || isSurveyLocked(s)) return;
-  s.patientQuestions = !!on;
-  s.updated = NOW;
-  state.previewQId = "demo";
-  render();
-}
-function patientQuestionsCard(s){
-  const on = surveyIncludesPatientQuestions(s);
-  const locked = isSurveyLocked(s);
-  const selected = previewingDemo();
-  const status = on
-    ? "Shown after the last question."
-    : locked
-      ? "Not included in this version."
-      : "Not included. Turn this on to add the screen after the last question.";
-  return `
-  <div class="patient-module${on?"":" is-off"}${selected?" selected":""}"
-    tabindex="0"${selected?` aria-current="true"`:""}
-    onclick="selectPreviewDemo()" onkeydown="previewDemoKey(event)">
-    <div class="patient-module-head">
-      <div>
-        <h3 class="patient-module-title">Questions about the patient</h3>
-        <p class="t-subtle dim mt8">Patients can skip every field. Reflect uses the answers only to compare experience across groups.</p>
-      </div>
-      <label class="patient-module-switch" onclick="if(!this.querySelector('.fw-switch').disabled) event.stopPropagation()">
-        <span class="sr">Include questions about the patient</span>
-        <input type="checkbox" class="fw-switch" role="switch"
-          ${on?"checked":""}${locked?" disabled":""}
-          onchange="togglePatientQuestions('${s.id}', this.checked)">
-      </label>
-    </div>
-    <ul class="patient-module-fields">
-      <li>${esc(P_UI.en.ageLabel)}</li>
-      <li>${esc(P_UI.en.langLabel)}</li>
-      <li>${esc(P_UI.en.ethLabel)}</li>
-    </ul>
-    <p class="t-detail dim mt8">${status}</p>
-  </div>`;
-}
 function introScreenCard(s){
   const surveyLocked = isSurveyLocked(s);
-  const selected = previewingIntro();
   const copy = introStaffCopy(s, (state.surveyQuestions[s.id]||[]).length);
   return `
-  <div class="fw-card sec intro-screen${selected?" selected":""}"
-    tabindex="0"${selected?` aria-current="true"`:""}
-    onclick="selectPreviewIntro()" onkeydown="previewIntroKey(event)">
+  <div class="fw-card sec intro-screen">
     <div class="between between--inline">
       <div class="intro-screen-copy">
         <h2 class="t-h4">Welcome screen</h2>
@@ -5444,7 +5430,7 @@ function surveyLockBanner(s){
     <div class="fw-alert fw-alert--info survey-lock-banner" role="status">
       <span class="fw-alert__icon">${I.lock(20)}</span>
       <div>
-        <p class="fw-alert__desc"><strong>Live — editing locked.</strong> This survey is collecting responses. Questions, the optional patient screen, trigger, and schedule can’t change on this version.</p>
+        <p class="fw-alert__desc"><strong>Live — editing locked.</strong> This survey is collecting responses. Questions, trigger, and schedule can’t change on this version.</p>
       </div>
     </div>`;
   }
@@ -5835,13 +5821,151 @@ function viewSurveysIndex(){
     </div>`}`;
 }
 
+function builderSection(s, qs){
+  const locked = isSurveyLocked(s);
+  const id = state.previewQId;
+  if(id==="intro" || id==="publish" || id==="delete" || id==="questions") return id;
+  if(id==="library" && !locked) return "library";
+  if(id==="benchmark" && !locked) return "benchmark";
+  if(qs.length) return "questions";
+  return "publish";
+}
+function selectBuilderSection(id){
+  if(state.suppressQClick || state.dragQId) return;
+  if(state.previewQId===id) return;
+  state.triggerSelectOpen = false;
+  state.scheduleDurationOpen = false;
+  state.previewQId = id;
+  render();
+}
+function builderNavItem(id, label, current, icon){
+  return `<button type="button" class="builder-nav-item"${current?` aria-current="true"`:""} onclick="selectBuilderSection('${id}')">
+    <span class="${icon?"builder-nav-ico":"builder-nav-num"}" aria-hidden="true">${icon||""}</span>
+    <span class="builder-nav-text">${label}</span>
+  </button>`;
+}
+function builderQuestions(qs, surveyLocked){
+  const required = qs.filter(q=>q.required).length;
+  return `
+  <div class="fw-card">
+    <div class="between between--inline" style="margin-bottom:16px">
+      <div>
+        <h2 class="t-h4">Questions</h2>
+        <p class="t-subtle dim mt8">${surveyLocked
+          ? "Question wording is locked on this version."
+          : "Move a question with the arrows. Edit wording and required with the pencil. Benchmark questions can't be edited."}</p>
+      </div>
+      ${qs.length?`<span class="fw-badge fw-badge--outline">${required} required</span>`:""}
+    </div>
+    ${qs.length?qs.map((q,i)=>`
+      <div class="qcard${q.locked?" locked":""}" data-qid="${q.id}">
+        <div class="qcard-body">
+          <div class="t-pui" style="font-weight:700">${esc(q.text)}</div>
+          <div class="qmeta">
+            <span class="fw-badge fw-badge--secondary">${TYPE_LABEL[q.type]}</span>
+            ${q.required?`<span class="fw-badge fw-badge--outline">Required</span>`:`<span class="t-detail dim">Optional</span>`}
+            ${q.locked?`<span class="fw-badge fw-badge--outline">${I.lock(12)} Benchmark</span>`:""}
+          </div>
+          ${q.locked && q.lockNote?`<p class="t-subtle dim mt8">${esc(q.lockNote)}</p>`:""}
+          ${q.help?`<p class="t-subtle dim mt8">${esc(q.help)}</p>`:""}
+        </div>
+        ${surveyLocked?"":`<div class="qbtns">
+          <button class="iconbtn" aria-label="Move up" ${i===0?"disabled":""} onclick="moveQ(${i},-1)">${I.up(16)}</button>
+          <button class="iconbtn" aria-label="Move down" ${i===qs.length-1?"disabled":""} onclick="moveQ(${i},1)">${I.down(16)}</button>
+          <button class="iconbtn" aria-label="Edit" title="${q.locked?"Benchmark questions can't be edited":"Edit question"}"
+            ${q.locked?"disabled":`onclick="openEditQuestion('${q.id}')"`}>${I.pencil(16)}</button>
+          <button class="iconbtn" aria-label="Remove" title="Remove question" onclick="removeQ('${q.id}')">${I.trash(16)}</button>
+        </div>`}
+      </div>`).join("")
+      : `<p class="t-subtle dim">${surveyLocked?"No questions on this version.":"No questions yet. Add one from Add a question."}</p>`}
+  </div>`;
+}
+function builderLibrary(qs){
+  return `
+  <div class="fw-card">
+    <h2 class="t-h4">Add a question</h2>
+    <p class="t-subtle dim mt8">Start blank, or use wording other agencies have already tested.</p>
+    <div class="addrow">
+      <button class="fw-btn fw-btn--outline fw-btn--sm" onclick="addQ('yesno')">${I.plus(16)} Yes / no</button>
+      <button class="fw-btn fw-btn--outline fw-btn--sm" onclick="addQ('scale')">${I.plus(16)} Rating</button>
+      <button class="fw-btn fw-btn--outline fw-btn--sm" onclick="addQ('choice')">${I.plus(16)} Multiple choice</button>
+      <button class="fw-btn fw-btn--outline fw-btn--sm" onclick="addQ('text')">${I.plus(16)} Written answer</button>
+    </div>
+    <div class="questions-lib">
+      <h3 class="questions-lib__heading">From library</h3>
+      <p class="t-subtle dim mt8">Wording other agencies have already tested.</p>
+      <div class="lib-filters" role="group" aria-label="Filter library">
+        ${LIB_FILTERS.map(([id,label])=>`
+          <button type="button" class="lib-chip" aria-pressed="${state.libraryFilter===id}"
+            onclick="setLibraryFilter('${id}')">${label}</button>`).join("")}
+      </div>
+      <div class="lib-list">
+        ${(() => {
+          const filter = state.libraryFilter;
+          const rows = filter==="all" ? LIBRARY
+            : filter==="benchmark" ? LIBRARY.filter(l=>l.benchmark)
+            : LIBRARY.filter(l=>l.category===filter);
+          const added = new Set(qs.map(q=>q.text.trim().toLowerCase()));
+          if(!rows.length) return `<p class="t-subtle dim">No questions in this category.</p>`;
+          return rows.map(l=>{
+            const already = added.has(l.text.trim().toLowerCase());
+            return `
+          <div class="qcard${already?" added":""}" data-lib-id="${l.id}">
+            <div class="qcard-body">
+              <div class="t-pui">${esc(l.text)}</div>
+              <div class="qmeta">
+                <span class="fw-badge fw-badge--secondary">${esc(l.category)}</span>
+                <span class="fw-badge fw-badge--outline">${TYPE_LABEL[l.type]||l.type}</span>
+                ${l.benchmark?`<span class="fw-badge fw-badge--outline">${I.lock(12)} Benchmark</span>`:""}
+              </div>
+            </div>
+            <button class="fw-btn fw-btn--${already?"outline":"primary"} fw-btn--sm"
+              ${already?"disabled":""} onclick="addFromLib('${l.id}')">${already?"Added":"Add"}</button>
+          </div>`;
+          }).join("");
+        })()}
+      </div>
+    </div>
+  </div>`;
+}
+function builderBenchmark(lockedQs){
+  return `
+  <div class="fw-card" style="background:var(--muted)">
+    <div class="row" style="align-items:flex-start;gap:12px">
+      <span class="dim" style="padding-top:2px">${I.shield(18)}</span>
+      <div>
+        <h2 class="t-h4">Benchmarking</h2>
+        <p class="t-body dim mt8">${lockedQs
+          ? `${lockedQs===1?"One question":lockedQs+" questions"} in this survey use shared wording so results can be compared
+          across participating agencies. You keep your own questions alongside them. Leaving the benchmark
+          means ${lockedQs===1?"that question becomes":"those questions become"} editable and your agency drops out of comparison.`
+          : "This survey isn't in the benchmark. Add the shared questions if you want results compared across agencies."}</p>
+      </div>
+    </div>
+  </div>`;
+}
+function builderDelete(s){
+  return `
+  <div class="fw-card" style="border-color:color-mix(in srgb,var(--destructive) 35%,var(--border))">
+    <h2 class="t-h4">Delete this survey</h2>
+    <p class="t-subtle dim mt8">${s.status==="Live" && s.responses
+      ? `This survey is live with ${s.responses} response${s.responses===1?"":"s"}. Prefer Stop survey to end collection and keep history. Deleting removes responses from Reflect.`
+      : s.status==="Live"
+      ? "This survey is live. Prefer Stop survey to release the trigger. Deleting removes it from Reflect."
+      : s.status==="Draft"
+      ? "This draft hasn't been sent yet. Deleting it removes the survey and its questions."
+      : "This version is no longer collecting. Deleting removes it and its responses from Reflect."} This can't be undone.</p>
+    <button class="fw-btn fw-btn--sm fw-btn--ghost-destructive mt16" onclick="askDeleteSurvey('${s.id}')">
+      ${I.trash(16)} Delete survey</button>
+  </div>`;
+}
 function viewSurveys(){
   const s = currentSurvey();
   if(!s) return viewSurveysIndex();
   const qs = qList();
   const lockedQs = qs.filter(q=>q.locked).length;
   const surveyLocked = isSurveyLocked(s);
-  const previewIdx = previewQIndex();
+  const section = builderSection(s, qs);
   const meta = surveyTitleMeta(s);
   const hasQuestions = qs.length > 0;
   const previewBtn = `<button class="fw-btn fw-btn--outline" type="button"${hasQuestions
@@ -5922,135 +6046,25 @@ function viewSurveys(){
     </div>
   </div>
   ${surveyLockBanner(s)}
-  <div class="split">
-    <div>
-      ${triggerAssocCard(s)}
-      ${introScreenCard(s)}
-      <div class="fw-card sec">
-        <div class="between between--inline" style="margin-bottom:16px">
-          <div>
-            <h2 class="t-h4">Questions</h2>
-            <p class="t-subtle dim mt8">${surveyLocked
-              ? "Question wording is locked on this version."
-              : "Drag to reorder. Edit wording and required with the pencil. Benchmark questions can't be edited."}</p>
-          </div>
-          <span class="fw-badge fw-badge--outline">${qs.filter(q=>q.required).length} required</span>
-        </div>
-        ${qs.length?qs.map((q,i)=>`
-          <div class="qcard qcard-select ${q.locked?"locked":""} ${i===previewIdx?"selected":""}"
-            data-qid="${q.id}" tabindex="0" aria-current="${i===previewIdx?"true":"false"}"
-            onclick="selectPreviewQ('${q.id}')" onkeydown="previewQKey(event,'${q.id}')"
-            ${surveyLocked?"":`ondragover="qDragOver(event)" ondragenter="qDragEnter(event)" ondrop="qDrop(event)"`}>
-            <span class="grip" ${surveyLocked||q.locked?"":`draggable="true"`} aria-hidden="true"
-              ${surveyLocked||q.locked?"":`ondragstart="qDragStart(event)" ondragend="qDragEnd()"`}>${surveyLocked||q.locked?I.lock(16):I.grip(16)}</span>
-            <div class="qcard-body">
-              <div class="t-pui" style="font-weight:700">${esc(q.text)}</div>
-              <div class="qmeta">
-                <span class="fw-badge fw-badge--secondary">${TYPE_LABEL[q.type]}</span>
-                ${q.required?`<span class="fw-badge fw-badge--outline">Required</span>`:`<span class="t-detail dim">Optional</span>`}
-                ${q.locked?`<span class="fw-badge fw-badge--outline">${I.lock(12)}Benchmark</span>`:""}
-              </div>
-              ${q.locked?`<p class="t-subtle dim mt8">${esc(q.lockNote)}</p>`:""}
-              ${q.help?`<p class="t-subtle dim mt8">${esc(q.help)}</p>`:""}
-            </div>
-            ${surveyLocked?"":`<div class="qbtns" onclick="event.stopPropagation()">
-              <button class="iconbtn" aria-label="Move up"   ${i===0?"disabled":""} onclick="moveQ(${i},-1)">${I.up(16)}</button>
-              <button class="iconbtn" aria-label="Move down" ${i===qs.length-1?"disabled":""} onclick="moveQ(${i},1)">${I.down(16)}</button>
-              <button class="iconbtn" aria-label="Edit" title="${q.locked?"Benchmark questions can't be edited":"Edit question"}"
-                ${q.locked?"disabled":`onclick="openEditQuestion('${q.id}')"`}>${I.pencil(16)}</button>
-              <button class="iconbtn" aria-label="Remove" title="Remove question" onclick="removeQ('${q.id}')">${I.trash(16)}</button>
-            </div>`}
-          </div>`).join("") : `<p class="t-subtle dim" style="margin-bottom:16px">${surveyLocked?"No questions on this version.":"No questions yet. Add one, or pick from the library."}</p>`}
-        ${patientQuestionsCard(s)}
-        ${surveyLocked?"":`<div class="addrow">
-          <button class="fw-btn fw-btn--outline fw-btn--sm" onclick="addQ('yesno')">${I.plus(16)} Yes / no</button>
-          <button class="fw-btn fw-btn--outline fw-btn--sm" onclick="addQ('scale')">${I.plus(16)} Rating</button>
-          <button class="fw-btn fw-btn--outline fw-btn--sm" onclick="addQ('choice')">${I.plus(16)} Multiple choice</button>
-          <button class="fw-btn fw-btn--outline fw-btn--sm" onclick="addQ('text')">${I.plus(16)} Written answer</button>
-        </div>
-        <div class="questions-lib">
-          <h3 class="questions-lib__heading">From library</h3>
-          <p class="t-subtle dim mt8">Wording other agencies have already tested.</p>
-          <div class="lib-filters" role="group" aria-label="Filter library">
-            ${LIB_FILTERS.map(([id,label])=>`
-              <button type="button" class="lib-chip" aria-pressed="${state.libraryFilter===id}"
-                onclick="setLibraryFilter('${id}')">${label}</button>`).join("")}
-          </div>
-          <div class="lib-list">
-            ${(() => {
-              const filter = state.libraryFilter;
-              const rows = filter==="all" ? LIBRARY
-                : filter==="benchmark" ? LIBRARY.filter(l=>l.benchmark)
-                : LIBRARY.filter(l=>l.category===filter);
-              const added = new Set(qs.map(q=>q.text.trim().toLowerCase()));
-              if(!rows.length) return `<p class="t-subtle dim">No questions in this category.</p>`;
-              return rows.map(l=>{
-                const already = added.has(l.text.trim().toLowerCase());
-                return `
-              <div class="qcard${already?" added":""}" data-lib-id="${l.id}">
-                <div class="qcard-body">
-                  <div class="t-pui">${esc(l.text)}</div>
-                  <div class="qmeta">
-                    <span class="fw-badge fw-badge--secondary">${esc(l.category)}</span>
-                    <span class="fw-badge fw-badge--outline">${TYPE_LABEL[l.type]||l.type}</span>
-                    ${l.benchmark?`<span class="fw-badge fw-badge--outline">${I.lock(12)}Benchmark</span>`:""}
-                  </div>
-                </div>
-                <button class="fw-btn fw-btn--${already?"outline":"primary"} fw-btn--sm"
-                  ${already?"disabled":""} onclick="addFromLib('${l.id}')">${already?"Added":"Add"}</button>
-              </div>`;
-              }).join("");
-            })()}
-          </div>
-        </div>`}
-      </div>
-
-      ${surveyLocked?"":`<div class="fw-card sec" style="background:var(--muted)">
-        <div class="row" style="align-items:flex-start;gap:12px">
-          <span class="dim" style="padding-top:2px">${I.shield(18)}</span>
-          <div>
-            <h2 class="t-h4">Benchmarking</h2>
-            <p class="t-body dim mt8">${lockedQs
-              ? `${lockedQs===1?"One question":"Two questions"} in this survey use shared wording so results can be compared
-              across participating agencies. You keep your own questions alongside them. Leaving the benchmark
-              means ${lockedQs===1?"that question becomes":"those questions become"} editable and your agency drops out of comparison.`
-              : "This survey isn't in the benchmark. Add the shared questions if you want results compared across agencies."}</p>
-          </div>
-        </div>
-      </div>`}
-
-      <div class="fw-card sec" style="border-color:color-mix(in srgb,var(--destructive) 35%,var(--border))">
-        <h2 class="t-h4">Delete this survey</h2>
-        <p class="t-subtle dim mt8">${s.status==="Live" && s.responses
-          ? `This survey is live with ${s.responses} response${s.responses===1?"":"s"}. Prefer Stop survey to end collection and keep history. Deleting removes responses from Reflect.`
-          : s.status==="Live"
-          ? "This survey is live. Prefer Stop survey to release the trigger. Deleting removes it from Reflect."
-          : s.status==="Draft"
-          ? "This draft hasn't been sent yet. Deleting it removes the survey and its questions."
-          : "This version is no longer collecting. Deleting removes it and its responses from Reflect."} This can't be undone.</p>
-        <button class="fw-btn fw-btn--sm fw-btn--ghost-destructive mt16" onclick="askDeleteSurvey('${s.id}')">
-          ${I.trash(16)} Delete survey</button>
-      </div>
-    </div>
-
-    <div class="preview-col">
-      <div class="preview-sticky">
-        <div class="phone-frame${previewingDemo() && !surveyIncludesPatientQuestions(s)?" is-excluded":""}">
-          <div class="cap">${I.radio(16)} ${previewingIntro()
-            ? "Welcome — what the patient sees"
-            : previewingDemo()
-            ? (surveyIncludesPatientQuestions(s)
-              ? "After the last question — what the patient sees"
-              : "Not included — turn it on to add this screen")
-            : previewIdx>=0
-            ? `Question ${previewIdx+1} of ${qs.length} — what the patient sees`
-            : "Live preview — what the patient sees"}</div>
-          <div>${patientPreview()}</div>
-        </div>
-        <p class="t-subtle dim mt16">${surveyLocked
-          ? "Preview of this locked version."
-          : "Preview reflects unsaved changes. Publish to send this version."}</p>
-      </div>
+  <div class="builder">
+    <nav class="builder-nav" aria-label="Survey sections">
+      <div class="builder-nav-label">Setup</div>
+      ${builderNavItem("publish", surveyLocked?"Associated trigger":"Publish setup", section==="publish", I.bolt(16))}
+      ${builderNavItem("intro", "Welcome screen", section==="intro", I.info(16))}
+      ${builderNavItem("questions", "Questions", section==="questions", I.list(16))}
+      ${surveyLocked?"":`<div class="builder-nav-label">More</div>
+      ${builderNavItem("library", "Add a question", section==="library", I.plus(16))}
+      ${builderNavItem("benchmark", "Benchmarking", section==="benchmark", I.shield(16))}`}
+      <div class="builder-nav-label">Survey</div>
+      ${builderNavItem("delete", "Delete survey", section==="delete", I.trash(16))}
+    </nav>
+    <div class="builder-detail">
+      ${section==="publish"?triggerAssocCard(s):""}
+      ${section==="intro"?introScreenCard(s):""}
+      ${section==="questions"?builderQuestions(qs, surveyLocked):""}
+      ${section==="library"?builderLibrary(qs):""}
+      ${section==="benchmark"?builderBenchmark(lockedQs):""}
+      ${section==="delete"?builderDelete(s):""}
     </div>
   </div>`;
 }
@@ -6407,11 +6421,8 @@ const P_UI = {
     introAlert:"Your answers go to a supervisor, not to the crew who treated you. Nothing here changes your bill or your care.",
     start:"Start",
     next:"Next",
-    almostDone:"Almost done",
     back:"Back",
     skip:"Skip",
-    demoTitle:"Three questions about you — only if you want.",
-    demoBody:"We ask so we can check whether some people get a worse experience than others. You can send your answers without filling any of this in.",
     send:"Send my answers",
     thanksTitle:"Thank you — that's genuinely useful.",
     thanksBody:"Someone at {agency} will read this. You don't need to do anything else.",
@@ -6421,12 +6432,8 @@ const P_UI = {
     previewEmpty:"Add a question to see the patient preview.",
     yes:"Yes",
     no:"No",
-    preferNot:"Prefer not to say",
     textPlaceholder:"Type your answer…",
     charCount:"{n} of 600",
-    ageLabel:"Your age",
-    langLabel:"The language you're most comfortable in",
-    ethLabel:"How you describe your race or ethnicity",
     footRef:"Reflect · {agency} · reference {ref}",
     foot:"Reflect · {agency}",
     demoBar:"Patient view · demo",
@@ -6443,11 +6450,8 @@ const P_UI = {
     introAlert:"Sus respuestas van a un supervisor, no a la tripulación que lo atendió. Nada aquí cambia su factura ni su atención.",
     start:"Comenzar",
     next:"Siguiente",
-    almostDone:"Casi listo",
     back:"Atrás",
     skip:"Saltar",
-    demoTitle:"Tres preguntas sobre usted — solo si quiere.",
-    demoBody:"Las hacemos para ver si algunas personas tienen una peor experiencia que otras. Puede enviar sus respuestas sin completar esto.",
     send:"Enviar mis respuestas",
     thanksTitle:"Gracias — eso es de mucha ayuda.",
     thanksBody:"Alguien en {agency} leerá esto. No necesita hacer nada más.",
@@ -6457,12 +6461,8 @@ const P_UI = {
     previewEmpty:"Agregue una pregunta para ver la vista previa del paciente.",
     yes:"Sí",
     no:"No",
-    preferNot:"Prefiero no decir",
     textPlaceholder:"Escriba su respuesta…",
     charCount:"{n} de 600",
-    ageLabel:"Su edad",
-    langLabel:"El idioma en el que se siente más cómodo",
-    ethLabel:"Cómo describe su raza o etnia",
     footRef:"Reflect · {agency} · referencia {ref}",
     foot:"Reflect · {agency}",
     demoBar:"Vista del paciente · demo",
@@ -6605,7 +6605,6 @@ function pSetLocale(id){
   if(!P_LOCALES.some(l=>l.id===id)) return;
   if(state.survey.locale===id) return;
   state.survey.locale = id;
-  state.pSelectOpen = null;
   pPaint();
 }
 function pLangSwitch(){
@@ -6630,59 +6629,6 @@ function pDemoBar(){
   return `<div class="p-demo">
     <span>${esc(pT("demoBar"))}</span>
     <button class="fw-btn fw-btn--outline fw-btn--sm" type="button" onclick="go('#/')">${esc(pT("backStaff"))}</button>
-  </div>`;
-}
-const P_DEMO = {
-  age:{
-    id:"p-age", labelKey:"ageLabel",
-    options:["18–24","25–34","35–44","45–54","55–64","65–74","75 or older"]
-  },
-  lang:{
-    id:"p-lang", labelKey:"langLabel",
-    options:["English","Spanish","Vietnamese","Tagalog","Arabic","Another language"]
-  },
-  eth:{
-    id:"p-eth", labelKey:"ethLabel",
-    options:["American Indian or Alaska Native","Asian","Black or African American",
-      "Hispanic or Latino","Middle Eastern or North African",
-      "Native Hawaiian or Pacific Islander","White","More than one"]
-  }
-};
-function pSelectValues(key){ return [""].concat(P_DEMO[key].options); }
-function pSelectField(key, opts){
-  const spec = P_DEMO[key];
-  const values = pSelectValues(key);
-  const val = state.survey.demo[key] || "";
-  const open = !opts?.static && state.pSelectOpen===key;
-  const active = Math.min(values.length-1, Math.max(0, state.pSelectActive|0));
-  const blank = pT("preferNot");
-  const shown = val ? pTo(val) : blank;
-  const label = pT(spec.labelKey);
-  const frozen = !!(opts && opts.static);
-  const trigger = frozen
-    ? `<div class="fw-select__trigger" aria-hidden="true">${esc(shown)}</div>`
-    : `<button type="button" class="fw-select__trigger" id="${spec.id}"
-        aria-haspopup="listbox" aria-expanded="${open}"
-        aria-labelledby="${spec.id}-label ${spec.id}"
-        aria-controls="${spec.id}-list"
-        ${open?`aria-activedescendant="${spec.id}-opt-${active}"`:""}
-        onclick="pSelectToggle('${key}',event)" onkeydown="pSelectKey('${key}',event)">${esc(shown)}</button>`;
-  return `<div class="fw-field p-fieldset">
-    <span class="fw-label"${frozen?"":` id="${spec.id}-label"`}>${esc(label)}</span>
-    <div class="fw-select${open?" is-open":""}">
-      ${trigger}
-      <span class="fw-select__chevron">${I.down(16)}</span>
-      ${open?`<div class="fw-select__menu" id="${spec.id}-list" role="listbox" aria-labelledby="${spec.id}-label">
-        ${values.map((o,i)=>{
-          const selected = val===o;
-          const labelOpt = o ? pTo(o) : blank;
-          return `<div class="fw-select__opt" role="option" id="${spec.id}-opt-${i}"
-            data-value="${esc(o)}" aria-selected="${selected}"${i===active?" data-active":""}
-            onmousedown="event.preventDefault()"
-            onclick="pSelectPick('${key}',this)">${esc(labelOpt)}${selected?I.check(16):""}</div>`;
-        }).join("")}
-      </div>`:""}
-    </div>
   </div>`;
 }
 function pProgress(total, idx){
@@ -6757,75 +6703,12 @@ function pIntroContent(total, embed){
       </div>
     </div>`;
 }
-function patientDemoBody(total, embed){
-  return `
-    ${total>0?pProgress(total, total):""}
-    <div class="p-step">
-      <span class="fw-badge fw-badge--secondary">${esc(pT("optional"))}</span>
-    </div>
-    <h1 class="t-h3 mt8">${esc(pT("demoTitle"))}</h1>
-    <p class="t-body dim mt8">${esc(pT("demoBody"))}</p>
-    ${pSelectField("age", embed?{static:true}:undefined)}
-    ${pSelectField("lang", embed?{static:true}:undefined)}
-    ${pSelectField("eth", embed?{static:true}:undefined)}`;
-}
-function patientDemoPreview(){
-  const total = qList().length;
-  return `<div class="patient patient--embed" lang="${esc(pLocale())}">
-    <div class="p-wrap">
-      ${pLangSwitch()}
-      <div class="p-lock">${I.lock(12)} ${esc(pT("private",{agency:AGENCY.name}))}</div>
-      <div class="p-card">
-        ${patientDemoBody(total, true)}
-        <div class="p-actions">
-          <div class="p-cta">
-            <button type="button" class="fw-btn fw-btn--primary fw-btn--lg p-next" tabindex="-1">${esc(pT("send"))}</button>
-            <button type="button" class="fw-btn fw-btn--link p-back" tabindex="-1">${esc(pT("back"))}</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>`;
-}
-function patientIntroPreview(){
-  const total = qList().length;
-  return `<div class="patient patient--embed" lang="${esc(pLocale())}">
-    <div class="p-wrap">
-      ${pLangSwitch()}
-      <div class="p-lock">${I.lock(12)} ${esc(pT("private",{agency:AGENCY.name}))}</div>
-      <div class="p-card">
-        ${pIntroContent(total, true)}
-      </div>
-    </div>
-  </div>`;
-}
-function patientPreview(){
-  if(previewingIntro()) return patientIntroPreview();
-  if(previewingDemo()) return patientDemoPreview();
+function previewModalStep(){
   const qs = qList();
-  const idx = previewQIndex();
-  const q = idx>=0 ? qs[idx] : null;
-  if(!q){
-    return `<div class="patient patient--embed" lang="${esc(pLocale())}">
-      <div class="p-wrap">
-        ${pLangSwitch()}
-        <div class="p-card">
-          <p class="t-body dim">${esc(pT("previewEmpty"))}</p>
-        </div>
-      </div>
-    </div>`;
-  }
-  return `<div class="patient patient--embed" lang="${esc(pLocale())}">
-    <div class="p-wrap">
-      ${pLangSwitch()}
-      <div class="p-card">
-        ${pQuestionHead(q, idx, qs.length)}
-        ${pQuestionFields(q)}
-      </div>
-    </div>
-  </div>`;
+  if(!qs.length || previewingIntro()) return -1;
+  const i = qs.findIndex(q=>q.id===state.previewQId);
+  return i>=0 ? i : 0;
 }
-
 function viewPatient(){
   const S = state.survey, qs = qList();
   const total = qs.length;
@@ -6847,31 +6730,8 @@ function viewPatient(){
     </div></div>`;
   }
 
-  /* demographics — only when this version includes the module */
-  if(S.step === total && surveyIncludesPatientQuestions()){
-    return `<div class="patient" lang="${esc(pLocale())}"><div class="p-wrap">
-      ${pDemoBar()}
-      ${pLangSwitch()}
-      ${pViewTag()}
-        <div class="p-lock">${I.lock(12)} ${esc(pT("private",{agency}))}</div>
-        <div class="p-card">
-          ${patientDemoBody(total, false)}
-          <div class="p-actions">
-            <div class="p-cta">
-              <button class="fw-btn fw-btn--primary fw-btn--lg p-next" onclick="pFinish()">${esc(pT("send"))}</button>
-              <button class="fw-btn fw-btn--link p-back" onclick="pBack()">${esc(pT("back"))}</button>
-            </div>
-          </div>
-        </div>
-        <p class="p-foot">${esc(pT("foot",{agency}))}</p>
-      </div>
-    </div></div>`;
-  }
-
-  if(S.step === total) S.step = total+1;
-
   /* done */
-  if(S.step === total+1){
+  if(S.step >= total){
     const low = Object.entries(S.answers).some(([k,v])=>{
       if(k==="q1") return v==="Poor" || v==="Unacceptable";
       if(k==="q2") return v==="Not likely" || v==="Definitely not likely";
@@ -6914,8 +6774,8 @@ function viewPatient(){
         ${pQuestionFields(q, {interactive:true, val})}
         <div class="p-actions">
           <div class="p-cta">
-            <button class="fw-btn fw-btn--primary fw-btn--lg p-next" ${q.required&&!answered?"disabled":""} onclick="${S.step===total-1 && !surveyIncludesPatientQuestions()?"pFinish()":"pNext()"}">
-              ${esc(S.step===total-1 ? (surveyIncludesPatientQuestions()?pT("almostDone"):pT("send")) : pT("next"))}</button>
+            <button class="fw-btn fw-btn--primary fw-btn--lg p-next" ${q.required&&!answered?"disabled":""} onclick="${S.step===total-1?"pFinish()":"pNext()"}">
+              ${esc(S.step===total-1 ? pT("send") : pT("next"))}</button>
             ${S.step>0?`<button class="fw-btn fw-btn--link p-back" onclick="pBack()">${esc(pT("back"))}</button>`:""}
           </div>
           ${q.required?"":`<button class="fw-btn fw-btn--ghost" onclick="pSkip()">${esc(pT("skip"))}</button>`}
@@ -7080,6 +6940,20 @@ function restoreLibScroll(){
   apply();
   requestAnimationFrame(apply);
 }
+function sizeLibList(){
+  const list = document.querySelector(".builder-detail .lib-list");
+  if(!list){
+    document.documentElement.style.removeProperty("--lib-list-top");
+    return;
+  }
+  const apply = ()=>{
+    const top = list.getBoundingClientRect().top;
+    if(top < 0) return;
+    document.documentElement.style.setProperty("--lib-list-top", `${Math.round(top)}px`);
+  };
+  apply();
+  requestAnimationFrame(apply);
+}
 
 function blinkSend(id){
   state.blinkSent[id] = true;
@@ -7211,7 +7085,7 @@ function addQ(type){
     options: type==="choice" ? ["Option one","Option two"] : undefined,
     labels:  type==="scale"  ? ["Poor","","","","Excellent"] : undefined
   });
-  state.previewQId = id;
+  state.previewQId = "questions";
   syncQuestionCount(surveyIdFromHash() || "sv_post");
   toast("Question added.", true);
   withFlip("[data-qid]", render);
@@ -7234,7 +7108,7 @@ function addFromLib(id){
     options: l.options ? [...l.options] : undefined,
     labels: l.type==="scale" ? ["Poor","","","","Excellent"] : undefined
   });
-  state.previewQId = qid;
+  state.previewQId = "library";
   syncQuestionCount(surveyIdFromHash() || "sv_post");
   toast("Added from library.", true);
   withFlip("[data-qid]", render);
@@ -7297,7 +7171,6 @@ function duplicateAndEdit(id, { silent=false, claimTrigger=null }={}){
     introTitle: s.introTitle || null,
     introBody: s.introBody || null,
     description: s.description || "",
-    patientQuestions: s.patientQuestions !== false,
     publishedAt:null,
     endsAt:null,
     stoppedAt:null,
@@ -7851,7 +7724,6 @@ function pTurn(dir, mutate){
   const apply = ()=>{
     mutate();
     state.pSlide = dir;
-    state.pSelectOpen = null;
     pPaint();
     jump();
     state.pBusy = false;
@@ -7888,65 +7760,7 @@ function pText(id,v){ state.survey.answers[id] = v;
 function pNext(){ pTurn("fwd", ()=>{ state.survey.step++; }); }
 function pSkip(){ pTurn("fwd", ()=>{ state.survey.step++; }); }
 function pBack(){ pTurn("back", ()=>{ state.survey.step = Math.max(-1, state.survey.step-1); }); }
-function pDemo(k,v){ state.survey.demo[k] = v; }
-function pSelectPaint(focusKey){
-  Object.keys(P_DEMO).forEach(k=>{
-    const btn = document.getElementById(P_DEMO[k].id);
-    const field = btn && btn.closest(".fw-field");
-    if(!field) return;
-    const tpl = document.createElement("template");
-    tpl.innerHTML = pSelectField(k).trim();
-    field.replaceWith(tpl.content.firstElementChild);
-  });
-  if(focusKey) document.getElementById(P_DEMO[focusKey].id)?.focus();
-  if(state.pSelectOpen) document.querySelector(".fw-select__opt[data-active]")?.scrollIntoView({block:"nearest"});
-}
-function pSelectToggle(key, e){
-  if(e){ e.preventDefault(); e.stopPropagation(); }
-  state.pSelectOpen = state.pSelectOpen===key ? null : key;
-  if(state.pSelectOpen){
-    const values = pSelectValues(key);
-    const val = state.survey.demo[key] || "";
-    const i = values.indexOf(val);
-    state.pSelectActive = i<0 ? 0 : i;
-  }
-  pSelectPaint(key);
-}
-function pSelectPick(key, el){
-  pDemo(key, el.getAttribute("data-value") || "");
-  state.pSelectOpen = null;
-  pSelectPaint(key);
-}
-function pSelectKey(key, e){
-  const open = state.pSelectOpen===key;
-  const values = pSelectValues(key);
-  if(e.key==="Escape"){
-    if(open){ e.preventDefault(); state.pSelectOpen = null; pSelectPaint(key); }
-    return;
-  }
-  if(e.key==="ArrowDown" || e.key==="ArrowUp"){
-    e.preventDefault();
-    if(!open){ pSelectToggle(key, e); return; }
-    const delta = e.key==="ArrowDown" ? 1 : -1;
-    state.pSelectActive = (state.pSelectActive + delta + values.length) % values.length;
-    pSelectPaint(key);
-    return;
-  }
-  if(e.key==="Home" || e.key==="End"){
-    if(!open) return;
-    e.preventDefault();
-    state.pSelectActive = e.key==="Home" ? 0 : values.length-1;
-    pSelectPaint(key);
-    return;
-  }
-  if((e.key==="Enter" || e.key===" ") && open){
-    e.preventDefault();
-    pDemo(key, values[state.pSelectActive] || "");
-    state.pSelectOpen = null;
-    pSelectPaint(key);
-  }
-}
-function pFinish(){ pTurn("fwd", ()=>{ state.survey.step = qList().length+1; }); }
+function pFinish(){ pTurn("fwd", ()=>{ state.survey.step = qList().length; }); }
 function scrollPageTop(){
   const stage = document.querySelector(".preview-stage");
   if(stage){
@@ -7986,7 +7800,7 @@ function surveyPreview(){
 function openSurveyPreview(){
   if(!qList().length){ toast("Add a question first."); return; }
   const locale = state.survey.locale || "en";
-  state.survey = { step:-1, answers:{}, showDemo:false, demo:{}, locale };
+  state.survey = { step:previewModalStep(), answers:{}, locale };
   /* Skip entrance slide — overlay fade covers open, and the slide can
      leave .p-view at opacity:0 on mobile when the animation never fires. */
   state.pSlide = null;
@@ -8004,7 +7818,7 @@ function openSurveyPreview(){
 function closeSurveyPreview(){
   const locale = state.survey.locale || "en";
   state.previewSurvey = false;
-  state.survey = { step:-1, answers:{}, showDemo:false, demo:{}, locale };
+  state.survey = { step:-1, answers:{}, locale };
   render();
 }
 
@@ -8039,6 +7853,7 @@ function render(){
   document.body.classList.toggle("nav-open", !!state.navOpen);
   document.body.classList.toggle("drawer-open", !!(state.openAlert||state.openResponse||state.openTrigger));
   restoreLibScroll();
+  sizeLibList();
   armDrawer();
   if(enter) requestAnimationFrame(()=>document.documentElement.classList.remove("is-route-enter"));
 }
@@ -8090,7 +7905,6 @@ window.addEventListener("keydown", e=>{
     ovxCloseMenus(); render(); return;
   }
   if(state.overviewSurveyOpen){ state.overviewSurveyOpen = false; render(); return; }
-  if(state.pSelectOpen){ state.pSelectOpen = null; pSelectPaint(); return; }
   if(state.crewSelectOpen){ state.crewSelectOpen = false; crewSelectPaint(); return; }
   if(state.navOpen){ closeNav(); return; }
   if(state.previewSurvey){ closeSurveyPreview(); return; }
@@ -8128,10 +7942,6 @@ window.addEventListener("mousedown", e=>{
     state.overviewSurveyOpen = false;
     render();
   }
-  if(state.pSelectOpen && !e.target.closest(".fw-select")){
-    state.pSelectOpen = null;
-    pSelectPaint();
-  }
   if(state.crewSelectOpen && !e.target.closest(".score-crew-select")){
     state.crewSelectOpen = false;
     crewSelectPaint(false);
@@ -8146,6 +7956,7 @@ window.matchMedia("(max-width: 1080px)").addEventListener("change", ev=>{
   state.crewSelectOpen = false;
   if((location.hash||"#/")==="#/scorecard") render();
 });
+window.addEventListener("resize", ()=>{ sizeLibList(); });
 history.scrollRestoration = "manual";
 state.survey.step = -1;
 render();
