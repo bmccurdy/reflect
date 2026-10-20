@@ -1340,7 +1340,13 @@ button.num-link{
 
 /* builder */
 .trigger-assoc .fw-select{margin-top:0}
-.publish-setup-stack{display:flex;flex-direction:column;gap:20px}
+.publish-setup-stack{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:24px;
+  align-items:start;
+}
+.publish-setup-section{min-width:0}
 .publish-setup-label{
   margin:0 0 8px;font-size:14px;line-height:20px;font-weight:500;color:var(--foreground);
 }
@@ -1453,6 +1459,7 @@ button.num-link{
 .schedule-fields .fw-field{min-width:0}
 .schedule-fields--2{grid-template-columns:1fr 1fr}
 @media (max-width:720px){
+  .publish-setup-stack{grid-template-columns:minmax(0,1fr);gap:20px}
   .schedule-fields--2,
   .publish-setup .schedule-fields--2{grid-template-columns:minmax(0,12.5rem)}
 }
@@ -1643,6 +1650,18 @@ button.num-link{
 }
 .builder-nav-item[aria-current="true"] .builder-nav-ico,
 .builder-nav-item[aria-current="true"] .builder-nav-num{color:var(--primary)}
+.builder-nav-item--destructive{color:var(--destructive)}
+.builder-nav-item--destructive .builder-nav-ico{color:var(--destructive)}
+.builder-nav-item--destructive:hover{
+  background:var(--status-critical-wash);
+  color:var(--destructive-hover);
+}
+.builder-nav-item--destructive:hover .builder-nav-ico{color:var(--destructive-hover)}
+.builder-nav-item--destructive[aria-current="true"]{
+  background:var(--status-critical-wash);
+  color:var(--destructive);
+}
+.builder-nav-item--destructive[aria-current="true"] .builder-nav-ico{color:var(--destructive)}
 .builder-nav-text{
   min-width:0;
   display:-webkit-box;
@@ -5838,8 +5857,8 @@ function selectBuilderSection(id){
   state.previewQId = id;
   render();
 }
-function builderNavItem(id, label, current, icon){
-  return `<button type="button" class="builder-nav-item"${current?` aria-current="true"`:""} onclick="selectBuilderSection('${id}')">
+function builderNavItem(id, label, current, icon, extra=""){
+  return `<button type="button" class="builder-nav-item${extra?` ${extra}`:""}"${current?` aria-current="true"`:""} onclick="selectBuilderSection('${id}')">
     <span class="${icon?"builder-nav-ico":"builder-nav-num"}" aria-hidden="true">${icon||""}</span>
     <span class="builder-nav-text">${label}</span>
   </button>`;
@@ -6056,7 +6075,7 @@ function viewSurveys(){
       ${builderNavItem("library", "Add a question", section==="library", I.plus(16))}
       ${builderNavItem("benchmark", "Benchmarking", section==="benchmark", I.shield(16))}`}
       <div class="builder-nav-label">Survey</div>
-      ${builderNavItem("delete", "Delete survey", section==="delete", I.trash(16))}
+      ${builderNavItem("delete", "Delete survey", section==="delete", I.trash(16), "builder-nav-item--destructive")}
     </nav>
     <div class="builder-detail">
       ${section==="publish"?triggerAssocCard(s):""}
