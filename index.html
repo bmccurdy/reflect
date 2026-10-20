@@ -3357,6 +3357,16 @@ const OVERVIEW_PAYORS = [
   { label:"VA",                   share:0.05 },
   { label:"TRICARE",              share:0.03 }
 ];
+/* Sample ePCR patient demographics (share of completed surveys). Age bands sum to 100%, as do the two
+   languages. Dummy data until the ePCR feed is connected; survey answers are not used here. */
+const OVERVIEW_DEMOGRAPHICS = [
+  { label:"Age 75+",            dim:"age",      share:0.26 },
+  { label:"Age 55–74",          dim:"age",      share:0.31 },
+  { label:"Age 35–54",          dim:"age",      share:0.24 },
+  { label:"Age 18–34",          dim:"age",      share:0.19 },
+  { label:"Spanish preferred",  dim:"language", share:0.12 },
+  { label:"English preferred",  dim:"language", share:0.88 }
+];
 
 function overviewSurveyId(){
   if(state.surveys.some(x=>x.id===state.overviewSurvey)) return state.overviewSurvey;
@@ -3841,24 +3851,41 @@ function ovxPayorRows(slices){
     }, 0)
   })).sort((a,b)=>b.n - a.n);
 }
-function ovxGroupRows(slices){
-  const map = new Map(OVERVIEW_GROUP_ORDER.map(label=>[label, { label, n:0, sum:0 }]));
+/* Split a whole-number total across weights so the parts add up exactly (largest remainder). */
+function ovxSplit(total, weights){
+  const sum = weights.reduce((a,b)=>a+b, 0);
+  if(!total || !sum) return weights.map(()=>0);
+  const raw = weights.map(w=>w/sum*total);
+  const out = raw.map(Math.floor);
+  const rest = total - out.reduce((a,b)=>a+b, 0);
+  raw.map((v,i)=>({ i, r:v-out[i], w:weights[i] }))
+    .sort((a,b)=>b.r-a.r || b.w-a.w || a.i-b.i)
+    .slice(0, rest)
+    .forEach(x=>{ out[x.i]++; });
+  return out;
+}
+function ovxDemographicRows(slices){
+  const dims = [...new Set(OVERVIEW_DEMOGRAPHICS.map(x=>x.dim))];
+  const idxOf = dim => OVERVIEW_DEMOGRAPHICS.map((x,i)=>x.dim===dim ? i : -1).filter(i=>i>=0);
+  const counts = OVERVIEW_DEMOGRAPHICS.map(()=>0);
+  let total = 0;
   slices.forEach(d=>{
-    const share = ovxPayerShareOf(d);
-    d.groups.forEach(g=>{
-      const bucket = map.get(g.label);
-      if(!bucket) return;
-      const n = Math.round(g.n * share);
-      bucket.n += n;
-      bucket.sum += g.score * n;
+    const t = Math.round(d.completed * ovxPayerShareOf(d));
+    total += t;
+    dims.forEach(dim=>{
+      const idx = idxOf(dim);
+      ovxSplit(t, idx.map(i=>OVERVIEW_DEMOGRAPHICS[i].share)).forEach((n,k)=>{ counts[idx[k]] += n; });
     });
   });
-  return OVERVIEW_GROUP_ORDER.map(label=>{
-    const g = map.get(label);
-    const held = g.n < OVERVIEW_MIN_GROUP;
-    const score = g.n ? g.sum / g.n : null;
-    return { label, n:g.n, score:held ? null : score, warn:!held && score<4 };
+  const pcts = OVERVIEW_DEMOGRAPHICS.map(()=>0);
+  dims.forEach(dim=>{
+    const idx = idxOf(dim);
+    ovxSplit(100, idx.map(i=>counts[i])).forEach((v,k)=>{ pcts[idx[k]] = v; });
   });
+  return {
+    total,
+    rows: OVERVIEW_DEMOGRAPHICS.map((x,i)=>({ label:x.label, n:counts[i], pct:pcts[i] }))
+  };
 }
 function ovxOpenAlerts(slices){
   const ids = new Set();
@@ -4006,7 +4033,7 @@ function viewOverview(){
     .sort((a,b)=>b.pct-a.pct || b.shown-a.shown);
   const payors = ovxPayorRows(slices);
   const payorMax = Math.max(1, ...payors.map(x=>x.n));
-  const groups = ovxGroupRows(slices);
+  const demo = ovxDemographicRows(slices);
   const alerts = ovxOpenAlerts(slices);
   const callbacks = alerts.length;
   const flagged = slices.reduce((sum,d)=>sum+Math.round(d.flagged*d.scale), 0);
@@ -4125,19 +4152,18 @@ function viewOverview(){
           <div class="ovx-block">
             <div class="ovx-demo-title">
               <h3>By demographic</h3>
-              <p>Average score out of 5 · Optional questions</p>
+              <p>ePCR patient demographics · % of completed surveys</p>
             </div>
-            <div class="ovx-demohead">
-              <span>Group</span><span>n</span><span>Not every respondent is included</span><span>Score</span>
+            ${demo.total?`<div class="ovx-demohead">
+              <span>Group</span><span>n</span><span>Share of completed surveys</span><span>Share</span>
             </div>
-            ${groups.map(g=>`<div class="ovx-grow">
+            ${demo.rows.map(g=>`<div class="ovx-grow">
               <span>${esc(g.label)}</span>
               <span class="ovx-n">${g.n.toLocaleString("en-US")}</span>
-              ${g.score==null
-                ? `<span class="ovx-withheld">Withheld</span><b>—</b>`
-                : `<div class="ovx-meter" role="img" aria-label="${esc(g.label)} ${g.score.toFixed(1)} of 5"><span class="${g.warn?"is-warn":""}" style="width:${(g.score/5*100).toFixed(1)}%"></span></div><b class="${g.warn?"is-warn":""}">${g.score.toFixed(1)}</b>`}
+              <div class="ovx-meter" role="img" aria-label="${esc(g.label)} ${g.pct}%"><span style="width:${g.pct}%"></span></div>
+              <b>${g.pct}%</b>
             </div>`).join("")}
-            <p class="ovx-fine">Groups with fewer than 10 responses are withheld to preserve patient anonymity.</p>
+            <p class="ovx-fine">From the ePCR each agency submits when a call is completed, not from the survey.</p>`:`<p class="ovx-empty">No completed surveys in this range.</p>`}
           </div>
         </div>
       </section>`:`<section class="ovx-card"><p class="ovx-empty">No live surveys to summarize.</p></section>`}
