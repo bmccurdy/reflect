@@ -873,7 +873,7 @@ html[data-theme="dark"] .ovx-meter > span.is-warn{background:var(--status-elevat
 .tbl--surveys .sv-responses,
 .tbl--surveys .sv-rate,
 .tbl--surveys .sv-schedule{font-size:14px;line-height:20px}
-.tbl--alerts td{vertical-align:middle}
+.tbl--alerts td{vertical-align:middle;font-size:14px;line-height:20px}
 .tbl--alerts{
   table-layout:fixed;width:100%;
 }
@@ -886,10 +886,13 @@ html[data-theme="dark"] .ovx-meter > span.is-warn{background:var(--status-elevat
   white-space:nowrap;
 }
 .tbl--alerts .al-why .snip{max-width:none;width:100%}
-.tbl--alerts .al-reason{max-width:100%;font-size:14px;line-height:20px}
+.tbl--alerts .al-reason{max-width:100%;font-size:14px;line-height:20px;font-weight:700}
 .tbl--alerts .al-survey-name{
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
+.tbl--alerts .al-survey-name,
+.tbl--alerts .al-unit > span,
+.tbl--alerts .trig-tip{color:var(--muted-foreground)}
 .tbl--alerts .al-unit > span{white-space:nowrap}
 .tbl--responses td{vertical-align:middle}
 .tbl--responses .rs-when,
@@ -2201,7 +2204,7 @@ html[data-theme="dark"] .patient{
   .tbl--alerts .al-why{display:contents;width:auto}
   .tbl--alerts .al-reason{
     order:1;flex:1 1 0;min-width:0;
-    font-size:16px;line-height:24px;font-weight:400;
+    font-size:16px;line-height:24px;font-weight:700;
   }
   .tbl--alerts .al-opened{
     order:2;flex:0 0 auto;width:auto;margin-left:auto;
