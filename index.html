@@ -725,7 +725,11 @@ html[data-theme="dark"] .ov-reading .ov-label{
 .ovx-qrow--warn .ovx-qnps{color:var(--red-600)}
 .ovx-qrow .ovx-delta{font-size:13px}
 .ovx-qn{font-size:12px;line-height:normal;color:var(--muted-foreground)}
-.ovx-qdist{display:flex;align-items:center;min-width:0;height:26px}
+.ovx-qdist{position:relative;display:flex;align-items:center;min-width:0;height:26px}
+.ovx-qdist .ovx-bar:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
+.ovx-qtip{display:none}
+.ovx-qrow:hover .ovx-qtip,
+.ovx-qdist:focus-within .ovx-qtip{display:block}
 .ovx-qdist .ovx-bar{width:100%;height:26px;border-radius:var(--radius-md)}
 .ovx-qdist .ovx-bar > span{
   display:flex;align-items:center;justify-content:center;
@@ -734,8 +738,11 @@ html[data-theme="dark"] .ov-reading .ov-label{
   font-size:12px;line-height:14px;font-weight:700;
 }
 .ovx-qdist .ovx-bar > span b{font-weight:700;white-space:nowrap;visibility:hidden}
-@container (min-width: 32px){
+@container (min-width: 24px){
   .ovx-qdist .ovx-bar > span b{visibility:visible}
+}
+@container (min-width: 20px){
+  .ovx-qdist .ovx-bar > span b.is-short{visibility:visible}
 }
 .ovx-caption{
   display:flex;align-items:center;justify-content:center;height:34px;padding:0 20px;
@@ -3750,10 +3757,10 @@ function ovxDelta(n, tail){
   return `<span class="ovx-delta ${cls}">${n===0?"":ovxArrow(up)} ${sign}${num}${tail||""}</span>`;
 }
 function ovxBarSeg(cls, n){
-  return `<span class="${cls}" style="flex:${n} ${n} 0">${n>0?`<b>${n}%</b>`:""}</span>`;
+  return `<span class="${cls}" style="flex:${n} ${n} 0">${n>0?`<b${n<10?` class="is-short"`:""}>${n}%</b>`:""}</span>`;
 }
-function ovxBar(d, p, g){
-  return `<div class="ovx-bar" role="img" aria-label="${d}% low, ${p}% middle, ${g}% high">
+function ovxBar(d, p, g, {focusable}={}){
+  return `<div class="ovx-bar" role="img"${focusable?` tabindex="0"`:""} aria-label="${d}% low, ${p}% middle, ${g}% high">
     ${ovxBarSeg("ovx-bar__d", d)}
     ${ovxBarSeg("ovx-bar__p", p)}
     ${ovxBarSeg("ovx-bar__g", g)}
@@ -4074,7 +4081,8 @@ function viewOverview(){
               ${showChange?ovxDelta(q.delta):""}
               <p class="ovx-qn">n = ${q.shown.toLocaleString("en-US")}</p>
               <div class="ovx-qdist">
-                ${ovxBar(q.dist.d, q.dist.p, q.dist.g)}
+                ${ovxBar(q.dist.d, q.dist.p, q.dist.g, {focusable:true})}
+                <span class="fw-tooltip ovx-qtip" aria-hidden="true">${q.dist.d}% low · ${q.dist.p}% middle · ${q.dist.g}% high</span>
               </div>
             </div>`).join(""):`<p class="ovx-empty">No questions carry this tag.</p>`}
             <p class="ovx-caption">Low is a poor or no answer. High is a top-two choice or yes. Sorted by result, highest first.</p>
