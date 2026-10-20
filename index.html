@@ -1340,16 +1340,60 @@ button.num-link{
 
 /* builder */
 .trigger-assoc .fw-select{margin-top:0}
+.publish-setup-lede{
+  margin:0 0 16px;font-size:14px;line-height:20px;color:var(--muted-foreground);
+}
 .publish-setup-stack{
   display:grid;
   grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-  gap:24px;
-  align-items:start;
+  gap:16px;
+  align-items:stretch;
 }
-.publish-setup-section{min-width:0}
-.publish-setup-label{
-  margin:0 0 8px;font-size:14px;line-height:20px;font-weight:500;color:var(--foreground);
+.publish-setup-step{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  padding:16px;
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  background:var(--muted);
 }
+.publish-setup-step-head{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+}
+.publish-setup-step-num{
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  width:28px;
+  height:28px;
+  border-radius:var(--r-full);
+  background:var(--primary);
+  color:var(--primary-foreground);
+  font-size:13px;
+  line-height:1;
+  font-weight:700;
+  font-variant-numeric:tabular-nums;
+}
+.publish-setup-step-copy{min-width:0}
+.publish-setup-step-title{
+  margin:0;
+  font-size:16px;
+  line-height:24px;
+  font-weight:700;
+  letter-spacing:-.01em;
+  color:var(--foreground);
+}
+.publish-setup-step-desc{
+  margin:4px 0 0;
+  font-size:13px;
+  line-height:18px;
+  color:var(--muted-foreground);
+}
+.publish-setup-step-body{min-width:0}
 .publish-setup .seg{margin-top:0;width:max-content;max-width:100%}
 .publish-setup .seg button{
   flex:0 0 auto;white-space:nowrap;
@@ -1459,7 +1503,7 @@ button.num-link{
 .schedule-fields .fw-field{min-width:0}
 .schedule-fields--2{grid-template-columns:1fr 1fr}
 @media (max-width:720px){
-  .publish-setup-stack{grid-template-columns:minmax(0,1fr);gap:20px}
+  .publish-setup-stack{grid-template-columns:minmax(0,1fr)}
   .schedule-fields--2,
   .publish-setup .schedule-fields--2{grid-template-columns:minmax(0,12.5rem)}
 }
@@ -1512,18 +1556,63 @@ button.num-link{
 .qcard-select.locked.selected{
   background:color-mix(in srgb,var(--accent) 55%,var(--muted));
 }
-.intro-screen{transition:border-color var(--dur-micro) var(--ease-out),
-  box-shadow var(--dur-micro) var(--ease-out),
-  background-color var(--dur-micro) var(--ease-out)}
-.intro-screen:hover{border-color:var(--muted-foreground)}
-.intro-screen.selected{
-  border-color:var(--primary);
-  box-shadow:0 0 0 1px var(--primary);
-  background:var(--accent);
+.intro-screen-lede{
+  margin:0;font-size:14px;line-height:20px;color:var(--muted-foreground);
 }
-.intro-screen-copy{min-width:0}
-.intro-excerpt{
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+.intro-screen-panel{
+  margin-top:16px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  padding:16px;
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  background:var(--muted);
+}
+.intro-screen-panel-head{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+}
+.intro-screen-panel-mark{
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  width:28px;
+  height:28px;
+  border-radius:var(--r-full);
+  background:var(--primary);
+  color:var(--primary-foreground);
+}
+.intro-screen-panel-mark svg{display:block}
+.intro-screen-panel-copy{min-width:0}
+.intro-screen-panel-title{
+  margin:0;
+  font-size:16px;
+  line-height:24px;
+  font-weight:700;
+  letter-spacing:-.01em;
+  color:var(--foreground);
+}
+.intro-screen-panel-desc{
+  margin:4px 0 0;
+  font-size:13px;
+  line-height:18px;
+  color:var(--muted-foreground);
+}
+.intro-screen-preview-title{
+  margin:0;
+  font-size:16px;
+  line-height:24px;
+  font-weight:700;
+  letter-spacing:-.01em;
+  color:var(--foreground);
+}
+.intro-screen-preview-body{
+  margin:8px 0 0;
+  font-size:14px;
+  line-height:20px;
+  color:var(--muted-foreground);
 }
 .qcard.added{background:var(--muted);opacity:.7}
 .qcard.added:hover{border-color:var(--border);box-shadow:none}
@@ -1670,11 +1759,6 @@ button.num-link{
 }
 .builder-detail{min-width:0}
 .builder-detail > .sec{margin-top:0}
-.builder-detail .intro-excerpt{
-  display:block;
-  -webkit-line-clamp:unset;
-  overflow:visible;
-}
 
 .preview-overlay{
   position:fixed;inset:0;z-index:56;
@@ -5033,20 +5117,27 @@ function introScreenCard(s){
   const surveyLocked = isSurveyLocked(s);
   const copy = introStaffCopy(s, (state.surveyQuestions[s.id]||[]).length);
   return `
-  <div class="fw-card sec intro-screen">
+  <div class="fw-card intro-screen">
     <div class="between between--inline">
-      <div class="intro-screen-copy">
+      <div>
         <h2 class="t-h4">Welcome screen</h2>
-        <p class="t-subtle dim mt8">Patients see this before the first question.</p>
+        <p class="intro-screen-lede">Patients see this before the first question. Edit the heading and intro text they land on.</p>
       </div>
-      ${surveyLocked?"":`<div class="qbtns" onclick="event.stopPropagation()">
-        <button type="button" class="iconbtn" aria-label="Edit welcome screen" onclick="openEditIntro()">${I.pencil(16)}</button>
-      </div>`}
+      ${surveyLocked?"":`<button type="button" class="fw-btn fw-btn--outline fw-btn--sm" onclick="openEditIntro()">${I.pencil(14)} Edit</button>`}
     </div>
-    <div class="mt16">
-      <div class="t-pui" style="font-weight:700">${esc(copy.title)}</div>
-      <p class="t-subtle dim mt8 intro-excerpt">${esc(copy.body)}</p>
-    </div>
+    <section class="intro-screen-panel" aria-labelledby="intro-preview-title">
+      <div class="intro-screen-panel-head">
+        <span class="intro-screen-panel-mark" aria-hidden="true">${I.eye(14)}</span>
+        <div class="intro-screen-panel-copy">
+          <h3 class="intro-screen-panel-title" id="intro-preview-title">What patients see</h3>
+          <p class="intro-screen-panel-desc">Resolved with the agency name and question count.</p>
+        </div>
+      </div>
+      <div>
+        <p class="intro-screen-preview-title">${esc(copy.title)}</p>
+        <p class="intro-screen-preview-body">${esc(copy.body)}</p>
+      </div>
+    </section>
   </div>`;
 }
 function selectPreviewQ(id){
@@ -5304,24 +5395,43 @@ function triggerAssocCard(s){
   if(!locked){
     return `
     <div class="fw-card trigger-assoc publish-setup">
-      <div class="between between--inline" style="margin-bottom:16px">
-        <h2 class="t-h4">Publish setup</h2>
+      <div class="between between--inline">
+        <div>
+          <h2 class="t-h4">Publish setup</h2>
+          <p class="publish-setup-lede">Two steps before you publish. Associate a trigger first, then set when the survey runs.</p>
+        </div>
         ${activeId
           ? `<span class="fw-badge fw-badge--success">${I.checkCircle(12)} Linked</span>`
           : `<span class="fw-badge fw-badge--outline">Required to publish</span>`}
       </div>
-      <div class="publish-setup-stack">
-        <div class="publish-setup-section">
-          <h3 class="publish-setup-label">Trigger</h3>
-          <div class="publish-setup-trigger">
-            ${triggerSelect(s)}
-            ${triggerSelectActions(s)}
+      <div class="publish-setup-stack" role="list" aria-label="Publish setup steps">
+        <section class="publish-setup-step" role="listitem" aria-labelledby="publish-step-1-title">
+          <div class="publish-setup-step-head">
+            <span class="publish-setup-step-num" aria-hidden="true">1</span>
+            <div class="publish-setup-step-copy">
+              <h3 class="publish-setup-step-title" id="publish-step-1-title">Associate a trigger</h3>
+              <p class="publish-setup-step-desc">Choose which FirstWatch trigger starts this survey.</p>
+            </div>
           </div>
-        </div>
-        <div class="publish-setup-section">
-          <h3 class="publish-setup-label">Schedule</h3>
-          ${scheduleSetupFields(s)}
-        </div>
+          <div class="publish-setup-step-body">
+            <div class="publish-setup-trigger">
+              ${triggerSelect(s)}
+              ${triggerSelectActions(s)}
+            </div>
+          </div>
+        </section>
+        <section class="publish-setup-step" role="listitem" aria-labelledby="publish-step-2-title">
+          <div class="publish-setup-step-head">
+            <span class="publish-setup-step-num" aria-hidden="true">2</span>
+            <div class="publish-setup-step-copy">
+              <h3 class="publish-setup-step-title" id="publish-step-2-title">Set the schedule</h3>
+              <p class="publish-setup-step-desc">Decide how long the survey collects responses after publish.</p>
+            </div>
+          </div>
+          <div class="publish-setup-step-body">
+            ${scheduleSetupFields(s)}
+          </div>
+        </section>
       </div>
     </div>`;
   }
