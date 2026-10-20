@@ -5148,7 +5148,7 @@ function introScreenCard(s){
   <div class="fw-card intro-screen">
     <div class="between between--inline">
       <div>
-        <h2 class="t-h4">Welcome screen</h2>
+        <h2 class="t-h4">Introduction</h2>
         <p class="intro-screen-lede">Patients see this before the first question. Edit the heading and intro text they land on.</p>
       </div>
       ${surveyLocked?"":`<button type="button" class="fw-btn fw-btn--outline fw-btn--sm" onclick="openEditIntro()">${I.pencil(14)} Edit</button>`}
@@ -6206,7 +6206,7 @@ function viewSurveys(){
     <nav class="builder-nav" aria-label="Survey sections">
       <div class="builder-nav-label">Setup</div>
       ${builderNavItem("publish", surveyLocked?"Associated trigger":"Publish setup", section==="publish", I.bolt(16))}
-      ${builderNavItem("intro", "Welcome screen", section==="intro", I.info(16))}
+      ${builderNavItem("intro", "Introduction", section==="intro", I.info(16))}
       ${builderNavItem("questions", "Questions", section==="questions", I.list(16))}
       ${surveyLocked?"":`<div class="builder-nav-label">More</div>
       ${builderNavItem("library", "Add a question", section==="library", I.plus(16))}
@@ -7498,7 +7498,7 @@ function editIntroDialog(id){
   <div class="dialog-wrap" onclick="closeEditIntro()">
     <div class="dialog dialog--edit-q" role="dialog" aria-modal="true" aria-labelledby="edit-intro-title-h"
       onclick="event.stopPropagation()">
-      <h2 class="t-h4" id="edit-intro-title-h">Edit welcome screen</h2>
+      <h2 class="t-h4" id="edit-intro-title-h">Edit introduction</h2>
       <p class="t-subtle dim mt8">Shown before the first question. Patients who pick Spanish still see the standard Spanish introduction.</p>
       <div class="edit-q-field">
         <label class="t-subtle" for="edit-intro-title">Heading</label>
@@ -7557,7 +7557,7 @@ function confirmEditIntro(){
   state.editIntro = null;
   state.previewQId = "intro";
   render();
-  toast("Welcome screen updated.");
+  toast("Introduction updated.");
 }
 function defaultTestSmsDraft(){
   return { first:"", last:"", phone:"" };
