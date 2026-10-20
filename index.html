@@ -1735,18 +1735,6 @@ button.num-link{
 }
 .builder-nav-item[aria-current="true"] .builder-nav-ico,
 .builder-nav-item[aria-current="true"] .builder-nav-num{color:var(--primary)}
-.builder-nav-item--destructive{color:var(--destructive)}
-.builder-nav-item--destructive .builder-nav-ico{color:var(--destructive)}
-.builder-nav-item--destructive:hover{
-  background:var(--status-critical-wash);
-  color:var(--destructive-hover);
-}
-.builder-nav-item--destructive:hover .builder-nav-ico{color:var(--destructive-hover)}
-.builder-nav-item--destructive[aria-current="true"]{
-  background:var(--status-critical-wash);
-  color:var(--destructive);
-}
-.builder-nav-item--destructive[aria-current="true"] .builder-nav-ico{color:var(--destructive)}
 .builder-nav-text{
   min-width:0;
   display:-webkit-box;
@@ -5970,7 +5958,7 @@ function viewSurveysIndex(){
 function builderSection(s, qs){
   const locked = isSurveyLocked(s);
   const id = state.previewQId;
-  if(id==="intro" || id==="publish" || id==="delete" || id==="questions") return id;
+  if(id==="intro" || id==="publish" || id==="questions") return id;
   if(id==="library" && !locked) return "library";
   if(id==="benchmark" && !locked) return "benchmark";
   if(qs.length) return "questions";
@@ -6090,21 +6078,6 @@ function builderBenchmark(lockedQs){
     </div>
   </div>`;
 }
-function builderDelete(s){
-  return `
-  <div class="fw-card" style="border-color:color-mix(in srgb,var(--destructive) 35%,var(--border))">
-    <h2 class="t-h4">Delete this survey</h2>
-    <p class="t-subtle dim mt8">${s.status==="Live" && s.responses
-      ? `This survey is live with ${s.responses} response${s.responses===1?"":"s"}. Prefer Stop survey to end collection and keep history. Deleting removes responses from Reflect.`
-      : s.status==="Live"
-      ? "This survey is live. Prefer Stop survey to release the trigger. Deleting removes it from Reflect."
-      : s.status==="Draft"
-      ? "This draft hasn't been sent yet. Deleting it removes the survey and its questions."
-      : "This version is no longer collecting. Deleting removes it and its responses from Reflect."} This can't be undone.</p>
-    <button class="fw-btn fw-btn--sm fw-btn--ghost-destructive mt16" onclick="askDeleteSurvey('${s.id}')">
-      ${I.trash(16)} Delete survey</button>
-  </div>`;
-}
 function viewSurveys(){
   const s = currentSurvey();
   if(!s) return viewSurveysIndex();
@@ -6201,8 +6174,6 @@ function viewSurveys(){
       ${surveyLocked?"":`<div class="builder-nav-label">More</div>
       ${builderNavItem("library", "Add a question", section==="library", I.plus(16))}
       ${builderNavItem("benchmark", "Benchmarking", section==="benchmark", I.shield(16))}`}
-      <div class="builder-nav-label">Survey</div>
-      ${builderNavItem("delete", "Delete survey", section==="delete", I.trash(16), "builder-nav-item--destructive")}
     </nav>
     <div class="builder-detail">
       ${section==="publish"?triggerAssocCard(s):""}
@@ -6210,7 +6181,6 @@ function viewSurveys(){
       ${section==="questions"?builderQuestions(qs, surveyLocked):""}
       ${section==="library"?builderLibrary(qs):""}
       ${section==="benchmark"?builderBenchmark(lockedQs):""}
-      ${section==="delete"?builderDelete(s):""}
     </div>
   </div>`;
 }
