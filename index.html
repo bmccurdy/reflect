@@ -89,6 +89,9 @@ ul{margin:0;padding:0;list-style:none}
 textarea.fw-input{height:auto;min-height:88px;padding:12px;resize:vertical;line-height:24px}
 .fw-btn--ghost-destructive{background:transparent;color:var(--destructive)}
 .fw-btn--ghost-destructive:hover{background:var(--status-critical-wash);color:var(--destructive-hover)}
+.fw-btn--muted{background:var(--surface-muted);color:var(--fg)}
+.fw-btn--muted:hover{background:var(--neutral-200)}
+html[data-theme="dark"] .fw-btn--muted:hover{background:var(--neutral-700)}
 a.fw-btn{text-decoration:none}
 .fw-btn{line-height:calc(var(--font-leading-5)*1px)}
 .fw-btn:not(.fw-btn--icon){height:auto}
@@ -7507,7 +7510,7 @@ function editIntroDialog(id){
         <p class="t-detail dim mt8">Use {agency} for the agency name and {n} for the number of questions. Both fill in when the patient opens the survey.</p>
       </div>
       <div class="dialog-actions dialog-actions--split">
-        <button class="fw-btn fw-btn--ghost" type="button" onclick="resetIntroDraft()">Reset to standard wording</button>
+        <button class="fw-btn fw-btn--muted" type="button" onclick="resetIntroDraft()">Reset to standard wording</button>
         <div class="dialog-actions__end">
           <button class="fw-btn fw-btn--outline" type="button" onclick="closeEditIntro()">Cancel</button>
           <button class="fw-btn fw-btn--primary" type="button" onclick="confirmEditIntro()">Save</button>
