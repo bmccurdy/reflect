@@ -1587,44 +1587,10 @@ button.num-link{
 }
 .intro-screen-panel{
   margin-top:16px;
-  display:flex;
-  flex-direction:column;
-  gap:16px;
   padding:16px;
   border:1px solid var(--border);
   border-radius:var(--r-lg);
   background:var(--muted);
-}
-.intro-screen-panel-head{
-  display:flex;
-  align-items:flex-start;
-  gap:12px;
-}
-.intro-screen-panel-mark{
-  flex:0 0 auto;
-  display:grid;
-  place-items:center;
-  width:28px;
-  height:28px;
-  border-radius:var(--r-full);
-  background:var(--primary);
-  color:var(--primary-foreground);
-}
-.intro-screen-panel-mark svg{display:block}
-.intro-screen-panel-copy{min-width:0}
-.intro-screen-panel-title{
-  margin:0;
-  font-size:16px;
-  line-height:24px;
-  font-weight:700;
-  letter-spacing:-.01em;
-  color:var(--foreground);
-}
-.intro-screen-panel-desc{
-  margin:4px 0 0;
-  font-size:13px;
-  line-height:18px;
-  color:var(--muted-foreground);
 }
 .intro-screen-preview-title{
   margin:0;
@@ -5149,18 +5115,11 @@ function introScreenCard(s){
     <div class="between between--inline">
       <div>
         <h2 class="t-h4">Introduction</h2>
-        <p class="intro-screen-lede">Patients see this before the first question. Edit the heading and intro text they land on.</p>
+        <p class="intro-screen-lede">Shown before the first question.</p>
       </div>
       ${surveyLocked?"":`<button type="button" class="fw-btn fw-btn--outline fw-btn--sm" onclick="openEditIntro()">${I.pencil(14)} Edit</button>`}
     </div>
-    <section class="intro-screen-panel" aria-labelledby="intro-preview-title">
-      <div class="intro-screen-panel-head">
-        <span class="intro-screen-panel-mark" aria-hidden="true">${I.eye(14)}</span>
-        <div class="intro-screen-panel-copy">
-          <h3 class="intro-screen-panel-title" id="intro-preview-title">What patients see</h3>
-          <p class="intro-screen-panel-desc">Resolved with the agency name and question count.</p>
-        </div>
-      </div>
+    <section class="intro-screen-panel" aria-label="Introduction preview">
       <div>
         <p class="intro-screen-preview-title">${esc(copy.title)}</p>
         <p class="intro-screen-preview-body">${esc(copy.body)}</p>
