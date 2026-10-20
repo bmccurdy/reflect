@@ -745,7 +745,7 @@ html[data-theme="dark"] .ov-reading .ov-label{
   .ovx-qdist .ovx-bar > span b.is-short{visibility:visible}
 }
 .ovx-caption{
-  display:flex;align-items:center;justify-content:center;height:34px;padding:0 20px;
+  display:flex;align-items:center;justify-content:center;min-height:34px;padding:8px 20px;
   font-size:11px;line-height:normal;color:var(--muted-foreground);text-align:center;
 }
 .ovx-follow{border-color:color-mix(in srgb,var(--amber-700) 32%,var(--amber-200))}
@@ -3772,11 +3772,12 @@ function ovxQuestionTag(name){
   if(n.includes("listen") || n.includes("explain") || n.includes("communicat")) return "communication";
   return "care";
 }
+const OVX_TARGETS = { mean:4, top2:65, yes:80 };
 function ovxWarnMetric(m){
   if(!m || !m.n) return false;
-  if(m.kind==="mean") return m.mean < 4;
-  if(m.kind==="top2") return m.pct < 65;
-  return m.pct < 80;
+  if(m.kind==="mean") return m.mean < OVX_TARGETS.mean;
+  if(m.kind==="top2") return m.pct < OVX_TARGETS.top2;
+  return m.pct < OVX_TARGETS.yes;
 }
 function ovxDistribution(q, rows){
   const answered = rows.filter(r=>r.answers[q.id]!=null && r.answers[q.id]!=="");
@@ -4085,7 +4086,7 @@ function viewOverview(){
                 <span class="fw-tooltip ovx-qtip" aria-hidden="true">${q.dist.d}% low · ${q.dist.p}% middle · ${q.dist.g}% high</span>
               </div>
             </div>`).join(""):`<p class="ovx-empty">No questions carry this tag.</p>`}
-            <p class="ovx-caption">Low is a poor or no answer. High is a top-two choice or yes. Sorted by result, highest first.</p>
+            <p class="ovx-caption">Low is a poor or no answer. High is a top-two choice or yes. Highlighted rows are below target (${OVX_TARGETS.mean.toFixed(1)} average, ${OVX_TARGETS.top2}% top-two, ${OVX_TARGETS.yes}% yes). Sorted by result, highest first.</p>
           </section>
         </div>
         <div class="ovx-side">
