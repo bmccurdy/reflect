@@ -807,6 +807,20 @@ html[data-theme="dark"] .ov-reading .ov-label{
 .ovx-grow .ovx-n{font-size:12px;color:var(--muted-foreground)}
 .ovx-grow b{font-size:14px}
 .ovx-grow b.is-warn{color:var(--amber-700)}
+html[data-theme="dark"] .ovx-qhead,
+html[data-theme="dark"] .ovx-meter,
+html[data-theme="dark"] .ovx-ratebar{background:var(--surface-muted)}
+html[data-theme="dark"] .ovx-qrow--warn,
+html[data-theme="dark"] .ovx-follow__head{
+  background:color-mix(in srgb,var(--status-elevated) 10%,var(--card));
+}
+html[data-theme="dark"] .ovx-follow{border-color:color-mix(in srgb,var(--status-elevated) 40%,var(--border))}
+html[data-theme="dark"] .ovx-qrow--warn .ovx-qnps{color:var(--status-critical)}
+html[data-theme="dark"] .ovx-follow__flag,
+html[data-theme="dark"] .ovx-queue strong:not(.is-quiet),
+html[data-theme="dark"] .ovx-callback__meta .is-hot,
+html[data-theme="dark"] .ovx-grow b.is-warn{color:var(--status-elevated)}
+html[data-theme="dark"] .ovx-meter > span.is-warn{background:var(--status-elevated)}
 .ovx-withheld{font-size:12px;line-height:normal;color:var(--muted-foreground)}
 .ovx-fine{font-size:11px;line-height:normal;color:var(--muted-foreground)}
 .ovx-empty{padding:8px 0 4px;font-size:13px;line-height:20px;color:var(--muted-foreground)}
