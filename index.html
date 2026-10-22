@@ -874,6 +874,42 @@ html[data-theme="dark"] .ovx-meter > span.is-warn{background:var(--status-elevat
 .tbl--surveys .sv-rate,
 .tbl--surveys .sv-schedule{font-size:14px;line-height:20px}
 .tbl--surveys .sv-title{font-weight:700}
+/* Fixed column widths so expanding the Archived group doesn't resize (jog) the active rows */
+@media (min-width:1081px){
+  .tbl--surveys{table-layout:fixed}
+  .tbl--surveys thead th:nth-child(2){width:128px}
+  .tbl--surveys thead th:nth-child(3){width:136px}
+  .tbl--surveys thead th:nth-child(4){width:176px}
+  .tbl--surveys thead th:nth-child(5){width:120px}
+  .tbl--surveys thead th:nth-child(6){width:140px}
+  .tbl--surveys .sv-name{overflow-wrap:anywhere}
+}
+/* Archived group: collapsed row at the bottom of the Surveys table */
+.tbl--surveys tbody[hidden]{display:none}
+.tbl--surveys .sv-group-row td{padding:0;border-top:1px solid var(--border)}
+.tbl--surveys .sv-group-row[data-expanded="true"] td{border-bottom:1px solid var(--border)}
+.sv-group-toggle{
+  display:flex;align-items:center;gap:8px;width:100%;min-height:48px;padding:12px 16px;
+  border:0;background:transparent;cursor:pointer;text-align:left;
+  font-family:inherit;font-size:14px;line-height:20px;font-weight:500;color:var(--muted-foreground);
+  transition:background-color var(--dur-micro) var(--ease-out),color var(--dur-micro) var(--ease-out);
+}
+.sv-group-toggle:hover{background:var(--surface-hover);color:var(--foreground)}
+.sv-group-toggle:focus-visible{outline-offset:-2px}
+.sv-group-chevron{display:inline-flex}
+.tbl--surveys .sv-row--archived td,
+.tbl--surveys .sv-row--archived .sv-title,
+.tbl--surveys .sv-row--archived .num-link,
+.tbl--surveys .sv-row--archived .trig-tip{color:var(--muted-foreground)}
+.tbl--surveys .sv-row--archived .sv-title{font-weight:400}
+.tbl--surveys .sv-empty-row td{font-size:14px;line-height:20px}
+.fw-toast:has(.fw-toast__action){align-items:center}
+.fw-toast__action{
+  margin-left:auto;flex:0 0 auto;min-height:32px;padding:0 12px;
+  border:1px solid currentColor;border-radius:var(--r-md);background:transparent;
+  color:inherit;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
+}
+.fw-toast__action:hover{background:color-mix(in srgb, currentColor 12%, transparent)}
 .tbl--alerts td{vertical-align:middle;font-size:14px;line-height:20px}
 .tbl--alerts{
   table-layout:fixed;width:100%;
@@ -2169,6 +2205,22 @@ html[data-theme="dark"] .patient{
   .tbl--surveys .sv-responses[data-live="no"] + .sv-rate:not([data-empty="yes"])::before{
     content:none;margin:0;
   }
+  .tbl--surveys .sv-row--archived .sv-schedule{
+    display:block;order:9;flex:0 0 auto;
+    color:var(--muted-foreground);
+    font-size:13px;line-height:20px;
+  }
+  .tbl--surveys .sv-row--archived .sv-schedule::before{
+    content:"·";
+    margin-right:8px;
+  }
+  .tbl--surveys .sv-row--archived:has(.sv-responses[data-live="no"]) .sv-schedule{margin-left:40px}
+  .tbl--surveys .sv-row--archived:has(.sv-responses[data-live="no"]) .sv-schedule::before{content:none;margin:0}
+  .tbl--surveys tbody.sv-group tr.sv-group-row{padding:0;border-top:1px solid var(--border);border-bottom:0}
+  .tbl--surveys tbody.sv-group tr.sv-group-row::before{content:none}
+  .tbl--surveys .sv-group-row td{flex:1 1 100%;width:100%;border:0}
+  .tbl--surveys .sv-group-toggle{padding:12px 0}
+  .tbl--surveys .sv-empty-row td{flex:1 1 100%}
   .tbl--responses tbody tr{align-items:flex-start;padding:16px 0;gap:8px 12px}
   .tbl--responses .rs-quote{
     order:1;flex:1 1 0;min-width:0;
@@ -2493,7 +2545,19 @@ const SURVEYS = [
     description:"",
     schedule:{ mode:"duration", durationDays:30, startAt:null, endAt:null },
     publishedAt:null, endsAt:null, stoppedAt:null,
-    questions:9, responses:0, rate:0, sent:0, updated:mins(220) }
+    questions:9, responses:0, rate:0, sent:0, updated:mins(220) },
+  { id:"sv_h1pilot", name:"H1 post-transport pilot", status:"Archived", prevStatus:"Completed", triggerId:null, priorTriggerId:"8878",
+    familyId:"sv_h1pilot", version:1, clonedFromId:null,
+    description:"First-half pilot. Kept for H1 vs. H2 reporting.",
+    schedule:{ mode:"duration", durationDays:90, startAt:null, endAt:null },
+    publishedAt:daysAgo(220), endsAt:daysAgo(130), stoppedAt:daysAgo(130), archivedAt:daysAgo(45),
+    questions:7, responses:3, rate:27, sent:11, updated:daysAgo(45) },
+  { id:"sv_storm", name:"Winter storm check-in", status:"Archived", prevStatus:"Stopped", triggerId:null, priorTriggerId:"8825",
+    familyId:"sv_storm", version:1, clonedFromId:null,
+    description:"",
+    schedule:{ mode:"ongoing", durationDays:30, startAt:null, endAt:null },
+    publishedAt:daysAgo(60), endsAt:null, stoppedAt:daysAgo(28), archivedAt:daysAgo(20),
+    questions:4, responses:2, rate:18, sent:11, updated:daysAgo(20) }
 ];
 
 function defaultSchedule(){
@@ -2514,17 +2578,24 @@ function normalizeSurvey(s){
   if(out.publishedAt && !(out.publishedAt instanceof Date)) out.publishedAt = new Date(out.publishedAt);
   if(out.endsAt && !(out.endsAt instanceof Date)) out.endsAt = new Date(out.endsAt);
   if(out.stoppedAt && !(out.stoppedAt instanceof Date)) out.stoppedAt = new Date(out.stoppedAt);
+  if(out.archivedAt && !(out.archivedAt instanceof Date)) out.archivedAt = new Date(out.archivedAt);
   out.publishedAt = out.publishedAt || null;
   out.endsAt = out.endsAt != null ? out.endsAt : null;
   out.stoppedAt = out.stoppedAt || null;
+  out.archivedAt = out.archivedAt || null;
+  out.prevStatus = out.prevStatus || null;
   out.priorTriggerId = out.priorTriggerId != null
     ? String(out.priorTriggerId).replace(/^#/,"")
     : null;
   out.description = typeof out.description==="string" ? out.description : "";
   return out;
 }
+/** Live, Stopped, Completed, and Archived are read only. Only Drafts edit. */
 function isSurveyLocked(s){
   return !!s && s.status!=="Draft";
+}
+function isSurveyArchived(s){
+  return !!s && s.status==="Archived";
 }
 function surveyPageChanged(s){
   if(!s) return false;
@@ -2599,6 +2670,9 @@ function formatScheduleSummary(s){
   }
   if(s.status==="Stopped"){
     return s.stoppedAt ? `Stopped ${day(s.stoppedAt)}` : "Stopped";
+  }
+  if(s.status==="Archived"){
+    return s.archivedAt ? `Archived ${day(s.archivedAt)}` : "Archived";
   }
   if(sch.mode==="ongoing") return "Ongoing when published";
   if(sch.mode==="duration") return `${sch.durationDays||30} days after publish`;
@@ -2687,7 +2761,9 @@ const QUESTIONS_Q3 = [
 const SURVEY_BANK = {
   sv_post: QUESTIONS,
   sv_notrans: QUESTIONS_NOTRANS,
-  sv_q3: QUESTIONS_Q3
+  sv_q3: QUESTIONS_Q3,
+  sv_h1pilot: QUESTIONS,
+  sv_storm: QUESTIONS_NOTRANS
 };
 
 const RESPONSES = {
@@ -2766,7 +2842,26 @@ const RESPONSES = {
     { id:"R-4398", at:daysAgo(24), band:"55–64", lang:"Spanish", zone:"New Hyde Park", alert:"A-4473",
       answers:{ n1:"No", n2:"No", n3:"No", n4:"Yes" } }
   ],
-  sv_q3: []
+  sv_q3: [],
+  sv_h1pilot: [
+    { id:"R-7003", at:daysAgo(140), band:"65–74", lang:"English", zone:"Manhasset", alert:null,
+      unit:"M-8", crew:"Sowande / Kim", call:"Chest pain", phone:"(516) 555-0203",
+      answers:{ q1:"Good", q2:"Very likely", q3:"Yes", q4:"Yes", q5:"Calm and clear.", q6:"", q7:"No" } },
+    { id:"R-7002", at:daysAgo(160), band:"45–54", lang:"Spanish", zone:"New Hyde Park", alert:null,
+      unit:"M-3", crew:"Okafor / Reyes", call:"Difficulty breathing", phone:"(516) 555-0207",
+      answers:{ q1:"Fine", q2:"Not sure", q3:"Yes", q4:"No", q5:"", q6:"Hard to follow the questions.", q7:"No" } },
+    { id:"R-7001", at:daysAgo(190), band:"75+", lang:"English", zone:"Great Neck", alert:null,
+      unit:"E-7", crew:"Boyd / Trần", call:"Fall, hip", phone:"(516) 555-0211",
+      answers:{ q1:"Exceptional", q2:"Very likely", q3:"Yes", q4:"Yes", q5:"They kept me warm.", q6:"", q7:"No" } }
+  ],
+  sv_storm: [
+    { id:"R-7102", at:daysAgo(32), band:"55–64", lang:"English", zone:"Port Washington", alert:null,
+      unit:"E-2", crew:"Halloran / Pike", call:"Weakness, refused", phone:"(516) 555-0215",
+      answers:{ n1:"Yes", n2:"Yes", n3:"Yes", n4:"No" } },
+    { id:"R-7101", at:daysAgo(41), band:"35–44", lang:"English", zone:"Manhasset", alert:null,
+      unit:"M-12", crew:"Alvarez / Nwosu", call:"Fall, refused", phone:"(516) 555-0219",
+      answers:{ n1:"Yes", n2:"No", n3:"No", n4:"No" } }
+  ]
 };
 
 const LIBRARY = [
@@ -2918,6 +3013,8 @@ const state = {
   responseLimit:11,
   drawerKey:null,
   deleteSurvey:null,
+  archiveSurvey:null,
+  surveysArchivedOpen:false,
   stopSurvey:null,
   renameSurvey:null,
   editQuestion:null,
@@ -2933,6 +3030,7 @@ const state = {
   dragQId:null,
   suppressQClick:false,
   toast:null,
+  toastAction:null,
   routeEnter:true,
   blinkSent:{},
   libraryFilter:"all",
@@ -2987,6 +3085,8 @@ const I = {
   plus:       s=>ic('<path d="M5 12h14"/><path d="M12 5v14"/>',s),
   copy:       s=>ic('<rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',s),
   trash:      s=>ic('<path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',s),
+  archive:    s=>ic('<rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',s),
+  archiveRestore: s=>ic('<rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h2"/><path d="M20 8v11a2 2 0 0 1-2 2h-2"/><path d="m9 15 3-3 3 3"/><path d="M12 12v9"/>',s),
   star:       s=>ic('<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',s),
   starFill:   s=>ic('<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="currentColor"/>',s),
   more:       s=>ic('<circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/>',s),
@@ -3094,13 +3194,14 @@ function shell(body){
   ${state.openAlert||state.openResponse?caseDrawer():""}
   ${state.openTrigger?triggerDrawer(state.openTrigger):""}
   ${state.deleteSurvey?deleteConfirm(state.deleteSurvey):""}
+  ${state.archiveSurvey?archiveConfirm(state.archiveSurvey):""}
   ${state.stopSurvey?stopSurveyDialog(state.stopSurvey):""}
   ${state.renameSurvey?renameDialog(state.renameSurvey):""}
   ${state.editQuestion?editQuestionDialog(state.editQuestion):""}
   ${state.editIntro?editIntroDialog(state.editIntro):""}
   ${state.testSms?testSmsDialog(state.testSms):""}
   ${state.previewSurvey?surveyPreview():""}
-  ${state.toast?`<div class="fw-toaster" role="status"><div class="fw-toast fw-toast--success"><span class="fw-toast__icon">${I.check(16)}</span><p class="fw-toast__title">${esc(state.toast)}</p></div></div>`:""}`;
+  ${state.toast?`<div class="fw-toaster" role="status"><div class="fw-toast fw-toast--success"><span class="fw-toast__icon">${I.check(16)}</span><p class="fw-toast__title">${esc(state.toast)}</p>${state.toastAction?`<button type="button" class="fw-toast__action" onclick="runToastAction()">${esc(state.toastAction.label)}</button>`:""}</div></div>`:""}`;
 }
 
 const staleBanner = () => state.hideStale ? "" : `
@@ -3359,7 +3460,7 @@ const OVERVIEW_DEMOGRAPHICS = [
 function overviewSurveyId(){
   if(state.surveys.some(x=>x.id===state.overviewSurvey)) return state.overviewSurvey;
   const live = state.surveys.find(x=>x.status==="Live");
-  return (live || state.surveys[0] || {}).id || null;
+  return (live || state.surveys.find(x=>!isSurveyArchived(x)) || {}).id || null;
 }
 function overviewSurvey(){
   const id = overviewSurveyId();
@@ -5163,6 +5264,7 @@ function surveyStatusBadge(s){
   if(s.status==="Live") return `<span class="fw-badge fw-badge--success">${I.checkCircle(12)}Live</span>`;
   if(s.status==="Stopped") return `<span class="fw-badge fw-badge--destructive">${I.octagon(12)}Stopped</span>`;
   if(s.status==="Completed") return `<span class="fw-badge fw-badge--secondary">${I.check(12)}Completed</span>`;
+  if(s.status==="Archived") return `<span class="fw-badge fw-badge--outline">${I.archive(12)}Archived</span>`;
   return `<span class="fw-badge fw-badge--secondary">${I.pencil(12)}Draft</span>`;
 }
 function surveyTriggerCell(s){
@@ -5219,10 +5321,19 @@ function surveyTitleMeta(s){
     if(s.version>1) parts.push(`v${s.version}`);
     return parts.map(esc).join(" · ")+trig;
   }
+  if(s.status==="Archived"){
+    const parts = [];
+    if(s.publishedAt) parts.push(`Published ${day(s.publishedAt)}`);
+    parts.push(s.archivedAt ? `Archived ${day(s.archivedAt)}` : "Archived");
+    parts.push(resp);
+    if(s.version>1) parts.push(`v${s.version}`);
+    return parts.map(esc).join(" · ")+trig;
+  }
   return "";
 }
 function responseCountLink(s){
-  if(s.status!=="Live" && s.status!=="Stopped" && s.status!=="Completed") return `<span class="dim">—</span>`;
+  if(s.status!=="Live" && s.status!=="Stopped" && s.status!=="Completed" && s.status!=="Archived") return `<span class="dim">—</span>`;
+  if(s.status==="Archived" && s.prevStatus==="Draft") return `<span class="dim">—</span>`;
   const n = s.responses;
   const label = n===1 ? "1 response" : n+" responses";
   return `<a class="num-link" href="#/surveys/${s.id}/responses" aria-label="${label}">${n}</a>`;
@@ -5403,7 +5514,7 @@ function triggerAssocCard(s){
     <div class="fw-card trigger-assoc publish-setup">
       <div class="between between--inline">
         <div>
-          <h2 class="t-h4">Publish setup</h2>
+          <h2 class="t-h4">Setup</h2>
           <p class="publish-setup-lede">Two steps before you publish. Associate a trigger first, then set when the survey runs.</p>
         </div>
         ${activeId
@@ -5565,6 +5676,18 @@ function surveyLockBanner(s){
       <span class="fw-alert__icon">${I.lock(20)}</span>
       <div>
         <p class="fw-alert__desc"><strong>Live — editing locked.</strong> This survey is collecting responses. Questions, trigger, and schedule can’t change on this version.</p>
+      </div>
+    </div>`;
+  }
+  if(isSurveyArchived(s)){
+    return `
+    <div class="fw-alert fw-alert--info survey-lock-banner" role="status">
+      <span class="fw-alert__icon">${I.archive(20)}</span>
+      <div>
+        <p class="fw-alert__desc"><strong>Archived — read only.</strong> ${esc(formatScheduleSummary(s))}. Responses are kept for reporting. Restore it from the Surveys list.</p>
+        <div class="fw-alert__actions">
+          <button type="button" class="fw-btn fw-btn--primary fw-btn--sm" onclick="duplicateAndEdit('${s.id}')">${I.copy(14)} Duplicate &amp; edit</button>
+        </div>
       </div>
     </div>`;
   }
@@ -5911,13 +6034,33 @@ function viewSurveysIndex(){
   const live = state.surveys.filter(s=>s.status==="Live").length;
   const drafts = state.surveys.filter(s=>s.status==="Draft").length;
   const ended = state.surveys.filter(s=>s.status==="Stopped"||s.status==="Completed").length;
+  const active = state.surveys.filter(s=>!isSurveyArchived(s));
+  const archived = state.surveys.filter(isSurveyArchived);
+  const archOpen = !!state.surveysArchivedOpen && archived.length>0;
+  const row = s => {
+    const arch = isSurveyArchived(s);
+    return `
+          <tr${arch?` class="sv-row--archived"`:""}>
+            <td class="sv-name">
+              <a class="sv-title" href="#/surveys/${s.id}">${esc(s.name)}</a>
+              ${s.description?`<div class="t-subtle dim sv-desc">${esc(s.description)}</div>`:""}
+              <div class="t-subtle sv-meta">${s.questions} questions${s.version>1?` · v${s.version}`:""}</div>
+            </td>
+            <td class="sv-trigger">${surveyTriggerCell(s)}</td>
+            <td class="sv-status">${surveyStatusBadge(s)}</td>
+            <td class="dim sv-schedule">${esc(formatScheduleSummary(s))}</td>
+            <td class="sv-responses" data-live="${s.status==="Live"||(arch&&s.prevStatus!=="Draft")?"yes":"no"}">${responseCountLink(s)}</td>
+            <td class="sv-rate" data-empty="${s.rate?"no":"yes"}">${s.rate?s.rate+"%":"—"}</td>
+            <td class="morecol sv-more">${surveyRowMenu(s)}</td>
+          </tr>`;
+  };
   return `
   <div class="page-head">
     <div class="crumbs"><a href="#/">Overview</a><span class="sep">/</span><span>Surveys</span></div>
     <div class="between">
       <div>
         <h1 class="t-h2">Surveys</h1>
-        <p class="t-p dim">${live} live · ${drafts} draft${ended?` · ${ended} ended`:""}</p>
+        <p class="t-p dim">${live} live · ${drafts} draft${ended?` · ${ended} ended`:""}${archived.length?` · ${archived.length} archived`:""}</p>
       </div>
       <button class="fw-btn fw-btn--primary" onclick="newSurvey()">${I.plus(16)} Create new survey</button>
     </div>
@@ -5930,21 +6073,25 @@ function viewSurveysIndex(){
         <th class="morecol"><span class="sr">Actions</span></th>
       </tr></thead>
       <tbody>
-        ${state.surveys.map(s=>`
-          <tr>
-            <td class="sv-name">
-              <a class="sv-title" href="#/surveys/${s.id}">${esc(s.name)}</a>
-              ${s.description?`<div class="t-subtle dim sv-desc">${esc(s.description)}</div>`:""}
-              <div class="t-subtle sv-meta">${s.questions} questions${s.version>1?` · v${s.version}`:""}</div>
-            </td>
-            <td class="sv-trigger">${surveyTriggerCell(s)}</td>
-            <td class="sv-status">${surveyStatusBadge(s)}</td>
-            <td class="dim sv-schedule">${esc(formatScheduleSummary(s))}</td>
-            <td class="sv-responses" data-live="${s.status==="Live"?"yes":"no"}">${responseCountLink(s)}</td>
-            <td class="sv-rate" data-empty="${s.rate?"no":"yes"}">${s.rate?s.rate+"%":"—"}</td>
-            <td class="morecol sv-more">${surveyRowMenu(s)}</td>
-          </tr>`).join("")}
+        ${active.length?active.map(row).join(""):`
+          <tr class="sv-empty-row"><td colspan="7" class="dim">No active surveys. Restore one from Archived or create a new one.</td></tr>`}
       </tbody>
+      ${archived.length?`<tbody class="sv-group">
+        <tr class="sv-group-row" data-expanded="${archOpen}">
+          <td colspan="7">
+            <button type="button" class="sv-group-toggle" id="sv-archived-toggle"
+              aria-expanded="${archOpen}" aria-controls="sv-archived-rows"
+              onclick="toggleArchivedSurveys()">
+              <span class="sv-group-chevron" aria-hidden="true">${archOpen?I.down(16):I.chevronRight(16)}</span>
+              ${I.archive(16)}
+              <span>Archived (${archived.length})</span>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+      <tbody id="sv-archived-rows" class="sv-archived-rows"${archOpen?"":" hidden"}>
+        ${archOpen?archived.map(row).join(""):""}
+      </tbody>`:""}
     </table>
     </div>
   </div>`:`
@@ -5955,12 +6102,14 @@ function viewSurveysIndex(){
     </div>`}`;
 }
 
+/* Benchmarking section of the survey builder is hidden for now. Set to true to show its nav item and page again. */
+const SHOW_BENCHMARK_SECTION = false;
 function builderSection(s, qs){
   const locked = isSurveyLocked(s);
   const id = state.previewQId;
   if(id==="intro" || id==="publish" || id==="questions") return id;
   if(id==="library" && !locked) return "library";
-  if(id==="benchmark" && !locked) return "benchmark";
+  if(id==="benchmark" && !locked && SHOW_BENCHMARK_SECTION) return "benchmark";
   if(qs.length) return "questions";
   return "publish";
 }
@@ -6139,6 +6288,7 @@ function viewSurveys(){
           </button>`}
           ${s.status==="Live"?`<span class="fw-badge fw-badge--success survey-title-pill">${I.checkCircle(12)} Live</span>`:""}
           ${s.status==="Stopped"?`<span class="fw-badge survey-readonly-pill">${I.lock(12)} Read only</span>`:""}
+          ${isSurveyArchived(s)?`<span class="fw-badge fw-badge--outline survey-title-pill">${I.archive(12)} Archived</span>`:""}
         </h1>`}
         ${!surveyLocked && state.editingSurveyDesc===s.id?`
         <div class="survey-desc-edit">
@@ -6173,7 +6323,7 @@ function viewSurveys(){
       ${builderNavItem("questions", "Questions", section==="questions", I.list(16))}
       ${surveyLocked?"":`<div class="builder-nav-label">More</div>
       ${builderNavItem("library", "Add a question", section==="library", I.plus(16))}
-      ${builderNavItem("benchmark", "Benchmarking", section==="benchmark", I.shield(16))}`}
+      ${SHOW_BENCHMARK_SECTION?builderNavItem("benchmark", "Benchmarking", section==="benchmark", I.shield(16)):""}`}
     </nav>
     <div class="builder-detail">
       ${section==="publish"?triggerAssocCard(s):""}
@@ -6424,8 +6574,10 @@ function viewSurveyResponses(){
     <div class="fw-card empty">
       <div class="dim" style="display:flex;justify-content:center;margin-bottom:12px">${I.inbox(32)}</div>
       <div class="t">No responses yet.</div>
-      <div class="s t-p">${s.status==="Draft"
+      <div class="s t-p">${s.status==="Draft" || (isSurveyArchived(s) && s.prevStatus==="Draft")
         ? "This draft hasn't been sent, so nothing has come in."
+        : isSurveyArchived(s)
+        ? "This survey is archived. It isn't collecting responses."
         : "Invitations are out. New answers will show up here."}</div>
       <a class="fw-btn fw-btn--primary mt16" href="#/surveys/${s.id}">${I.pencil(16)} Edit survey</a>
     </div>`}`;
@@ -7019,15 +7171,26 @@ function toggleTheme(){
   withViewTransition(()=>render());
 }
 let toastTimer;
-function toast(msg, alreadyRendered){
+/** action: optional { label, run } — renders a button in the toast (e.g. Undo). */
+function toast(msg, alreadyRendered, action){
   state.toast = msg;
+  state.toastAction = action || null;
   if(!alreadyRendered) render();
   clearTimeout(toastTimer);
   toastTimer = setTimeout(()=>{
     state.toast=null;
+    state.toastAction = null;
     render();
     state.scrollPreserve = null;
-  }, 2600);
+  }, action ? 6000 : 2600);
+}
+function runToastAction(){
+  const a = state.toastAction;
+  clearTimeout(toastTimer);
+  state.toast = null;
+  state.toastAction = null;
+  if(a && typeof a.run==="function") a.run();
+  else render();
 }
 
 /* Keep the Question library in view after a full re-render inserts a card above it. */
@@ -7313,6 +7476,17 @@ function duplicateSurvey(id){
 function surveyRowMenu(s){
   const open = state.surveyMenu===s.id;
   const locked = isSurveyLocked(s);
+  if(isSurveyArchived(s)){
+    return `<div class="menu-wrap${open?" open":""}" onclick="event.stopPropagation()">
+    <button type="button" class="iconbtn" aria-label="More actions" aria-haspopup="menu" aria-expanded="${open}"
+      onclick="toggleSurveyMenu('${s.id}',event)">${I.more(18)}</button>
+    ${open?`<div class="menu" role="menu">
+      <button type="button" role="menuitem" onclick="go('#/surveys/${s.id}/responses')">${I.inbox(16)} View responses</button>
+      <button type="button" role="menuitem" onclick="duplicateAndEdit('${s.id}')">${I.copy(16)} Duplicate &amp; edit</button>
+      <button type="button" role="menuitem" onclick="restoreSurvey('${s.id}')">${I.archiveRestore(16)} Restore</button>
+    </div>`:""}
+  </div>`;
+  }
   return `<div class="menu-wrap${open?" open":""}" onclick="event.stopPropagation()">
     <button type="button" class="iconbtn" aria-label="More actions" aria-haspopup="menu" aria-expanded="${open}"
       onclick="toggleSurveyMenu('${s.id}',event)">${I.more(18)}</button>
@@ -7322,7 +7496,8 @@ function surveyRowMenu(s){
       ${s.status!=="Draft"?`<button type="button" role="menuitem" onclick="go('#/surveys/${s.id}/responses')">${I.inbox(16)} View responses</button>`:""}
       ${s.status==="Live"?`<button type="button" role="menuitem" onclick="askStopSurvey('${s.id}')">${I.octagon(16)} Stop survey</button>`:""}
       <button type="button" role="menuitem" onclick="duplicateAndEdit('${s.id}')">${I.copy(16)} Duplicate &amp; edit</button>
-      <button type="button" role="menuitem" class="danger" onclick="askDeleteSurvey('${s.id}')">${I.trash(16)} Delete</button>
+      <button type="button" role="menuitem" onclick="askArchiveSurvey('${s.id}')">${I.archive(16)} Archive</button>
+      ${s.status==="Draft"?`<button type="button" role="menuitem" class="danger" onclick="askDeleteSurvey('${s.id}')">${I.trash(16)} Discard draft</button>`:""}
     </div>`:""}
   </div>`;
 }
@@ -7332,6 +7507,12 @@ function toggleSurveyMenu(id, e){
   render();
 }
 function closeSurveyMenu(){ if(!state.surveyMenu) return; state.surveyMenu = null; render(); }
+function toggleArchivedSurveys(){
+  state.surveysArchivedOpen = !state.surveysArchivedOpen;
+  state.surveyMenu = null;
+  render();
+  document.getElementById("sv-archived-toggle")?.focus();
+}
 function renameDialog(id){
   const s = state.surveys.find(x=>x.id===id);
   if(!s) return "";
@@ -7752,32 +7933,28 @@ function surveyDescKey(e){
   if(e.key==="Enter" && (e.metaKey || e.ctrlKey)){ e.preventDefault(); confirmInlineDesc(); }
 }
 
+/* Discard: only never-published Drafts can be removed. Everything else is archived. */
 function deleteConfirm(id){
   const s = state.surveys.find(x=>x.id===id);
-  if(!s) return "";
-  const live = s.status==="Live";
-  const consequence = live && s.responses
-    ? `Stops invitations and permanently removes ${s.responses} response${s.responses===1?"":"s"} collected so far.`
-    : live
-    ? "Stops invitations and removes this survey from Reflect."
-    : "Removes this draft and its questions. It hasn't been sent yet.";
+  if(!s || s.status!=="Draft") return "";
   return `
   <div class="scrim" style="z-index:54"></div>
   <div class="dialog-wrap" onclick="closeDeleteSurvey()">
     <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="del-title" aria-describedby="del-desc"
       onclick="event.stopPropagation()">
       <div class="dialog-icon" aria-hidden="true">${I.trash(20)}</div>
-      <h2 class="t-h4" id="del-title">Delete “${esc(s.name)}”?</h2>
-      <p class="t-body dim mt8" id="del-desc">${consequence} This can't be undone.</p>
+      <h2 class="t-h4" id="del-title">Discard “${esc(s.name)}”?</h2>
+      <p class="t-body dim mt8" id="del-desc">Removes this draft and its questions. It hasn't been sent, so there are no responses to lose. This can't be undone.</p>
       <div class="dialog-actions">
-        <button class="fw-btn fw-btn--outline" onclick="closeDeleteSurvey()">Keep survey</button>
-        <button class="fw-btn fw-btn--destructive" onclick="confirmDeleteSurvey()">${I.trash(16)} Delete survey</button>
+        <button class="fw-btn fw-btn--outline" onclick="closeDeleteSurvey()">Keep draft</button>
+        <button class="fw-btn fw-btn--destructive" onclick="confirmDeleteSurvey()">${I.trash(16)} Discard draft</button>
       </div>
     </div>
   </div>`;
 }
 function askDeleteSurvey(id){
-  if(!state.surveys.find(x=>x.id===id)) return;
+  const s = state.surveys.find(x=>x.id===id);
+  if(!s || s.status!=="Draft") return;
   state.surveyMenu = null;
   state.deleteSurvey = id;
   render();
@@ -7787,13 +7964,119 @@ function confirmDeleteSurvey(){
   const id = state.deleteSurvey;
   if(!id) return;
   const s = state.surveys.find(x=>x.id===id);
-  const name = s ? s.name : "Survey";
+  state.deleteSurvey = null;
+  if(!s || s.status!=="Draft"){ render(); return; }
+  const name = s.name;
   state.surveys = state.surveys.filter(x=>x.id!==id);
   delete state.surveyQuestions[id];
   delete state.responses[id];
-  state.deleteSurvey = null;
   go("#/surveys");
-  toast(name+" deleted.");
+  toast(name+" discarded.");
+}
+
+/* Archive: replaces delete for anything that isn't a Draft. Responses are kept. */
+function archiveConfirm(id){
+  const s = state.surveys.find(x=>x.id===id);
+  if(!s || isSurveyArchived(s)) return "";
+  const n = Number(s.responses)||0;
+  const isDraft = s.status==="Draft";
+  const liveTrig = s.status==="Live" ? surveyActiveTriggerId(s) : null;
+  const kept = isDraft
+    ? "It moves to Archived. It hasn't been sent, so there are no responses."
+    : `It stops collecting responses and moves to Archived. ${n===1
+      ? "Its 1 response is kept for reporting."
+      : n===0 ? "It has no responses yet." : `All ${n} responses are kept for reporting.`}`;
+  const liveNote = s.status==="Live"
+    ? (liveTrig ? ` This stops the survey first and frees trigger ${formatTriggerId(liveTrig)}.` : " This stops the survey first.")
+    : "";
+  return `
+  <div class="scrim" style="z-index:54"></div>
+  <div class="dialog-wrap" onclick="closeArchiveSurvey()">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="arch-title" aria-describedby="arch-desc"
+      onclick="event.stopPropagation()">
+      <h2 class="t-h4" id="arch-title">Archive “${esc(s.name)}”?</h2>
+      <p class="t-body dim mt8" id="arch-desc">${esc(kept+liveNote)}</p>
+      <div class="dialog-actions">
+        <button class="fw-btn fw-btn--outline" onclick="closeArchiveSurvey()">Cancel</button>
+        <button class="fw-btn fw-btn--primary" onclick="confirmArchiveSurvey()">${I.archive(16)} Archive survey</button>
+      </div>
+    </div>
+  </div>`;
+}
+function askArchiveSurvey(id){
+  const s = state.surveys.find(x=>x.id===id);
+  if(!s || isSurveyArchived(s)) return;
+  state.surveyMenu = null;
+  state.archiveSurvey = id;
+  render();
+}
+function closeArchiveSurvey(){ state.archiveSurvey = null; render(); }
+function confirmArchiveSurvey(){
+  const id = state.archiveSurvey;
+  if(!id) return;
+  const s = state.surveys.find(x=>x.id===id);
+  state.archiveSurvey = null;
+  if(!s || isSurveyArchived(s)){ render(); return; }
+  const snap = { status:s.status, triggerId:s.triggerId, priorTriggerId:s.priorTriggerId,
+    stoppedAt:s.stoppedAt, updated:s.updated };
+  if(s.status==="Live"){
+    /* One step: stop first (same as the Stop flow), then archive. */
+    releaseSurveyTrigger(s);
+    s.stoppedAt = NOW;
+  } else if(s.status==="Draft"){
+    /* A draft can hold a trigger. Archived surveys never do. Remember it for Restore. */
+    s.archivedTriggerId = surveyActiveTriggerId(s);
+    s.triggerId = null;
+  }
+  s.prevStatus = s.status;
+  s.status = "Archived";
+  s.archivedAt = NOW;
+  s.updated = NOW;
+  toast("Survey archived.", true, { label:"Undo", run:()=>undoArchiveSurvey(id, snap) });
+  render();
+}
+function clearArchiveFields(s){
+  s.archivedAt = null;
+  s.prevStatus = null;
+  s.archivedTriggerId = null;
+  if(!state.surveys.some(isSurveyArchived)) state.surveysArchivedOpen = false;
+}
+/** Back to the pre-archive status. A Live survey comes back Stopped: its trigger was released. */
+function restoreSurvey(id){
+  const s = state.surveys.find(x=>x.id===id);
+  if(!s || !isSurveyArchived(s)) return;
+  const prev = s.prevStatus;
+  const next = prev==="Live" ? "Stopped"
+    : (prev==="Draft" || prev==="Stopped" || prev==="Completed") ? prev
+    : s.publishedAt ? "Stopped" : "Draft";
+  let msg = next==="Stopped" && prev==="Live" ? "Survey restored as Stopped. Its trigger stays free." : "Survey restored.";
+  if(next==="Draft" && s.archivedTriggerId){
+    const owner = triggerOwner(s.archivedTriggerId, s.id);
+    if(owner) msg = `Survey restored. Its trigger is now linked to ${owner.name}.`;
+    else s.triggerId = s.archivedTriggerId;
+  }
+  s.status = next;
+  s.updated = NOW;
+  clearArchiveFields(s);
+  state.surveyMenu = null;
+  toast(msg, true);
+  render();
+}
+function undoArchiveSurvey(id, snap){
+  const s = state.surveys.find(x=>x.id===id);
+  if(!s || !isSurveyArchived(s)){ render(); return; }
+  const trig = String(snap.triggerId||"").replace(/^#/,"");
+  if(trig && triggerOwner(trig, s.id)){
+    /* Trigger was claimed in the meantime. Fall back to a normal restore. */
+    const owner = triggerOwner(trig, s.id);
+    restoreSurvey(id);
+    if(snap.status==="Live") toast(`Restored as Stopped. Its trigger is now linked to ${owner.name}.`);
+    return;
+  }
+  Object.assign(s, snap);
+  clearArchiveFields(s);
+  toast("Archive undone.", true);
+  render();
 }
 
 /* patient survey */
@@ -7979,6 +8262,7 @@ window.addEventListener("hashchange", ()=>{
     state.openAlert = null;
   }
   state.deleteSurvey = null;
+  state.archiveSurvey = null;
   state.stopSurvey = null;
   state.renameSurvey = null;
   state.editIntro = null;
@@ -8032,6 +8316,7 @@ window.addEventListener("keydown", e=>{
   if(state.editingSurveyDesc){ cancelInlineDesc(); return; }
   if(state.surveyMenu){ closeSurveyMenu(); return; }
   if(state.deleteSurvey){ closeDeleteSurvey(); return; }
+  if(state.archiveSurvey){ closeArchiveSurvey(); return; }
   if(state.stopSurvey){ closeStopSurvey(); return; }
   if(state.openResponse || state.openAlert){ closeCase(); return; }
   if(state.openTrigger){ closeTrigger(); return; }
