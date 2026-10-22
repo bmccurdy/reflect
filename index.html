@@ -1562,8 +1562,10 @@ button.num-link{
 .survey-lock-banner.fw-alert--info .fw-alert__desc strong{
   color:var(--accent-foreground);
 }
+.survey-lock-banner .fw-alert__desc{flex:1;min-width:0}
+.survey-lock-banner__actions,
 .survey-lock-banner .fw-alert__actions{
-  display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;
+  display:flex;flex-wrap:wrap;gap:8px;flex-shrink:0;margin-left:auto;align-items:center;
 }
 .schedule-card .seg{margin-top:12px}
 .schedule-fields{display:grid;gap:12px;margin-top:16px}
@@ -2361,6 +2363,9 @@ html[data-theme="dark"] .patient{
     flex-wrap:wrap;align-items:flex-start;
   }
   .stale-banner .stale-banner__close{margin-left:auto}
+  .survey-lock-banner{flex-wrap:wrap;align-items:flex-start}
+  .survey-lock-banner__actions,
+  .survey-lock-banner .fw-alert__actions{margin-left:auto}
 }
 
 @media (max-height:500px) and (max-width:1080px){
@@ -5683,23 +5688,19 @@ function surveyLockBanner(s){
     return `
     <div class="fw-alert fw-alert--info survey-lock-banner" role="status">
       <span class="fw-alert__icon">${I.archive(20)}</span>
-      <div>
-        <p class="fw-alert__desc"><strong>Archived — read only.</strong> ${esc(formatScheduleSummary(s))}. Responses are kept for reporting. Restore it from the Surveys list.</p>
-        <div class="fw-alert__actions">
-          <button type="button" class="fw-btn fw-btn--primary fw-btn--sm" onclick="duplicateAndEdit('${s.id}')">${I.copy(14)} Duplicate &amp; edit</button>
-        </div>
+      <p class="fw-alert__desc"><strong>Archived — read only.</strong> ${esc(formatScheduleSummary(s))}. Responses are kept for reporting. Restore it from the Surveys list.</p>
+      <div class="survey-lock-banner__actions">
+        <button type="button" class="fw-btn fw-btn--primary fw-btn--sm" onclick="duplicateAndEdit('${s.id}')">${I.copy(14)} Duplicate &amp; edit</button>
       </div>
     </div>`;
   }
   return `
   <div class="fw-alert fw-alert--warning survey-lock-banner" role="status">
     <span class="fw-alert__icon">${I.lock(20)}</span>
-    <div>
-      <p class="fw-alert__desc"><strong>Completed — read only.</strong> ${esc(formatScheduleSummary(s))}. ${surveyActiveTriggerId(s)?"":surveyPriorTriggerId(s)?"Trigger freed for a new draft.":"No trigger was linked."}</p>
-      <div class="fw-alert__actions">
-        <button type="button" class="fw-btn fw-btn--primary fw-btn--sm" onclick="duplicateAndEdit('${s.id}')">${I.copy(14)} Duplicate &amp; edit</button>
-        ${s.clonedFromId?`<a class="fw-btn fw-btn--outline fw-btn--sm" href="#/surveys/${s.clonedFromId}">View prior version</a>`:""}
-      </div>
+    <p class="fw-alert__desc"><strong>Completed — read only.</strong> ${esc(formatScheduleSummary(s))}. ${surveyActiveTriggerId(s)?"":surveyPriorTriggerId(s)?"Trigger freed for a new draft.":"No trigger was linked."}</p>
+    <div class="survey-lock-banner__actions">
+      <button type="button" class="fw-btn fw-btn--primary fw-btn--sm" onclick="duplicateAndEdit('${s.id}')">${I.copy(14)} Duplicate &amp; edit</button>
+      ${s.clonedFromId?`<a class="fw-btn fw-btn--outline fw-btn--sm" href="#/surveys/${s.clonedFromId}">View prior version</a>`:""}
     </div>
   </div>`;
 }
