@@ -7497,7 +7497,7 @@ function surveyRowMenu(s){
       ${s.status!=="Draft"?`<button type="button" role="menuitem" onclick="go('#/surveys/${s.id}/responses')">${I.inbox(16)} View responses</button>`:""}
       ${s.status==="Live"?`<button type="button" role="menuitem" onclick="askStopSurvey('${s.id}')">${I.octagon(16)} Stop survey</button>`:""}
       <button type="button" role="menuitem" onclick="duplicateAndEdit('${s.id}')">${I.copy(16)} Duplicate &amp; edit</button>
-      <button type="button" role="menuitem" onclick="askArchiveSurvey('${s.id}')">${I.archive(16)} Archive</button>
+      ${s.status!=="Live"?`<button type="button" role="menuitem" onclick="askArchiveSurvey('${s.id}')">${I.archive(16)} Archive</button>`:""}
       ${s.status==="Draft"?`<button type="button" role="menuitem" class="danger" onclick="askDeleteSurvey('${s.id}')">${I.trash(16)} Discard draft</button>`:""}
     </div>`:""}
   </div>`;
@@ -7981,22 +7981,18 @@ function archiveConfirm(id){
   if(!s || isSurveyArchived(s)) return "";
   const n = Number(s.responses)||0;
   const isDraft = s.status==="Draft";
-  const liveTrig = s.status==="Live" ? surveyActiveTriggerId(s) : null;
   const kept = isDraft
     ? "It moves to Archived. It hasn't been sent, so there are no responses."
     : `It stops collecting responses and moves to Archived. ${n===1
       ? "Its 1 response is kept for reporting."
       : n===0 ? "It has no responses yet." : `All ${n} responses are kept for reporting.`}`;
-  const liveNote = s.status==="Live"
-    ? (liveTrig ? ` This stops the survey first and frees trigger ${formatTriggerId(liveTrig)}.` : " This stops the survey first.")
-    : "";
   return `
   <div class="scrim" style="z-index:54"></div>
   <div class="dialog-wrap" onclick="closeArchiveSurvey()">
     <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="arch-title" aria-describedby="arch-desc"
       onclick="event.stopPropagation()">
       <h2 class="t-h4" id="arch-title">Archive “${esc(s.name)}”?</h2>
-      <p class="t-body dim mt8" id="arch-desc">${esc(kept+liveNote)}</p>
+      <p class="t-body dim mt8" id="arch-desc">${esc(kept)}</p>
       <div class="dialog-actions">
         <button class="fw-btn fw-btn--outline" onclick="closeArchiveSurvey()">Cancel</button>
         <button class="fw-btn fw-btn--primary" onclick="confirmArchiveSurvey()">${I.archive(16)} Archive survey</button>
@@ -8006,7 +8002,8 @@ function archiveConfirm(id){
 }
 function askArchiveSurvey(id){
   const s = state.surveys.find(x=>x.id===id);
-  if(!s || isSurveyArchived(s)) return;
+  /* Live surveys can't be archived. Stop them first. */
+  if(!s || isSurveyArchived(s) || s.status==="Live") return;
   state.surveyMenu = null;
   state.archiveSurvey = id;
   render();
@@ -8017,14 +8014,10 @@ function confirmArchiveSurvey(){
   if(!id) return;
   const s = state.surveys.find(x=>x.id===id);
   state.archiveSurvey = null;
-  if(!s || isSurveyArchived(s)){ render(); return; }
+  if(!s || isSurveyArchived(s) || s.status==="Live"){ render(); return; }
   const snap = { status:s.status, triggerId:s.triggerId, priorTriggerId:s.priorTriggerId,
     stoppedAt:s.stoppedAt, updated:s.updated };
-  if(s.status==="Live"){
-    /* One step: stop first (same as the Stop flow), then archive. */
-    releaseSurveyTrigger(s);
-    s.stoppedAt = NOW;
-  } else if(s.status==="Draft"){
+  if(s.status==="Draft"){
     /* A draft can hold a trigger. Archived surveys never do. Remember it for Restore. */
     s.archivedTriggerId = surveyActiveTriggerId(s);
     s.triggerId = null;
