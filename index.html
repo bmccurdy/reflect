@@ -7287,7 +7287,7 @@ const BV_VARIANTS = [
 ];
 const BV_NOTES = {
   current:"Today's sidebar layout, for comparison.",
-  A:"Setup and Questions as top tabs. Add question opens a side panel with blank types and the tagged library.",
+  A:"Default. Setup and Questions as top tabs. Add question opens a side panel with blank types and the tagged library.",
   B:"Guided 3-step flow with Next / Back. Review step shows exactly what's left before Publish.",
   C:"Setup collapses into a summary strip. Questions on the left, tagged library always open on the right.",
   D:"Reads like the survey itself. Intro is the first card, + between questions inserts a new one in place."
@@ -7315,7 +7315,8 @@ const bvI = {
 (function initBuilderVariant(){
   let v = null;
   try{ v = new URLSearchParams(location.search).get("bv"); }catch(e){}
-  if(!v){ try{ v = localStorage.getItem("reflect.bv"); }catch(e){} }
+  /* Default is A (top tabs + Add question drawer). Only ?bv= overrides it; a past switcher click doesn't stick. */
+  try{ localStorage.removeItem("reflect.bv"); }catch(e){}
   state.bvVariant = BV_VARIANTS.some(([k])=>k===v) ? v : "A";
   state.bvTab = "setup";
   state.bvTagFilter = "all";
@@ -7331,7 +7332,6 @@ const bvI = {
 function bvActive(s){ return !!s && !isSurveyLocked(s) && state.bvVariant!=="current"; }
 function setBuilderVariant(v){
   state.bvVariant = v;
-  try{ localStorage.setItem("reflect.bv", v); }catch(e){}
   state.bvAddOpen = false;
   state.bvInsertAt = null;
   render();
