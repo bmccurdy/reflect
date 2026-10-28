@@ -2420,6 +2420,203 @@ body:not(.is-locked) #gate{display:none}
   display:flex;align-items:center;gap:10px;margin-bottom:16px;
 }
 .gate-brand img{width:32px;height:32px;display:block}
+
+/* ---------- Survey builder (tabs + add drawer) ---------- */
+.bv-card-head{display:flex;align-items:flex-start;gap:12px}
+.bv-card-copy{flex:1;min-width:0}
+.bv-card-copy .t-subtle{margin:4px 0 0}
+.bv-card-ico{
+  flex-shrink:0;width:32px;height:32px;border-radius:var(--r-md);
+  display:grid;place-items:center;background:var(--accent);color:var(--primary);
+}
+.bv-status{flex-shrink:0}
+.bv-setup-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.bv-setup-card{min-width:0}
+.bv-sub{margin:0;font-size:14px;line-height:20px;font-weight:700;color:var(--foreground)}
+.bv-sub.mt24{margin-top:24px}
+
+/* tabs row */
+.bv-tabsrow{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  border-bottom:1px solid var(--border);margin-bottom:24px;
+}
+.bv-tablist{border-bottom:0}
+.bv-tab{font-size:15px;font-weight:600;min-height:44px;gap:8px}
+.bv-tab__n{
+  width:22px;height:22px;border-radius:var(--r-full);display:inline-grid;place-items:center;
+  font-size:12px;font-weight:700;background:var(--surface-muted);color:var(--muted-foreground);
+}
+.bv-tab[data-active] .bv-tab__n{background:var(--primary);color:var(--primary-foreground)}
+.bv-tab__n.is-ok{background:var(--status-resolved-wash);color:var(--status-resolved)}
+.bv-body{min-width:0}
+.bv-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:24px}
+
+/* publish checklist */
+.bv-check__list{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
+.bv-check__item{display:flex;align-items:center;gap:10px;font-size:14px;line-height:20px}
+.bv-check__ico{color:var(--muted-foreground);display:inline-flex}
+.bv-check__item.is-ok .bv-check__ico{color:var(--status-resolved)}
+.bv-check__label{flex:1;min-width:0;color:var(--foreground)}
+.bv-check__item.is-ok .bv-check__label{color:var(--muted-foreground)}
+.bv-check__detail{display:block;font-size:13px;color:var(--muted-foreground)}
+.bv-check--inline{padding-bottom:10px}
+.bv-check--inline .bv-check__list{display:flex;flex-wrap:wrap;gap:4px 16px;margin:0}
+.bv-check--inline .bv-check__item{font-size:13px;gap:6px}
+.bv-link{
+  border:0;background:transparent;color:var(--primary);font:inherit;font-size:13px;font-weight:600;
+  cursor:pointer;padding:4px 6px;border-radius:var(--r-sm);min-height:28px;
+}
+.bv-link:hover{background:var(--accent)}
+.bv-link:focus-visible{outline:2px solid var(--ring,var(--primary));outline-offset:2px}
+
+/* intro */
+.bv-intro{
+  border:1px solid var(--border);border-radius:var(--r-lg);background:var(--card);padding:16px 20px;
+}
+.bv-intro.is-off{background:var(--muted)}
+.bv-intro__head{display:flex;align-items:center;gap:12px}
+.bv-intro__title{margin:0;font-size:16px;line-height:24px;font-weight:700;color:var(--foreground)}
+.bv-intro__body{display:flex;align-items:flex-start;gap:12px;margin-top:12px;padding-left:44px}
+.bv-intro__preview{flex:1;min-width:0;padding:12px 14px;border-radius:var(--r-md);background:var(--muted)}
+.bv-switch-field{display:inline-flex;align-items:center;gap:8px;cursor:pointer;min-height:44px}
+
+/* question cards */
+.bv-qcard{align-items:center}
+.bv-qnum{
+  flex-shrink:0;width:28px;height:28px;border-radius:var(--r-full);display:grid;place-items:center;
+  font-size:13px;font-weight:700;background:var(--surface-muted);color:var(--muted-foreground);
+}
+.bv-tagsel{
+  position:relative;display:inline-flex;align-items:center;height:24px;
+  border:1px solid var(--border);border-radius:var(--r-full);background:var(--card);
+  color:var(--muted-foreground);padding-left:22px;
+}
+.bv-tagsel__ico{position:absolute;left:8px;top:50%;transform:translateY(-50%);display:inline-flex;pointer-events:none}
+.bv-tagsel select{
+  appearance:none;border:0;background:transparent;font:inherit;font-size:12px;font-weight:600;
+  color:var(--foreground);padding:0 10px 0 2px;height:22px;cursor:pointer;max-width:240px;field-sizing:content;
+}
+.bv-tagsel:focus-within{outline:2px solid var(--ring,var(--primary));outline-offset:2px}
+.bv-tagbadge{gap:4px}
+
+/* empty state */
+.bv-emptyadd{
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  padding:40px 24px;border:2px dashed var(--border);border-radius:var(--r-lg);background:var(--muted);
+}
+.bv-emptyadd--slim{padding:32px 20px}
+.bv-emptyadd__ico{
+  width:48px;height:48px;border-radius:var(--r-full);display:grid;place-items:center;
+  background:var(--accent);color:var(--primary);margin-bottom:12px;
+}
+.bv-emptyadd__title{margin:0;font-size:16px;line-height:24px;font-weight:700;color:var(--foreground)}
+.bv-emptyadd .t-subtle{margin:4px 0 0}
+.bv-emptyadd .bv-types{justify-content:center}
+
+/* library */
+.bv-search{position:relative;margin-top:12px}
+.bv-search__ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted-foreground);display:inline-flex;pointer-events:none}
+.bv-search .fw-input{padding-left:36px;width:100%}
+.bv-chips{margin-top:12px}
+.bv-chip-n{margin-left:6px;opacity:.75;font-weight:700}
+.bv-chip-new{border-style:dashed;gap:4px}
+.bv-newtag{height:28px;font-size:12px;width:200px;border-radius:var(--r-full)}
+.bv-lib-list{margin-top:12px;max-height:420px}
+.bv-lib--compact .bv-lib-list{max-height:360px}
+.bv-librow{align-items:center;padding:12px 14px}
+.bv-empty-lib{padding:12px 0}
+
+/* A: drawer */
+.bv-scrim{position:fixed;inset:56px 0 0;background:rgb(0 0 0 / .32);z-index:90;animation:rise var(--dur-micro) var(--ease-out) both}
+.bv-drawer{
+  position:fixed;top:56px;right:0;bottom:0;width:min(520px,100vw);z-index:91;
+  background:var(--card);border-left:1px solid var(--border);box-shadow:var(--shadow-xl);
+  display:flex;flex-direction:column;
+}
+.bv-drawer__head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.bv-drawer__body{padding:20px;overflow-y:auto;flex:1}
+.bv-drawer .bv-lib-list{max-height:none}
+
+/* B: stepper */
+.bv-stepper{list-style:none;margin:0 0 24px;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.bv-step__btn{
+  width:100%;display:flex;align-items:center;gap:12px;text-align:left;cursor:pointer;
+  padding:12px 14px;min-height:56px;border:1px solid var(--border);border-radius:var(--r-lg);
+  background:var(--card);color:var(--foreground);font:inherit;
+  transition:border-color var(--dur-micro) var(--ease-out),background-color var(--dur-micro) var(--ease-out);
+}
+.bv-step__btn:hover{border-color:var(--muted-foreground)}
+.bv-step__btn:focus-visible{outline:2px solid var(--ring,var(--primary));outline-offset:2px}
+.bv-step.is-current .bv-step__btn{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary);background:var(--accent)}
+.bv-step__n{
+  flex-shrink:0;width:28px;height:28px;border-radius:var(--r-full);display:grid;place-items:center;
+  font-size:13px;font-weight:700;background:var(--surface-muted);color:var(--muted-foreground);
+}
+.bv-step.is-current .bv-step__n{background:var(--primary);color:var(--primary-foreground)}
+.bv-step.is-ok .bv-step__n{background:var(--status-resolved-wash);color:var(--status-resolved)}
+.bv-step__copy{display:flex;flex-direction:column;min-width:0}
+.bv-step__label{font-size:14px;font-weight:700;line-height:20px}
+.bv-step__sub{font-size:12px;line-height:16px;color:var(--muted-foreground)}
+.bv-details summary{
+  display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;font-weight:600;
+  color:var(--primary);min-height:40px;padding:0 12px;border:1px solid var(--border);border-radius:var(--r-md);
+  list-style:none;
+}
+.bv-details summary::-webkit-details-marker{display:none}
+.bv-details[open] summary{background:var(--accent)}
+.bv-review{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.bv-tagsum{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
+.bv-tagsum li{display:flex;align-items:center;justify-content:space-between;gap:12px}
+
+/* C: setup strip + split */
+.bv-strip{padding:16px 20px;margin-bottom:16px}
+.bv-strip__row{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.bv-strip__h{margin:0;font-size:16px;font-weight:700;color:var(--foreground)}
+.bv-strip__cell{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.bv-strip__k{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:.04em}
+.bv-strip__v{font-size:14px;font-weight:600;color:var(--foreground);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bv-strip__body{margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
+.bv-strip__body .fw-card{box-shadow:none}
+.bv-split{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:16px;align-items:start}
+.bv-split__side{position:sticky;top:16px}
+.bv-side-blank{margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
+.bv-side-blank .addrow{margin-top:8px}
+
+/* D: document */
+.bv-doc__setup{max-width:760px;display:grid;gap:16px}
+.bv-doc__setup > .t-subtle{margin:0}
+.bv-doc__page{max-width:760px;margin:0 auto}
+.bv-intro--doc{border-top:4px solid var(--primary)}
+.bv-doc__empty{text-align:center;padding:24px 0 0}
+.bv-insert{margin:4px 0}
+.bv-insert__btn{
+  width:100%;display:flex;align-items:center;gap:8px;border:0;background:transparent;cursor:pointer;
+  padding:6px 0;min-height:44px;color:var(--muted-foreground);font:inherit;
+}
+.bv-insert__line{flex:1;height:1px;background:var(--border);opacity:0;transition:opacity var(--dur-micro) var(--ease-out)}
+.bv-insert__pill{
+  display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;
+  padding:4px 10px;border:1px solid var(--border);border-radius:var(--r-full);background:var(--card);
+  opacity:.55;transition:opacity var(--dur-micro) var(--ease-out),color var(--dur-micro) var(--ease-out);
+}
+.bv-insert__btn:hover .bv-insert__pill,.bv-insert__btn:focus-visible .bv-insert__pill,.bv-insert.is-open .bv-insert__pill{opacity:1;color:var(--primary);border-color:var(--primary)}
+.bv-insert__btn:hover .bv-insert__line,.bv-insert__btn:focus-visible .bv-insert__line,.bv-insert.is-open .bv-insert__line{opacity:1;background:var(--primary)}
+.bv-insert__btn:focus-visible{outline:none}
+.bv-insert:last-child .bv-insert__pill{opacity:1}
+.bv-insert__panel{
+  margin:4px 0 12px;padding:16px;border:1px solid var(--primary);border-radius:var(--r-lg);
+  background:var(--card);box-shadow:var(--shadow-md);
+}
+
+@media (max-width:1100px){
+  .bv-split{grid-template-columns:minmax(0,1fr)}
+  .bv-split__side{position:static}
+}
+@media (max-width:820px){
+  .bv-setup-grid,.bv-review{grid-template-columns:minmax(0,1fr)}
+  .bv-stepper{grid-template-columns:minmax(0,1fr)}
+  .bv-intro__body{padding-left:0;flex-direction:column}
+}
 </style>
 </head>
 <body class="is-locked">
@@ -2614,10 +2811,18 @@ function surveyPageChanged(s){
   if(String(s.description||"").trim()) return true;
   return false;
 }
+/** Questions that count for publish / test SMS — excludes an unsaved new-question draft. */
+function committedQuestions(qs){
+  const list = qs || [];
+  if(state.editQuestionIsNew && state.editQuestion){
+    return list.filter(q=>q.id!==state.editQuestion);
+  }
+  return list;
+}
 function canSendTestSms(s, qs){
   if(!s || s.status==="Live") return false;
   if(!s.fresh) return true;
-  return (qs||[]).length > 0 || surveyPageChanged(s);
+  return committedQuestions(qs).length > 0 || surveyPageChanged(s);
 }
 function isSurveyCollecting(s){
   return !!s && s.status==="Live";
@@ -3023,6 +3228,7 @@ const state = {
   stopSurvey:null,
   renameSurvey:null,
   editQuestion:null,
+  editQuestionIsNew:false,
   editIntro:null,
   testSms:null,
   testSmsDraft:null,
@@ -5174,6 +5380,7 @@ function syncQuestionCount(id){
   if(s) s.questions = (state.surveyQuestions[id]||[]).length;
 }
 function previewingIntro(){ return state.previewQId==="intro"; }
+function surveyIntroOn(s){ return !s || s.introEnabled!==false; }
 function previewQIndex(){
   if(previewingIntro()) return -1;
   const qs = qList();
@@ -6232,17 +6439,16 @@ function viewSurveys(){
   const s = currentSurvey();
   if(!s) return viewSurveysIndex();
   const qs = qList();
-  const lockedQs = qs.filter(q=>q.locked).length;
   const surveyLocked = isSurveyLocked(s);
-  const section = builderSection(s, qs);
   const meta = surveyTitleMeta(s);
-  const hasQuestions = qs.length > 0;
+  const hasQuestions = committedQuestions(qs).length > 0;
   const previewBtn = `<button class="fw-btn fw-btn--outline" type="button"${hasQuestions
     ? ` onclick="openSurveyPreview()"`
     : ` disabled title="Add a question to preview"`}>${I.eye(16)} Preview</button>`;
-  const publishBtn = `<button class="fw-btn fw-btn--primary" type="button"${hasQuestions
-    ? ` onclick="publishSurvey('${s.id}')"`
-    : ` disabled title="Add a question to publish"`}>Publish</button>`;
+  const bvMissing = surveyLocked ? "" : bvMissingText(s, qs);
+  const publishBtn = `<button class="fw-btn fw-btn--primary" type="button"${!bvMissing
+        ? ` onclick="publishSurvey('${s.id}')"`
+        : ` disabled title="${esc(bvMissing)}" aria-describedby="bv-pub-missing"`}>Publish</button>${bvMissing?`<span class="sr" id="bv-pub-missing">${esc(bvMissing)}</span>`:""}`;
   const canTest = canSendTestSms(s, qs);
   const testSmsBtn = s.status==="Live" ? "" : `<button class="fw-btn fw-btn--outline" type="button"${canTest
     ? ` onclick="openTestSms('${s.id}')"`
@@ -6316,24 +6522,7 @@ function viewSurveys(){
     </div>
   </div>
   ${surveyLockBanner(s)}
-  <div class="builder">
-    <nav class="builder-nav" aria-label="Survey sections">
-      <div class="builder-nav-label">Setup</div>
-      ${builderNavItem("publish", surveyLocked?"Associated trigger":"Publish setup", section==="publish", I.bolt(16))}
-      ${builderNavItem("intro", "Introduction", section==="intro", I.info(16))}
-      ${builderNavItem("questions", "Questions", section==="questions", I.list(16))}
-      ${surveyLocked?"":`<div class="builder-nav-label">More</div>
-      ${builderNavItem("library", "Add a question", section==="library", I.plus(16))}
-      ${SHOW_BENCHMARK_SECTION?builderNavItem("benchmark", "Benchmarking", section==="benchmark", I.shield(16)):""}`}
-    </nav>
-    <div class="builder-detail">
-      ${section==="publish"?triggerAssocCard(s):""}
-      ${section==="intro"?introScreenCard(s):""}
-      ${section==="questions"?builderQuestions(qs, surveyLocked):""}
-      ${section==="library"?builderLibrary(qs):""}
-      ${section==="benchmark"?builderBenchmark(lockedQs):""}
-    </div>
-  </div>`;
+  ${bvBuilder(s, qs)}`;
 }
 
 const RESPONSE_PAGE = 11;
@@ -6974,17 +7163,19 @@ function pIntroContent(total, embed){
 }
 function previewModalStep(){
   const qs = qList();
-  if(!qs.length || previewingIntro()) return -1;
-  const i = qs.findIndex(q=>q.id===state.previewQId);
-  return i>=0 ? i : 0;
+  if(!qs.length) return -1;
+  /* Full patient flow: intro first when enabled; otherwise first question. */
+  return surveyIntroOn(currentSurvey()) ? -1 : 0;
 }
 function viewPatient(){
   const S = state.survey, qs = qList();
   const total = qs.length;
   const agency = AGENCY.name;
+  const introOn = surveyIntroOn(currentSurvey());
 
   /* intro */
-  if(S.step === -1 || S.step === undefined) S.step = -1;
+  if(S.step === undefined) S.step = introOn ? -1 : 0;
+  if(S.step === -1 && !introOn && qs.length) S.step = 0;
   if(S.step === -1){
     return `<div class="patient" lang="${esc(pLocale())}"><div class="p-wrap">
       ${pDemoBar()}
@@ -7056,6 +7247,465 @@ function viewPatient(){
 }
 
 </script>
+<script>
+/* ============================================================
+   8b. SURVEY BUILDER
+   Setup (trigger + schedule) | Questions (intro + questions).
+   Add question opens a right drawer with blank types + tagged library.
+   Locked surveys use the same tabs read-only.
+   ============================================================ */
+const QTAGS = [
+  { key:"comm", label:"Communication & Shared Decisions" },
+  { key:"compassion", label:"Compassion & Dignity" },
+  { key:"coord", label:"Care Coordination & Handoff" },
+  { key:"vehicle", label:"Vehicle & Ride" },
+  { key:"outcome", label:"Outcome measure", special:true },
+  { key:"open", label:"Open-ended", special:true }
+];
+const LIB_TAGS = {
+  lib1:"compassion", lib2:"outcome", lib3:"comm", lib4:"compassion", lib5:"open", lib6:"open",
+  lib7:"coord", lib8:"comm", lib9:"coord", lib10:"compassion", lib11:"vehicle", lib12:"compassion",
+  lib13:"vehicle", lib14:"comm", lib15:"open", lib16:"open", lib17:"compassion", lib18:"coord",
+  lib19:"vehicle", lib20:"coord"
+};
+const bvI = {
+  tag:(s=16)=>ic(`<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>`, s),
+  search:(s=16)=>ic(`<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>`, s),
+  circle:(s=16)=>ic(`<circle cx="12" cy="12" r="10"/>`, s)
+};
+
+(function initBuilderVariant(){
+  try{ localStorage.removeItem("reflect.bv"); }catch(e){}
+  state.bvTab = "setup";
+  state.bvTagFilter = "all";
+  state.bvQuery = "";
+  state.bvAddOpen = false;
+  state.bvInsertAt = null;
+  state.bvSetupOpen = false;
+  state.bvCustomTags = [];
+  state.bvNewTagOpen = false;
+  state.bvSurveyId = null;
+})();
+
+function bvAllTags(){ return QTAGS.concat(state.bvCustomTags); }
+function bvTagLabel(key){ const t = bvAllTags().find(x=>x.key===key); return t ? t.label : ""; }
+function bvLibFor(q){ return LIBRARY.find(l=>l.text.trim().toLowerCase()===String(q.text||"").trim().toLowerCase()); }
+function qTagKey(q){
+  if(q.tag!==undefined) return q.tag;
+  const l = bvLibFor(q);
+  if(l) return LIB_TAGS[l.id] || null;
+  if(q.type==="text") return "open";
+  return null;
+}
+function bvSetQTag(id, key){
+  if(isSurveyLocked(currentSurvey())) return;
+  const q = qList().find(x=>x.id===id);
+  if(!q) return;
+  q.tag = key || null;
+  toast(key ? `Tagged ${bvTagLabel(key)}.` : "Tag removed.");
+}
+
+/* Keep per-survey UI state from leaking between surveys. */
+function bvSyncSurvey(s, qs){
+  if(state.bvSurveyId===s.id) return;
+  state.bvSurveyId = s.id;
+  state.bvAddOpen = false;
+  state.bvInsertAt = null;
+  state.bvQuery = "";
+  state.bvTagFilter = "all";
+  const setupDone = bvChecklist(s, qs).filter(c=>c.tab==="setup").every(c=>c.ok);
+  state.bvTab = setupDone ? "questions" : "setup";
+  state.bvSetupOpen = !setupDone;
+}
+
+function bvScheduleOk(s){
+  const sch = s.schedule || defaultSchedule();
+  if(sch.mode==="ongoing") return true;
+  if(sch.mode==="duration") return Number(sch.durationDays)>0;
+  if(sch.mode==="range") return !!sch.endAt;
+  return false;
+}
+function bvChecklist(s, qs){
+  const t = s.triggerId ? findTriggerDef(s.triggerId) : null;
+  const trigOk = !!t && !triggerOwner(s.triggerId, s.id);
+  const committed = committedQuestions(qs);
+  return [
+    { key:"trigger", label:"Trigger selected", detail: t ? t.name : "Not set", ok:trigOk, tab:"setup" },
+    { key:"schedule", label:"Schedule set", detail: formatScheduleSummary(s), ok:bvScheduleOk(s), tab:"setup" },
+    { key:"questions", label:"At least 1 question", detail: committed.length ? `${committed.length} question${committed.length===1?"":"s"}` : "None yet", ok:committed.length>0, tab:"questions" }
+  ];
+}
+function bvMissingText(s, qs){
+  const miss = bvChecklist(s, qs).filter(c=>!c.ok).map(c=>c.label.toLowerCase());
+  return miss.length ? `To publish: ${miss.join(", ")}` : "";
+}
+function bvGo(tab){
+  state.bvTab = tab;
+  state.bvAddOpen = false;
+  state.bvInsertAt = null;
+  state.triggerSelectOpen = false;
+  state.scheduleDurationOpen = false;
+  render();
+  requestAnimationFrame(()=>document.querySelector(".bv-body")?.scrollIntoView({block:"nearest", behavior:"smooth"}));
+}
+
+/* ---------- actions ---------- */
+function bvAddBlank(type, at){
+  if(isSurveyLocked(currentSurvey())) return;
+  const id = "q"+(++qn);
+  const q = {
+    id, type, required:false, locked:false,
+    text:"Untitled question",
+    options: type==="choice" ? ["Option one","Option two"] : undefined,
+    labels:  type==="scale"  ? ["Poor","","","","Excellent"] : undefined
+  };
+  const qs = qList();
+  if(typeof at==="number" && at>=0 && at<=qs.length) qs.splice(at, 0, q);
+  else qs.push(q);
+  state.bvInsertAt = null;
+  state.bvAddOpen = false;
+  state.bvTab = "questions";
+  state.previewQId = "questions";
+  syncQuestionCount(surveyIdFromHash() || "sv_post");
+  openEditQuestion(id, { isNew:true });
+}
+function bvAddLib(id, at){
+  if(isSurveyLocked(currentSurvey())) return;
+  const before = qList().length;
+  addFromLib(id);
+  const qs = qList();
+  if(qs.length===before) return;
+  if(typeof at==="number" && at>=0 && at<qs.length-1){
+    const q = qs.pop();
+    qs.splice(at, 0, q);
+    state.bvInsertAt = at+1;
+  }
+  state.bvTab = "questions";
+  render();
+}
+function bvSetTagFilter(k){ state.bvTagFilter = k; render(); }
+function bvOnQuery(v){
+  state.bvQuery = v;
+  const host = document.querySelector("[data-bv-lib]");
+  if(!host) return;
+  const at = host.getAttribute("data-bv-at");
+  host.innerHTML = bvLibRows(qList(), at==="" ? null : Number(at));
+}
+function bvOpenAdd(){
+  if(isSurveyLocked(currentSurvey())) return;
+  state.bvAddOpen = true;
+  render();
+  requestAnimationFrame(()=>document.getElementById("bv-lib-search")?.focus());
+}
+function bvCloseAdd(){ state.bvAddOpen = false; render(); }
+function bvToggleInsert(i){ state.bvInsertAt = state.bvInsertAt===i ? null : i; render(); }
+function bvToggleSetup(){ state.bvSetupOpen = !state.bvSetupOpen; render(); }
+function bvToggleIntro(id){
+  const s = state.surveys.find(x=>x.id===id);
+  if(!s || isSurveyLocked(s)) return;
+  s.introEnabled = s.introEnabled===false;
+  toast(s.introEnabled ? "Introduction on." : "Introduction off. Patients start at the first question.");
+  render();
+}
+function bvOpenNewTag(){ state.bvNewTagOpen = true; render(); requestAnimationFrame(()=>document.getElementById("bv-new-tag")?.focus()); }
+function bvNewTagKey(e){
+  if(e.key==="Escape"){ state.bvNewTagOpen = false; render(); return; }
+  if(e.key!=="Enter") return;
+  e.preventDefault();
+  const label = e.target.value.trim();
+  if(!label){ state.bvNewTagOpen = false; render(); return; }
+  if(bvAllTags().some(t=>t.label.toLowerCase()===label.toLowerCase())){ toast("That tag already exists."); return; }
+  const key = "c_"+Date.now();
+  state.bvCustomTags.push({ key, label, custom:true });
+  state.bvNewTagOpen = false;
+  state.bvTagFilter = key;
+  toast(`Tag "${label}" created. Assign it from a question's tag menu.`);
+  render();
+}
+
+/* ---------- shared pieces ---------- */
+function bvTriggerCard(s){
+  const locked = isSurveyLocked(s);
+  if(locked){
+    const activeId = surveyActiveTriggerId(s);
+    return `<section class="fw-card bv-setup-card" aria-labelledby="bv-trig-h">
+      <div class="bv-card-head">
+        <span class="bv-card-ico" aria-hidden="true">${I.bolt(18)}</span>
+        <div class="bv-card-copy">
+          <h2 class="t-h4" id="bv-trig-h">Trigger</h2>
+          <p class="t-subtle dim">Which FirstWatch trigger sends this survey.</p>
+        </div>
+        ${activeId
+          ? `<span class="fw-badge fw-badge--success bv-status">${I.checkCircle(12)} Linked</span>`
+          : `<span class="fw-badge fw-badge--secondary bv-status">Previously linked</span>`}
+      </div>
+      <div class="mt16">${triggerAssocWell(s)}</div>
+    </section>`;
+  }
+  const ok = bvChecklist(s, qList())[0].ok;
+  return `<section class="fw-card bv-setup-card" aria-labelledby="bv-trig-h">
+    <div class="bv-card-head">
+      <span class="bv-card-ico" aria-hidden="true">${I.bolt(18)}</span>
+      <div class="bv-card-copy">
+        <h2 class="t-h4" id="bv-trig-h">Trigger</h2>
+        <p class="t-subtle dim">Which FirstWatch trigger sends this survey.</p>
+      </div>
+      ${bvStatus(ok)}
+    </div>
+    <div class="publish-setup-trigger mt16">
+      ${triggerSelect(s)}
+      ${triggerSelectActions(s)}
+    </div>
+  </section>`;
+}
+function bvScheduleCard(s){
+  const locked = isSurveyLocked(s);
+  return `<section class="fw-card bv-setup-card" aria-labelledby="bv-sch-h">
+    <div class="bv-card-head">
+      <span class="bv-card-ico" aria-hidden="true">${I.calendar(18)}</span>
+      <div class="bv-card-copy">
+        <h2 class="t-h4" id="bv-sch-h">Schedule</h2>
+        <p class="t-subtle dim">How long it collects responses after publish.</p>
+      </div>
+      ${locked
+        ? `<span class="fw-badge fw-badge--outline bv-status">${I.lock(12)} Locked</span>`
+        : bvStatus(bvScheduleOk(s))}
+    </div>
+    <div class="mt16">${locked
+      ? `<p class="schedule-readonly">${esc(formatScheduleSummary(s))}</p>`
+      : scheduleSetupFields(s)}</div>
+  </section>`;
+}
+function bvStatus(ok){
+  return ok
+    ? `<span class="fw-badge fw-badge--success bv-status">${I.checkCircle(12)} Done</span>`
+    : `<span class="fw-badge fw-badge--outline bv-status">Required</span>`;
+}
+function bvSetupGrid(s){
+  return `<div class="bv-setup-grid">${bvTriggerCard(s)}${bvScheduleCard(s)}</div>`;
+}
+function bvIntroBlock(s, opts={}){
+  const locked = isSurveyLocked(s);
+  const on = s.introEnabled!==false;
+  const copy = introStaffCopy(s, (state.surveyQuestions[s.id]||[]).length);
+  return `<section class="bv-intro${on?"":" is-off"}${opts.doc?" bv-intro--doc":""}" aria-labelledby="bv-intro-h">
+    <div class="bv-intro__head">
+      <span class="bv-card-ico" aria-hidden="true">${I.info(18)}</span>
+      <div class="bv-card-copy">
+        <h3 class="bv-intro__title" id="bv-intro-h">Introduction <span class="t-detail dim">· optional</span></h3>
+        <p class="t-subtle dim">${on?"Shown before the first question.":"Off. Patients go straight to the first question."}</p>
+      </div>
+      ${locked
+        ? `<span class="fw-badge fw-badge--outline">${on?"On":"Off"}</span>`
+        : `<label class="bv-switch-field">
+        <input class="fw-switch" type="checkbox" role="switch" ${on?"checked":""}
+          aria-label="Show introduction" onchange="bvToggleIntro('${s.id}')">
+        <span class="t-detail">${on?"On":"Off"}</span>
+      </label>`}
+    </div>
+    ${on?`<div class="bv-intro__body">
+      <div class="bv-intro__preview">
+        <p class="intro-screen-preview-title">${esc(copy.title)}</p>
+        <p class="intro-screen-preview-body">${esc(copy.body)}</p>
+      </div>
+      ${locked?"":`<button type="button" class="fw-btn fw-btn--outline fw-btn--sm" onclick="openEditIntro()">${I.pencil(14)} Edit</button>`}
+    </div>`:""}
+  </section>`;
+}
+function bvTagBadge(q){
+  const cur = qTagKey(q);
+  if(!cur) return `<span class="t-detail dim">No tag</span>`;
+  return `<span class="fw-badge fw-badge--outline bv-tagbadge">${bvI.tag(12)} ${esc(bvTagLabel(cur))}</span>`;
+}
+function bvTagSelect(q){
+  const cur = qTagKey(q) || "";
+  return `<label class="bv-tagsel">
+    <span class="sr">Tag for question</span>
+    <span class="bv-tagsel__ico" aria-hidden="true">${bvI.tag(12)}</span>
+    <select onchange="bvSetQTag('${q.id}', this.value)">
+      <option value=""${cur?"":" selected"}>Add tag</option>
+      ${bvAllTags().map(t=>`<option value="${t.key}"${t.key===cur?" selected":""}>${esc(t.label)}</option>`).join("")}
+    </select>
+  </label>`;
+}
+function bvQCard(q, i, qs, opts={}){
+  const locked = !!opts.locked;
+  return `<div class="qcard bv-qcard" data-qid="${q.id}">
+    <span class="bv-qnum" aria-hidden="true">${i+1}</span>
+    <div class="qcard-body">
+      <div class="t-pui" style="font-weight:700">${esc(q.text)}</div>
+      <div class="qmeta">
+        <span class="fw-badge fw-badge--secondary">${TYPE_LABEL[q.type]}</span>
+        ${q.required?`<span class="fw-badge fw-badge--outline">Required</span>`:`<span class="t-detail dim">Optional</span>`}
+        ${locked?bvTagBadge(q):bvTagSelect(q)}
+      </div>
+    </div>
+    ${locked?"":`<div class="qbtns">
+      <button class="iconbtn" aria-label="Move up" ${i===0?"disabled":""} onclick="moveQ(${i},-1)">${I.up(16)}</button>
+      <button class="iconbtn" aria-label="Move down" ${i===qs.length-1?"disabled":""} onclick="moveQ(${i},1)">${I.down(16)}</button>
+      <button class="iconbtn" aria-label="Edit question" ${q.locked?"disabled":`onclick="openEditQuestion('${q.id}')"`}>${I.pencil(16)}</button>
+      <button class="iconbtn" aria-label="Remove question" onclick="removeQ('${q.id}')">${I.trash(16)}</button>
+    </div>`}
+  </div>`;
+}
+function bvTypeButtons(at){
+  const a = (typeof at==="number") ? `,${at}` : "";
+  return `<div class="addrow bv-types">
+    <button class="fw-btn fw-btn--outline fw-btn--sm" onclick="bvAddBlank('yesno'${a})">${I.plus(16)} Yes / no</button>
+    <button class="fw-btn fw-btn--outline fw-btn--sm" onclick="bvAddBlank('scale'${a})">${I.plus(16)} Rating</button>
+    <button class="fw-btn fw-btn--outline fw-btn--sm" onclick="bvAddBlank('choice'${a})">${I.plus(16)} Multiple choice</button>
+    <button class="fw-btn fw-btn--outline fw-btn--sm" onclick="bvAddBlank('text'${a})">${I.plus(16)} Written answer</button>
+  </div>`;
+}
+function bvTagChips(){
+  const tags = bvAllTags();
+  const count = k => LIBRARY.filter(l=>LIB_TAGS[l.id]===k).length;
+  return `<div class="lib-filters bv-chips" role="group" aria-label="Filter by tag">
+    <button type="button" class="lib-chip" aria-pressed="${state.bvTagFilter==="all"}" onclick="bvSetTagFilter('all')">All</button>
+    ${tags.map(t=>`<button type="button" class="lib-chip" aria-pressed="${state.bvTagFilter===t.key}" onclick="bvSetTagFilter('${t.key}')">${esc(t.label)}${t.custom?"":` <span class="bv-chip-n">${count(t.key)}</span>`}</button>`).join("")}
+    ${state.bvNewTagOpen
+      ? `<input class="fw-input bv-newtag" id="bv-new-tag" placeholder="Tag name, then Enter" maxlength="40" onkeydown="bvNewTagKey(event)" onblur="state.bvNewTagOpen=false;render()">`
+      : `<button type="button" class="lib-chip bv-chip-new" onclick="bvOpenNewTag()">${I.plus(12)} New tag</button>`}
+  </div>`;
+}
+function bvLibRows(qs, at){
+  const f = state.bvTagFilter;
+  const q = (state.bvQuery||"").trim().toLowerCase();
+  const added = new Set(qs.map(x=>String(x.text).trim().toLowerCase()));
+  let rows = f==="all" ? LIBRARY : LIBRARY.filter(l=>LIB_TAGS[l.id]===f);
+  if(q) rows = rows.filter(l=>l.text.toLowerCase().includes(q));
+  if(!rows.length){
+    const custom = state.bvCustomTags.some(t=>t.key===f);
+    return `<p class="t-subtle dim bv-empty-lib">${custom
+      ? "No library questions use this tag yet. Add a question, then pick this tag from its tag menu."
+      : "No library questions match."}</p>`;
+  }
+  const a = (typeof at==="number") ? `,${at}` : "";
+  return rows.map(l=>{
+    const already = added.has(l.text.trim().toLowerCase());
+    return `<div class="qcard bv-librow${already?" added":""}" data-lib-id="${l.id}">
+      <div class="qcard-body">
+        <div class="t-pui">${esc(l.text)}</div>
+        <div class="qmeta">
+          <span class="fw-badge fw-badge--outline bv-tagbadge">${bvI.tag(12)} ${esc(bvTagLabel(LIB_TAGS[l.id]))}</span>
+          <span class="t-detail dim">${TYPE_LABEL[l.type]||l.type}</span>
+        </div>
+      </div>
+      <button class="fw-btn fw-btn--${already?"outline":"primary"} fw-btn--sm" ${already?"disabled":""}
+        aria-label="${already?"Already added":"Add"}: ${esc(l.text)}" onclick="bvAddLib('${l.id}'${a})">${already?"Added":"Add"}</button>
+    </div>`;
+  }).join("");
+}
+function bvLibrary(qs, opts={}){
+  const at = (typeof opts.at==="number") ? opts.at : null;
+  return `<div class="bv-lib${opts.compact?" bv-lib--compact":""}">
+    ${opts.hideTypes?"":`<h3 class="bv-sub">Start blank</h3>${bvTypeButtons(at)}`}
+    <h3 class="bv-sub${opts.hideTypes?"":" mt24"}">From the tagged library</h3>
+    <div class="bv-search">
+      <span class="bv-search__ico" aria-hidden="true">${bvI.search(16)}</span>
+      <label class="sr" for="bv-lib-search">Search library</label>
+      <input class="fw-input" id="bv-lib-search" type="search" placeholder="Search questions" autocomplete="off"
+        value="${esc(state.bvQuery||"")}" oninput="bvOnQuery(this.value)">
+    </div>
+    ${bvTagChips()}
+    <div class="lib-list bv-lib-list" data-bv-lib data-bv-at="${at===null?"":at}">${bvLibRows(qs, at)}</div>
+  </div>`;
+}
+function bvEmptyAdd(opts={}){
+  if(opts.locked){
+    return `<p class="t-subtle dim">No questions on this version.</p>`;
+  }
+  return `<div class="bv-emptyadd">
+    <span class="bv-emptyadd__ico" aria-hidden="true">${I.plus(24)}</span>
+    <h3 class="bv-emptyadd__title">Add your first question</h3>
+    <p class="t-subtle dim">Start blank, or pick tested wording from the tagged library.</p>
+    ${bvTypeButtons(0)}
+    ${opts.libraryButton?`<button type="button" class="fw-btn fw-btn--primary mt16" onclick="${opts.libraryButton}">${bvI.tag(16)} Browse tagged library</button>`:""}
+  </div>`;
+}
+function bvQuestionList(s, qs, opts={}){
+  const locked = !!opts.locked || isSurveyLocked(s);
+  if(!qs.length) return bvEmptyAdd({ ...opts, locked });
+  return `<div class="bv-qlist">${qs.map((q,i)=>bvQCard(q,i,qs,{ locked })).join("")}</div>`;
+}
+function bvPublishChecklist(s, qs, opts={}){
+  const list = bvChecklist(s, qs);
+  const left = list.filter(c=>!c.ok).length;
+  const noLinks = !!opts.noLinks || isSurveyLocked(s);
+  return `<div class="bv-check${opts.inline?" bv-check--inline":""}" role="status" aria-live="polite">
+    ${opts.inline?"":`<h3 class="bv-sub">${left?`${left} item${left===1?"":"s"} left before you can publish`:"Ready to publish"}</h3>`}
+    <ul class="bv-check__list">
+      ${list.map(c=>`<li class="bv-check__item${c.ok?" is-ok":""}">
+        <span class="bv-check__ico" aria-hidden="true">${c.ok?I.checkCircle(16):bvI.circle(16)}</span>
+        <span class="bv-check__label">${esc(c.label)}${opts.inline?"":`<span class="bv-check__detail">${esc(c.detail||"")}</span>`}</span>
+        <span class="sr">${c.ok?"done":"not done"}</span>
+        ${!c.ok && !noLinks?`<button type="button" class="bv-link" onclick="bvGo('${c.tab}')">Fix</button>`:""}
+      </li>`).join("")}
+    </ul>
+  </div>`;
+}
+function bvTabsBar(s, qs){
+  const locked = isSurveyLocked(s);
+  const list = bvChecklist(s, qs);
+  const setupOk = list.filter(c=>c.tab==="setup").every(c=>c.ok);
+  const committed = committedQuestions(qs);
+  const qOk = committed.length>0;
+  const tab = state.bvTab==="questions" ? "questions" : "setup";
+  const t = (id, n, label, ok, extra="") => `<button type="button" class="fw-tab bv-tab" role="tab" id="bv-tab-${id}"
+      aria-selected="${tab===id}" ${tab===id?"data-active":""} aria-controls="bv-panel"
+      onclick="bvGo('${id}')">
+      <span class="bv-tab__n${ok?" is-ok":""}" aria-hidden="true">${ok?I.check(12):n}</span>${label}${extra}
+    </button>`;
+  return `<div class="bv-tabsrow">
+    <div class="fw-tablist fw-tablist--line bv-tablist" role="tablist" aria-label="Survey builder">
+      ${t("setup", 1, "Setup", setupOk)}
+      ${t("questions", 2, "Questions", qOk, committed.length?` <span class="fw-tab__count">${committed.length}</span>`:"")}
+    </div>
+    ${locked?"":bvPublishChecklist(s, qs, { inline:true })}
+  </div>`;
+}
+
+/* ---------- Top tabs + add drawer ---------- */
+function bvVariantA(s, qs){
+  const locked = isSurveyLocked(s);
+  const tab = state.bvTab==="questions" ? "questions" : "setup";
+  const addOpen = !locked && state.bvAddOpen;
+  return `${bvTabsBar(s, qs)}
+  <div class="bv-body" id="bv-panel" role="tabpanel" aria-labelledby="bv-tab-${tab}">
+    ${tab==="setup" ? `${bvSetupGrid(s)}
+      ${locked?"":`<div class="bv-foot"><span></span>
+        <button class="fw-btn fw-btn--primary" onclick="bvGo('questions')">Next: Questions ${I.chevronRight(16)}</button>
+      </div>`}`
+    : `${bvIntroBlock(s)}
+      <div class="fw-card mt16">
+        <div class="between between--inline">
+          <div>
+            <h2 class="t-h4">Questions</h2>
+            <p class="t-subtle dim mt8">Patients see them in this order.</p>
+          </div>
+          ${!locked && qs.length?`<button class="fw-btn fw-btn--primary fw-btn--sm" onclick="bvOpenAdd()">${I.plus(16)} Add question</button>`:""}
+        </div>
+        <div class="mt16">${bvQuestionList(s, qs, { locked, libraryButton: locked?"":"bvOpenAdd()" })}</div>
+      </div>`}
+  </div>
+  ${addOpen?`
+  <div class="bv-scrim" onclick="bvCloseAdd()"></div>
+  <aside class="bv-drawer" role="dialog" aria-modal="true" aria-labelledby="bv-drawer-h">
+    <div class="bv-drawer__head">
+      <h2 class="t-h4" id="bv-drawer-h">Add a question</h2>
+      <button class="iconbtn" aria-label="Close" onclick="bvCloseAdd()">${I.x(18)}</button>
+    </div>
+    <div class="bv-drawer__body">${bvLibrary(qs)}</div>
+  </aside>`:""}`;
+}
+
+function bvBuilder(s, qs){
+  bvSyncSurvey(s, qs);
+  if(isSurveyLocked(s)) state.bvAddOpen = false;
+  return `<div class="bv bv--A">${bvVariantA(s, qs)}</div>`;
+}
+</script>
+
 <script>
 /* ============================================================
    9. ACTIONS
@@ -7497,7 +8147,7 @@ function surveyRowMenu(s){
       ${s.status!=="Draft"?`<button type="button" role="menuitem" onclick="go('#/surveys/${s.id}/responses')">${I.inbox(16)} View responses</button>`:""}
       ${s.status==="Live"?`<button type="button" role="menuitem" onclick="askStopSurvey('${s.id}')">${I.octagon(16)} Stop survey</button>`:""}
       <button type="button" role="menuitem" onclick="duplicateAndEdit('${s.id}')">${I.copy(16)} Duplicate &amp; edit</button>
-      <button type="button" role="menuitem" onclick="askArchiveSurvey('${s.id}')">${I.archive(16)} Archive</button>
+      ${s.status!=="Live"?`<button type="button" role="menuitem" onclick="askArchiveSurvey('${s.id}')">${I.archive(16)} Archive</button>`:""}
       ${s.status==="Draft"?`<button type="button" role="menuitem" class="danger" onclick="askDeleteSurvey('${s.id}')">${I.trash(16)} Discard draft</button>`:""}
     </div>`:""}
   </div>`;
@@ -7581,7 +8231,7 @@ function editQuestionDialog(id){
     </div>
   </div>`;
 }
-function openEditQuestion(id){
+function openEditQuestion(id, opts={}){
   if(isSurveyLocked(currentSurvey())){ toast("This version is locked."); return; }
   const q = qList().find(x=>x.id===id);
   if(!q || q.locked){
@@ -7589,6 +8239,7 @@ function openEditQuestion(id){
     return;
   }
   state.editQuestion = id;
+  state.editQuestionIsNew = !!opts.isNew;
   state.previewQId = id;
   render();
   requestAnimationFrame(()=>{
@@ -7597,14 +8248,31 @@ function openEditQuestion(id){
   });
 }
 function closeEditQuestion(){
+  const id = state.editQuestion;
+  const wasNew = state.editQuestionIsNew;
   state.editQuestion = null;
+  state.editQuestionIsNew = false;
+  if(wasNew && id){
+    const qs = qList();
+    const i = qs.findIndex(q=>q.id===id);
+    if(i>=0){
+      qs.splice(i, 1);
+      syncQuestionCount(surveyIdFromHash() || "sv_post");
+    }
+  }
   render();
 }
 function confirmEditQuestion(){
   const id = state.editQuestion;
   if(!id) return;
+  const wasNew = state.editQuestionIsNew;
   const q = qList().find(x=>x.id===id);
-  if(!q || q.locked){ state.editQuestion = null; render(); return; }
+  if(!q || q.locked){
+    state.editQuestion = null;
+    state.editQuestionIsNew = false;
+    render();
+    return;
+  }
   const textEl = document.getElementById("edit-q-text");
   const reqEl = document.getElementById("edit-q-required");
   const text = ((textEl && textEl.value) || "").trim();
@@ -7628,8 +8296,9 @@ function confirmEditQuestion(){
   const s = sid && state.surveys.find(x=>x.id===sid);
   if(s) s.updated = NOW;
   state.editQuestion = null;
+  state.editQuestionIsNew = false;
   render();
-  toast("Question updated.");
+  toast(wasNew ? "Question added." : "Question updated.");
 }
 function editIntroDialog(id){
   const s = state.surveys.find(x=>x.id===id);
@@ -7981,22 +8650,18 @@ function archiveConfirm(id){
   if(!s || isSurveyArchived(s)) return "";
   const n = Number(s.responses)||0;
   const isDraft = s.status==="Draft";
-  const liveTrig = s.status==="Live" ? surveyActiveTriggerId(s) : null;
   const kept = isDraft
     ? "It moves to Archived. It hasn't been sent, so there are no responses."
     : `It stops collecting responses and moves to Archived. ${n===1
       ? "Its 1 response is kept for reporting."
       : n===0 ? "It has no responses yet." : `All ${n} responses are kept for reporting.`}`;
-  const liveNote = s.status==="Live"
-    ? (liveTrig ? ` This stops the survey first and frees trigger ${formatTriggerId(liveTrig)}.` : " This stops the survey first.")
-    : "";
   return `
   <div class="scrim" style="z-index:54"></div>
   <div class="dialog-wrap" onclick="closeArchiveSurvey()">
     <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="arch-title" aria-describedby="arch-desc"
       onclick="event.stopPropagation()">
       <h2 class="t-h4" id="arch-title">Archive “${esc(s.name)}”?</h2>
-      <p class="t-body dim mt8" id="arch-desc">${esc(kept+liveNote)}</p>
+      <p class="t-body dim mt8" id="arch-desc">${esc(kept)}</p>
       <div class="dialog-actions">
         <button class="fw-btn fw-btn--outline" onclick="closeArchiveSurvey()">Cancel</button>
         <button class="fw-btn fw-btn--primary" onclick="confirmArchiveSurvey()">${I.archive(16)} Archive survey</button>
@@ -8006,7 +8671,8 @@ function archiveConfirm(id){
 }
 function askArchiveSurvey(id){
   const s = state.surveys.find(x=>x.id===id);
-  if(!s || isSurveyArchived(s)) return;
+  /* Live surveys can't be archived. Stop them first. */
+  if(!s || isSurveyArchived(s) || s.status==="Live") return;
   state.surveyMenu = null;
   state.archiveSurvey = id;
   render();
@@ -8017,14 +8683,10 @@ function confirmArchiveSurvey(){
   if(!id) return;
   const s = state.surveys.find(x=>x.id===id);
   state.archiveSurvey = null;
-  if(!s || isSurveyArchived(s)){ render(); return; }
+  if(!s || isSurveyArchived(s) || s.status==="Live"){ render(); return; }
   const snap = { status:s.status, triggerId:s.triggerId, priorTriggerId:s.priorTriggerId,
     stoppedAt:s.stoppedAt, updated:s.updated };
-  if(s.status==="Live"){
-    /* One step: stop first (same as the Stop flow), then archive. */
-    releaseSurveyTrigger(s);
-    s.stoppedAt = NOW;
-  } else if(s.status==="Draft"){
+  if(s.status==="Draft"){
     /* A draft can hold a trigger. Archived surveys never do. Remember it for Restore. */
     s.archivedTriggerId = surveyActiveTriggerId(s);
     s.triggerId = null;
@@ -8159,7 +8821,12 @@ function pText(id,v){ state.survey.answers[id] = v;
   const c = document.querySelector(".p-count"); if(c) c.textContent = pT("charCount",{n:v.length}); }
 function pNext(){ pTurn("fwd", ()=>{ state.survey.step++; }); }
 function pSkip(){ pTurn("fwd", ()=>{ state.survey.step++; }); }
-function pBack(){ pTurn("back", ()=>{ state.survey.step = Math.max(-1, state.survey.step-1); }); }
+function pBack(){
+  pTurn("back", ()=>{
+    const min = surveyIntroOn(currentSurvey()) ? -1 : 0;
+    state.survey.step = Math.max(min, state.survey.step-1);
+  });
+}
 function pFinish(){ pTurn("fwd", ()=>{ state.survey.step = qList().length; }); }
 function scrollPageTop(){
   const stage = document.querySelector(".preview-stage");
