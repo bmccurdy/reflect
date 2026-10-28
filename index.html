@@ -7452,9 +7452,12 @@ function bvTriggerCard(s){
       </div>
       ${bvStatus(ok)}
     </div>
-    <div class="publish-setup-trigger mt16">
-      ${triggerSelect(s)}
-      ${triggerSelectActions(s)}
+    <div class="mt16">
+      <div class="publish-setup-trigger">
+        ${triggerSelect(s)}
+        ${triggerSelectActions(s)}
+      </div>
+      <p class="t-detail dim mt8" id="bv-trig-hint">When this trigger fires, matching patients are invited to take the survey.</p>
     </div>
   </section>`;
 }
