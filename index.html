@@ -2421,18 +2421,7 @@ body:not(.is-locked) #gate{display:none}
 }
 .gate-brand img{width:32px;height:32px;display:block}
 
-/* ---------- Survey builder flow variations (prototype) ---------- */
-.bv-switch{
-  display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;
-  margin:0 0 16px;padding:12px 16px;
-  border:1px dashed var(--border);border-radius:var(--r-lg);background:var(--muted);
-}
-.bv-switch__head{display:flex;align-items:center;gap:8px}
-.bv-switch__label{font-size:13px;font-weight:700;color:var(--foreground)}
-.bv-switch__seg{flex-wrap:wrap}
-.bv-switch__seg button{min-height:32px}
-.bv-switch__note{flex-basis:100%;margin:0;font-size:13px;line-height:20px;color:var(--muted-foreground)}
-
+/* ---------- Survey builder (tabs + add drawer) ---------- */
 .bv-card-head{display:flex;align-items:flex-start;gap:12px}
 .bv-card-copy{flex:1;min-width:0}
 .bv-card-copy .t-subtle{margin:4px 0 0}
@@ -2822,10 +2811,18 @@ function surveyPageChanged(s){
   if(String(s.description||"").trim()) return true;
   return false;
 }
+/** Questions that count for publish / test SMS — excludes an unsaved new-question draft. */
+function committedQuestions(qs){
+  const list = qs || [];
+  if(state.editQuestionIsNew && state.editQuestion){
+    return list.filter(q=>q.id!==state.editQuestion);
+  }
+  return list;
+}
 function canSendTestSms(s, qs){
   if(!s || s.status==="Live") return false;
   if(!s.fresh) return true;
-  return (qs||[]).length > 0 || surveyPageChanged(s);
+  return committedQuestions(qs).length > 0 || surveyPageChanged(s);
 }
 function isSurveyCollecting(s){
   return !!s && s.status==="Live";
@@ -3231,6 +3228,7 @@ const state = {
   stopSurvey:null,
   renameSurvey:null,
   editQuestion:null,
+  editQuestionIsNew:false,
   editIntro:null,
   testSms:null,
   testSmsDraft:null,
@@ -5382,6 +5380,7 @@ function syncQuestionCount(id){
   if(s) s.questions = (state.surveyQuestions[id]||[]).length;
 }
 function previewingIntro(){ return state.previewQId==="intro"; }
+function surveyIntroOn(s){ return !s || s.introEnabled!==false; }
 function previewQIndex(){
   if(previewingIntro()) return -1;
   const qs = qList();
@@ -6440,23 +6439,16 @@ function viewSurveys(){
   const s = currentSurvey();
   if(!s) return viewSurveysIndex();
   const qs = qList();
-  const lockedQs = qs.filter(q=>q.locked).length;
   const surveyLocked = isSurveyLocked(s);
-  const section = builderSection(s, qs);
   const meta = surveyTitleMeta(s);
-  const hasQuestions = qs.length > 0;
+  const hasQuestions = committedQuestions(qs).length > 0;
   const previewBtn = `<button class="fw-btn fw-btn--outline" type="button"${hasQuestions
     ? ` onclick="openSurveyPreview()"`
     : ` disabled title="Add a question to preview"`}>${I.eye(16)} Preview</button>`;
-  const bvOn = bvActive(s);
-  const bvMissing = bvOn ? bvMissingText(s, qs) : "";
-  const publishBtn = bvOn
-    ? `<button class="fw-btn fw-btn--primary" type="button"${!bvMissing
+  const bvMissing = surveyLocked ? "" : bvMissingText(s, qs);
+  const publishBtn = `<button class="fw-btn fw-btn--primary" type="button"${!bvMissing
         ? ` onclick="publishSurvey('${s.id}')"`
-        : ` disabled title="${esc(bvMissing)}" aria-describedby="bv-pub-missing"`}>Publish</button>${bvMissing?`<span class="sr" id="bv-pub-missing">${esc(bvMissing)}</span>`:""}`
-    : `<button class="fw-btn fw-btn--primary" type="button"${hasQuestions
-    ? ` onclick="publishSurvey('${s.id}')"`
-    : ` disabled title="Add a question to publish"`}>Publish</button>`;
+        : ` disabled title="${esc(bvMissing)}" aria-describedby="bv-pub-missing"`}>Publish</button>${bvMissing?`<span class="sr" id="bv-pub-missing">${esc(bvMissing)}</span>`:""}`;
   const canTest = canSendTestSms(s, qs);
   const testSmsBtn = s.status==="Live" ? "" : `<button class="fw-btn fw-btn--outline" type="button"${canTest
     ? ` onclick="openTestSms('${s.id}')"`
@@ -6530,25 +6522,7 @@ function viewSurveys(){
     </div>
   </div>
   ${surveyLockBanner(s)}
-  ${bvOn?bvBuilder(s, qs):`
-  <div class="builder">
-    <nav class="builder-nav" aria-label="Survey sections">
-      <div class="builder-nav-label">Setup</div>
-      ${builderNavItem("publish", surveyLocked?"Associated trigger":"Publish setup", section==="publish", I.bolt(16))}
-      ${builderNavItem("intro", "Introduction", section==="intro", I.info(16))}
-      ${builderNavItem("questions", "Questions", section==="questions", I.list(16))}
-      ${surveyLocked?"":`<div class="builder-nav-label">More</div>
-      ${builderNavItem("library", "Add a question", section==="library", I.plus(16))}
-      ${SHOW_BENCHMARK_SECTION?builderNavItem("benchmark", "Benchmarking", section==="benchmark", I.shield(16)):""}`}
-    </nav>
-    <div class="builder-detail">
-      ${section==="publish"?triggerAssocCard(s):""}
-      ${section==="intro"?introScreenCard(s):""}
-      ${section==="questions"?builderQuestions(qs, surveyLocked):""}
-      ${section==="library"?builderLibrary(qs):""}
-      ${section==="benchmark"?builderBenchmark(lockedQs):""}
-    </div>
-  </div>`}`;
+  ${bvBuilder(s, qs)}`;
 }
 
 const RESPONSE_PAGE = 11;
@@ -7189,17 +7163,19 @@ function pIntroContent(total, embed){
 }
 function previewModalStep(){
   const qs = qList();
-  if(!qs.length || previewingIntro()) return -1;
-  const i = qs.findIndex(q=>q.id===state.previewQId);
-  return i>=0 ? i : 0;
+  if(!qs.length) return -1;
+  /* Full patient flow: intro first when enabled; otherwise first question. */
+  return surveyIntroOn(currentSurvey()) ? -1 : 0;
 }
 function viewPatient(){
   const S = state.survey, qs = qList();
   const total = qs.length;
   const agency = AGENCY.name;
+  const introOn = surveyIntroOn(currentSurvey());
 
   /* intro */
-  if(S.step === -1 || S.step === undefined) S.step = -1;
+  if(S.step === undefined) S.step = introOn ? -1 : 0;
+  if(S.step === -1 && !introOn && qs.length) S.step = 0;
   if(S.step === -1){
     return `<div class="patient" lang="${esc(pLocale())}"><div class="p-wrap">
       ${pDemoBar()}
@@ -7273,24 +7249,11 @@ function viewPatient(){
 </script>
 <script>
 /* ============================================================
-   8b. SURVEY BUILDER FLOW VARIATIONS (prototype only)
-   Setup (trigger + schedule) -> Questions (intro + questions + tagged library) -> Publish.
-   Switch with the "Design variation" bar on a Draft survey, or ?bv=A|B|C|D in the URL.
+   8b. SURVEY BUILDER
+   Setup (trigger + schedule) | Questions (intro + questions).
+   Add question opens a right drawer with blank types + tagged library.
+   Locked surveys use the same tabs read-only.
    ============================================================ */
-const BV_VARIANTS = [
-  ["current","Current"],
-  ["A","A · Top tabs"],
-  ["B","B · Stepper"],
-  ["C","C · Split builder"],
-  ["D","D · Document"]
-];
-const BV_NOTES = {
-  current:"Today's sidebar layout, for comparison.",
-  A:"Default. Setup and Questions as top tabs. Add question opens a side panel with blank types and the tagged library.",
-  B:"Guided 3-step flow with Next / Back. Review step shows exactly what's left before Publish.",
-  C:"Setup collapses into a summary strip. Questions on the left, tagged library always open on the right.",
-  D:"Reads like the survey itself. Intro is the first card, + between questions inserts a new one in place."
-};
 const QTAGS = [
   { key:"comm", label:"Communication & Shared Decisions" },
   { key:"compassion", label:"Compassion & Dignity" },
@@ -7312,11 +7275,7 @@ const bvI = {
 };
 
 (function initBuilderVariant(){
-  let v = null;
-  try{ v = new URLSearchParams(location.search).get("bv"); }catch(e){}
-  /* Default is A (top tabs + Add question drawer). Only ?bv= overrides it; a past switcher click doesn't stick. */
   try{ localStorage.removeItem("reflect.bv"); }catch(e){}
-  state.bvVariant = BV_VARIANTS.some(([k])=>k===v) ? v : "A";
   state.bvTab = "setup";
   state.bvTagFilter = "all";
   state.bvQuery = "";
@@ -7328,13 +7287,6 @@ const bvI = {
   state.bvSurveyId = null;
 })();
 
-function bvActive(s){ return !!s && !isSurveyLocked(s) && state.bvVariant!=="current"; }
-function setBuilderVariant(v){
-  state.bvVariant = v;
-  state.bvAddOpen = false;
-  state.bvInsertAt = null;
-  render();
-}
 function bvAllTags(){ return QTAGS.concat(state.bvCustomTags); }
 function bvTagLabel(key){ const t = bvAllTags().find(x=>x.key===key); return t ? t.label : ""; }
 function bvLibFor(q){ return LIBRARY.find(l=>l.text.trim().toLowerCase()===String(q.text||"").trim().toLowerCase()); }
@@ -7346,6 +7298,7 @@ function qTagKey(q){
   return null;
 }
 function bvSetQTag(id, key){
+  if(isSurveyLocked(currentSurvey())) return;
   const q = qList().find(x=>x.id===id);
   if(!q) return;
   q.tag = key || null;
@@ -7375,10 +7328,11 @@ function bvScheduleOk(s){
 function bvChecklist(s, qs){
   const t = s.triggerId ? findTriggerDef(s.triggerId) : null;
   const trigOk = !!t && !triggerOwner(s.triggerId, s.id);
+  const committed = committedQuestions(qs);
   return [
     { key:"trigger", label:"Trigger selected", detail: t ? t.name : "Not set", ok:trigOk, tab:"setup" },
     { key:"schedule", label:"Schedule set", detail: formatScheduleSummary(s), ok:bvScheduleOk(s), tab:"setup" },
-    { key:"questions", label:"At least 1 question", detail: qs.length ? `${qs.length} question${qs.length===1?"":"s"}` : "None yet", ok:qs.length>0, tab:"questions" }
+    { key:"questions", label:"At least 1 question", detail: committed.length ? `${committed.length} question${committed.length===1?"":"s"}` : "None yet", ok:committed.length>0, tab:"questions" }
   ];
 }
 function bvMissingText(s, qs){
@@ -7397,19 +7351,26 @@ function bvGo(tab){
 
 /* ---------- actions ---------- */
 function bvAddBlank(type, at){
-  addQ(type);
+  if(isSurveyLocked(currentSurvey())) return;
+  const id = "q"+(++qn);
+  const q = {
+    id, type, required:false, locked:false,
+    text:"Untitled question",
+    options: type==="choice" ? ["Option one","Option two"] : undefined,
+    labels:  type==="scale"  ? ["Poor","","","","Excellent"] : undefined
+  };
   const qs = qList();
-  const q = qs[qs.length-1];
-  if(typeof at==="number" && at>=0 && at<qs.length-1){
-    qs.splice(qs.length-1, 1);
-    qs.splice(at, 0, q);
-  }
+  if(typeof at==="number" && at>=0 && at<=qs.length) qs.splice(at, 0, q);
+  else qs.push(q);
   state.bvInsertAt = null;
   state.bvAddOpen = false;
   state.bvTab = "questions";
-  openEditQuestion(q.id);
+  state.previewQId = "questions";
+  syncQuestionCount(surveyIdFromHash() || "sv_post");
+  openEditQuestion(id, { isNew:true });
 }
 function bvAddLib(id, at){
+  if(isSurveyLocked(currentSurvey())) return;
   const before = qList().length;
   addFromLib(id);
   const qs = qList();
@@ -7430,13 +7391,18 @@ function bvOnQuery(v){
   const at = host.getAttribute("data-bv-at");
   host.innerHTML = bvLibRows(qList(), at==="" ? null : Number(at));
 }
-function bvOpenAdd(){ state.bvAddOpen = true; render(); requestAnimationFrame(()=>document.getElementById("bv-lib-search")?.focus()); }
+function bvOpenAdd(){
+  if(isSurveyLocked(currentSurvey())) return;
+  state.bvAddOpen = true;
+  render();
+  requestAnimationFrame(()=>document.getElementById("bv-lib-search")?.focus());
+}
 function bvCloseAdd(){ state.bvAddOpen = false; render(); }
 function bvToggleInsert(i){ state.bvInsertAt = state.bvInsertAt===i ? null : i; render(); }
 function bvToggleSetup(){ state.bvSetupOpen = !state.bvSetupOpen; render(); }
 function bvToggleIntro(id){
   const s = state.surveys.find(x=>x.id===id);
-  if(!s) return;
+  if(!s || isSurveyLocked(s)) return;
   s.introEnabled = s.introEnabled===false;
   toast(s.introEnabled ? "Introduction on." : "Introduction off. Patients start at the first question.");
   render();
@@ -7458,19 +7424,24 @@ function bvNewTagKey(e){
 }
 
 /* ---------- shared pieces ---------- */
-function bvSwitcher(s){
-  return `<div class="bv-switch" role="region" aria-label="Design variation (prototype)">
-    <div class="bv-switch__head">
-      <span class="fw-badge fw-badge--outline">Prototype</span>
-      <span class="bv-switch__label" id="bv-switch-label">Builder flow variation</span>
-    </div>
-    <div class="seg bv-switch__seg" role="group" aria-labelledby="bv-switch-label">
-      ${BV_VARIANTS.map(([k,l])=>`<button type="button" aria-pressed="${state.bvVariant===k}" onclick="setBuilderVariant('${k}')">${l}</button>`).join("")}
-    </div>
-    <p class="bv-switch__note">${esc(BV_NOTES[state.bvVariant]||"")}</p>
-  </div>`;
-}
 function bvTriggerCard(s){
+  const locked = isSurveyLocked(s);
+  if(locked){
+    const activeId = surveyActiveTriggerId(s);
+    return `<section class="fw-card bv-setup-card" aria-labelledby="bv-trig-h">
+      <div class="bv-card-head">
+        <span class="bv-card-ico" aria-hidden="true">${I.bolt(18)}</span>
+        <div class="bv-card-copy">
+          <h2 class="t-h4" id="bv-trig-h">Trigger</h2>
+          <p class="t-subtle dim">Which FirstWatch trigger sends this survey.</p>
+        </div>
+        ${activeId
+          ? `<span class="fw-badge fw-badge--success bv-status">${I.checkCircle(12)} Linked</span>`
+          : `<span class="fw-badge fw-badge--secondary bv-status">Previously linked</span>`}
+      </div>
+      <div class="mt16">${triggerAssocWell(s)}</div>
+    </section>`;
+  }
   const ok = bvChecklist(s, qList())[0].ok;
   return `<section class="fw-card bv-setup-card" aria-labelledby="bv-trig-h">
     <div class="bv-card-head">
@@ -7488,6 +7459,7 @@ function bvTriggerCard(s){
   </section>`;
 }
 function bvScheduleCard(s){
+  const locked = isSurveyLocked(s);
   return `<section class="fw-card bv-setup-card" aria-labelledby="bv-sch-h">
     <div class="bv-card-head">
       <span class="bv-card-ico" aria-hidden="true">${I.calendar(18)}</span>
@@ -7495,9 +7467,13 @@ function bvScheduleCard(s){
         <h2 class="t-h4" id="bv-sch-h">Schedule</h2>
         <p class="t-subtle dim">How long it collects responses after publish.</p>
       </div>
-      ${bvStatus(bvScheduleOk(s))}
+      ${locked
+        ? `<span class="fw-badge fw-badge--outline bv-status">${I.lock(12)} Locked</span>`
+        : bvStatus(bvScheduleOk(s))}
     </div>
-    <div class="mt16">${scheduleSetupFields(s)}</div>
+    <div class="mt16">${locked
+      ? `<p class="schedule-readonly">${esc(formatScheduleSummary(s))}</p>`
+      : scheduleSetupFields(s)}</div>
   </section>`;
 }
 function bvStatus(ok){
@@ -7509,6 +7485,7 @@ function bvSetupGrid(s){
   return `<div class="bv-setup-grid">${bvTriggerCard(s)}${bvScheduleCard(s)}</div>`;
 }
 function bvIntroBlock(s, opts={}){
+  const locked = isSurveyLocked(s);
   const on = s.introEnabled!==false;
   const copy = introStaffCopy(s, (state.surveyQuestions[s.id]||[]).length);
   return `<section class="bv-intro${on?"":" is-off"}${opts.doc?" bv-intro--doc":""}" aria-labelledby="bv-intro-h">
@@ -7518,20 +7495,27 @@ function bvIntroBlock(s, opts={}){
         <h3 class="bv-intro__title" id="bv-intro-h">Introduction <span class="t-detail dim">· optional</span></h3>
         <p class="t-subtle dim">${on?"Shown before the first question.":"Off. Patients go straight to the first question."}</p>
       </div>
-      <label class="bv-switch-field">
+      ${locked
+        ? `<span class="fw-badge fw-badge--outline">${on?"On":"Off"}</span>`
+        : `<label class="bv-switch-field">
         <input class="fw-switch" type="checkbox" role="switch" ${on?"checked":""}
           aria-label="Show introduction" onchange="bvToggleIntro('${s.id}')">
         <span class="t-detail">${on?"On":"Off"}</span>
-      </label>
+      </label>`}
     </div>
     ${on?`<div class="bv-intro__body">
       <div class="bv-intro__preview">
         <p class="intro-screen-preview-title">${esc(copy.title)}</p>
         <p class="intro-screen-preview-body">${esc(copy.body)}</p>
       </div>
-      <button type="button" class="fw-btn fw-btn--outline fw-btn--sm" onclick="openEditIntro()">${I.pencil(14)} Edit</button>
+      ${locked?"":`<button type="button" class="fw-btn fw-btn--outline fw-btn--sm" onclick="openEditIntro()">${I.pencil(14)} Edit</button>`}
     </div>`:""}
   </section>`;
+}
+function bvTagBadge(q){
+  const cur = qTagKey(q);
+  if(!cur) return `<span class="t-detail dim">No tag</span>`;
+  return `<span class="fw-badge fw-badge--outline bv-tagbadge">${bvI.tag(12)} ${esc(bvTagLabel(cur))}</span>`;
 }
 function bvTagSelect(q){
   const cur = qTagKey(q) || "";
@@ -7545,6 +7529,7 @@ function bvTagSelect(q){
   </label>`;
 }
 function bvQCard(q, i, qs, opts={}){
+  const locked = !!opts.locked;
   return `<div class="qcard bv-qcard" data-qid="${q.id}">
     <span class="bv-qnum" aria-hidden="true">${i+1}</span>
     <div class="qcard-body">
@@ -7552,15 +7537,15 @@ function bvQCard(q, i, qs, opts={}){
       <div class="qmeta">
         <span class="fw-badge fw-badge--secondary">${TYPE_LABEL[q.type]}</span>
         ${q.required?`<span class="fw-badge fw-badge--outline">Required</span>`:`<span class="t-detail dim">Optional</span>`}
-        ${bvTagSelect(q)}
+        ${locked?bvTagBadge(q):bvTagSelect(q)}
       </div>
     </div>
-    <div class="qbtns">
+    ${locked?"":`<div class="qbtns">
       <button class="iconbtn" aria-label="Move up" ${i===0?"disabled":""} onclick="moveQ(${i},-1)">${I.up(16)}</button>
       <button class="iconbtn" aria-label="Move down" ${i===qs.length-1?"disabled":""} onclick="moveQ(${i},1)">${I.down(16)}</button>
       <button class="iconbtn" aria-label="Edit question" ${q.locked?"disabled":`onclick="openEditQuestion('${q.id}')"`}>${I.pencil(16)}</button>
       <button class="iconbtn" aria-label="Remove question" onclick="removeQ('${q.id}')">${I.trash(16)}</button>
-    </div>
+    </div>`}
   </div>`;
 }
 function bvTypeButtons(at){
@@ -7627,6 +7612,9 @@ function bvLibrary(qs, opts={}){
   </div>`;
 }
 function bvEmptyAdd(opts={}){
+  if(opts.locked){
+    return `<p class="t-subtle dim">No questions on this version.</p>`;
+  }
   return `<div class="bv-emptyadd">
     <span class="bv-emptyadd__ico" aria-hidden="true">${I.plus(24)}</span>
     <h3 class="bv-emptyadd__title">Add your first question</h3>
@@ -7636,12 +7624,14 @@ function bvEmptyAdd(opts={}){
   </div>`;
 }
 function bvQuestionList(s, qs, opts={}){
-  if(!qs.length) return bvEmptyAdd(opts);
-  return `<div class="bv-qlist">${qs.map((q,i)=>bvQCard(q,i,qs)).join("")}</div>`;
+  const locked = !!opts.locked || isSurveyLocked(s);
+  if(!qs.length) return bvEmptyAdd({ ...opts, locked });
+  return `<div class="bv-qlist">${qs.map((q,i)=>bvQCard(q,i,qs,{ locked })).join("")}</div>`;
 }
 function bvPublishChecklist(s, qs, opts={}){
   const list = bvChecklist(s, qs);
   const left = list.filter(c=>!c.ok).length;
+  const noLinks = !!opts.noLinks || isSurveyLocked(s);
   return `<div class="bv-check${opts.inline?" bv-check--inline":""}" role="status" aria-live="polite">
     ${opts.inline?"":`<h3 class="bv-sub">${left?`${left} item${left===1?"":"s"} left before you can publish`:"Ready to publish"}</h3>`}
     <ul class="bv-check__list">
@@ -7649,15 +7639,17 @@ function bvPublishChecklist(s, qs, opts={}){
         <span class="bv-check__ico" aria-hidden="true">${c.ok?I.checkCircle(16):bvI.circle(16)}</span>
         <span class="bv-check__label">${esc(c.label)}${opts.inline?"":`<span class="bv-check__detail">${esc(c.detail||"")}</span>`}</span>
         <span class="sr">${c.ok?"done":"not done"}</span>
-        ${!c.ok && !opts.noLinks?`<button type="button" class="bv-link" onclick="bvGo('${c.tab}')">Fix</button>`:""}
+        ${!c.ok && !noLinks?`<button type="button" class="bv-link" onclick="bvGo('${c.tab}')">Fix</button>`:""}
       </li>`).join("")}
     </ul>
   </div>`;
 }
 function bvTabsBar(s, qs){
+  const locked = isSurveyLocked(s);
   const list = bvChecklist(s, qs);
   const setupOk = list.filter(c=>c.tab==="setup").every(c=>c.ok);
-  const qOk = qs.length>0;
+  const committed = committedQuestions(qs);
+  const qOk = committed.length>0;
   const tab = state.bvTab==="questions" ? "questions" : "setup";
   const t = (id, n, label, ok, extra="") => `<button type="button" class="fw-tab bv-tab" role="tab" id="bv-tab-${id}"
       aria-selected="${tab===id}" ${tab===id?"data-active":""} aria-controls="bv-panel"
@@ -7667,21 +7659,23 @@ function bvTabsBar(s, qs){
   return `<div class="bv-tabsrow">
     <div class="fw-tablist fw-tablist--line bv-tablist" role="tablist" aria-label="Survey builder">
       ${t("setup", 1, "Setup", setupOk)}
-      ${t("questions", 2, "Questions", qOk, qs.length?` <span class="fw-tab__count">${qs.length}</span>`:"")}
+      ${t("questions", 2, "Questions", qOk, committed.length?` <span class="fw-tab__count">${committed.length}</span>`:"")}
     </div>
-    ${bvPublishChecklist(s, qs, { inline:true })}
+    ${locked?"":bvPublishChecklist(s, qs, { inline:true })}
   </div>`;
 }
 
-/* ---------- Variation A: top tabs + add drawer ---------- */
+/* ---------- Top tabs + add drawer ---------- */
 function bvVariantA(s, qs){
+  const locked = isSurveyLocked(s);
   const tab = state.bvTab==="questions" ? "questions" : "setup";
+  const addOpen = !locked && state.bvAddOpen;
   return `${bvTabsBar(s, qs)}
   <div class="bv-body" id="bv-panel" role="tabpanel" aria-labelledby="bv-tab-${tab}">
     ${tab==="setup" ? `${bvSetupGrid(s)}
-      <div class="bv-foot"><span></span>
+      ${locked?"":`<div class="bv-foot"><span></span>
         <button class="fw-btn fw-btn--primary" onclick="bvGo('questions')">Next: Questions ${I.chevronRight(16)}</button>
-      </div>`
+      </div>`}`
     : `${bvIntroBlock(s)}
       <div class="fw-card mt16">
         <div class="between between--inline">
@@ -7689,12 +7683,12 @@ function bvVariantA(s, qs){
             <h2 class="t-h4">Questions</h2>
             <p class="t-subtle dim mt8">Patients see them in this order.</p>
           </div>
-          ${qs.length?`<button class="fw-btn fw-btn--primary fw-btn--sm" onclick="bvOpenAdd()">${I.plus(16)} Add question</button>`:""}
+          ${!locked && qs.length?`<button class="fw-btn fw-btn--primary fw-btn--sm" onclick="bvOpenAdd()">${I.plus(16)} Add question</button>`:""}
         </div>
-        <div class="mt16">${bvQuestionList(s, qs, { libraryButton:"bvOpenAdd()" })}</div>
+        <div class="mt16">${bvQuestionList(s, qs, { locked, libraryButton: locked?"":"bvOpenAdd()" })}</div>
       </div>`}
   </div>
-  ${state.bvAddOpen?`
+  ${addOpen?`
   <div class="bv-scrim" onclick="bvCloseAdd()"></div>
   <aside class="bv-drawer" role="dialog" aria-modal="true" aria-labelledby="bv-drawer-h">
     <div class="bv-drawer__head">
@@ -7705,148 +7699,10 @@ function bvVariantA(s, qs){
   </aside>`:""}`;
 }
 
-/* ---------- Variation B: stepper ---------- */
-function bvVariantB(s, qs){
-  const list = bvChecklist(s, qs);
-  const steps = [
-    { id:"setup", label:"Setup", sub:"Trigger and schedule", ok:list.filter(c=>c.tab==="setup").every(c=>c.ok) },
-    { id:"questions", label:"Questions", sub:qs.length?`${qs.length} added`:"Intro and questions", ok:qs.length>0 },
-    { id:"review", label:"Review & publish", sub:list.every(c=>c.ok)?"Ready":"Check what's left", ok:false }
-  ];
-  const cur = steps.some(x=>x.id===state.bvTab) ? state.bvTab : "setup";
-  const idx = steps.findIndex(x=>x.id===cur);
-  const ready = list.every(c=>c.ok);
-  return `<ol class="bv-stepper" aria-label="Survey builder steps">
-    ${steps.map((st,i)=>`<li class="bv-step${st.id===cur?" is-current":""}${st.ok?" is-ok":""}">
-      <button type="button" class="bv-step__btn" ${st.id===cur?`aria-current="step"`:""} onclick="bvGo('${st.id}')">
-        <span class="bv-step__n" aria-hidden="true">${st.ok?I.check(14):i+1}</span>
-        <span class="bv-step__copy"><span class="bv-step__label">${st.label}</span><span class="bv-step__sub">${esc(st.sub)}</span></span>
-      </button>
-    </li>`).join("")}
-  </ol>
-  <div class="bv-body">
-    ${cur==="setup" ? bvSetupGrid(s) : ""}
-    ${cur==="questions" ? `${bvIntroBlock(s)}
-      <div class="fw-card mt16">
-        <h2 class="t-h4">Questions</h2>
-        <div class="mt16">${bvQuestionList(s, qs)}</div>
-        ${qs.length?`<details class="bv-details mt16"${state.bvTagFilter!=="all"||state.bvQuery?" open":""}>
-          <summary>${I.plus(16)} Add more questions</summary>
-          <div class="mt16">${bvLibrary(qs)}</div>
-        </details>`:`<div class="mt24">${bvLibrary(qs, { hideTypes:true })}</div>`}
-      </div>` : ""}
-    ${cur==="review" ? `<div class="bv-review">
-        <div class="fw-card">${bvPublishChecklist(s, qs)}</div>
-        <div class="fw-card">
-          <h3 class="bv-sub">Questions by tag</h3>
-          ${bvTagSummary(qs)}
-        </div>
-      </div>` : ""}
-    <div class="bv-foot">
-      ${idx>0?`<button class="fw-btn fw-btn--outline" onclick="bvGo('${steps[idx-1].id}')">${I.chevronLeft(16)} Back</button>`:"<span></span>"}
-      ${idx<steps.length-1
-        ? `<button class="fw-btn fw-btn--primary" onclick="bvGo('${steps[idx+1].id}')">Next: ${steps[idx+1].label} ${I.chevronRight(16)}</button>`
-        : `<button class="fw-btn fw-btn--primary" ${ready?`onclick="publishSurvey('${s.id}')"`:`disabled aria-describedby="bv-pub-why"`}>Publish survey</button>
-           ${ready?"":`<span class="sr" id="bv-pub-why">${esc(bvMissingText(s, qs))}</span>`}`}
-    </div>
-  </div>`;
-}
-function bvTagSummary(qs){
-  if(!qs.length) return `<p class="t-subtle dim">No questions yet.</p>`;
-  const counts = {};
-  qs.forEach(q=>{ const k = qTagKey(q) || "_none"; counts[k] = (counts[k]||0)+1; });
-  return `<ul class="bv-tagsum">${Object.entries(counts).map(([k,n])=>`<li>
-    <span class="fw-badge fw-badge--outline bv-tagbadge">${bvI.tag(12)} ${esc(k==="_none"?"Untagged":bvTagLabel(k))}</span>
-    <span class="t-detail dim">${n} question${n===1?"":"s"}</span></li>`).join("")}</ul>
-    ${counts._none?`<p class="t-detail dim mt8">Untagged questions won't group in Overview or exports.</p>`:""}`;
-}
-
-/* ---------- Variation C: setup strip + split builder ---------- */
-function bvVariantC(s, qs){
-  const list = bvChecklist(s, qs);
-  const setupOk = list.filter(c=>c.tab==="setup").every(c=>c.ok);
-  const open = state.bvSetupOpen || !setupOk;
-  return `<section class="fw-card bv-strip${open?" is-open":""}" aria-labelledby="bv-strip-h">
-    <div class="bv-strip__row">
-      <h2 class="bv-strip__h" id="bv-strip-h">Setup</h2>
-      <div class="bv-strip__cell">
-        <span class="bv-strip__k">${I.bolt(14)} Trigger</span>
-        <span class="bv-strip__v${list[0].ok?"":" dim"}">${esc(list[0].detail)}</span>
-      </div>
-      <div class="bv-strip__cell">
-        <span class="bv-strip__k">${I.calendar(14)} Schedule</span>
-        <span class="bv-strip__v">${esc(list[1].detail)}</span>
-      </div>
-      ${setupOk
-        ? `<button type="button" class="fw-btn fw-btn--outline fw-btn--sm" aria-expanded="${open}" onclick="bvToggleSetup()">${open?"Done":`${I.pencil(14)} Edit`}</button>`
-        : `<span class="fw-badge fw-badge--outline">Required to publish</span>`}
-    </div>
-    ${open?`<div class="bv-strip__body">${bvSetupGrid(s)}</div>`:""}
-  </section>
-  <div class="bv-split">
-    <div class="bv-split__main">
-      ${bvIntroBlock(s)}
-      <div class="fw-card mt16">
-        <div class="between between--inline">
-          <h2 class="t-h4">Questions</h2>
-          ${qs.length?`<span class="t-detail dim">${qs.length} · reorder with the arrows</span>`:""}
-        </div>
-        <div class="mt16">${qs.length?bvQuestionList(s, qs):`<div class="bv-emptyadd bv-emptyadd--slim">
-          <span class="bv-emptyadd__ico" aria-hidden="true">${I.plus(24)}</span>
-          <h3 class="bv-emptyadd__title">Add your first question</h3>
-          <p class="t-subtle dim">Pick from the tagged library on the right, or start blank.</p>
-          ${bvTypeButtons(0)}
-        </div>`}</div>
-      </div>
-    </div>
-    <aside class="fw-card bv-split__side" aria-label="Add questions">
-      <h2 class="t-h4">Add questions</h2>
-      <div class="mt16">${bvLibrary(qs, { hideTypes:true, compact:true })}</div>
-      ${qs.length?`<div class="bv-side-blank"><h3 class="bv-sub">Or start blank</h3>${bvTypeButtons()}</div>`:""}
-    </aside>
-  </div>`;
-}
-
-/* ---------- Variation D: document flow ---------- */
-function bvInsertRow(i, qs){
-  const open = state.bvInsertAt===i;
-  return `<div class="bv-insert${open?" is-open":""}">
-    <button type="button" class="bv-insert__btn" aria-expanded="${open}" onclick="bvToggleInsert(${i})">
-      <span class="bv-insert__line" aria-hidden="true"></span>
-      <span class="bv-insert__pill">${open?I.x(14):I.plus(14)} ${open?"Close":i===qs.length?"Add question":"Insert here"}</span>
-      <span class="bv-insert__line" aria-hidden="true"></span>
-    </button>
-    ${open?`<div class="bv-insert__panel">${bvLibrary(qs, { at:i, compact:true })}</div>`:""}
-  </div>`;
-}
-function bvVariantD(s, qs){
-  const tab = state.bvTab==="questions" ? "questions" : "setup";
-  if(!qs.length && tab==="questions" && state.bvInsertAt===null) state.bvInsertAt = 0;
-  return `${bvTabsBar(s, qs)}
-  <div class="bv-body bv-doc" id="bv-panel" role="tabpanel" aria-labelledby="bv-tab-${tab}">
-    ${tab==="setup" ? `<div class="bv-doc__setup">
-        <p class="t-subtle dim">Two things decide who gets this survey and for how long.</p>
-        ${bvTriggerCard(s)}
-        ${bvScheduleCard(s)}
-        <div class="bv-foot"><span></span><button class="fw-btn fw-btn--primary" onclick="bvGo('questions')">Next: Write the survey ${I.chevronRight(16)}</button></div>
-      </div>`
-    : `<div class="bv-doc__page">
-        ${bvIntroBlock(s, { doc:true })}
-        ${qs.length?"":`<div class="bv-doc__empty"><h3 class="bv-emptyadd__title">No questions yet</h3><p class="t-subtle dim">Add the first one below.</p></div>`}
-        ${qs.map((q,i)=>`${bvInsertRow(i, qs)}${bvQCard(q,i,qs)}`).join("")}
-        ${bvInsertRow(qs.length, qs)}
-      </div>`}
-  </div>`;
-}
-
 function bvBuilder(s, qs){
   bvSyncSurvey(s, qs);
-  const v = state.bvVariant;
-  const body = v==="A" ? bvVariantA(s, qs)
-    : v==="B" ? bvVariantB(s, qs)
-    : v==="C" ? bvVariantC(s, qs)
-    : bvVariantD(s, qs);
-  return `<div class="bv bv--${v}">${body}</div>`;
+  if(isSurveyLocked(s)) state.bvAddOpen = false;
+  return `<div class="bv bv--A">${bvVariantA(s, qs)}</div>`;
 }
 </script>
 
@@ -8375,7 +8231,7 @@ function editQuestionDialog(id){
     </div>
   </div>`;
 }
-function openEditQuestion(id){
+function openEditQuestion(id, opts={}){
   if(isSurveyLocked(currentSurvey())){ toast("This version is locked."); return; }
   const q = qList().find(x=>x.id===id);
   if(!q || q.locked){
@@ -8383,6 +8239,7 @@ function openEditQuestion(id){
     return;
   }
   state.editQuestion = id;
+  state.editQuestionIsNew = !!opts.isNew;
   state.previewQId = id;
   render();
   requestAnimationFrame(()=>{
@@ -8391,14 +8248,31 @@ function openEditQuestion(id){
   });
 }
 function closeEditQuestion(){
+  const id = state.editQuestion;
+  const wasNew = state.editQuestionIsNew;
   state.editQuestion = null;
+  state.editQuestionIsNew = false;
+  if(wasNew && id){
+    const qs = qList();
+    const i = qs.findIndex(q=>q.id===id);
+    if(i>=0){
+      qs.splice(i, 1);
+      syncQuestionCount(surveyIdFromHash() || "sv_post");
+    }
+  }
   render();
 }
 function confirmEditQuestion(){
   const id = state.editQuestion;
   if(!id) return;
+  const wasNew = state.editQuestionIsNew;
   const q = qList().find(x=>x.id===id);
-  if(!q || q.locked){ state.editQuestion = null; render(); return; }
+  if(!q || q.locked){
+    state.editQuestion = null;
+    state.editQuestionIsNew = false;
+    render();
+    return;
+  }
   const textEl = document.getElementById("edit-q-text");
   const reqEl = document.getElementById("edit-q-required");
   const text = ((textEl && textEl.value) || "").trim();
@@ -8422,8 +8296,9 @@ function confirmEditQuestion(){
   const s = sid && state.surveys.find(x=>x.id===sid);
   if(s) s.updated = NOW;
   state.editQuestion = null;
+  state.editQuestionIsNew = false;
   render();
-  toast("Question updated.");
+  toast(wasNew ? "Question added." : "Question updated.");
 }
 function editIntroDialog(id){
   const s = state.surveys.find(x=>x.id===id);
@@ -8946,7 +8821,12 @@ function pText(id,v){ state.survey.answers[id] = v;
   const c = document.querySelector(".p-count"); if(c) c.textContent = pT("charCount",{n:v.length}); }
 function pNext(){ pTurn("fwd", ()=>{ state.survey.step++; }); }
 function pSkip(){ pTurn("fwd", ()=>{ state.survey.step++; }); }
-function pBack(){ pTurn("back", ()=>{ state.survey.step = Math.max(-1, state.survey.step-1); }); }
+function pBack(){
+  pTurn("back", ()=>{
+    const min = surveyIntroOn(currentSurvey()) ? -1 : 0;
+    state.survey.step = Math.max(min, state.survey.step-1);
+  });
+}
 function pFinish(){ pTurn("fwd", ()=>{ state.survey.step = qList().length; }); }
 function scrollPageTop(){
   const stage = document.querySelector(".preview-stage");
