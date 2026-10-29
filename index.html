@@ -2430,15 +2430,24 @@ body:not(.is-locked) #gate{display:none}
   display:grid;place-items:center;background:var(--accent);color:var(--primary);
 }
 .bv-status{flex-shrink:0}
-.bv-setup-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
-.bv-setup-card{min-width:0}
+.bv-setup-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch}
+.bv-setup-card{min-width:0;height:100%}
 .bv-sub{margin:0;font-size:14px;line-height:20px;font-weight:700;color:var(--foreground)}
 .bv-sub.mt24{margin-top:24px}
+
+/* sticky survey builder chrome (title + tabs) */
+.bv-sticky{
+  position:sticky;top:56px;z-index:5;
+  background:var(--muted);
+  padding-bottom:24px;
+}
+.bv-sticky .page-head{margin-bottom:16px}
+.bv-sticky .survey-lock-banner{margin-bottom:16px}
 
 /* tabs row */
 .bv-tabsrow{
   display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;
-  border-bottom:1px solid var(--border);margin-bottom:24px;
+  border-bottom:1px solid var(--border);margin-bottom:0;
 }
 .bv-tablist{border-bottom:0}
 .bv-tab{font-size:15px;font-weight:600;min-height:44px;gap:8px}
@@ -6464,64 +6473,68 @@ function viewSurveys(){
     : `${testSmsBtn}
         ${previewBtn}
         ${publishBtn}`;
+  bvSyncSurvey(s, qs);
   return `
-  <div class="page-head">
-    <div class="crumbs"><a href="#/">Overview</a><span class="sep">/</span><a href="#/surveys">Surveys</a>
-      <span class="sep">/</span><span>${esc(s.name)}</span></div>
-    <a class="page-back" href="#/surveys">${I.chevronLeft(16)} Surveys</a>
-    <div class="between">
-      <div>
-        ${!surveyLocked && state.editingSurveyName===s.id?`
-        <h1 class="t-h2 title-edit">
-          <label class="sr" for="survey-name-input">Survey name</label>
-          <div class="title-edit-field">
-            <input class="fw-input title-edit-input" id="survey-name-input" value="${esc(s.name)}"
-              maxlength="80" autocomplete="off"
-              onkeydown="surveyNameKey(event)" onblur="onSurveyNameBlur()">
-            <div class="title-edit-actions">
-              <button type="button" class="iconbtn title-edit-save" aria-label="Save name"
-                onmousedown="event.preventDefault()" onclick="confirmInlineRename()">${I.check(18)}</button>
-              <button type="button" class="iconbtn title-edit-cancel" aria-label="Cancel rename"
-                onmousedown="event.preventDefault()" onclick="cancelInlineRename()">${I.x(18)}</button>
+  <div class="bv-sticky">
+    <div class="page-head">
+      <div class="crumbs"><a href="#/">Overview</a><span class="sep">/</span><a href="#/surveys">Surveys</a>
+        <span class="sep">/</span><span>${esc(s.name)}</span></div>
+      <a class="page-back" href="#/surveys">${I.chevronLeft(16)} Surveys</a>
+      <div class="between">
+        <div>
+          ${!surveyLocked && state.editingSurveyName===s.id?`
+          <h1 class="t-h2 title-edit">
+            <label class="sr" for="survey-name-input">Survey name</label>
+            <div class="title-edit-field">
+              <input class="fw-input title-edit-input" id="survey-name-input" value="${esc(s.name)}"
+                maxlength="80" autocomplete="off"
+                onkeydown="surveyNameKey(event)" onblur="onSurveyNameBlur()">
+              <div class="title-edit-actions">
+                <button type="button" class="iconbtn title-edit-save" aria-label="Save name"
+                  onmousedown="event.preventDefault()" onclick="confirmInlineRename()">${I.check(18)}</button>
+                <button type="button" class="iconbtn title-edit-cancel" aria-label="Cancel rename"
+                  onmousedown="event.preventDefault()" onclick="cancelInlineRename()">${I.x(18)}</button>
+              </div>
             </div>
-          </div>
-        </h1>`:`
-        <h1 class="t-h2 title-edit">
-          ${surveyLocked
-            ? `<span>${esc(s.name)}</span>`
-            : `<button type="button" class="title-edit-hit" title="Rename survey" onclick="startInlineRename('${s.id}')">
-            <span>${esc(s.name)}</span>
-            <span class="title-edit-pen" aria-hidden="true">${I.pencil(16)}</span>
-          </button>`}
-          ${s.status==="Live"?`<span class="fw-badge fw-badge--success survey-title-pill">${I.checkCircle(12)} Live</span>`:""}
-          ${s.status==="Stopped"?`<span class="fw-badge survey-readonly-pill">${I.lock(12)} Read only</span>`:""}
-          ${isSurveyArchived(s)?`<span class="fw-badge fw-badge--outline survey-title-pill">${I.archive(12)} Archived</span>`:""}
-        </h1>`}
-        ${!surveyLocked && state.editingSurveyDesc===s.id?`
-        <div class="survey-desc-edit">
-          <label class="sr" for="survey-desc-input">Survey description</label>
-          <textarea class="fw-input fw-textarea" id="survey-desc-input" rows="2"
-            maxlength="${SURVEY_DESC_MAX}"
-            onkeydown="surveyDescKey(event)" onblur="onSurveyDescBlur()">${esc(s.description||"")}</textarea>
-          <div class="title-edit-actions">
-            <button type="button" class="iconbtn title-edit-save" aria-label="Save description"
-              onmousedown="event.preventDefault()" onclick="confirmInlineDesc()">${I.check(18)}</button>
-            <button type="button" class="iconbtn title-edit-cancel" aria-label="Cancel description"
-              onmousedown="event.preventDefault()" onclick="cancelInlineDesc()">${I.x(18)}</button>
-          </div>
-        </div>`: surveyLocked
-          ? (s.description?`<p class="survey-desc">${esc(s.description)}</p>`:"")
-          : `<button type="button" class="survey-desc-hit${s.description?"":" survey-desc-hit--empty"}"
-              title="${s.description?"Edit description":"Add description"}"
-              onclick="startInlineDesc('${s.id}')">${s.description?esc(s.description):"Add description"}</button>`}
-        <p class="t-subtle dim survey-title-meta">${meta}</p>
-      </div>
-      <div class="row page-actions" style="gap:8px">
-        ${pageActions}
+          </h1>`:`
+          <h1 class="t-h2 title-edit">
+            ${surveyLocked
+              ? `<span>${esc(s.name)}</span>`
+              : `<button type="button" class="title-edit-hit" title="Rename survey" onclick="startInlineRename('${s.id}')">
+              <span>${esc(s.name)}</span>
+              <span class="title-edit-pen" aria-hidden="true">${I.pencil(16)}</span>
+            </button>`}
+            ${s.status==="Live"?`<span class="fw-badge fw-badge--success survey-title-pill">${I.checkCircle(12)} Live</span>`:""}
+            ${s.status==="Stopped"?`<span class="fw-badge survey-readonly-pill">${I.lock(12)} Read only</span>`:""}
+            ${isSurveyArchived(s)?`<span class="fw-badge fw-badge--outline survey-title-pill">${I.archive(12)} Archived</span>`:""}
+          </h1>`}
+          ${!surveyLocked && state.editingSurveyDesc===s.id?`
+          <div class="survey-desc-edit">
+            <label class="sr" for="survey-desc-input">Survey description</label>
+            <textarea class="fw-input fw-textarea" id="survey-desc-input" rows="2"
+              maxlength="${SURVEY_DESC_MAX}"
+              onkeydown="surveyDescKey(event)" onblur="onSurveyDescBlur()">${esc(s.description||"")}</textarea>
+            <div class="title-edit-actions">
+              <button type="button" class="iconbtn title-edit-save" aria-label="Save description"
+                onmousedown="event.preventDefault()" onclick="confirmInlineDesc()">${I.check(18)}</button>
+              <button type="button" class="iconbtn title-edit-cancel" aria-label="Cancel description"
+                onmousedown="event.preventDefault()" onclick="cancelInlineDesc()">${I.x(18)}</button>
+            </div>
+          </div>`: surveyLocked
+            ? (s.description?`<p class="survey-desc">${esc(s.description)}</p>`:"")
+            : `<button type="button" class="survey-desc-hit${s.description?"":" survey-desc-hit--empty"}"
+                title="${s.description?"Edit description":"Add description"}"
+                onclick="startInlineDesc('${s.id}')">${s.description?esc(s.description):"Add description"}</button>`}
+          <p class="t-subtle dim survey-title-meta">${meta}</p>
+        </div>
+        <div class="row page-actions" style="gap:8px">
+          ${pageActions}
+        </div>
       </div>
     </div>
+    ${surveyLockBanner(s)}
+    ${bvTabsBar(s, qs)}
   </div>
-  ${surveyLockBanner(s)}
   ${bvBuilder(s, qs)}`;
 }
 
@@ -7672,8 +7685,7 @@ function bvVariantA(s, qs){
   const locked = isSurveyLocked(s);
   const tab = state.bvTab==="questions" ? "questions" : "setup";
   const addOpen = !locked && state.bvAddOpen;
-  return `${bvTabsBar(s, qs)}
-  <div class="bv-body" id="bv-panel" role="tabpanel" aria-labelledby="bv-tab-${tab}">
+  return `<div class="bv-body" id="bv-panel" role="tabpanel" aria-labelledby="bv-tab-${tab}">
     ${tab==="setup" ? `${bvSetupGrid(s)}
       ${locked?"":`<div class="bv-foot"><span></span>
         <button class="fw-btn fw-btn--primary" onclick="bvGo('questions')">Next: Questions ${I.chevronRight(16)}</button>
