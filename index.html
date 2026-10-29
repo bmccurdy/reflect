@@ -2435,49 +2435,17 @@ body:not(.is-locked) #gate{display:none}
 .bv-sub{margin:0;font-size:14px;line-height:20px;font-weight:700;color:var(--foreground)}
 .bv-sub.mt24{margin-top:24px}
 
-/* sticky survey builder chrome (title + tabs) */
+/* sticky survey builder chrome */
 .bv-sticky{
   position:sticky;top:56px;z-index:5;
   background:var(--muted);
   padding-bottom:24px;
 }
-.bv-sticky .page-head{margin-bottom:16px}
-.bv-sticky .survey-lock-banner{margin-bottom:16px}
-
-/* tabs row */
-.bv-tabsrow{
-  display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;
-  border-bottom:1px solid var(--border);margin-bottom:0;
-}
-.bv-tablist{border-bottom:0}
-.bv-tab{font-size:15px;font-weight:600;min-height:44px;gap:8px}
-.bv-tab__n{
-  width:22px;height:22px;border-radius:var(--r-full);display:inline-grid;place-items:center;
-  font-size:12px;font-weight:700;background:var(--accent);color:var(--primary);
-}
-.bv-tab[data-active] .bv-tab__n{
-  background:var(--primary);color:var(--primary-foreground);
-}
+.bv-sticky .page-head{margin-bottom:0}
+.bv-sticky .survey-lock-banner{margin-bottom:0;margin-top:16px}
 .bv-body{min-width:0}
 .bv-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:24px}
-
-/* publish checklist */
-.bv-check__list{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
-.bv-check__item{display:flex;align-items:center;gap:10px;font-size:14px;line-height:20px}
-.bv-check__ico{color:var(--muted-foreground);display:inline-flex}
-.bv-check__item.is-ok .bv-check__ico{color:var(--status-resolved)}
-.bv-check__label{flex:1;min-width:0;color:var(--foreground)}
-.bv-check__item.is-ok .bv-check__label{color:var(--muted-foreground)}
-.bv-check__detail{display:block;font-size:13px;color:var(--muted-foreground)}
-.bv-check--inline{padding-bottom:10px}
-.bv-check--inline .bv-check__list{display:flex;flex-wrap:wrap;gap:4px 16px;margin:0}
-.bv-check--inline .bv-check__item{font-size:13px;gap:6px}
-.bv-link{
-  border:0;background:transparent;color:var(--primary);font:inherit;font-size:13px;font-weight:600;
-  cursor:pointer;padding:4px 6px;border-radius:var(--r-sm);min-height:28px;
-}
-.bv-link:hover{background:var(--accent)}
-.bv-link:focus-visible{outline:2px solid var(--ring,var(--primary));outline-offset:2px}
+.bv-stepback{margin-bottom:12px}
 
 /* intro */
 .bv-intro{
@@ -2831,6 +2799,7 @@ function committedQuestions(qs){
 }
 function canSendTestSms(s, qs){
   if(!s || s.status==="Live") return false;
+  if(!surveyTriggerReady(s)) return false;
   if(!s.fresh) return true;
   return committedQuestions(qs).length > 0 || surveyPageChanged(s);
 }
@@ -4920,6 +4889,10 @@ function surveyActiveTriggerId(s){
   const n = String(s?.triggerId||"").replace(/^#/,"");
   return n || null;
 }
+function surveyTriggerReady(s){
+  const id = surveyActiveTriggerId(s);
+  return !!id && !!findTriggerDef(id);
+}
 function surveyPriorTriggerId(s){
   const n = String(s?.priorTriggerId||"").replace(/^#/,"");
   return n || null;
@@ -6058,6 +6031,9 @@ function clearSurveyTrigger(id){
   s.updated = NOW;
   state.triggerSelectOpen = false;
   state.triggerSelectShowUsed = false;
+  state.bvTab = "setup";
+  state.bvAddOpen = false;
+  state.bvInsertAt = null;
   render();
 }
 function triggerSelectSearchKey(e){
@@ -6452,17 +6428,25 @@ function viewSurveys(){
   const surveyLocked = isSurveyLocked(s);
   const meta = surveyTitleMeta(s);
   const hasQuestions = committedQuestions(qs).length > 0;
-  const previewBtn = `<button class="fw-btn fw-btn--outline" type="button"${hasQuestions
+  const triggerReady = surveyTriggerReady(s);
+  const canPreview = triggerReady && hasQuestions;
+  const previewDisabledTitle = !triggerReady
+    ? "Select a trigger to preview"
+    : "Add a question to preview";
+  const previewBtn = `<button class="fw-btn fw-btn--outline" type="button"${canPreview
     ? ` onclick="openSurveyPreview()"`
-    : ` disabled title="Add a question to preview"`}>${I.eye(16)} Preview</button>`;
+    : ` disabled title="${esc(previewDisabledTitle)}"`}>${I.eye(16)} Preview</button>`;
   const bvMissing = surveyLocked ? "" : bvMissingText(s, qs);
   const publishBtn = `<button class="fw-btn fw-btn--primary" type="button"${!bvMissing
         ? ` onclick="publishSurvey('${s.id}')"`
         : ` disabled title="${esc(bvMissing)}" aria-describedby="bv-pub-missing"`}>Publish</button>${bvMissing?`<span class="sr" id="bv-pub-missing">${esc(bvMissing)}</span>`:""}`;
   const canTest = canSendTestSms(s, qs);
+  const testDisabledTitle = !triggerReady
+    ? "Select a trigger to send a test"
+    : "Add a question or edit this survey to send a test";
   const testSmsBtn = s.status==="Live" ? "" : `<button class="fw-btn fw-btn--outline" type="button"${canTest
     ? ` onclick="openTestSms('${s.id}')"`
-    : ` disabled title="Add a question or edit this survey to send a test"`}>${I.phone(16)} Send test SMS</button>`;
+    : ` disabled title="${esc(testDisabledTitle)}"`}>${I.phone(16)} Send test SMS</button>`;
   const pageActions = surveyLocked
     ? `${s.status!=="Draft"?`<a class="fw-btn fw-btn--outline" href="#/surveys/${s.id}/responses">${I.inbox(16)} Responses</a>`:""}
         ${testSmsBtn}
@@ -6534,7 +6518,6 @@ function viewSurveys(){
       </div>
     </div>
     ${surveyLockBanner(s)}
-    ${bvTabsBar(s, qs)}
   </div>
   ${bvBuilder(s, qs)}`;
 }
@@ -7284,8 +7267,7 @@ const LIB_TAGS = {
 };
 const bvI = {
   tag:(s=16)=>ic(`<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>`, s),
-  search:(s=16)=>ic(`<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>`, s),
-  circle:(s=16)=>ic(`<circle cx="12" cy="12" r="10"/>`, s)
+  search:(s=16)=>ic(`<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>`, s)
 };
 
 (function initBuilderVariant(){
@@ -7354,6 +7336,10 @@ function bvMissingText(s, qs){
   return miss.length ? `To publish: ${miss.join(", ")}` : "";
 }
 function bvGo(tab){
+  if(tab==="questions" && !surveyTriggerReady(currentSurvey())){
+    toast("Select a trigger first.");
+    tab = "setup";
+  }
   state.bvTab = tab;
   state.bvAddOpen = false;
   state.bvInsertAt = null;
@@ -7644,51 +7630,23 @@ function bvQuestionList(s, qs, opts={}){
   if(!qs.length) return bvEmptyAdd({ ...opts, locked });
   return `<div class="bv-qlist">${qs.map((q,i)=>bvQCard(q,i,qs,{ locked })).join("")}</div>`;
 }
-function bvPublishChecklist(s, qs, opts={}){
-  const list = bvChecklist(s, qs);
-  const left = list.filter(c=>!c.ok).length;
-  const noLinks = !!opts.noLinks || isSurveyLocked(s);
-  return `<div class="bv-check${opts.inline?" bv-check--inline":""}" role="status" aria-live="polite">
-    ${opts.inline?"":`<h3 class="bv-sub">${left?`${left} item${left===1?"":"s"} left before you can publish`:"Ready to publish"}</h3>`}
-    <ul class="bv-check__list">
-      ${list.map(c=>`<li class="bv-check__item${c.ok?" is-ok":""}">
-        <span class="bv-check__ico" aria-hidden="true">${c.ok?I.checkCircle(16):bvI.circle(16)}</span>
-        <span class="bv-check__label">${esc(c.label)}${opts.inline?"":`<span class="bv-check__detail">${esc(c.detail||"")}</span>`}</span>
-        <span class="sr">${c.ok?"done":"not done"}</span>
-        ${!c.ok && !noLinks?`<button type="button" class="bv-link" onclick="bvGo('${c.tab}')">Fix</button>`:""}
-      </li>`).join("")}
-    </ul>
-  </div>`;
-}
-function bvTabsBar(s, qs){
-  const locked = isSurveyLocked(s);
-  const committed = committedQuestions(qs);
-  const tab = state.bvTab==="questions" ? "questions" : "setup";
-  const t = (id, n, label, extra="") => `<button type="button" class="fw-tab bv-tab" role="tab" id="bv-tab-${id}"
-      aria-selected="${tab===id}" ${tab===id?"data-active":""} aria-controls="bv-panel"
-      onclick="bvGo('${id}')">
-      <span class="bv-tab__n" aria-hidden="true">${n}</span>${label}${extra}
-    </button>`;
-  return `<div class="bv-tabsrow">
-    <div class="fw-tablist fw-tablist--line bv-tablist" role="tablist" aria-label="Survey builder">
-      ${t("setup", 1, "Setup")}
-      ${t("questions", 2, "Questions", committed.length?` <span class="fw-tab__count">${committed.length}</span>`:"")}
-    </div>
-    ${locked?"":bvPublishChecklist(s, qs, { inline:true })}
-  </div>`;
-}
-
-/* ---------- Top tabs + add drawer ---------- */
+/* ---------- Setup / questions steps + add drawer ---------- */
 function bvVariantA(s, qs){
   const locked = isSurveyLocked(s);
-  const tab = state.bvTab==="questions" ? "questions" : "setup";
+  const triggerReady = surveyTriggerReady(s);
+  const tab = state.bvTab==="questions" && triggerReady ? "questions" : "setup";
   const addOpen = !locked && state.bvAddOpen;
-  return `<div class="bv-body" id="bv-panel" role="tabpanel" aria-labelledby="bv-tab-${tab}">
+  return `<div class="bv-body" id="bv-panel">
     ${tab==="setup" ? `${bvSetupGrid(s)}
       ${locked?"":`<div class="bv-foot"><span></span>
-        <button class="fw-btn fw-btn--primary" onclick="bvGo('questions')">Add Questions ${I.chevronRight(16)}</button>
+        <button class="fw-btn fw-btn--primary" type="button"${triggerReady
+          ? ` onclick="bvGo('questions')"`
+          : ` disabled title="Select a trigger first"`}>Add Questions ${I.chevronRight(16)}</button>
       </div>`}`
-    : `${bvIntroBlock(s)}
+    : `<div class="bv-stepback">
+        <button type="button" class="fw-btn fw-btn--ghost fw-btn--sm" onclick="bvGo('setup')">${I.chevronLeft(16)} Setup</button>
+      </div>
+      ${bvIntroBlock(s)}
       <div class="fw-card mt16">
         <div class="between between--inline">
           <div>
@@ -8877,6 +8835,8 @@ function surveyPreview(){
   </div>`;
 }
 function openSurveyPreview(){
+  const s = currentSurvey();
+  if(!surveyTriggerReady(s)){ toast("Select a trigger first."); return; }
   if(!qList().length){ toast("Add a question first."); return; }
   const locale = state.survey.locale || "en";
   state.survey = { step:previewModalStep(), answers:{}, locale };
