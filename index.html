@@ -2453,10 +2453,11 @@ body:not(.is-locked) #gate{display:none}
 .bv-tab{font-size:15px;font-weight:600;min-height:44px;gap:8px}
 .bv-tab__n{
   width:22px;height:22px;border-radius:var(--r-full);display:inline-grid;place-items:center;
-  font-size:12px;font-weight:700;background:var(--surface-muted);color:var(--muted-foreground);
+  font-size:12px;font-weight:700;background:var(--accent);color:var(--primary);
 }
-.bv-tab[data-active] .bv-tab__n{background:var(--primary);color:var(--primary-foreground)}
-.bv-tab__n.is-ok{background:var(--status-resolved-wash);color:var(--status-resolved)}
+.bv-tab[data-active] .bv-tab__n{
+  background:var(--primary);color:var(--primary-foreground);
+}
 .bv-body{min-width:0}
 .bv-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:24px}
 
@@ -7661,20 +7662,17 @@ function bvPublishChecklist(s, qs, opts={}){
 }
 function bvTabsBar(s, qs){
   const locked = isSurveyLocked(s);
-  const list = bvChecklist(s, qs);
-  const setupOk = list.filter(c=>c.tab==="setup").every(c=>c.ok);
   const committed = committedQuestions(qs);
-  const qOk = committed.length>0;
   const tab = state.bvTab==="questions" ? "questions" : "setup";
-  const t = (id, n, label, ok, extra="") => `<button type="button" class="fw-tab bv-tab" role="tab" id="bv-tab-${id}"
+  const t = (id, n, label, extra="") => `<button type="button" class="fw-tab bv-tab" role="tab" id="bv-tab-${id}"
       aria-selected="${tab===id}" ${tab===id?"data-active":""} aria-controls="bv-panel"
       onclick="bvGo('${id}')">
-      <span class="bv-tab__n${ok?" is-ok":""}" aria-hidden="true">${ok?I.check(12):n}</span>${label}${extra}
+      <span class="bv-tab__n" aria-hidden="true">${n}</span>${label}${extra}
     </button>`;
   return `<div class="bv-tabsrow">
     <div class="fw-tablist fw-tablist--line bv-tablist" role="tablist" aria-label="Survey builder">
-      ${t("setup", 1, "Setup", setupOk)}
-      ${t("questions", 2, "Questions", qOk, committed.length?` <span class="fw-tab__count">${committed.length}</span>`:"")}
+      ${t("setup", 1, "Setup")}
+      ${t("questions", 2, "Questions", committed.length?` <span class="fw-tab__count">${committed.length}</span>`:"")}
     </div>
     ${locked?"":bvPublishChecklist(s, qs, { inline:true })}
   </div>`;
@@ -7688,7 +7686,7 @@ function bvVariantA(s, qs){
   return `<div class="bv-body" id="bv-panel" role="tabpanel" aria-labelledby="bv-tab-${tab}">
     ${tab==="setup" ? `${bvSetupGrid(s)}
       ${locked?"":`<div class="bv-foot"><span></span>
-        <button class="fw-btn fw-btn--primary" onclick="bvGo('questions')">Next: Questions ${I.chevronRight(16)}</button>
+        <button class="fw-btn fw-btn--primary" onclick="bvGo('questions')">Add Questions ${I.chevronRight(16)}</button>
       </div>`}`
     : `${bvIntroBlock(s)}
       <div class="fw-card mt16">
