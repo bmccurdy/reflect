@@ -1461,8 +1461,10 @@ button.num-link{
   color:var(--muted-foreground);
 }
 .publish-setup-step-body{min-width:0}
-.publish-setup .seg{margin-top:0;width:max-content;max-width:100%}
-.publish-setup .seg button{
+.publish-setup .seg,
+.bv-setup-card .seg{margin-top:0;width:max-content;max-width:100%}
+.publish-setup .seg button,
+.bv-setup-card .seg button{
   flex:0 0 auto;white-space:nowrap;
   display:inline-flex;align-items:center;justify-content:center;
 }
@@ -2382,11 +2384,11 @@ html[data-theme="dark"] .patient{
     transition:none !important;
   }
   .stagger>*,.p-view,.p-view--in-fwd,.p-view--in-back,.p-seal,.bar i,.toast,.menu,.qcard-in,.qcard-out,
-  .drawer-head,.drawer-body > *{animation-name:fadeOnly !important}
+  .drawer-head,.drawer-body > *,.bv-drawer__head,.bv-drawer__body > *{animation-name:fadeOnly !important}
   /* Base rule sets opacity:0 before the slide-in animation; if motion is
      reduced the animation may never run, so force the final visible state. */
   .p-view--in-fwd,.p-view--in-back,.p-view--out-fwd,.p-view--out-back{opacity:1;transform:none}
-  .drawer{transform:none;transition:none}
+  .drawer,.bv-drawer{transform:none;transition:none}
   @keyframes fadeOnly{from{opacity:0}to{opacity:1}}
   .tbl tbody tr.resolving{animation-name:fadeOnly !important;animation-direction:reverse !important}
   .live-dot{animation:none}
@@ -2443,9 +2445,70 @@ body:not(.is-locked) #gate{display:none}
 }
 .bv-sticky .page-head{margin-bottom:0}
 .bv-sticky .survey-lock-banner{margin-bottom:0;margin-top:16px}
+.bv-nav{margin-top:16px}
+.bv-steps{
+  display:flex;align-items:center;gap:0;
+  width:max-content;max-width:100%;
+}
+.bv-steps__tab{
+  display:inline-flex;align-items:center;gap:10px;
+  min-height:44px;padding:8px 16px;
+  border:1px solid var(--border);border-radius:var(--r-lg);
+  background:var(--card);color:var(--foreground);
+  font:inherit;font-size:15px;font-weight:700;line-height:20px;
+  cursor:pointer;text-align:left;
+  transition:
+    border-color var(--dur-micro) var(--ease-out),
+    background-color var(--dur-micro) var(--ease-out),
+    box-shadow var(--dur-micro) var(--ease-out),
+    color var(--dur-micro) var(--ease-out);
+}
+.bv-steps__tab:hover{
+  border-color:var(--muted-foreground);background:var(--surface-hover);
+}
+.bv-steps__tab:focus-visible{
+  outline:2px solid var(--ring,var(--primary));outline-offset:2px;
+}
+.bv-steps__tab[aria-selected="true"],
+.bv-steps__tab[data-active]{
+  border-color:var(--primary);
+  box-shadow:0 0 0 1px var(--primary);
+  background:var(--accent);
+  color:var(--primary);
+}
+.bv-steps__tab:disabled,
+.bv-steps__tab[aria-disabled="true"]{
+  opacity:.55;cursor:not-allowed;
+}
+.bv-steps__tab:disabled:hover,
+.bv-steps__tab[aria-disabled="true"]:hover{
+  border-color:var(--border);background:var(--card);color:var(--foreground);
+}
+.bv-steps__n{
+  flex-shrink:0;width:28px;height:28px;border-radius:var(--r-full);
+  display:inline-grid;place-items:center;
+  font-size:13px;font-weight:700;line-height:1;
+  background:var(--surface-muted);color:var(--muted-foreground);
+}
+.bv-steps__tab[aria-selected="true"] .bv-steps__n,
+.bv-steps__tab[data-active] .bv-steps__n{
+  background:var(--primary);color:var(--primary-foreground);
+}
+.bv-steps__tab.is-ok .bv-steps__n{
+  background:var(--status-resolved-wash);color:var(--status-resolved);
+}
+.bv-steps__tab[aria-selected="true"].is-ok .bv-steps__n,
+.bv-steps__tab[data-active].is-ok .bv-steps__n{
+  background:var(--primary);color:var(--primary-foreground);
+}
+.bv-steps__n svg{width:14px;height:14px}
+.bv-steps__label{white-space:nowrap}
+.bv-steps__rail{
+  flex:0 0 28px;height:2px;margin:0 4px;
+  background:var(--border);border-radius:1px;
+}
+.bv-steps__rail.is-done{background:var(--primary)}
 .bv-body{min-width:0}
-.bv-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:24px}
-.bv-stepback{margin-bottom:12px}
 
 /* intro */
 .bv-intro{
@@ -2505,14 +2568,36 @@ body:not(.is-locked) #gate{display:none}
 .bv-empty-lib{padding:12px 0}
 
 /* A: drawer */
-.bv-scrim{position:fixed;inset:56px 0 0;background:rgb(0 0 0 / .32);z-index:90;animation:rise var(--dur-micro) var(--ease-out) both}
+.bv-scrim{
+  position:fixed;inset:56px 0 0;background:rgb(0 0 0 / .32);z-index:90;
+  animation:fade var(--dur-layout) var(--ease-out);
+}
+.bv-scrim.is-settled{animation:none}
 .bv-drawer{
   position:fixed;top:56px;right:0;bottom:0;width:min(520px,100vw);z-index:91;
   background:var(--card);border-left:1px solid var(--border);box-shadow:var(--shadow-xl);
-  display:flex;flex-direction:column;
+  display:flex;flex-direction:column;overflow:hidden;
+  transform:translate3d(100%,0,0);
+  transition:transform var(--dur-page) var(--ease-out);
 }
-.bv-drawer__head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.bv-drawer.is-open{transform:translate3d(0,0,0)}
+.bv-drawer.is-settled{transition:none}
+.bv-drawer__head{
+  display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);
+  animation:drawerDataIn var(--dur-page) var(--ease-out) both;
+  animation-delay:40ms;
+}
 .bv-drawer__body{padding:20px;overflow-y:auto;flex:1}
+.bv-drawer__body > *{
+  animation:drawerDataIn var(--dur-page) var(--ease-out) both;
+  animation-delay:calc(70ms + (var(--i,0) * 40ms));
+}
+.bv-drawer__body > *:nth-child(1){--i:0}
+.bv-drawer__body > *:nth-child(2){--i:1}
+.bv-drawer__body > *:nth-child(3){--i:2}
+.bv-drawer__body > *:nth-child(4){--i:3}
+.bv-drawer.is-settled .bv-drawer__head,
+.bv-drawer.is-settled .bv-drawer__body > *{animation:none}
 .bv-drawer .bv-lib-list{max-height:none}
 
 /* B: stepper */
@@ -6244,7 +6329,7 @@ function viewSurveysIndex(){
             <td class="sv-status">${surveyStatusBadge(s)}</td>
             <td class="dim sv-schedule">${esc(formatScheduleSummary(s))}</td>
             <td class="sv-responses" data-live="${s.status==="Live"||(arch&&s.prevStatus!=="Draft")?"yes":"no"}">${responseCountLink(s)}</td>
-            <td class="sv-rate" data-empty="${s.rate?"no":"yes"}">${s.rate?s.rate+"%":"—"}</td>
+            <td class="sv-rate" data-empty="${s.rate?"no":"yes"}">${s.rate?s.rate+"%":`<span class="dim">—</span>`}</td>
             <td class="morecol sv-more">${surveyRowMenu(s)}</td>
           </tr>`;
   };
@@ -6518,6 +6603,7 @@ function viewSurveys(){
       </div>
     </div>
     ${surveyLockBanner(s)}
+    ${bvNavTabs(s, qs)}
   </div>
   ${bvBuilder(s, qs)}`;
 }
@@ -7247,8 +7333,8 @@ function viewPatient(){
 <script>
 /* ============================================================
    8b. SURVEY BUILDER
-   Setup (trigger + schedule) | Questions (intro + questions).
-   Add question opens a right drawer with blank types + tagged library.
+   Sticky Setup | Questions tabs. Setup: trigger + schedule.
+   Questions: intro + question list. Add opens a right drawer.
    Locked surveys use the same tabs read-only.
    ============================================================ */
 const QTAGS = [
@@ -7399,6 +7485,40 @@ function bvOpenAdd(){
 function bvCloseAdd(){ state.bvAddOpen = false; render(); }
 function bvToggleInsert(i){ state.bvInsertAt = state.bvInsertAt===i ? null : i; render(); }
 function bvToggleSetup(){ state.bvSetupOpen = !state.bvSetupOpen; render(); }
+function bvNavTabs(s, qs){
+  const triggerReady = surveyTriggerReady(s);
+  const tab = state.bvTab==="questions" && triggerReady ? "questions" : "setup";
+  const n = committedQuestions(qs).length;
+  const setupOk = bvChecklist(s, qs).filter(c=>c.tab==="setup").every(c=>c.ok);
+  const setupN = setupOk && tab!=="setup"
+    ? I.check(14)
+    : "1";
+  const qN = n>0 && tab!=="questions"
+    ? I.check(14)
+    : "2";
+  return `
+  <div class="fw-tabs bv-nav">
+    <div class="bv-steps" role="tablist" aria-label="Survey builder steps">
+      <button type="button" class="bv-steps__tab${setupOk?" is-ok":""}" role="tab" id="bv-tab-setup"
+        aria-selected="${tab==="setup"}" ${tab==="setup"?"data-active":""}
+        aria-controls="bv-panel" aria-label="Step 1, Setup"
+        onclick="bvGo('setup')">
+        <span class="bv-steps__n" aria-hidden="true">${setupN}</span>
+        <span class="bv-steps__label">Setup</span>
+      </button>
+      <span class="bv-steps__rail${setupOk?" is-done":""}" aria-hidden="true"></span>
+      <button type="button" class="bv-steps__tab${n>0?" is-ok":""}" role="tab" id="bv-tab-questions"
+        aria-selected="${tab==="questions"}" ${tab==="questions"?"data-active":""}
+        aria-controls="bv-panel" aria-label="Step 2, Questions${n?`, ${n} added`:""}"
+        ${triggerReady
+          ? `onclick="bvGo('questions')"`
+          : `disabled title="Select a trigger first" aria-disabled="true"`}>
+        <span class="bv-steps__n" aria-hidden="true">${qN}</span>
+        <span class="bv-steps__label">Questions</span>
+      </button>
+    </div>
+  </div>`;
+}
 function bvToggleIntro(id){
   const s = state.surveys.find(x=>x.id===id);
   if(!s || isSurveyLocked(s)) return;
@@ -7636,17 +7756,9 @@ function bvVariantA(s, qs){
   const triggerReady = surveyTriggerReady(s);
   const tab = state.bvTab==="questions" && triggerReady ? "questions" : "setup";
   const addOpen = !locked && state.bvAddOpen;
-  return `<div class="bv-body" id="bv-panel">
-    ${tab==="setup" ? `${bvSetupGrid(s)}
-      ${locked?"":`<div class="bv-foot"><span></span>
-        <button class="fw-btn fw-btn--primary" type="button"${triggerReady
-          ? ` onclick="bvGo('questions')"`
-          : ` disabled title="Select a trigger first"`}>Add Questions ${I.chevronRight(16)}</button>
-      </div>`}`
-    : `<div class="bv-stepback">
-        <button type="button" class="fw-btn fw-btn--ghost fw-btn--sm" onclick="bvGo('setup')">${I.chevronLeft(16)} Setup</button>
-      </div>
-      ${bvIntroBlock(s)}
+  return `<div class="bv-body" id="bv-panel" role="tabpanel" aria-labelledby="bv-tab-${tab}">
+    ${tab==="setup" ? bvSetupGrid(s)
+    : `${bvIntroBlock(s)}
       <div class="fw-card mt16">
         <div class="between between--inline">
           <div>
@@ -7659,8 +7771,8 @@ function bvVariantA(s, qs){
       </div>`}
   </div>
   ${addOpen?`
-  <div class="bv-scrim" onclick="bvCloseAdd()"></div>
-  <aside class="bv-drawer" role="dialog" aria-modal="true" aria-labelledby="bv-drawer-h">
+  <div class="bv-scrim${state.bvDrawerArmed?" is-settled":""}" onclick="bvCloseAdd()"></div>
+  <aside class="bv-drawer${state.bvDrawerArmed?" is-open is-settled":""}" role="dialog" aria-modal="true" aria-labelledby="bv-drawer-h">
     <div class="bv-drawer__head">
       <h2 class="t-h4" id="bv-drawer-h">Add a question</h2>
       <button class="iconbtn" aria-label="Close" onclick="bvCloseAdd()">${I.x(18)}</button>
@@ -7701,21 +7813,45 @@ function armDrawer(){
   const key = drawerKey();
   if(!el || !key){
     state.drawerKey = null;
+  } else {
+    const prev = state.drawerKey;
+    const same = prev === key;
+    const paging = isResponsePaging();
+    state.drawerKey = key;
+    if(same || prefersReduce() || paging){
+      el.classList.toggle("is-paging", !!paging);
+      el.classList.add("is-open");
+    } else {
+      el.classList.remove("is-paging");
+      requestAnimationFrame(()=>{
+        requestAnimationFrame(()=>{
+          const live = document.querySelector(".drawer");
+          if(live) live.classList.add("is-open");
+        });
+      });
+    }
+  }
+  armBvDrawer();
+}
+function armBvDrawer(){
+  const el = document.querySelector(".bv-drawer");
+  const scrim = document.querySelector(".bv-scrim");
+  if(!el || !state.bvAddOpen){
+    state.bvDrawerArmed = false;
     return;
   }
-  const prev = state.drawerKey;
-  const same = prev === key;
-  const paging = isResponsePaging();
-  state.drawerKey = key;
-  if(same || prefersReduce() || paging){
-    el.classList.toggle("is-paging", !!paging);
-    el.classList.add("is-open");
+  const same = !!state.bvDrawerArmed;
+  state.bvDrawerArmed = true;
+  if(same || prefersReduce()){
+    el.classList.add("is-open", "is-settled");
+    if(scrim) scrim.classList.add("is-settled");
     return;
   }
-  el.classList.remove("is-paging");
+  el.classList.remove("is-settled");
+  if(scrim) scrim.classList.remove("is-settled");
   requestAnimationFrame(()=>{
     requestAnimationFrame(()=>{
-      const live = document.querySelector(".drawer");
+      const live = document.querySelector(".bv-drawer");
       if(live) live.classList.add("is-open");
     });
   });
@@ -8890,7 +9026,7 @@ function render(){
   else body = viewOverview();
   root.innerHTML = shell(body);
   document.body.classList.toggle("nav-open", !!state.navOpen);
-  document.body.classList.toggle("drawer-open", !!(state.openAlert||state.openResponse||state.openTrigger));
+  document.body.classList.toggle("drawer-open", !!(state.openAlert||state.openResponse||state.openTrigger||state.bvAddOpen));
   restoreLibScroll();
   sizeLibList();
   armDrawer();
