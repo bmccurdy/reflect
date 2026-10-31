@@ -1846,7 +1846,7 @@ html[data-theme="dark"] .patient{
 .p-wrap{width:100%;max-width:520px}
 .p-lock{
   display:flex;align-items:center;gap:8px;justify-content:center;
-  color:var(--p-ink-muted);font-size:12px;line-height:20px;margin-bottom:24px;
+  color:var(--p-ink-muted);font-size:12px;line-height:20px;margin-top:32px;
 }
 .p-card{padding:0;background:transparent;border:0;box-shadow:none;border-radius:0}
 .p-card.p-done{text-align:center}
@@ -7335,10 +7335,10 @@ function viewPatient(){
       ${pDemoBar()}
       ${pLangSwitch()}
       ${pViewTag()}
-        <div class="p-lock">${I.lock(12)} ${esc(pT("private",{agency}))}</div>
         <div class="p-card">
           ${pIntroContent(total, false)}
         </div>
+        <div class="p-lock">${I.lock(12)} ${esc(pT("private",{agency}))}</div>
       </div>
     </div></div>`;
   }
@@ -7381,7 +7381,6 @@ function viewPatient(){
     ${pDemoBar()}
     ${pLangSwitch()}
     ${pViewTag()}
-      <div class="p-lock">${I.lock(12)} ${esc(pT("private",{agency}))}</div>
       <div class="p-card">
         ${pQuestionHead(q, S.step, total)}
         ${pQuestionFields(q, {interactive:true, val})}
@@ -7395,6 +7394,7 @@ function viewPatient(){
         </div>
       </div>
       <p class="p-foot">${esc(pT("foot",{agency}))}</p>
+      <div class="p-lock">${I.lock(12)} ${esc(pT("private",{agency}))}</div>
     </div>
   </div></div>`;
 }
