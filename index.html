@@ -2527,17 +2527,6 @@ body:not(.is-locked) #gate{display:none}
   flex-shrink:0;width:28px;height:28px;border-radius:var(--r-full);display:grid;place-items:center;
   font-size:13px;font-weight:700;background:var(--surface-muted);color:var(--muted-foreground);
 }
-.bv-tagsel{
-  position:relative;display:inline-flex;align-items:center;height:24px;
-  border:1px solid var(--border);border-radius:var(--r-full);background:var(--card);
-  color:var(--muted-foreground);padding-left:22px;
-}
-.bv-tagsel__ico{position:absolute;left:8px;top:50%;transform:translateY(-50%);display:inline-flex;pointer-events:none}
-.bv-tagsel select{
-  appearance:none;border:0;background:transparent;font:inherit;font-size:12px;font-weight:600;
-  color:var(--foreground);padding:0 10px 0 2px;height:22px;cursor:pointer;max-width:240px;field-sizing:content;
-}
-.bv-tagsel:focus-within{outline:2px solid var(--ring,var(--primary));outline-offset:2px}
 .bv-tagbadge{gap:4px}
 
 /* empty state */
@@ -2560,8 +2549,6 @@ body:not(.is-locked) #gate{display:none}
 .bv-search .fw-input{padding-left:36px;width:100%}
 .bv-chips{margin-top:12px}
 .bv-chip-n{margin-left:6px;opacity:.75;font-weight:700}
-.bv-chip-new{border-style:dashed;gap:4px}
-.bv-newtag{height:28px;font-size:12px;width:200px;border-radius:var(--r-full)}
 .bv-lib-list{margin-top:12px;max-height:420px}
 .bv-lib--compact .bv-lib-list{max-height:360px}
 .bv-librow{align-items:center;padding:12px 14px}
@@ -2574,7 +2561,7 @@ body:not(.is-locked) #gate{display:none}
 }
 .bv-scrim.is-settled{animation:none}
 .bv-drawer{
-  position:fixed;top:56px;right:0;bottom:0;width:min(520px,100vw);z-index:91;
+  position:fixed;top:56px;right:0;bottom:0;width:min(560px,100vw);z-index:91;
   background:var(--card);border-left:1px solid var(--border);box-shadow:var(--shadow-xl);
   display:flex;flex-direction:column;overflow:hidden;
   transform:translate3d(100%,0,0);
@@ -2599,6 +2586,12 @@ body:not(.is-locked) #gate{display:none}
 .bv-drawer.is-settled .bv-drawer__head,
 .bv-drawer.is-settled .bv-drawer__body > *{animation:none}
 .bv-drawer .bv-lib-list{max-height:none}
+@media (min-width:821px){
+  .bv-drawer .bv-types{flex-wrap:nowrap;gap:6px}
+  .bv-drawer .bv-types .fw-btn--sm{
+    flex:1 1 auto;justify-content:center;padding-inline:10px;white-space:nowrap;
+  }
+}
 
 /* B: stepper */
 .bv-stepper{list-style:none;margin:0 0 24px;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
@@ -3158,7 +3151,18 @@ const LIBRARY = [
   { id:"lib17", category:"Care quality", text:"Was your pain managed as well as you expected?", type:"scale", benchmark:false },
   { id:"lib18", category:"Communication", text:"Did someone explain what would happen at the hospital?", type:"yesno", benchmark:false },
   { id:"lib19", category:"Care quality", text:"Was the ambulance clean?", type:"yesno", benchmark:false },
-  { id:"lib20", category:"Follow-up", text:"Did you have a way to reach us afterward if you had questions?", type:"yesno", benchmark:false }
+  { id:"lib20", category:"Follow-up", text:"Did you have a way to reach us afterward if you had questions?", type:"yesno", benchmark:false },
+  /* Community / refuse-transport wording used in seeded surveys — must appear in All */
+  { id:"lib21", category:"Recommendation", text:"How safe do you feel calling 911 in this community?", type:"choice", options:["Very safe","Mostly safe","Not sure","Mostly unsafe","Unsafe"], benchmark:false },
+  { id:"lib22", category:"Care quality", text:"Do you trust our crews to treat people with respect?", type:"yesno", benchmark:true },
+  { id:"lib23", category:"Communication", text:"Do you feel crews in this community listen to the people they treat?", type:"yesno", benchmark:true },
+  { id:"lib24", category:"Communication", text:"Do you know when to call 911 instead of driving yourself?", type:"yesno", benchmark:false },
+  { id:"lib25", category:"Recommendation", text:"Have you or someone close to you used our service in the last year?", type:"yesno", benchmark:false },
+  { id:"lib26", category:"Communication", text:"Is language a barrier when you call for help?", type:"yesno", benchmark:false },
+  { id:"lib27", category:"Open feedback", text:"What does this community's EMS do well?", type:"text", benchmark:false },
+  { id:"lib28", category:"Open feedback", text:"What should we do better?", type:"text", benchmark:false },
+  { id:"lib29", category:"Communication", text:"Did the crew listen to why you didn't want to go to the hospital?", type:"yesno", benchmark:true },
+  { id:"lib30", category:"Communication", text:"Did someone explain what could happen if you stayed?", type:"yesno", benchmark:false }
 ];
 const LIB_FILTERS = [
   ["all","All"],
@@ -7349,7 +7353,9 @@ const LIB_TAGS = {
   lib1:"compassion", lib2:"outcome", lib3:"comm", lib4:"compassion", lib5:"open", lib6:"open",
   lib7:"coord", lib8:"comm", lib9:"coord", lib10:"compassion", lib11:"vehicle", lib12:"compassion",
   lib13:"vehicle", lib14:"comm", lib15:"open", lib16:"open", lib17:"compassion", lib18:"coord",
-  lib19:"vehicle", lib20:"coord"
+  lib19:"vehicle", lib20:"coord",
+  lib21:"outcome", lib22:"compassion", lib23:"comm", lib24:"comm", lib25:"outcome", lib26:"comm",
+  lib27:"open", lib28:"open", lib29:"comm", lib30:"coord"
 };
 const bvI = {
   tag:(s=16)=>ic(`<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>`, s),
@@ -7364,27 +7370,16 @@ const bvI = {
   state.bvAddOpen = false;
   state.bvInsertAt = null;
   state.bvSetupOpen = false;
-  state.bvCustomTags = [];
-  state.bvNewTagOpen = false;
   state.bvSurveyId = null;
 })();
 
-function bvAllTags(){ return QTAGS.concat(state.bvCustomTags); }
+function bvAllTags(){ return QTAGS; }
 function bvTagLabel(key){ const t = bvAllTags().find(x=>x.key===key); return t ? t.label : ""; }
 function bvLibFor(q){ return LIBRARY.find(l=>l.text.trim().toLowerCase()===String(q.text||"").trim().toLowerCase()); }
 function qTagKey(q){
   if(q.tag!==undefined) return q.tag;
   const l = bvLibFor(q);
-  if(l) return LIB_TAGS[l.id] || null;
-  if(q.type==="text") return "open";
-  return null;
-}
-function bvSetQTag(id, key){
-  if(isSurveyLocked(currentSurvey())) return;
-  const q = qList().find(x=>x.id===id);
-  if(!q) return;
-  q.tag = key || null;
-  toast(key ? `Tagged ${bvTagLabel(key)}.` : "Tag removed.");
+  return l ? (LIB_TAGS[l.id] || null) : null;
 }
 
 /* Keep per-survey UI state from leaking between surveys. */
@@ -7526,22 +7521,6 @@ function bvToggleIntro(id){
   toast(s.introEnabled ? "Introduction on." : "Introduction off. Patients start at the first question.");
   render();
 }
-function bvOpenNewTag(){ state.bvNewTagOpen = true; render(); requestAnimationFrame(()=>document.getElementById("bv-new-tag")?.focus()); }
-function bvNewTagKey(e){
-  if(e.key==="Escape"){ state.bvNewTagOpen = false; render(); return; }
-  if(e.key!=="Enter") return;
-  e.preventDefault();
-  const label = e.target.value.trim();
-  if(!label){ state.bvNewTagOpen = false; render(); return; }
-  if(bvAllTags().some(t=>t.label.toLowerCase()===label.toLowerCase())){ toast("That tag already exists."); return; }
-  const key = "c_"+Date.now();
-  state.bvCustomTags.push({ key, label, custom:true });
-  state.bvNewTagOpen = false;
-  state.bvTagFilter = key;
-  toast(`Tag "${label}" created. Assign it from a question's tag menu.`);
-  render();
-}
-
 /* ---------- shared pieces ---------- */
 function bvTriggerCard(s){
   const locked = isSurveyLocked(s);
@@ -7636,19 +7615,8 @@ function bvIntroBlock(s, opts={}){
 }
 function bvTagBadge(q){
   const cur = qTagKey(q);
-  if(!cur) return `<span class="t-detail dim">No tag</span>`;
+  if(!cur) return "";
   return `<span class="fw-badge fw-badge--outline bv-tagbadge">${bvI.tag(12)} ${esc(bvTagLabel(cur))}</span>`;
-}
-function bvTagSelect(q){
-  const cur = qTagKey(q) || "";
-  return `<label class="bv-tagsel">
-    <span class="sr">Tag for question</span>
-    <span class="bv-tagsel__ico" aria-hidden="true">${bvI.tag(12)}</span>
-    <select onchange="bvSetQTag('${q.id}', this.value)">
-      <option value=""${cur?"":" selected"}>Add tag</option>
-      ${bvAllTags().map(t=>`<option value="${t.key}"${t.key===cur?" selected":""}>${esc(t.label)}</option>`).join("")}
-    </select>
-  </label>`;
 }
 function bvQCard(q, i, qs, opts={}){
   const locked = !!opts.locked;
@@ -7659,7 +7627,7 @@ function bvQCard(q, i, qs, opts={}){
       <div class="qmeta">
         <span class="fw-badge fw-badge--secondary">${TYPE_LABEL[q.type]}</span>
         ${q.required?`<span class="fw-badge fw-badge--outline">Required</span>`:`<span class="t-detail dim">Optional</span>`}
-        ${locked?bvTagBadge(q):bvTagSelect(q)}
+        ${bvTagBadge(q)}
       </div>
     </div>
     ${locked?"":`<div class="qbtns">
@@ -7684,10 +7652,7 @@ function bvTagChips(){
   const count = k => LIBRARY.filter(l=>LIB_TAGS[l.id]===k).length;
   return `<div class="lib-filters bv-chips" role="group" aria-label="Filter by tag">
     <button type="button" class="lib-chip" aria-pressed="${state.bvTagFilter==="all"}" onclick="bvSetTagFilter('all')">All</button>
-    ${tags.map(t=>`<button type="button" class="lib-chip" aria-pressed="${state.bvTagFilter===t.key}" onclick="bvSetTagFilter('${t.key}')">${esc(t.label)}${t.custom?"":` <span class="bv-chip-n">${count(t.key)}</span>`}</button>`).join("")}
-    ${state.bvNewTagOpen
-      ? `<input class="fw-input bv-newtag" id="bv-new-tag" placeholder="Tag name, then Enter" maxlength="40" onkeydown="bvNewTagKey(event)" onblur="state.bvNewTagOpen=false;render()">`
-      : `<button type="button" class="lib-chip bv-chip-new" onclick="bvOpenNewTag()">${I.plus(12)} New tag</button>`}
+    ${tags.map(t=>`<button type="button" class="lib-chip" aria-pressed="${state.bvTagFilter===t.key}" onclick="bvSetTagFilter('${t.key}')">${esc(t.label)} <span class="bv-chip-n">${count(t.key)}</span></button>`).join("")}
   </div>`;
 }
 function bvLibRows(qs, at){
@@ -7697,10 +7662,7 @@ function bvLibRows(qs, at){
   let rows = f==="all" ? LIBRARY : LIBRARY.filter(l=>LIB_TAGS[l.id]===f);
   if(q) rows = rows.filter(l=>l.text.toLowerCase().includes(q));
   if(!rows.length){
-    const custom = state.bvCustomTags.some(t=>t.key===f);
-    return `<p class="t-subtle dim bv-empty-lib">${custom
-      ? "No library questions use this tag yet. Add a question, then pick this tag from its tag menu."
-      : "No library questions match."}</p>`;
+    return `<p class="t-subtle dim bv-empty-lib">No library questions match.</p>`;
   }
   const a = (typeof at==="number") ? `,${at}` : "";
   return rows.map(l=>{
@@ -8138,6 +8100,7 @@ function addFromLib(id){
     id: qid,
     text: l.text,
     type: l.type,
+    tag: LIB_TAGS[l.id] || null,
     required: !!l.benchmark,
     locked: !!l.benchmark,
     lockNote: l.benchmark ? "Benchmark question — shared wording across participating agencies" : undefined,
