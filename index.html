@@ -1946,28 +1946,40 @@ html[data-theme="dark"] .patient{
   font-size:13px;line-height:20px;
 }
 .p-lang{
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  margin:0 0 20px;flex-wrap:wrap;
-  color:var(--p-ink-muted);
+  display:flex;justify-content:center;
+  margin:0 0 20px;z-index:5;
 }
-.p-lang-btns{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
-.p-lang-btn{
-  appearance:none;cursor:pointer;
-  min-height:36px;padding:6px 12px;
-  border:1px solid var(--p-rule);border-radius:var(--r-md);
-  background:var(--p-paper);color:inherit;
-  font-size:13px;line-height:20px;font-weight:500;
-  transition:border-color var(--dur-micro) var(--ease-out),
-             background-color var(--dur-micro) var(--ease-out),
-             box-shadow var(--dur-micro) var(--ease-out);
+.p-lang .fw-select{
+  display:grid;grid-template-columns:max-content;
+  width:max-content;max-width:100%;
 }
-.p-lang-btn:hover{background:var(--accent);border-color:var(--muted-foreground)}
-.p-lang-btn[aria-pressed="true"]{
-  border-color:var(--primary);background:var(--accent);
-  box-shadow:0 0 0 1px var(--primary);font-weight:600;color:var(--p-ink);
+.p-lang__sizer,
+.p-lang .fw-select__trigger{
+  grid-area:1/1;
+}
+.p-lang__sizer{
+  visibility:hidden;pointer-events:none;
+  display:flex;flex-direction:column;
+  padding:0 40px 0 12px;
+  font-size:16px;line-height:24px;font-weight:600;
+  white-space:nowrap;
+}
+.p-lang__sizer-row{display:flex;align-items:center;gap:8px}
+.p-lang__sizer-row svg{width:16px;height:16px;flex-shrink:0}
+.p-lang .fw-select__trigger{width:auto;min-width:100%;gap:8px}
+.p-lang .fw-select__menu{display:none}
+.p-lang .fw-select.is-open .fw-select__menu{display:block}
+.p-lang__flag{
+  width:18px;height:12px;border-radius:2px;overflow:hidden;
+  flex-shrink:0;box-shadow:inset 0 0 0 1px rgb(0 0 0 / .12);
+}
+.p-lang__flag svg,
+.p-lang .fw-select__opt .p-lang__flag svg{
+  display:block;width:100%;height:100%;margin:0;color:inherit;
 }
 .patient--embed .p-lang{margin-bottom:16px}
-.patient--embed .p-lang-btn{pointer-events:auto}
+.patient--embed .p-lang .fw-select__trigger,
+.patient--embed .p-lang .fw-select__opt{pointer-events:auto}
 /* Opacity lives only in keyframes + fill-mode. A static opacity:0 here
    left the preview blank on mobile when the entrance animation never ran. */
 .p-view--in-fwd{animation:pInFwd var(--dur-slow) var(--ease-out) both}
@@ -2427,10 +2439,6 @@ body:not(.is-locked) #gate{display:none}
 .bv-card-head{display:flex;align-items:flex-start;gap:12px}
 .bv-card-copy{flex:1;min-width:0}
 .bv-card-copy .t-subtle{margin:4px 0 0}
-.bv-card-ico{
-  flex-shrink:0;width:32px;height:32px;border-radius:var(--r-md);
-  display:grid;place-items:center;background:var(--accent);color:var(--primary);
-}
 .bv-status{flex-shrink:0}
 .bv-setup-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch}
 .bv-setup-card{min-width:0;height:100%}
@@ -6956,6 +6964,20 @@ const P_LOCALES = [
   { id:"en", native:"English", staff:"English" },
   { id:"es", native:"Español", staff:"Spanish" }
 ];
+function pLangFlag(id){
+  if(id==="es"){
+    return `<svg viewBox="0 0 18 12" aria-hidden="true" focusable="false">
+      <rect width="6" height="12" fill="#006847"/>
+      <rect x="6" width="6" height="12" fill="#fff"/>
+      <rect x="12" width="6" height="12" fill="#ce1126"/>
+    </svg>`;
+  }
+  return `<svg viewBox="0 0 18 12" aria-hidden="true" focusable="false">
+    <rect width="18" height="12" fill="#b22234"/>
+    <path stroke="#fff" stroke-width="1.2" d="M0 1.5h18M0 3.9h18M0 6.3h18M0 8.7h18M0 11.1h18"/>
+    <rect width="7.5" height="6.5" fill="#3c3b6e"/>
+  </svg>`;
+}
 const P_UI = {
   en:{
     language:"Language",
@@ -7152,14 +7174,59 @@ function pSetLocale(id){
   state.survey.locale = id;
   pPaint();
 }
+function pLangClose(){
+  document.querySelectorAll(".p-lang .fw-select.is-open").forEach(el=>{
+    el.classList.remove("is-open");
+    const btn = el.querySelector(".fw-select__trigger");
+    if(btn) btn.setAttribute("aria-expanded", "false");
+  });
+}
+function pLangToggle(ev){
+  if(ev){ ev.preventDefault(); ev.stopPropagation(); }
+  const root = (ev && ev.currentTarget && ev.currentTarget.closest(".fw-select"))
+    || document.querySelector(".p-lang .fw-select");
+  if(!root) return;
+  const open = !root.classList.contains("is-open");
+  pLangClose();
+  if(!open) return;
+  root.classList.add("is-open");
+  const btn = root.querySelector(".fw-select__trigger");
+  if(btn) btn.setAttribute("aria-expanded", "true");
+}
+function pLangPick(id, ev){
+  if(ev){ ev.preventDefault(); ev.stopPropagation(); }
+  pLangClose();
+  pSetLocale(id);
+}
 function pLangSwitch(){
   const loc = pLocale();
-  return `<div class="p-lang" role="group" aria-label="${esc(pT("language"))}">
-    <span aria-hidden="true">${I.globe(16)}</span>
-    <div class="p-lang-btns">
-      ${P_LOCALES.map(l=>`
-        <button type="button" class="p-lang-btn" data-locale="${l.id}" aria-pressed="${loc===l.id}"
-          onclick="pSetLocale('${l.id}')">${esc(l.native)}</button>`).join("")}
+  const cur = pLocaleMeta();
+  const listId = "p-lang-list";
+  const flagRow = l=>`<span class="p-lang__flag" aria-hidden="true">${pLangFlag(l.id)}</span><span>${esc(l.native)}</span>`;
+  return `<div class="p-lang">
+    <div class="fw-select">
+      <span class="p-lang__sizer" aria-hidden="true">${P_LOCALES.map(l=>`
+        <span class="p-lang__sizer-row">${flagRow(l)}${I.check(16)}</span>`).join("")}</span>
+      <button type="button" class="fw-select__trigger" id="p-lang-trigger"
+        aria-haspopup="listbox" aria-expanded="false" aria-controls="${listId}"
+        aria-label="${esc(pT("language"))}: ${esc(cur.native)}"
+        onclick="pLangToggle(event)">
+        <span class="p-lang__flag" aria-hidden="true">${pLangFlag(cur.id)}</span>
+        <span class="fw-select__label">${esc(cur.native)}</span>
+      </button>
+      <span class="fw-select__chevron" aria-hidden="true">${I.down(16)}</span>
+      <div class="fw-select__menu" id="${listId}" role="listbox" aria-label="${esc(pT("language"))}">
+        ${P_LOCALES.map(l=>{
+          const on = loc===l.id;
+          return `<div class="fw-select__opt" role="option" data-locale="${l.id}"
+            aria-selected="${on}"
+            onmousedown="event.preventDefault()"
+            onclick="pLangPick('${l.id}', event)">
+            ${flagRow(l)}
+            ${on?I.check(16):""}
+          </div>`;
+        }).join("")}
+      </div>
     </div>
   </div>`;
 }
@@ -7272,7 +7339,6 @@ function viewPatient(){
         <div class="p-card">
           ${pIntroContent(total, false)}
         </div>
-        <p class="p-foot">${esc(pT("footRef",{agency, ref:"9F3C1A"}))}</p>
       </div>
     </div></div>`;
   }
@@ -7528,7 +7594,6 @@ function bvTriggerCard(s){
     const activeId = surveyActiveTriggerId(s);
     return `<section class="fw-card bv-setup-card" aria-labelledby="bv-trig-h">
       <div class="bv-card-head">
-        <span class="bv-card-ico" aria-hidden="true">${I.bolt(18)}</span>
         <div class="bv-card-copy">
           <h2 class="t-h4" id="bv-trig-h">Trigger</h2>
           <p class="t-subtle dim">Which FirstWatch trigger sends this survey.</p>
@@ -7543,7 +7608,6 @@ function bvTriggerCard(s){
   const ok = bvChecklist(s, qList())[0].ok;
   return `<section class="fw-card bv-setup-card" aria-labelledby="bv-trig-h">
     <div class="bv-card-head">
-      <span class="bv-card-ico" aria-hidden="true">${I.bolt(18)}</span>
       <div class="bv-card-copy">
         <h2 class="t-h4" id="bv-trig-h">Trigger</h2>
         <p class="t-subtle dim">Which FirstWatch trigger sends this survey.</p>
@@ -7563,7 +7627,6 @@ function bvScheduleCard(s){
   const locked = isSurveyLocked(s);
   return `<section class="fw-card bv-setup-card" aria-labelledby="bv-sch-h">
     <div class="bv-card-head">
-      <span class="bv-card-ico" aria-hidden="true">${I.calendar(18)}</span>
       <div class="bv-card-copy">
         <h2 class="t-h4" id="bv-sch-h">Schedule</h2>
         <p class="t-subtle dim">How long it collects responses after publish.</p>
@@ -8834,10 +8897,9 @@ function pPaint(){
   const curView = curPatient && curPatient.querySelector(".p-view");
   if(curPatient && nextPatient && curView && nextView){
     curPatient.setAttribute("lang", nextPatient.getAttribute("lang") || "en");
-    const loc = pLocale();
-    curPatient.querySelectorAll(".p-lang-btn").forEach(btn=>{
-      btn.setAttribute("aria-pressed", btn.getAttribute("data-locale")===loc ? "true" : "false");
-    });
+    const nextLang = nextPatient.querySelector(".p-lang");
+    const curLang = curPatient.querySelector(".p-lang");
+    if(curLang && nextLang) curLang.replaceWith(nextLang);
     curView.replaceWith(nextView);
     return;
   }
@@ -9037,6 +9099,7 @@ window.addEventListener("keydown", e=>{
     }
   }
   if(e.key!=="Escape") return;
+  if(document.querySelector(".p-lang .fw-select.is-open")){ pLangClose(); return; }
   if(state.triggerSelectOpen){ state.triggerSelectOpen = false; triggerSelectPaint(); return; }
   if(state.scheduleDurationOpen){ state.scheduleDurationOpen = false; scheduleDurationPaint(); return; }
   if(state.overviewScopeOpen || state.overviewTagOpen || state.overviewPayerOpen || state.overviewPeriodOpen){
@@ -9060,6 +9123,9 @@ window.addEventListener("keydown", e=>{
   if(state.openTrigger){ closeTrigger(); return; }
 });
 window.addEventListener("mousedown", e=>{
+  if(document.querySelector(".p-lang .fw-select.is-open") && !e.target.closest(".p-lang")){
+    pLangClose();
+  }
   if(state.surveyMenu && !e.target.closest(".menu-wrap")){
     state.surveyMenu = null;
     render();
