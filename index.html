@@ -2517,7 +2517,7 @@ body:not(.is-locked) #gate{display:none}
 .bv-intro.is-off{background:var(--muted)}
 .bv-intro__head{display:flex;align-items:center;gap:12px}
 .bv-intro__title{margin:0;font-size:16px;line-height:24px;font-weight:700;color:var(--foreground)}
-.bv-intro__body{display:flex;align-items:flex-start;gap:12px;margin-top:12px;padding-left:44px}
+.bv-intro__body{display:flex;align-items:flex-start;gap:12px;margin-top:12px}
 .bv-intro__preview{flex:1;min-width:0;padding:12px 14px;border-radius:var(--r-md);background:var(--muted)}
 .bv-switch-field{display:inline-flex;align-items:center;gap:8px;cursor:pointer;min-height:44px}
 
@@ -7591,7 +7591,6 @@ function bvIntroBlock(s, opts={}){
   const copy = introStaffCopy(s, (state.surveyQuestions[s.id]||[]).length);
   return `<section class="bv-intro${on?"":" is-off"}${opts.doc?" bv-intro--doc":""}" aria-labelledby="bv-intro-h">
     <div class="bv-intro__head">
-      <span class="bv-card-ico" aria-hidden="true">${I.info(18)}</span>
       <div class="bv-card-copy">
         <h3 class="bv-intro__title" id="bv-intro-h">Introduction <span class="t-detail dim">· optional</span></h3>
         <p class="t-subtle dim">${on?"Shown before the first question.":"Off. Patients go straight to the first question."}</p>
