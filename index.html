@@ -682,19 +682,20 @@ html[data-theme="dark"] .ov-reading .ov-label{
 .ovx-delta--up{color:var(--green-700)}
 .ovx-delta--down{color:var(--red-600)}
 .ovx-delta--flat{color:var(--muted-foreground)}
-.ovx-dist{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.ovx-dist{display:flex;flex-direction:column;gap:6px;width:100%;min-width:0}
 .ovx-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--neutral-100)}
 .ovx-bar > span{height:8px;min-width:0}
 .ovx-bar__d{background:var(--red-600)}
 .ovx-bar__p{background:var(--neutral-400)}
 .ovx-bar__g{background:var(--primary)}
 .ovx-dist__labels{
-  display:flex;justify-content:space-between;gap:8px;
+  display:flex;align-items:flex-start;
   font-size:11px;line-height:normal;font-weight:400;
 }
-.ovx-dist__labels span:first-child{color:var(--red-600)}
-.ovx-dist__labels span:nth-child(2){color:var(--muted-foreground)}
-.ovx-dist__labels span:last-child{color:var(--primary)}
+.ovx-dist__labels > span{min-width:0;overflow:hidden;white-space:nowrap}
+.ovx-dist__d{color:var(--red-600);text-align:left}
+.ovx-dist__p{color:var(--muted-foreground);text-align:center}
+.ovx-dist__g{color:var(--primary);text-align:right}
 .ovx-table__head{
   display:flex;align-items:center;justify-content:space-between;gap:16px;
   padding:16px 20px;
@@ -728,25 +729,11 @@ html[data-theme="dark"] .ov-reading .ov-label{
 .ovx-qrow--warn .ovx-qnps{color:var(--red-600)}
 .ovx-qrow .ovx-delta{font-size:13px}
 .ovx-qn{font-size:12px;line-height:normal;color:var(--muted-foreground)}
-.ovx-qdist{position:relative;display:flex;align-items:center;min-width:0;height:26px}
+.ovx-qdist{position:relative;display:flex;align-items:center;min-width:0}
 .ovx-qdist .ovx-bar:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
 .ovx-qtip{display:none}
 .ovx-qrow:hover .ovx-qtip,
 .ovx-qdist:focus-within .ovx-qtip{display:block}
-.ovx-qdist .ovx-bar{width:100%;height:26px;border-radius:var(--radius-md)}
-.ovx-qdist .ovx-bar > span{
-  display:flex;align-items:center;justify-content:center;
-  height:26px;min-width:0;overflow:hidden;container-type:inline-size;
-  color:var(--primary-foreground);
-  font-size:12px;line-height:14px;font-weight:700;
-}
-.ovx-qdist .ovx-bar > span b{font-weight:700;white-space:nowrap;visibility:hidden}
-@container (min-width: 24px){
-  .ovx-qdist .ovx-bar > span b{visibility:visible}
-}
-@container (min-width: 20px){
-  .ovx-qdist .ovx-bar > span b.is-short{visibility:visible}
-}
 .ovx-caption{
   display:flex;align-items:center;justify-content:center;min-height:34px;padding:8px 20px;
   font-size:11px;line-height:normal;color:var(--muted-foreground);text-align:center;
@@ -4119,13 +4106,26 @@ function ovxDelta(n, tail){
   return `<span class="ovx-delta ${cls}">${n===0?"":ovxArrow(up)} ${sign}${num}${tail||""}</span>`;
 }
 function ovxBarSeg(cls, n){
-  return `<span class="${cls}" style="flex:${n} ${n} 0">${n>0?`<b${n<10?` class="is-short"`:""}>${n}%</b>`:""}</span>`;
+  return `<span class="${cls}" style="flex:${n} ${n} 0"></span>`;
+}
+function ovxBarLabel(cls, n){
+  return `<span class="${cls}" style="flex:${n} ${n} 0">${n?`${n}%`:""}</span>`;
 }
 function ovxBar(d, p, g, {focusable}={}){
   return `<div class="ovx-bar" role="img"${focusable?` tabindex="0"`:""} aria-label="${d}% low, ${p}% middle, ${g}% high">
     ${ovxBarSeg("ovx-bar__d", d)}
     ${ovxBarSeg("ovx-bar__p", p)}
     ${ovxBarSeg("ovx-bar__g", g)}
+  </div>`;
+}
+function ovxDist(d, p, g, opts){
+  return `<div class="ovx-dist">
+    ${ovxBar(d, p, g, opts)}
+    <div class="ovx-dist__labels" aria-hidden="true">
+      ${ovxBarLabel("ovx-dist__d", d)}
+      ${ovxBarLabel("ovx-dist__p", p)}
+      ${ovxBarLabel("ovx-dist__g", g)}
+    </div>
   </div>`;
 }
 function ovxQuestionTag(name){
@@ -4461,7 +4461,7 @@ function viewOverview(){
               ${showChange?ovxDelta(q.delta):""}
               <p class="ovx-qn">n = ${q.shown.toLocaleString("en-US")}</p>
               <div class="ovx-qdist">
-                ${ovxBar(q.dist.d, q.dist.p, q.dist.g, {focusable:true})}
+                ${ovxDist(q.dist.d, q.dist.p, q.dist.g, {focusable:true})}
                 <span class="fw-tooltip ovx-qtip" aria-hidden="true">${q.dist.d}% low · ${q.dist.p}% middle · ${q.dist.g}% high</span>
               </div>
             </div>`).join(""):`<p class="ovx-empty">No questions carry this tag.</p>`}
