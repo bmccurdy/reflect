@@ -6323,7 +6323,7 @@ function confirmStopSurvey(andClone){
   if(!s || s.status!=="Live"){ closeStopSurvey(); return; }
   const freedTrigger = releaseSurveyTrigger(s);
   s.status = "Stopped";
-  s.stoppedAt = NOW;
+  s.stoppedAt = new Date();
   s.updated = NOW;
   state.stopSurvey = null;
   if(andClone){
