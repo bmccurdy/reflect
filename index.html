@@ -1281,6 +1281,12 @@ button.num-link{
 }
 .dialog-actions--split > .fw-btn--ghost{flex:0 1 auto}
 .dialog--stop{width:min(520px,100%)}
+.dialog--start .fw-alert{margin-top:16px}
+.dialog--start .fw-alert--warning{
+  background:color-mix(in srgb, var(--semantic-warning) 12%, var(--card));
+}
+.dialog--start .t-body strong,
+.dialog--start .fw-alert__desc strong{font-weight:700;color:var(--foreground)}
 @media (max-width:480px){
   .dialog-actions--split .fw-btn--ghost{order:3;width:100%}
   .dialog-actions__end{width:100%;justify-content:stretch}
@@ -6331,16 +6337,22 @@ function confirmStopSurvey(andClone){
   render();
 }
 function restartSurveyBlock(s){
-  if(!s || s.status!=="Stopped") return "This survey isn’t stopped.";
+  if(!s || s.status!=="Stopped") return { message:"This survey isn’t stopped." };
   const trigId = surveyPriorTriggerId(s);
-  if(!findTriggerDef(trigId)) return "This survey has no trigger to resume.";
+  const trig = findTriggerDef(trigId);
+  if(!trig) return { message:"This survey has no trigger to resume." };
   const owner = triggerOwner(trigId, s.id);
-  if(owner) return `${formatTriggerLabel(findTriggerDef(trigId))} is linked to ${owner.name}. Stop that survey before starting this one again.`;
+  if(owner) return {
+    code:"taken",
+    trigger:formatTriggerLabel(trig),
+    owner:owner.name,
+    message:`${formatTriggerLabel(trig)} is linked to ${owner.name}. Stop that survey before starting this one again.`
+  };
   const sch = s.schedule || defaultSchedule();
   if(sch.mode==="range" && (!sch.endAt || sch.endAt.getTime()<=NOW.getTime())){
-    return "The end date has passed. Duplicate and edit to set a new schedule.";
+    return { message:"The end date has passed. Duplicate and edit to set a new schedule." };
   }
-  return "";
+  return null;
 }
 function askStartSurvey(id){
   const s = state.surveys.find(x=>x.id===id);
@@ -6361,18 +6373,29 @@ function startSurveyDialog(id){
     : sch.mode==="range" && sch.endAt
       ? `Collecting runs through ${day(sch.endAt)}.`
       : "Collecting stays ongoing.";
+  const body = block && block.code==="taken"
+    ? `<div class="fw-alert fw-alert--warning" role="status">
+        <span class="fw-alert__icon">${I.alert(20)}</span>
+        <p class="fw-alert__desc"><strong>${esc(block.trigger)}</strong> is linked to <strong>${esc(block.owner)}</strong>. Stop that survey before starting this one again.</p>
+      </div>`
+    : block
+    ? `<div class="fw-alert fw-alert--warning" role="status">
+        <span class="fw-alert__icon">${I.alert(20)}</span>
+        <p class="fw-alert__desc">${esc(block.message)}</p>
+      </div>`
+    : `<p class="t-body dim mt8">Starts invitations again on <strong>${esc(trig?formatTriggerLabel(trig):"its trigger")}</strong>. ${esc(windowCopy)} Existing responses stay on this version.</p>`;
   return `
   <div class="scrim" style="z-index:54"></div>
   <div class="dialog-wrap" onclick="closeStartSurvey()">
-    <div class="dialog dialog--stop" role="dialog" aria-modal="true" aria-labelledby="start-title"
+    <div class="dialog dialog--stop dialog--start" role="dialog" aria-modal="true" aria-labelledby="start-title"
       onclick="event.stopPropagation()">
       <h2 class="t-h4" id="start-title">Start “${esc(s.name)}” again?</h2>
-      <p class="t-body dim mt8">${block
-        ? esc(block)
-        : `Starts invitations again on ${trig?esc(formatTriggerLabel(trig)):"its trigger"}. ${esc(windowCopy)} Existing responses stay on this version.`}</p>
+      ${body}
       <div class="dialog-actions">
-        <button type="button" class="fw-btn fw-btn--ghost" onclick="closeStartSurvey()">${block?"Close":"Cancel"}</button>
-        ${block?"":`<button type="button" class="fw-btn fw-btn--primary" onclick="confirmStartSurvey()">${I.play(16)} Start survey</button>`}
+        ${block
+          ? `<button type="button" class="fw-btn fw-btn--outline" onclick="closeStartSurvey()">Close</button>`
+          : `<button type="button" class="fw-btn fw-btn--ghost" onclick="closeStartSurvey()">Cancel</button>
+             <button type="button" class="fw-btn fw-btn--primary" onclick="confirmStartSurvey()">${I.play(16)} Start survey</button>`}
       </div>
     </div>
   </div>`;
@@ -6382,7 +6405,7 @@ function confirmStartSurvey(){
   if(!id) return;
   const s = state.surveys.find(x=>x.id===id);
   const block = restartSurveyBlock(s);
-  if(block){ toast(block); closeStartSurvey(); return; }
+  if(block){ toast(block.message); closeStartSurvey(); return; }
   const sch = s.schedule || defaultSchedule();
   s.triggerId = surveyPriorTriggerId(s);
   s.status = "Live";
