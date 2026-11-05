@@ -232,7 +232,7 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
   font-size:14px;line-height:20px;color:var(--muted-foreground);
 }
 .survey-desc-hit{
-  display:block;width:100%;max-width:36rem;margin:6px 0 0;padding:0;
+  display:inline-block;width:fit-content;max-width:36rem;margin:6px 0 0;padding:0;
   border:0;background:transparent;font:inherit;text-align:left;cursor:pointer;
   border-radius:var(--r-sm);color:var(--muted-foreground);
 }
@@ -1195,6 +1195,7 @@ button.num-link{
 .empty{padding:64px 24px;text-align:center}
 .empty .t{font-size:20px;line-height:28px;font-weight:700}
 .empty .s{color:var(--muted-foreground);margin-top:8px}
+.empty .fw-btn{align-self:center;width:auto}
 
 /* drawer */
 .scrim{
@@ -1708,6 +1709,15 @@ button.num-link{
 .qcard.drop-before::before{top:-5px}
 .qcard.drop-after::after{bottom:-5px}
 .qmeta{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.fu-marks__list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.fu-marks__opt{display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px;min-height:32px}
+.fu-marks__opt input{width:16px;height:16px;margin:0;accent-color:var(--primary);flex:0 0 auto}
+.edit-q-opt{display:flex;align-items:center;gap:8px;margin-top:8px}
+.edit-q-opt .fw-input{flex:1 1 auto;min-width:0}
+.edit-q-opt .fu-marks__opt{
+  display:flex;align-items:center;flex:0 0 auto;
+  margin:0;font-weight:400;white-space:nowrap;
+}
 .qcard-body{flex:1;min-width:0}
 .qbtns{display:flex;gap:4px;margin-left:auto}
 .iconbtn{
@@ -3011,7 +3021,8 @@ const QUESTIONS = [
     options:["Exceptional","Good","Fine","Poor","Unacceptable"] },
   { id:"q2", text:"How likely are you to recommend our emergency services?",
     type:"choice", required:true, locked:false,
-    options:["Very likely","Somewhat likely","Not sure","Not likely","Definitely not likely"] },
+    options:["Very likely","Somewhat likely","Not sure","Not likely","Definitely not likely"],
+    followUps:["Not likely","Definitely not likely"] },
   { id:"q3", text:"Did you feel listened to by the crew?", type:"yesno", required:true, locked:true,
     lockNote:"Benchmark question — shared wording across participating agencies" },
   { id:"q4", text:"Did you feel cared for by the crew?", type:"yesno", required:true, locked:true,
@@ -3034,7 +3045,8 @@ const QUESTIONS_Q3 = [
   { id:"c1", text:"How safe do you feel calling 911 in this community?", type:"choice", required:true, locked:false,
     options:["Very safe","Mostly safe","Not sure","Mostly unsafe","Unsafe"] },
   { id:"c2", text:"How likely are you to recommend our emergency services?", type:"choice", required:true, locked:false,
-    options:["Very likely","Somewhat likely","Not sure","Not likely","Definitely not likely"] },
+    options:["Very likely","Somewhat likely","Not sure","Not likely","Definitely not likely"],
+    followUps:["Not likely","Definitely not likely"] },
   { id:"c3", text:"Do you trust our crews to treat people with respect?", type:"yesno", required:true, locked:true,
     lockNote:"Benchmark question — shared wording across participating agencies" },
   { id:"c4", text:"Do you feel crews in this community listen to the people they treat?", type:"yesno", required:true, locked:true,
@@ -3154,7 +3166,7 @@ const RESPONSES = {
 
 const LIBRARY = [
   { id:"lib1", category:"Care quality", text:"Providing professional, compassionate, and personal care during your emergency is our priority. How well did we do?", type:"choice", options:["Exceptional","Good","Fine","Poor","Unacceptable"], benchmark:true },
-  { id:"lib2", category:"Recommendation", text:"How likely are you to recommend our emergency services?", type:"choice", options:["Very likely","Somewhat likely","Not sure","Not likely","Definitely not likely"], benchmark:true },
+  { id:"lib2", category:"Recommendation", text:"How likely are you to recommend our emergency services?", type:"choice", options:["Very likely","Somewhat likely","Not sure","Not likely","Definitely not likely"], followUps:["Not likely","Definitely not likely"], benchmark:true },
   { id:"lib3", category:"Communication", text:"Did you feel listened to by the crew?", type:"yesno", benchmark:false },
   { id:"lib4", category:"Care quality", text:"Did you feel cared for by the crew?", type:"yesno", benchmark:false },
   { id:"lib5", category:"Open feedback", text:"What did we do well?", type:"text", benchmark:false },
@@ -3295,6 +3307,8 @@ const state = {
   route:"#/",
   theme:"light",
   alerts: ALERTS.map(a=>({...a, log:[...a.log]})),
+  followUpStatus:{},
+  followUpLog:{},
   surveys: SURVEYS.map(s=>normalizeSurvey(s)),
   surveyQuestions: Object.fromEntries(Object.entries(SURVEY_BANK).map(([k,qs])=>[k, qs.map(q=>({...q}))])),
   responses: Object.fromEntries(Object.entries(RESPONSES).map(([k,rows])=>[k, rows.map(r=>({...r, answers:{...r.answers}}))])),
@@ -3430,7 +3444,7 @@ const statusBadge = k => {
 };
 const esc = t => String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 
-const openCount = () => state.alerts.filter(a=>a.status!=="resolved").length;
+const openCount = () => followUpQueue().filter(a=>a.status!=="resolved").length;
 const critCount = () => state.alerts.filter(a=>a.status==="critical").length;
 
 /* ============================================================
@@ -5158,6 +5172,7 @@ function alertSource(alertId){
   return null;
 }
 function alertSurveyId(a){
+  if(a && a.surveyId) return a.surveyId;
   return alertSource(a.id)?.surveyId || null;
 }
 function alertLinkedResponse(a){
@@ -5190,16 +5205,31 @@ function alertSurveyChipLabel(s){
   return s.name;
 }
 function alertSurveyCell(a){
-  const src = alertSource(a.id);
-  if(!src?.survey) return `<td class="al-survey dim">—</td>`;
-  const trig = surveyDisplayTriggerId(src.survey);
+  const surveyId = a.surveyId || alertSource(a.id)?.surveyId;
+  const survey = surveyId ? state.surveys.find(s=>s.id===surveyId) : null;
+  if(!survey) return `<td class="al-survey dim">—</td>`;
+  const trig = surveyDisplayTriggerId(survey);
   return `<td class="al-survey">
-    <span class="al-survey-name">${esc(src.survey.name)}</span>
-    ${trig?`<div class="t-subtle">${surveyTriggerCell(src.survey)}</div>`:""}
+    <span class="al-survey-name">${esc(survey.name)}</span>
+    ${trig?`<div class="t-subtle">${surveyTriggerCell(survey)}</div>`:""}
   </td>`;
 }
 function caseContext(){
   if(state.openAlert){
+    const marked = markedFollowUps().find(x=>x.id===state.openAlert);
+    if(marked){
+      const survey = state.surveys.find(s=>s.id===marked.surveyId) || null;
+      const response = responsesFor(marked.surveyId).find(r=>r.id===marked.responseId) || null;
+      return {
+        entry:"alert",
+        alert:marked,
+        survey,
+        surveyId:marked.surveyId,
+        response,
+        responseId:marked.responseId,
+        marked
+      };
+    }
     const alert = state.alerts.find(x=>x.id===state.openAlert);
     if(!alert) return null;
     const src = alertSource(alert.id);
@@ -5320,18 +5350,21 @@ function caseCallbackHtml(alert){
 function caseDrawer(){
   const ctx = caseContext();
   if(!ctx) return "";
-  const { entry, alert, survey, surveyId, response } = ctx;
+  const { entry, alert, survey, surveyId, response, marked } = ctx;
   const qs = surveyId ? (state.surveyQuestions[surveyId] || []) : [];
-  const call = response ? responseWantsCall(response, qs) : false;
   const quote = (response ? responseQuote(response, qs) : "") || (alert && alert.quote) || "";
-  const title = response
-    ? alertTitleFromResponse(response, qs)
-    : (alert ? alertDisplayTitle(alert) : "Survey response");
+  const title = marked
+    ? marked.question
+    : response
+      ? alertTitleFromResponse(response, qs)
+      : (alert ? alertDisplayTitle(alert) : "Survey response");
   const meta = caseMetaLine(ctx);
   const incident = caseIncidentKv(ctx);
   const details = caseDetailFields(ctx);
   const preferLang = details?.lang && details.lang!=="English" ? details.lang : "";
-  const idLine = alert
+  const idLine = marked
+    ? (response ? `Response <span style="font-weight:700">${esc(response.id)}</span>` : "")
+    : alert
     ? `Follow-up <span style="font-weight:700">${esc(alert.id)}</span>${response?` · Response <span style="font-weight:700">${esc(response.id)}</span>`:""}`
     : (response ? `Response <span style="font-weight:700">${esc(response.id)}</span>` : "");
   const showCallbackFoot = !!(alert && alert.status!=="resolved");
@@ -5368,14 +5401,18 @@ function caseDrawer(){
     </div>
     <div class="drawer-body">
       ${caseSurveyLine(ctx)}
-      ${call?`<div class="stale">${I.phone(16)} They asked for a call.</div>`:""}
-      ${preferLang?`<div class="stale"${call?` style="margin-top:12px"`:""}>
+      ${preferLang?`<div class="stale">
         ${I.users(16)} Patient prefers ${esc(preferLang)}. Use the interpreter line for the callback.</div>`:""}
-      ${quote?`<div class="quote">“${esc(quote)}”</div>`:""}
-      ${incident?`<div class="${quote||call||preferLang?"mt24":""}">${incident}</div>`:""}
+      ${marked?`<div class="case-section">
+        <h3 class="case-section__title">Answer</h3>
+        <p class="t-pui" style="font-weight:700;margin-top:4px">${esc(marked.answer)}</p>
+        <h3 class="case-section__title" style="margin-top:16px">Comment</h3>
+        <p class="t-p" style="margin-top:4px">${marked.comment?esc(marked.comment):`<span class="dim">No written comment</span>`}</p>
+      </div>`:""}
+      ${quote && !(marked && quote===marked.comment)?`<div class="quote">“${esc(quote)}”</div>`:""}
+      ${incident?`<div class="${quote||preferLang?"mt24":""}">${incident}</div>`:""}
       ${caseCallbackHtml(alert)}
       <div class="case-section" id="case-answers">
-        <h3 class="case-section__title">Survey answers</h3>
         ${caseAnswersHtml(response, qs, quote)}
       </div>
     </div>
@@ -5385,8 +5422,78 @@ function caseDrawer(){
   </aside>`;
 }
 
+function questionChoices(q){
+  if(!q) return [];
+  if(q.type==="yesno") return ["Yes","No"];
+  if(q.type==="choice") return (q.options||[]).slice();
+  if(q.type==="scale") return ["1","2","3","4","5"];
+  return [];
+}
+function choiceLabel(q, opt){
+  if(!q || q.type!=="scale") return String(opt);
+  const labels = q.labels || [];
+  if(opt==="1" && labels[0]) return `1 · ${labels[0]}`;
+  if(opt==="5" && (labels[4] || labels[labels.length-1])) return `5 · ${labels[4] || labels[labels.length-1]}`;
+  return String(opt);
+}
+function optionNeedsFollowUp(q, value){
+  if(value==null || value==="") return false;
+  return (q.followUps||[]).includes(String(value));
+}
+function markedFollowUps(){
+  const out = [];
+  state.surveys.forEach(s=>{
+    const qs = state.surveyQuestions[s.id] || [];
+    responsesFor(s.id).forEach(r=>{
+      qs.forEach(q=>{
+        const value = r.answers ? r.answers[q.id] : undefined;
+        if(!optionNeedsFollowUp(q, value)) return;
+        const id = `fu_${s.id}_${r.id}_${q.id}`;
+        const linked = r.alert ? state.alerts.find(a=>a.id===r.alert) : null;
+        out.push({
+          id,
+          kind:"marked",
+          surveyId:s.id,
+          responseId:r.id,
+          question:q.text,
+          answer:String(value),
+          comment:responseQuote(r, qs),
+          at:r.at,
+          status:state.followUpStatus[id] || "elevated",
+          log:state.followUpLog[id] || [],
+          unit:r.unit || linked?.unit || "",
+          call:r.call || linked?.call || "",
+          crew:r.crew || linked?.crew || "",
+          phone:r.phone || linked?.phone || "",
+          payor:linked?.payor || "",
+          zone:r.zone || linked?.zone || "",
+          band:r.band || linked?.band || "",
+          lang:r.lang || linked?.lang || "",
+          quote:responseQuote(r, qs)
+        });
+      });
+    });
+  });
+  return out;
+}
+function responseMarkedKey(surveyId, responseId){
+  return `${surveyId}|${responseId}`;
+}
+function followUpQueue(){
+  const marked = markedFollowUps();
+  const covered = new Set(marked.map(a=>responseMarkedKey(a.surveyId, a.responseId)));
+  const legacy = state.alerts.filter(a=>{
+    const src = alertSource(a.id);
+    if(!src) return true;
+    return !covered.has(responseMarkedKey(src.surveyId, src.responseId));
+  });
+  return [...marked, ...legacy].sort((a,b)=>b.at - a.at);
+}
+function followUpById(id){
+  return state.alerts.find(a=>a.id===id) || markedFollowUps().find(a=>a.id===id) || null;
+}
 function viewAlerts(){
-  const all = state.alerts;
+  const all = followUpQueue();
   const statusList = alertsForStatusFilter(all, queueFilter);
   const liveSurveys = state.surveys.filter(s=>s.status==="Live");
   const liveSurveyIds = new Set(liveSurveys.map(s=>s.id));
@@ -5442,14 +5549,19 @@ function viewAlerts(){
       </tr></thead>
       <tbody aria-live="polite">
         ${list.map(a=>{
-          const title = alertDisplayTitle(a);
-          const quote = alertDisplayQuote(a);
+          const marked = a.kind==="marked";
+          const title = marked ? a.question : alertDisplayTitle(a);
+          const quote = marked ? "" : alertDisplayQuote(a);
+          const answerLine = marked ? a.answer : "";
+          const commentLine = marked ? (a.comment || "No written comment") : "";
           return `
           <tr id="row-${a.id}">
             <td class="al-why">
               <button type="button" class="al-reason num-link" onclick="openAlert('${a.id}')">${esc(title)}</button>
+              ${answerLine?`<div class="snip">${esc(answerLine)}</div>`:""}
+              ${marked?`<div class="snip${a.comment?"":" dim"}">${esc(commentLine)}</div>`:""}
               ${quote?`<div class="snip">${esc(quote)}</div>`:""}
-              <div class="al-meta">${a.unit} · ${ago(a.at)}</div>
+              <div class="al-meta">${a.unit?`${esc(a.unit)} · `:""}${ago(a.at)}</div>
             </td>
             ${alertSurveyCell(a)}
             <td class="al-unit"><span style="font-size:14px;line-height:20px">${esc(a.unit)}</span><div class="t-subtle dim">${esc(a.call)}</div></td>
@@ -6536,7 +6648,7 @@ function builderQuestions(qs, surveyLocked){
         <h2 class="t-h4">Questions</h2>
         <p class="t-subtle dim mt8">${surveyLocked
           ? "Question wording is locked on this version."
-          : "Move a question with the arrows. Edit wording and required with the pencil. Benchmark questions can't be edited."}</p>
+          : "Move a question with the arrows. Edit wording, options, and follow-up with the pencil."}</p>
       </div>
       ${qs.length?`<span class="fw-badge fw-badge--outline">${required} required</span>`:""}
     </div>
@@ -6555,8 +6667,8 @@ function builderQuestions(qs, surveyLocked){
         ${surveyLocked?"":`<div class="qbtns">
           <button class="iconbtn" aria-label="Move up" ${i===0?"disabled":""} onclick="moveQ(${i},-1)">${I.up(16)}</button>
           <button class="iconbtn" aria-label="Move down" ${i===qs.length-1?"disabled":""} onclick="moveQ(${i},1)">${I.down(16)}</button>
-          <button class="iconbtn" aria-label="Edit" title="${q.locked?"Benchmark questions can't be edited":"Edit question"}"
-            ${q.locked?"disabled":`onclick="openEditQuestion('${q.id}')"`}>${I.pencil(16)}</button>
+          <button class="iconbtn" aria-label="Edit" title="Edit question"
+            onclick="openEditQuestion('${q.id}')">${I.pencil(16)}</button>
           <button class="iconbtn" aria-label="Remove" title="Remove question" onclick="removeQ('${q.id}')">${I.trash(16)}</button>
         </div>`}
       </div>`).join("")
@@ -6707,12 +6819,13 @@ function viewSurveys(){
             <label class="sr" for="survey-desc-input">Survey description</label>
             <textarea class="fw-input fw-textarea" id="survey-desc-input" rows="2"
               maxlength="${SURVEY_DESC_MAX}"
+              oninput="noteInlineDesc(this.value)"
               onkeydown="surveyDescKey(event)" onblur="onSurveyDescBlur(event)">${esc(s.description||"")}</textarea>
             <div class="title-edit-actions">
               <button type="button" class="iconbtn title-edit-save" aria-label="Save description"
-                onmousedown="saveInlineDesc(event)">${I.check(18)}</button>
+                onpointerdown="commitInlineDesc(event)">${I.check(18)}</button>
               <button type="button" class="iconbtn title-edit-cancel" aria-label="Cancel description"
-                onmousedown="discardInlineDesc(event)">${I.x(18)}</button>
+                onpointerdown="abortInlineDesc(event)">${I.x(18)}</button>
             </div>
           </div>`: surveyLocked
             ? (s.description?`<p class="survey-desc">${esc(s.description)}</p>`:"")
@@ -7806,7 +7919,8 @@ function bvQCard(q, i, qs, opts={}){
     ${locked?"":`<div class="qbtns">
       <button class="iconbtn" aria-label="Move up" ${i===0?"disabled":""} onclick="moveQ(${i},-1)">${I.up(16)}</button>
       <button class="iconbtn" aria-label="Move down" ${i===qs.length-1?"disabled":""} onclick="moveQ(${i},1)">${I.down(16)}</button>
-      <button class="iconbtn" aria-label="Edit question" ${q.locked?"disabled":`onclick="openEditQuestion('${q.id}')"`}>${I.pencil(16)}</button>
+      <button class="iconbtn" aria-label="Edit question" title="Edit question"
+        onclick="openEditQuestion('${q.id}')">${I.pencil(16)}</button>
       <button class="iconbtn" aria-label="Remove question" onclick="removeQ('${q.id}')">${I.trash(16)}</button>
     </div>`}
   </div>`;
@@ -8136,18 +8250,30 @@ function noteFor(id){
   return el ? el.value.trim() : "";
 }
 function logOnly(id){
-  const a = state.alerts.find(x=>x.id===id);
   const t = noteFor(id);
   if(!t){ toast("Add a note first, then log it."); return; }
-  a.log.unshift({ who:"You", at:NOW, text:t });
+  const a = state.alerts.find(x=>x.id===id);
+  const entry = { who:"You", at:NOW, text:t };
+  if(a) a.log.unshift(entry);
+  else if(markedFollowUps().some(x=>x.id===id)){
+    if(!state.followUpLog[id]) state.followUpLog[id] = [];
+    state.followUpLog[id].unshift(entry);
+  } else return;
   render(); toast("Logged.");
 }
 function logAndResolve(id){
-  const a = state.alerts.find(x=>x.id===id);
   const t = noteFor(id);
   if(!t){ toast("Add a note before closing this out."); return; }
-  a.log.unshift({ who:"You", at:NOW, text:t });
-  a.status = "resolved";
+  const a = state.alerts.find(x=>x.id===id);
+  const entry = { who:"You", at:NOW, text:t };
+  if(a){
+    a.log.unshift(entry);
+    a.status = "resolved";
+  } else if(markedFollowUps().some(x=>x.id===id)){
+    if(!state.followUpLog[id]) state.followUpLog[id] = [];
+    state.followUpLog[id].unshift(entry);
+    state.followUpStatus[id] = "resolved";
+  } else return;
   state.openAlert = null;
   state.openResponse = null;
   const row = document.getElementById("row-"+id);
@@ -8278,6 +8404,7 @@ function addFromLib(id){
     locked: !!l.benchmark,
     lockNote: l.benchmark ? "Benchmark question — shared wording across participating agencies" : undefined,
     options: l.options ? [...l.options] : undefined,
+    followUps: l.followUps ? [...l.followUps] : undefined,
     labels: l.type==="scale" ? ["Poor","","","","Excellent"] : undefined
   });
   state.previewQId = "library";
@@ -8325,6 +8452,7 @@ function duplicateAndEdit(id, { silent=false, claimTrigger=null }={}){
   const copy = (state.surveyQuestions[id]||[]).map(q=>({
     ...q, id:"q"+(++qn),
     options: q.options ? [...q.options] : undefined,
+    followUps: q.followUps ? [...q.followUps] : undefined,
     labels: q.labels ? [...q.labels] : undefined
   }));
   let triggerId = null;
@@ -8429,10 +8557,12 @@ function renameDialog(id){
 
 function editQuestionDialog(id){
   const q = qList().find(x=>x.id===id);
-  if(!q || q.locked) return "";
-  const opts = (q.options||[]).join("\n");
+  if(!q) return "";
   const scaleLo = q.labels && q.labels[0] != null ? q.labels[0] : "Poor";
   const scaleHi = q.labels && q.labels[4] != null ? q.labels[4] : "Excellent";
+  const optionRows = q.type==="yesno"
+    ? ["Yes","No"]
+    : (q.type==="choice" ? (q.options&&q.options.length?q.options:["Option one","Option two"]) : null);
   return `
   <div class="scrim" style="z-index:54"></div>
   <div class="dialog-wrap" onclick="closeEditQuestion()">
@@ -8452,11 +8582,33 @@ function editQuestionDialog(id){
         <input class="fw-switch" type="checkbox" id="edit-q-required" ${q.required?"checked":""}
           aria-label="Required">
       </div>
-      ${q.type==="choice"?`
+      ${optionRows?`
       <div class="edit-q-field">
-        <label class="t-subtle" for="edit-q-options">Options</label>
-        <textarea class="fw-input" id="edit-q-options" rows="5">${esc(opts)}</textarea>
-        <p class="t-detail dim mt8">One option per line.</p>
+        <label class="t-subtle">Options</label>
+        <div id="edit-q-opt-list">
+          ${optionRows.map(opt=>`
+          <div class="edit-q-opt">
+            <input class="fw-input" data-opt-text value="${esc(opt)}" aria-label="Option">
+            <label class="fu-marks__opt">
+              <input type="checkbox" data-opt-fu ${(q.followUps||[]).includes(opt)?"checked":""}>
+              <span>Follow-up</span>
+            </label>
+            <button type="button" class="iconbtn" aria-label="Remove option" onclick="removeEditChoiceRow(this)">${I.x(16)}</button>
+          </div>`).join("")}
+        </div>
+        ${q.type==="yesno"?"":`<button type="button" class="fw-btn fw-btn--outline fw-btn--sm mt8" onclick="addEditChoiceRow()">Add option</button>`}
+        <p class="t-detail dim mt8">Mark Follow-up for answers that should appear on Follow-ups. Nothing is emailed.</p>
+      </div>`:""}
+      ${q.type==="scale"?`
+      <div class="edit-q-field">
+        <label class="t-subtle">Follow-up</label>
+        <div class="fu-marks__list">
+          ${questionChoices(q).map(opt=>`<label class="fu-marks__opt">
+            <input type="checkbox" data-fu-opt="${esc(opt)}" ${(q.followUps||[]).includes(opt)?"checked":""}>
+            <span>${esc(choiceLabel(q, opt))}</span>
+          </label>`).join("")}
+        </div>
+        <p class="t-detail dim mt8">Marked answers show on Follow-ups. Nothing is emailed.</p>
       </div>`:""}
       ${q.type==="scale"?`
       <div class="edit-q-field">
@@ -8477,17 +8629,15 @@ function editQuestionDialog(id){
 function openEditQuestion(id, opts={}){
   if(isSurveyLocked(currentSurvey())){ toast("This version is locked."); return; }
   const q = qList().find(x=>x.id===id);
-  if(!q || q.locked){
-    toast("Benchmark questions can't be edited.");
-    return;
-  }
+  if(!q) return;
   state.editQuestion = id;
   state.editQuestionIsNew = !!opts.isNew;
   state.previewQId = id;
   render();
   requestAnimationFrame(()=>{
     const input = document.getElementById("edit-q-text");
-    if(input){ input.focus(); input.select(); }
+    if(input){ input.focus(); input.select(); return; }
+    document.querySelector(".dialog--edit-q [data-fu-opt]")?.focus();
   });
 }
 function closeEditQuestion(){
@@ -8505,12 +8655,27 @@ function closeEditQuestion(){
   }
   render();
 }
+function addEditChoiceRow(){
+  const list = document.getElementById("edit-q-opt-list");
+  if(!list) return;
+  const row = document.createElement("div");
+  row.className = "edit-q-opt";
+  row.innerHTML = `<input class="fw-input" data-opt-text value="" aria-label="Option">
+    <label class="fu-marks__opt"><input type="checkbox" data-opt-fu><span>Follow-up</span></label>
+    <button type="button" class="iconbtn" aria-label="Remove option" onclick="removeEditChoiceRow(this)">${I.x(16)}</button>`;
+  list.appendChild(row);
+  row.querySelector("[data-opt-text]")?.focus();
+}
+function removeEditChoiceRow(btn){
+  const row = btn && btn.closest ? btn.closest(".edit-q-opt") : null;
+  if(row) row.remove();
+}
 function confirmEditQuestion(){
   const id = state.editQuestion;
   if(!id) return;
   const wasNew = state.editQuestionIsNew;
   const q = qList().find(x=>x.id===id);
-  if(!q || q.locked){
+  if(!q){
     state.editQuestion = null;
     state.editQuestionIsNew = false;
     render();
@@ -8522,11 +8687,29 @@ function confirmEditQuestion(){
   if(!text){ toast("Write the question text."); if(textEl) textEl.focus(); return; }
   q.text = text;
   q.required = !!(reqEl && reqEl.checked);
-  if(q.type==="choice"){
-    const optsEl = document.getElementById("edit-q-options");
-    const lines = ((optsEl && optsEl.value) || "").split(/\n/).map(s=>s.trim()).filter(Boolean);
-    if(lines.length<2){ toast("Add at least two options."); if(optsEl) optsEl.focus(); return; }
-    q.options = lines;
+  if(q.type==="choice" || q.type==="yesno"){
+    const rows = [...document.querySelectorAll("#edit-q-opt-list .edit-q-opt")];
+    const options = [];
+    const followUps = [];
+    rows.forEach(row=>{
+      const label = (row.querySelector("[data-opt-text]")?.value || "").trim();
+      if(!label) return;
+      options.push(label);
+      if(row.querySelector("[data-opt-fu]")?.checked) followUps.push(label);
+    });
+    if(options.length<2){ toast("Add at least two options."); return; }
+    const stillYesNo = q.type==="yesno" && options.length===2 && options[0]==="Yes" && options[1]==="No";
+    if(stillYesNo){
+      q.followUps = followUps;
+    } else {
+      q.type = "choice";
+      q.options = options;
+      q.followUps = followUps;
+    }
+  }
+  if(q.type==="scale"){
+    const boxes = [...document.querySelectorAll(".dialog--edit-q [data-fu-opt]")];
+    if(boxes.length) q.followUps = boxes.filter(el=>el.checked).map(el=>el.getAttribute("data-fu-opt"));
   }
   if(q.type==="scale"){
     const lo = document.getElementById("edit-q-scale-lo");
@@ -8818,12 +9001,27 @@ function surveyNameKey(e){
 }
 
 let skipSurveyDescBlur = false;
+let descCommitGuard = false;
+function guardInlineDesc(){
+  descCommitGuard = true;
+  suppressInlineOpen = true;
+  setTimeout(()=>{ descCommitGuard = false; suppressInlineOpen = false; }, 600);
+}
+function noteInlineDesc(value){
+  state.descDraft = value;
+}
+function descDraftValue(){
+  const input = document.getElementById("survey-desc-input");
+  if(input) return input.value;
+  return state.descDraft || "";
+}
 function startInlineDesc(id){
-  if(suppressInlineOpen) return;
+  if(descCommitGuard || suppressInlineOpen) return;
   const s = state.surveys.find(x=>x.id===id);
   if(!s || isSurveyLocked(s)){ toast("This version is locked."); return; }
   state.editingSurveyName = null;
   state.editingSurveyDesc = id;
+  state.descDraft = s.description || "";
   render();
   const input = document.getElementById("survey-desc-input");
   if(input){ input.focus(); input.setSelectionRange(input.value.length, input.value.length); }
@@ -8832,15 +9030,16 @@ function cancelInlineDesc(){
   if(!state.editingSurveyDesc) return;
   skipSurveyDescBlur = true;
   state.editingSurveyDesc = null;
-  holdInlineOpen();
+  state.descDraft = null;
+  guardInlineDesc();
   render();
 }
 function confirmInlineDesc(){
   const id = state.editingSurveyDesc;
   if(!id) return;
-  const input = document.getElementById("survey-desc-input");
+  const raw = descDraftValue();
   skipSurveyDescBlur = true;
-  const result = applySurveyDesc(id, input && input.value);
+  const result = applySurveyDesc(id, raw);
   if(!result.ok){
     const el = document.getElementById("survey-desc-input");
     if(el) el.focus();
@@ -8848,28 +9047,34 @@ function confirmInlineDesc(){
     return;
   }
   state.editingSurveyDesc = null;
-  holdInlineOpen();
+  state.descDraft = null;
+  guardInlineDesc();
   render();
   skipSurveyDescBlur = false;
   if(result.changed){
-    const has = !!(input && input.value || "").trim();
-    toast(has ? "Description saved." : "Description cleared.");
+    toast(raw.trim() ? "Description saved." : "Description cleared.");
   }
 }
 function onSurveyDescBlur(e){
-  if(skipSurveyDescBlur){ skipSurveyDescBlur = false; return; }
+  if(skipSurveyDescBlur || descCommitGuard){
+    skipSurveyDescBlur = false;
+    return;
+  }
   const next = e && e.relatedTarget;
   if(next && next.closest && next.closest(".survey-desc-edit")) return;
   confirmInlineDesc();
 }
-function saveInlineDesc(e){
+function commitInlineDesc(e){
   if(e){ e.preventDefault(); e.stopPropagation(); }
+  noteInlineDesc(descDraftValue());
   confirmInlineDesc();
 }
-function discardInlineDesc(e){
+function abortInlineDesc(e){
   if(e){ e.preventDefault(); e.stopPropagation(); }
   cancelInlineDesc();
 }
+function saveInlineDesc(e){ commitInlineDesc(e); }
+function discardInlineDesc(e){ abortInlineDesc(e); }
 function surveyDescKey(e){
   if(e.key==="Escape"){ e.preventDefault(); e.stopPropagation(); cancelInlineDesc(); }
   if(e.key==="Enter" && (e.metaKey || e.ctrlKey)){ e.preventDefault(); confirmInlineDesc(); }
