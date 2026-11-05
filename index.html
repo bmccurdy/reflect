@@ -1028,11 +1028,15 @@ html[data-theme="dark"] .ovx-meter > span.is-warn{background:var(--status-elevat
   padding-top:16px;padding-bottom:24px;
 }
 html[data-theme="dark"] .score-hero-dock{background:var(--base-black)}
-.score-hero-dock .fw-card,
 .score-index .fw-card{
   background:transparent;
   box-shadow:none;
 }
+.score-hero-dock .fw-card{
+  background:var(--muted);
+  box-shadow:none;
+}
+html[data-theme="dark"] .score-hero-dock .fw-card{background:var(--base-black)}
 .score-hero-dock + .sec{margin-top:0}
 .score-hero-dock:has(.is-open){z-index:8}
 .score-detail .tbl-wrap,
@@ -2456,6 +2460,7 @@ body:not(.is-locked) #gate{display:none}
   background:var(--muted);
   padding-bottom:24px;
 }
+html[data-theme="dark"] .bv-sticky{background:var(--base-black)}
 .bv-sticky .page-head{margin-bottom:0}
 .bv-sticky .survey-lock-banner{margin-bottom:0;margin-top:16px}
 .bv-nav{margin-top:16px}
