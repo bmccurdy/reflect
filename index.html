@@ -2085,9 +2085,8 @@ html[data-theme="dark"] .patient{
   .funnel-stats > div:nth-child(odd){padding-left:0;border-left:0}
   .funnel-stats > div:nth-child(even){padding-left:16px;border-left:1px solid var(--border)}
   .page-head .row,.kpi-foot{flex-wrap:wrap}
-  .page-actions{width:100%}
-  .page-actions .fw-btn{flex:1 1 calc(50% - 8px)}
-  .page-actions .fw-btn--primary{flex:1 1 100%}
+  .page-actions{width:100%;flex-wrap:nowrap}
+  .page-actions .fw-btn{flex:1 1 0;min-width:0}
   .qcard{flex-wrap:wrap}
   .qcard-body{flex:1 1 0}
   .qcard .qbtns{
@@ -2378,6 +2377,9 @@ html[data-theme="dark"] .patient{
 }
 
 @media (max-width:760px){
+  .page-actions{flex-wrap:wrap}
+  .page-actions .fw-btn{flex:1 1 calc(50% - 8px)}
+  .page-actions .fw-btn--primary{flex:1 1 100%}
   .iconbtn,.topbar .iconbtn.nav-toggle{
     width:44px;height:44px;
   }
