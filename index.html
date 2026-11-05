@@ -1027,6 +1027,12 @@ html[data-theme="dark"] .ovx-meter > span.is-warn{background:var(--status-elevat
   background:var(--muted);
   padding-top:16px;padding-bottom:24px;
 }
+html[data-theme="dark"] .score-hero-dock{background:var(--base-black)}
+.score-hero-dock .fw-card,
+.score-index .fw-card{
+  background:transparent;
+  box-shadow:none;
+}
 .score-hero-dock + .sec{margin-top:0}
 .score-hero-dock:has(.is-open){z-index:8}
 .score-detail .tbl-wrap,
@@ -1072,7 +1078,6 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   position:sticky;top:56px;z-index:2;
   min-width:0;
   padding-top:16px;
-  background:var(--muted);
 }
 .score-detail{min-width:0}
 .crew-list{margin:0;padding:8px;list-style:none}
