@@ -2558,6 +2558,7 @@ html[data-theme="dark"] .bv-sticky{background:var(--base-black)}
   font-size:13px;font-weight:700;background:var(--surface-muted);color:var(--muted-foreground);
 }
 .bv-tagbadge{gap:4px}
+.q-follow{margin:8px 0 0}
 
 /* empty state */
 .bv-emptyadd{
@@ -5032,6 +5033,10 @@ function surveyActiveTriggerId(s){
 function surveyTriggerReady(s){
   const id = surveyActiveTriggerId(s);
   return !!id && !!findTriggerDef(id);
+}
+/** Drafts need a trigger before questions. A stopped survey stays readable. */
+function surveyQuestionsOpen(s){
+  return surveyTriggerReady(s) || (!!s && s.status==="Stopped");
 }
 function surveyPriorTriggerId(s){
   const n = String(s?.priorTriggerId||"").replace(/^#/,"");
@@ -7707,7 +7712,7 @@ function bvMissingText(s, qs){
   return miss.length ? `To publish: ${miss.join(", ")}` : "";
 }
 function bvGo(tab){
-  if(tab==="questions" && !surveyTriggerReady(currentSurvey())){
+  if(tab==="questions" && !surveyQuestionsOpen(currentSurvey())){
     toast("Select a trigger first.");
     tab = "setup";
   }
@@ -7771,8 +7776,8 @@ function bvCloseAdd(){ state.bvAddOpen = false; render(); }
 function bvToggleInsert(i){ state.bvInsertAt = state.bvInsertAt===i ? null : i; render(); }
 function bvToggleSetup(){ state.bvSetupOpen = !state.bvSetupOpen; render(); }
 function bvNavTabs(s, qs){
-  const triggerReady = surveyTriggerReady(s);
-  const tab = state.bvTab==="questions" && triggerReady ? "questions" : "setup";
+  const questionsOpen = surveyQuestionsOpen(s);
+  const tab = state.bvTab==="questions" && questionsOpen ? "questions" : "setup";
   const n = committedQuestions(qs).length;
   const setupOk = bvChecklist(s, qs).filter(c=>c.tab==="setup").every(c=>c.ok);
   const setupN = setupOk && tab!=="setup"
@@ -7795,7 +7800,7 @@ function bvNavTabs(s, qs){
       <button type="button" class="bv-steps__tab${n>0?" is-ok":""}" role="tab" id="bv-tab-questions"
         aria-selected="${tab==="questions"}" ${tab==="questions"?"data-active":""}
         aria-controls="bv-panel" aria-label="Step 2, Questions${n?`, ${n} added`:""}"
-        ${triggerReady
+        ${questionsOpen
           ? `onclick="bvGo('questions')"`
           : `disabled title="Select a trigger first" aria-disabled="true"`}>
         <span class="bv-steps__n" aria-hidden="true">${qN}</span>
@@ -7904,8 +7909,14 @@ function bvTagBadge(q){
   if(!cur) return "";
   return `<span class="fw-badge fw-badge--outline bv-tagbadge">${bvI.tag(12)} ${esc(bvTagLabel(cur))}</span>`;
 }
+function followUpSummary(q){
+  const marks = (q.followUps || []).map(v=>String(v)).filter(Boolean);
+  if(!marks.length) return "";
+  return marks.map(v=>choiceLabel(q, v)).join(", ");
+}
 function bvQCard(q, i, qs, opts={}){
   const locked = !!opts.locked;
+  const flagged = locked ? followUpSummary(q) : "";
   return `<div class="qcard bv-qcard" data-qid="${q.id}">
     <span class="bv-qnum" aria-hidden="true">${i+1}</span>
     <div class="qcard-body">
@@ -7915,6 +7926,7 @@ function bvQCard(q, i, qs, opts={}){
         ${q.required?`<span class="fw-badge fw-badge--outline">Required</span>`:`<span class="t-detail dim">Optional</span>`}
         ${bvTagBadge(q)}
       </div>
+      ${flagged?`<p class="t-subtle dim q-follow">Follow-up: ${esc(flagged)}</p>`:""}
     </div>
     ${locked?"":`<div class="qbtns">
       <button class="iconbtn" aria-label="Move up" ${i===0?"disabled":""} onclick="moveQ(${i},-1)">${I.up(16)}</button>
@@ -8002,8 +8014,8 @@ function bvQuestionList(s, qs, opts={}){
 /* ---------- Setup / questions steps + add drawer ---------- */
 function bvVariantA(s, qs){
   const locked = isSurveyLocked(s);
-  const triggerReady = surveyTriggerReady(s);
-  const tab = state.bvTab==="questions" && triggerReady ? "questions" : "setup";
+  const questionsOpen = surveyQuestionsOpen(s);
+  const tab = state.bvTab==="questions" && questionsOpen ? "questions" : "setup";
   const addOpen = !locked && state.bvAddOpen;
   return `<div class="bv-body" id="bv-panel" role="tabpanel" aria-labelledby="bv-tab-${tab}">
     ${tab==="setup" ? bvSetupGrid(s)
