@@ -239,12 +239,18 @@ html[data-theme="dark"] .topbar .seg{background:color-mix(in srgb,var(--base-whi
 .survey-desc-hit:hover,.survey-desc-hit:focus-visible{color:var(--foreground)}
 .survey-desc-hit--empty{font-style:italic;color:var(--muted-foreground)}
 .survey-desc-hit--empty:hover,.survey-desc-hit--empty:focus-visible{color:var(--primary)}
-.survey-desc-edit{margin-top:6px;max-width:36rem;position:relative}
+.survey-desc-edit{
+  display:flex;align-items:flex-start;gap:4px;
+  margin-top:6px;max-width:36rem;
+}
 .survey-desc-edit .fw-textarea{
-  width:100%;min-height:56px;padding:8px 12px;padding-right:76px;
+  flex:1 1 auto;min-width:0;width:auto;
+  min-height:56px;padding:8px 12px;
   font-size:14px;line-height:20px;resize:vertical;
 }
-.survey-desc-edit .title-edit-actions{top:10px;transform:none}
+.survey-desc-edit .title-edit-actions{
+  position:static;transform:none;flex:0 0 auto;
+}
 .sv-desc{margin-top:2px;font-weight:400}
 html[data-theme="dark"] .survey-readonly-pill{
   background:var(--neutral-800);
@@ -282,7 +288,7 @@ html[data-theme="dark"] .survey-readonly-pill{
 .title-edit-field .title-edit-input{width:100%;max-width:none;padding-right:76px}
 .title-edit-actions{
   position:absolute;right:6px;top:50%;transform:translateY(-50%);
-  display:flex;align-items:center;gap:2px;
+  display:flex;align-items:center;gap:2px;z-index:1;
 }
 .title-edit-save.iconbtn{color:var(--status-resolved)}
 .title-edit-save.iconbtn:hover{background:var(--status-resolved-wash);color:var(--status-resolved)}
@@ -6643,9 +6649,9 @@ function viewSurveys(){
                 onkeydown="surveyNameKey(event)" onblur="onSurveyNameBlur()">
               <div class="title-edit-actions">
                 <button type="button" class="iconbtn title-edit-save" aria-label="Save name"
-                  onmousedown="event.preventDefault()" onclick="confirmInlineRename()">${I.check(18)}</button>
+                  onmousedown="event.preventDefault()" onmouseup="saveInlineRename(event)" onclick="saveInlineRename(event)">${I.check(18)}</button>
                 <button type="button" class="iconbtn title-edit-cancel" aria-label="Cancel rename"
-                  onmousedown="event.preventDefault()" onclick="cancelInlineRename()">${I.x(18)}</button>
+                  onmousedown="event.preventDefault()" onmouseup="discardInlineRename(event)" onclick="cancelInlineRename()">${I.x(18)}</button>
               </div>
             </div>
           </h1>`:`
@@ -6665,12 +6671,12 @@ function viewSurveys(){
             <label class="sr" for="survey-desc-input">Survey description</label>
             <textarea class="fw-input fw-textarea" id="survey-desc-input" rows="2"
               maxlength="${SURVEY_DESC_MAX}"
-              onkeydown="surveyDescKey(event)" onblur="onSurveyDescBlur()">${esc(s.description||"")}</textarea>
+              onkeydown="surveyDescKey(event)" onblur="onSurveyDescBlur(event)">${esc(s.description||"")}</textarea>
             <div class="title-edit-actions">
               <button type="button" class="iconbtn title-edit-save" aria-label="Save description"
-                onmousedown="event.preventDefault()" onclick="confirmInlineDesc()">${I.check(18)}</button>
+                onmousedown="saveInlineDesc(event)">${I.check(18)}</button>
               <button type="button" class="iconbtn title-edit-cancel" aria-label="Cancel description"
-                onmousedown="event.preventDefault()" onclick="cancelInlineDesc()">${I.x(18)}</button>
+                onmousedown="discardInlineDesc(event)">${I.x(18)}</button>
             </div>
           </div>`: surveyLocked
             ? (s.description?`<p class="survey-desc">${esc(s.description)}</p>`:"")
@@ -8718,7 +8724,9 @@ function confirmRenameSurvey(){
 }
 
 let skipSurveyNameBlur = false;
+let suppressInlineOpen = false;
 function startInlineRename(id){
+  if(suppressInlineOpen) return;
   const s = state.surveys.find(x=>x.id===id);
   if(!s || isSurveyLocked(s)){ toast("This version is locked."); return; }
   state.editingSurveyDesc = null;
@@ -8727,10 +8735,15 @@ function startInlineRename(id){
   const input = document.getElementById("survey-name-input");
   if(input){ input.focus(); input.select(); }
 }
+function holdInlineOpen(){
+  suppressInlineOpen = true;
+  setTimeout(()=>{ suppressInlineOpen = false; }, 0);
+}
 function cancelInlineRename(){
   if(!state.editingSurveyName) return;
   skipSurveyNameBlur = true;
   state.editingSurveyName = null;
+  holdInlineOpen();
   render();
 }
 function confirmInlineRename(){
@@ -8746,6 +8759,7 @@ function confirmInlineRename(){
     return;
   }
   state.editingSurveyName = null;
+  holdInlineOpen();
   render();
   skipSurveyNameBlur = false;
   if(result.changed) toast("Renamed.");
@@ -8754,6 +8768,14 @@ function onSurveyNameBlur(){
   if(skipSurveyNameBlur){ skipSurveyNameBlur = false; return; }
   confirmInlineRename();
 }
+function saveInlineRename(e){
+  if(e) e.preventDefault();
+  confirmInlineRename();
+}
+function discardInlineRename(e){
+  if(e) e.preventDefault();
+  cancelInlineRename();
+}
 function surveyNameKey(e){
   if(e.key==="Enter"){ e.preventDefault(); confirmInlineRename(); }
   if(e.key==="Escape"){ e.preventDefault(); e.stopPropagation(); cancelInlineRename(); }
@@ -8761,6 +8783,7 @@ function surveyNameKey(e){
 
 let skipSurveyDescBlur = false;
 function startInlineDesc(id){
+  if(suppressInlineOpen) return;
   const s = state.surveys.find(x=>x.id===id);
   if(!s || isSurveyLocked(s)){ toast("This version is locked."); return; }
   state.editingSurveyName = null;
@@ -8773,6 +8796,7 @@ function cancelInlineDesc(){
   if(!state.editingSurveyDesc) return;
   skipSurveyDescBlur = true;
   state.editingSurveyDesc = null;
+  holdInlineOpen();
   render();
 }
 function confirmInlineDesc(){
@@ -8788,6 +8812,7 @@ function confirmInlineDesc(){
     return;
   }
   state.editingSurveyDesc = null;
+  holdInlineOpen();
   render();
   skipSurveyDescBlur = false;
   if(result.changed){
@@ -8795,9 +8820,19 @@ function confirmInlineDesc(){
     toast(has ? "Description saved." : "Description cleared.");
   }
 }
-function onSurveyDescBlur(){
+function onSurveyDescBlur(e){
   if(skipSurveyDescBlur){ skipSurveyDescBlur = false; return; }
+  const next = e && e.relatedTarget;
+  if(next && next.closest && next.closest(".survey-desc-edit")) return;
   confirmInlineDesc();
+}
+function saveInlineDesc(e){
+  if(e){ e.preventDefault(); e.stopPropagation(); }
+  confirmInlineDesc();
+}
+function discardInlineDesc(e){
+  if(e){ e.preventDefault(); e.stopPropagation(); }
+  cancelInlineDesc();
 }
 function surveyDescKey(e){
   if(e.key==="Escape"){ e.preventDefault(); e.stopPropagation(); cancelInlineDesc(); }
