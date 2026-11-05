@@ -9,6 +9,7 @@
 <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="vendor/firstwatch/styles.css">
+<script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
 <style>
 
 :root{
@@ -3289,6 +3290,7 @@ const state = {
   archiveSurvey:null,
   surveysArchivedOpen:false,
   stopSurvey:null,
+  startSurvey:null,
   renameSurvey:null,
   editQuestion:null,
   editQuestionIsNew:false,
@@ -3381,6 +3383,7 @@ const I = {
   info:       s=>ic('<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',s),
   inbox:      s=>ic('<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1z"/>',s),
   bolt:       s=>ic('<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/>',s),
+  play:       s=>ic('<polygon points="6 3 20 12 6 21 6 3" fill="currentColor" stroke="none"/>',s),
   send:       s=>ic('<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',s),
   calendar:   s=>ic('<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',s),
   trendUp:    s=>ic('<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',s),
@@ -3470,6 +3473,7 @@ function shell(body){
   ${state.deleteSurvey?deleteConfirm(state.deleteSurvey):""}
   ${state.archiveSurvey?archiveConfirm(state.archiveSurvey):""}
   ${state.stopSurvey?stopSurveyDialog(state.stopSurvey):""}
+  ${state.startSurvey?startSurveyDialog(state.startSurvey):""}
   ${state.renameSurvey?renameDialog(state.renameSurvey):""}
   ${state.editQuestion?editQuestionDialog(state.editQuestion):""}
   ${state.editIntro?editIntroDialog(state.editIntro):""}
@@ -6320,6 +6324,69 @@ function confirmStopSurvey(andClone){
   toast("Survey stopped. Trigger freed for a new draft.", true);
   render();
 }
+function restartSurveyBlock(s){
+  if(!s || s.status!=="Stopped") return "This survey isn’t stopped.";
+  const trigId = surveyPriorTriggerId(s);
+  if(!findTriggerDef(trigId)) return "This survey has no trigger to resume.";
+  const owner = triggerOwner(trigId, s.id);
+  if(owner) return `${formatTriggerLabel(findTriggerDef(trigId))} is linked to ${owner.name}. Stop that survey before starting this one again.`;
+  const sch = s.schedule || defaultSchedule();
+  if(sch.mode==="range" && (!sch.endAt || sch.endAt.getTime()<=NOW.getTime())){
+    return "The end date has passed. Duplicate and edit to set a new schedule.";
+  }
+  return "";
+}
+function askStartSurvey(id){
+  const s = state.surveys.find(x=>x.id===id);
+  if(!s || s.status!=="Stopped") return;
+  state.surveyMenu = null;
+  state.startSurvey = id;
+  render();
+}
+function closeStartSurvey(){ state.startSurvey = null; render(); }
+function startSurveyDialog(id){
+  const s = state.surveys.find(x=>x.id===id);
+  if(!s) return "";
+  const block = restartSurveyBlock(s);
+  const trig = findTriggerDef(surveyPriorTriggerId(s));
+  const sch = s.schedule || defaultSchedule();
+  const windowCopy = sch.mode==="duration"
+    ? `Collecting runs for ${Math.max(1, Number(sch.durationDays)||30)} days from today.`
+    : sch.mode==="range" && sch.endAt
+      ? `Collecting runs through ${day(sch.endAt)}.`
+      : "Collecting stays ongoing.";
+  return `
+  <div class="scrim" style="z-index:54"></div>
+  <div class="dialog-wrap" onclick="closeStartSurvey()">
+    <div class="dialog dialog--stop" role="dialog" aria-modal="true" aria-labelledby="start-title"
+      onclick="event.stopPropagation()">
+      <h2 class="t-h4" id="start-title">Start “${esc(s.name)}” again?</h2>
+      <p class="t-body dim mt8">${block
+        ? esc(block)
+        : `Starts invitations again on ${trig?esc(formatTriggerLabel(trig)):"its trigger"}. ${esc(windowCopy)} Existing responses stay on this version.`}</p>
+      <div class="dialog-actions">
+        <button type="button" class="fw-btn fw-btn--ghost" onclick="closeStartSurvey()">${block?"Close":"Cancel"}</button>
+        ${block?"":`<button type="button" class="fw-btn fw-btn--primary" onclick="confirmStartSurvey()">${I.play(16)} Start survey</button>`}
+      </div>
+    </div>
+  </div>`;
+}
+function confirmStartSurvey(){
+  const id = state.startSurvey;
+  if(!id) return;
+  const s = state.surveys.find(x=>x.id===id);
+  const block = restartSurveyBlock(s);
+  if(block){ toast(block); closeStartSurvey(); return; }
+  const sch = s.schedule || defaultSchedule();
+  s.triggerId = surveyPriorTriggerId(s);
+  s.status = "Live";
+  s.stoppedAt = null;
+  s.endsAt = sch.mode==="duration" ? resolveEndsAt(sch, NOW) : resolveEndsAt(sch, s.publishedAt || NOW);
+  s.updated = NOW;
+  state.startSurvey = null;
+  toast(s.endsAt ? `Survey is live again through ${day(s.endsAt)}.` : "Survey is live again.", true);
+  render();
+}
 
 function viewSurveysIndex(){
   const live = state.surveys.filter(s=>s.status==="Live").length;
@@ -6551,6 +6618,9 @@ function viewSurveys(){
         ${s.status==="Live"
           ? `<button class="fw-btn fw-btn--outline" onclick="askStopSurvey('${s.id}')">${I.octagon(16)} Stop survey</button>
              <button class="fw-btn fw-btn--primary" onclick="duplicateAndEdit('${s.id}')">${I.copy(16)} Duplicate &amp; edit</button>`
+          : s.status==="Stopped"
+          ? `<button class="fw-btn fw-btn--outline" onclick="duplicateAndEdit('${s.id}')">${I.copy(16)} Duplicate &amp; edit</button>
+             <button class="fw-btn fw-btn--primary" onclick="askStartSurvey('${s.id}')">${I.play(16)} Start survey</button>`
           : `<button class="fw-btn fw-btn--primary" onclick="duplicateAndEdit('${s.id}')">${I.copy(16)} Duplicate &amp; edit</button>`}`
     : `${testSmsBtn}
         ${previewBtn}
@@ -8276,6 +8346,7 @@ function surveyRowMenu(s){
       ${surveyDisplayTriggerId(s)?`<button type="button" role="menuitem" onclick="event.preventDefault()">${I.externalLink(16)} View trigger</button>`:""}
       ${s.status!=="Draft"?`<button type="button" role="menuitem" onclick="go('#/surveys/${s.id}/responses')">${I.inbox(16)} View responses</button>`:""}
       ${s.status==="Live"?`<button type="button" role="menuitem" onclick="askStopSurvey('${s.id}')">${I.octagon(16)} Stop survey</button>`:""}
+      ${s.status==="Stopped"?`<button type="button" role="menuitem" onclick="askStartSurvey('${s.id}')">${I.play(16)} Start survey</button>`:""}
       <button type="button" role="menuitem" onclick="duplicateAndEdit('${s.id}')">${I.copy(16)} Duplicate &amp; edit</button>
       ${s.status!=="Live"?`<button type="button" role="menuitem" onclick="askArchiveSurvey('${s.id}')">${I.archive(16)} Archive</button>`:""}
       ${s.status==="Draft"?`<button type="button" role="menuitem" class="danger" onclick="askDeleteSurvey('${s.id}')">${I.trash(16)} Discard draft</button>`:""}
@@ -9063,6 +9134,7 @@ window.addEventListener("hashchange", ()=>{
   state.deleteSurvey = null;
   state.archiveSurvey = null;
   state.stopSurvey = null;
+  state.startSurvey = null;
   state.renameSurvey = null;
   state.editIntro = null;
   state.testSms = null;
@@ -9118,6 +9190,7 @@ window.addEventListener("keydown", e=>{
   if(state.deleteSurvey){ closeDeleteSurvey(); return; }
   if(state.archiveSurvey){ closeArchiveSurvey(); return; }
   if(state.stopSurvey){ closeStopSurvey(); return; }
+  if(state.startSurvey){ closeStartSurvey(); return; }
   if(state.openResponse || state.openAlert){ closeCase(); return; }
   if(state.openTrigger){ closeTrigger(); return; }
 });
