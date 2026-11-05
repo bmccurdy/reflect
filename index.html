@@ -2738,6 +2738,7 @@ const ago = d => {
 };
 const clock = d => d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
 const day = d => d.toLocaleDateString("en-US",{month:"short",day:"numeric"});
+const dayYear = d => d.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
 
 const ALERTS = [
   { id:"A-4471", status:"critical", unit:"M-12", call:"Chest pain", crew:"Alvarez / Nwosu",
@@ -2944,7 +2945,7 @@ function formatScheduleSummary(s){
     return s.endsAt ? `Ended ${day(s.endsAt)}` : "Completed";
   }
   if(s.status==="Stopped"){
-    return s.stoppedAt ? `Stopped ${day(s.stoppedAt)}` : "Stopped";
+    return s.stoppedAt ? `Stopped ${dayYear(s.stoppedAt)}` : "Stopped";
   }
   if(s.status==="Archived"){
     return s.archivedAt ? `Archived ${day(s.archivedAt)}` : "Archived";
@@ -5616,7 +5617,7 @@ function surveyTitleMeta(s){
   if(s.status==="Stopped"){
     const parts = [];
     if(s.publishedAt) parts.push(`Published ${day(s.publishedAt)}`);
-    parts.push(s.stoppedAt ? `Stopped ${day(s.stoppedAt)}` : "Stopped");
+    parts.push(s.stoppedAt ? `Stopped ${dayYear(s.stoppedAt)}` : "Stopped");
     parts.push(resp);
     if(s.version>1) parts.push(`v${s.version}`);
     return parts.map(esc).join(" · ")+trig;
