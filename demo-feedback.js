@@ -58,8 +58,8 @@
     let surveyId = "";
     if (patient) {
       page = "Patient survey";
-    } else if (hash === "#/alerts") {
-      page = "Alerts";
+    } else if (hash === "#/follow-ups" || hash === "#/alerts") {
+      page = "Follow-ups";
     } else if (hash === "#/scorecard") {
       page = "Scorecard";
     } else if (hash === "#/blink") {
