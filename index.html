@@ -757,9 +757,6 @@ html[data-theme="dark"] .ov-reading .ov-label{
 .ovx-queue strong.is-quiet{color:var(--foreground)}
 .ovx-queue span{display:block;margin-top:3px;font-size:12px;line-height:normal;font-weight:400;color:var(--muted-foreground)}
 .ovx-callback__note{font-size:13px;line-height:normal}
-.ovx-callback__meta{display:flex;gap:16px;font-size:12px;line-height:normal}
-.ovx-callback__meta .is-hot{color:var(--amber-700)}
-.ovx-callback__meta .is-dim{color:var(--muted-foreground)}
 .ovx-link{
   display:inline-flex;align-items:center;gap:4px;
   font-size:13px;line-height:normal;font-weight:700;color:var(--primary);
@@ -777,8 +774,8 @@ html[data-theme="dark"] .ov-reading .ov-label{
 .ovx-part__block{display:flex;flex-direction:column;gap:9px}
 .ovx-part__note{font-size:11px;line-height:normal;color:var(--muted-foreground)}
 .ovx-hline{height:1px;background:var(--border)}
-.ovx-meter{height:6px;border-radius:3px;background:var(--neutral-100);overflow:hidden}
-.ovx-meter > span{display:block;height:6px;background:var(--primary);border-radius:3px}
+.ovx-meter{height:8px;border-radius:4px;background:var(--neutral-100);overflow:hidden}
+.ovx-meter > span{display:block;height:8px;background:var(--primary);border-radius:4px}
 .ovx-meter > span.is-warn{background:var(--amber-700)}
 .ovx-ratebar{height:8px;border-radius:4px;background:var(--neutral-100);overflow:hidden}
 .ovx-ratebar > span{display:block;height:8px;background:var(--primary)}
@@ -818,7 +815,6 @@ html[data-theme="dark"] .ovx-follow{border-color:color-mix(in srgb,var(--status-
 html[data-theme="dark"] .ovx-qrow--warn .ovx-qnps{color:var(--status-critical)}
 html[data-theme="dark"] .ovx-follow__flag,
 html[data-theme="dark"] .ovx-queue strong:not(.is-quiet),
-html[data-theme="dark"] .ovx-callback__meta .is-hot,
 html[data-theme="dark"] .ovx-grow b.is-warn{color:var(--status-elevated)}
 html[data-theme="dark"] .ovx-meter > span.is-warn{background:var(--status-elevated)}
 .ovx-withheld{font-size:12px;line-height:normal;color:var(--muted-foreground)}
@@ -900,7 +896,16 @@ html[data-theme="dark"] .ovx-meter > span.is-warn{background:var(--status-elevat
   color:inherit;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
 }
 .fw-toast__action:hover{background:color-mix(in srgb, currentColor 12%, transparent)}
-.tbl--alerts td{vertical-align:middle;font-size:14px;line-height:20px}
+.tbl--alerts td{vertical-align:top;font-size:14px;line-height:20px}
+.tbl--alerts tr.al-group{cursor:pointer;transition:background-color var(--dur-micro) var(--ease-out)}
+@media (hover:hover){
+  .tbl--alerts tr.al-group:hover{background:var(--accent)}
+  .tbl--alerts tr.al-group:hover .al-reason{text-decoration:underline}
+}
+.tbl--alerts tr.al-group:focus-visible{outline:2px solid var(--ring);outline-offset:-2px}
+.al-pair + .al-pair{margin-top:12px}
+.al-pair .al-reason{display:block;font-weight:700;color:var(--primary);text-align:left}
+.al-pair .snip{margin-top:2px}
 .tbl--alerts{
   table-layout:fixed;width:100%;
 }
@@ -921,6 +926,10 @@ html[data-theme="dark"] .ovx-meter > span.is-warn{background:var(--status-elevat
 .tbl--alerts .al-unit > span,
 .tbl--alerts .trig-tip{color:var(--muted-foreground)}
 .tbl--alerts .al-unit > span{white-space:nowrap}
+.tbl--responses tbody tr{transition:background-color var(--dur-micro) var(--ease-out)}
+@media (hover:hover){
+  .tbl--responses tbody tr:hover{background:var(--accent)}
+}
 .tbl--responses td{vertical-align:middle}
 .tbl--responses .rs-when,
 .tbl--responses .rs-area,
@@ -935,13 +944,50 @@ html[data-theme="dark"] .ovx-meter > span.is-warn{background:var(--status-elevat
   font-size:14px;line-height:20px;
 }
 .tbl--responses .rs-quote .rs-excerpt{font-weight:700}
-.tbl--responses .rs-quote{
-  width:100%;
+.tbl--responses .rs-quote{width:100%}
+.tbl--responses .rs-quote-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
 }
 .tbl--responses .rs-quote .rs-excerpt{
-  width:100%;
+  flex:0 1 auto;
+  min-width:0;
+  width:auto;
   max-width:none;
 }
+.tbl--responses .rs-sent{
+  flex:0 0 auto;
+  color:var(--muted-foreground);
+  font-size:14px;
+  line-height:20px;
+  font-weight:500;
+}
+.tbl--responses .rs-check{
+  width:52px;
+  padding-right:4px;
+  text-align:center;
+  vertical-align:middle;
+}
+.tbl--responses .rs-check .fw-check{margin:0}
+.rs-bulk{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px 16px;
+  padding:12px 16px;
+  border-bottom:1px solid var(--border);
+  background:var(--surface-hover);
+}
+.rs-bulk[hidden]{display:none}
+.rs-bulk-count{
+  margin:0;
+  font-size:14px;
+  line-height:20px;
+  font-weight:600;
+}
+.rs-bulk-actions{display:flex;align-items:center;gap:8px;margin-left:auto;flex:0 0 auto}
 
 .menu-wrap{position:relative;display:inline-flex}
 .menu-wrap.open{z-index:31}
@@ -1148,6 +1194,9 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
 
 .ans{padding:12px 0;border-bottom:1px solid var(--border)}
 .ans:last-child{border-bottom:0}
+.ans-q{font-size:14px;line-height:20px;color:var(--muted-foreground)}
+.ans-a{margin-top:4px;font-size:16px;line-height:24px;font-weight:700;color:var(--foreground)}
+.ans-a .dim{font-weight:400}
 .num-link{color:var(--primary);font-weight:400;text-decoration:none}
 .num-link:hover{text-decoration:underline}
 .num-link--muted{color:var(--muted-foreground);font-weight:400}
@@ -1317,6 +1366,9 @@ button.num-link{
 .kv{display:grid;grid-template-columns:132px 1fr;gap:8px 16px;font-size:14px;line-height:20px}
 .kv dt{color:var(--muted-foreground)}
 .kv dd{margin:0}
+.kv .incident-link{display:inline-flex;align-items:center;gap:4px}
+.kv .incident-link svg{flex:0 0 auto}
+.kv .incident-link:hover .incident-link__num{text-decoration:underline}
 .drawer--trigger .drawer-head{
   padding:16px 18px;
   gap:12px;
@@ -1391,18 +1443,19 @@ button.num-link{
 .al-survey-name{display:block;font-weight:400;font-size:14px;line-height:20px}
 .alert-source{margin-bottom:20px}
 .alert-source dd{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px}
-.case-survey{
-  display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;
-  margin-bottom:16px;font-size:14px;line-height:20px;
-  position:relative;z-index:5;
-}
-.case-survey__name{font-weight:700;color:var(--primary);text-decoration:none}
-.case-survey__name:hover{text-decoration:underline}
 .case-section{
   margin-top:24px;padding-top:16px;border-top:1px solid var(--border);
 }
+#case-answers .ans:last-child{padding-bottom:0}
+#case-callback{
+  margin-top:12px;
+  padding-top:28px;
+}
 .case-section__title{
   margin:0 0 12px;font-size:14px;line-height:20px;font-weight:700;color:var(--foreground);
+}
+#case-callback > .case-section__title{
+  font-size:20px;line-height:28px;font-weight:600;letter-spacing:-.005em;
 }
 .case-section .ans:first-child{padding-top:0}
 .case-section .log{border-top:0;margin-top:16px;padding-top:0}
@@ -2251,9 +2304,13 @@ html[data-theme="dark"] .patient{
   .tbl--surveys .sv-group-toggle{padding:12px 0}
   .tbl--surveys .sv-empty-row td{flex:1 1 100%}
   .tbl--responses tbody tr{align-items:flex-start;padding:16px 0;gap:8px 12px}
+  .tbl--responses .rs-check{
+    order:0;flex:0 0 auto;width:auto;padding:1px 0 0;text-align:left;
+  }
   .tbl--responses .rs-quote{
     order:1;flex:1 1 0;min-width:0;
   }
+  .rs-bulk{padding:12px 16px}
   .tbl--responses .rs-when,
   .tbl--responses .rs-area,
   .tbl--responses .rs-band,
@@ -2266,19 +2323,17 @@ html[data-theme="dark"] .patient{
     font-size:13px;line-height:20px;
   }
   .tbl--alerts tbody tr{align-items:flex-start;padding:16px 0;gap:8px 12px}
-  .tbl--alerts .al-why{display:contents;width:auto}
-  .tbl--alerts .al-reason{
-    order:1;flex:1 1 0;min-width:0;
+  .tbl--alerts .al-why{display:block;flex:1 1 0;min-width:0;width:auto}
+  .tbl--alerts .al-pair .al-reason{
     font-size:16px;line-height:24px;font-weight:700;
   }
   .tbl--alerts .al-opened{
     order:2;flex:0 0 auto;width:auto;margin-left:auto;
     font-size:13px;line-height:20px;padding-top:2px;
   }
-  .tbl--alerts .al-why .snip{
-    order:3;flex:1 1 100%;width:100%;max-width:none;
-    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;
-    overflow:hidden;
+  .tbl--alerts .al-pair .snip{
+    display:block;max-width:none;width:100%;
+    -webkit-line-clamp:unset;line-clamp:unset;overflow:visible;
   }
   .tbl--alerts .al-meta{
     order:4;flex:1 1 100%;width:100%;margin-top:0;
@@ -3025,11 +3080,13 @@ const QUESTIONS = [
 
 const QUESTIONS_NOTRANS = [
   { id:"n1", text:"Did the crew listen to why you didn't want to go to the hospital?", type:"yesno", required:true, locked:true,
-    lockNote:"Benchmark question — shared wording across participating agencies" },
+    lockNote:"Benchmark question — shared wording across participating agencies", followUps:["No"] },
   { id:"n2", text:"Did you feel cared for by the crew?", type:"yesno", required:true, locked:true,
-    lockNote:"Benchmark question — shared wording across participating agencies" },
-  { id:"n3", text:"Did someone explain what could happen if you stayed?", type:"yesno", required:true, locked:false },
-  { id:"n4", text:"Would you like us to call you?", type:"yesno", required:false, locked:false }
+    lockNote:"Benchmark question — shared wording across participating agencies", followUps:["No"] },
+  { id:"n3", text:"Did someone explain what could happen if you stayed?", type:"yesno", required:true, locked:false,
+    followUps:["No"] },
+  { id:"n4", text:"Would you like us to call you?", type:"yesno", required:false, locked:false,
+    followUps:["Yes"] }
 ];
 
 const QUESTIONS_Q3 = [
@@ -3293,17 +3350,66 @@ const COMMENDATIONS = [
     patient:"P. Alvarez", sent:true }
 ];
 
+/* One name per completed survey. Alerts that point at a response use the same name. */
+const PATIENT_BY_RESPONSE = {
+  "R-9911":"Helen Cho",
+  "R-9910":"Robert Ellis",
+  "R-9908":"Carmen Reyes",
+  "R-9907":"Dana Whitfield",
+  "R-9906":"James Okonkwo",
+  "R-9905":"Priya Shah",
+  "R-9904":"Margaret Hale",
+  "R-9903":"Nina Patel",
+  "R-9902":"Thomas Brennan",
+  "R-9901":"Evelyn Marsh",
+  "R-9899":"Luis Ortega",
+  "R-9898":"Sandra Kim",
+  "R-9897":"Rosa Ibarra",
+  "R-9896":"Jordan Blake",
+  "R-9895":"Frank Moretti",
+  "R-9894":"Dorothy Pell",
+  "R-4404":"Alex Brennan",
+  "R-4403":"Walter Singh",
+  "R-4402":"Elena Vasquez",
+  "R-4401":"Ruth Coleman",
+  "R-4400":"Andre Brooks",
+  "R-4399":"Maya Chen",
+  "R-4398":"Hector Ruiz",
+  "R-7003":"Gloria Bennett",
+  "R-7002":"Lucia Moreno",
+  "R-7001":"Harold Stein",
+  "R-7102":"Patricia Holm",
+  "R-7101":"Omar Haddad"
+};
+function patientForResponse(r){
+  return r && PATIENT_BY_RESPONSE[r.id] || "";
+}
+function patientForAlert(alertId){
+  for(const rows of Object.values(RESPONSES)){
+    const row = rows.find(r=>r.alert===alertId);
+    if(row) return patientForResponse(row);
+  }
+  return "";
+}
+
 /* mutable runtime state */
 const state = {
   route:"#/",
   theme:"light",
-  alerts: ALERTS.map(a=>({...a, log:[...a.log]})),
+  alerts: ALERTS.map(a=>({...a, patient:patientForAlert(a.id), log:[...a.log]})),
   followUpStatus:{},
   followUpLog:{},
   surveys: SURVEYS.map(s=>normalizeSurvey(s)),
-  surveyQuestions: Object.fromEntries(Object.entries(SURVEY_BANK).map(([k,qs])=>[k, qs.map(q=>({...q}))])),
-  responses: Object.fromEntries(Object.entries(RESPONSES).map(([k,rows])=>[k, rows.map(r=>({...r, answers:{...r.answers}}))])),
+  surveyQuestions: Object.fromEntries(Object.entries(SURVEY_BANK).map(([k,qs])=>[k, qs.map(q=>{
+    const copy = { ...q };
+    if(k==="sv_storm") delete copy.followUps;
+    else if(Array.isArray(copy.followUps)) copy.followUps = [...copy.followUps];
+    return copy;
+  })])),
+  responses: Object.fromEntries(Object.entries(RESPONSES).map(([k,rows])=>[k, rows.map(r=>({...r, patient:patientForResponse(r), answers:{...r.answers}}))])),
   openAlert:null,
+  followUpGroup:false,
+  followUpGroupKey:null,
   openResponse:null,
   openTrigger:null,
   triggerRulesTab:"inclusion",
@@ -3313,8 +3419,8 @@ const state = {
   triggerSelectShowUsed:false,
   scheduleDurationOpen:false,
   scheduleDurationActive:0,
-  responseFilter:"all",
   responseLimit:11,
+  selectedResponses:{},
   drawerKey:null,
   deleteSurvey:null,
   archiveSurvey:null,
@@ -3435,7 +3541,7 @@ const statusBadge = k => {
 };
 const esc = t => String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 
-const openCount = () => followUpQueue().filter(a=>a.status!=="resolved").length;
+const openCount = () => followUpGroups(followUpQueue().filter(a=>a.status!=="resolved")).length;
 const critCount = () => state.alerts.filter(a=>a.status==="critical").length;
 
 /* ============================================================
@@ -4446,8 +4552,6 @@ function viewOverview(){
   const demo = ovxDemographicRows(slices);
   const alerts = ovxOpenAlerts(slices);
   const callbacks = alerts.length;
-  const flagged = slices.reduce((sum,d)=>sum+Math.round(d.flagged*d.scale), 0);
-  const comments = slices.reduce((sum,d)=>sum+(d.hasText ? Math.round(d.comments*d.scale) : 0), 0);
   const attention = ovxAttention(questions);
   const showChange = questions.some(q=>q.delta!=null);
   const period = ovxPeriodLabel();
@@ -4515,11 +4619,7 @@ function viewOverview(){
                 <p><strong class="${quietQueue?"is-quiet":""}">${esc(quietQueue?"—":overviewOldestWait(alerts))}</strong><span>Oldest wait</span></p>
               </div>
               <p class="ovx-callback__note">${quietQueue?"No open callbacks in this range.":"Prioritize the longest-waiting patient."}</p>
-              <p class="ovx-callback__meta">
-                <span class="${flagged?"is-hot":"is-dim"}">${flagged.toLocaleString("en-US")} flagged responses</span>
-                <span class="is-dim">${comments.toLocaleString("en-US")} written comments</span>
-              </p>
-              <a class="ovx-link" href="#/follow-ups">Open follow-ups ${I.arrow(14)}</a>
+              <a class="ovx-link" href="#/follow-ups" onclick="openFollowUpsFromOverview(event)">Open follow-ups ${I.arrow(14)}</a>
             </div>
           </section>
           <section class="ovx-card ovx-part" aria-labelledby="ovx-part">
@@ -5147,6 +5247,13 @@ let queueFilter = "open";
 let alertSurveyFilter = "all";
 function setFilter(f){ queueFilter = f; render(); }
 function setAlertSurveyFilter(id){ alertSurveyFilter = id; render(); }
+function openFollowUpsFromOverview(e){
+  if(e) e.preventDefault();
+  const scope = state.overviewScope;
+  const live = state.surveys.some(s=>s.status==="Live" && s.id===scope);
+  alertSurveyFilter = scope!=="all" && live ? scope : "all";
+  go("#/follow-ups");
+}
 
 function alertsForStatusFilter(alerts, bucket){
   if(bucket==="all") return alerts;
@@ -5181,18 +5288,19 @@ function alertLinkedResponse(a){
     qs: state.surveyQuestions[src.surveyId] || []
   };
 }
-function alertDisplayTitle(a){
-  const linked = alertLinkedResponse(a);
-  if(linked) return alertTitleFromResponse(linked.response, linked.qs);
-  return "Survey response";
-}
-function alertDisplayQuote(a){
-  const linked = alertLinkedResponse(a);
-  if(linked){
-    const q = responseQuote(linked.response, linked.qs);
-    if(q) return q;
+function followUpHeading(a){
+  if(a && a.kind==="marked"){
+    return { question: a.question, answer: a.answer || "", comment: a.comment || "" };
   }
-  return a.quote || "";
+  const linked = a ? alertLinkedResponse(a) : null;
+  const reason = linked ? primaryFollowUp(linked.response, linked.qs) : null;
+  const comment = linked ? responseQuote(linked.response, linked.qs) : "";
+  const answer = reason && reason.answer ? reason.answer : "";
+  return {
+    question: reason && reason.question ? reason.question : "Survey response",
+    answer,
+    comment: comment && comment!==answer ? comment : ""
+  };
 }
 function alertSurveyChipLabel(s){
   if(s.id==="sv_post") return "Post-transport";
@@ -5249,18 +5357,16 @@ function caseContext(){
   }
   return null;
 }
-function caseSurveyLine(ctx){
-  const { survey, surveyId } = ctx;
-  if(!survey || !surveyId) return "";
-  const id = surveyDisplayTriggerId(survey);
-  return `<div class="case-survey">
-    <a class="case-survey__name" href="#/surveys/${esc(surveyId)}" onclick="closeCase()">${esc(survey.name)}</a>
-    ${id?`<span class="t-subtle">${surveyTriggerCell(survey)}</span>`:""}
-  </div>`;
-}
 function caseMetaLine(ctx){
-  const { alert, response } = ctx;
-  const at = response?.at || alert?.at;
+  const { entry, alert, response, surveyId } = ctx;
+  if(state.followUpGroup && surveyId && response){
+    const items = followUpGroupItems(surveyId, response.id);
+    if(items.length){
+      const at = items.reduce((m,a)=>a.at>m ? a.at : m, items[0].at);
+      return ago(at);
+    }
+  }
+  const at = entry==="alert" ? (alert?.at || response?.at) : (response?.at || alert?.at);
   return at ? ago(at) : "";
 }
 function placeholderIncidentNo(seed){
@@ -5281,7 +5387,7 @@ function caseDetailFields(ctx){
     band: response?.band || alert?.band || "",
     lang: response?.lang || alert?.lang || "",
     phone: response?.phone || alert?.phone || "",
-    payor: alert?.payor || response?.payor || "",
+    patient: response?.patient || alert?.patient || "",
     incident: alert?.incident || response?.incident
       || placeholderIncidentNo(`${alert?.id||""}|${response?.id||""}|${alert?.phone||response?.phone||""}`)
   };
@@ -5292,29 +5398,30 @@ function caseIncidentKv(ctx){
   const unitCrew = [d.unit, d.crew].filter(Boolean).join(" — ");
   const dash = `<span class="dim">—</span>`;
   return `<dl class="kv">
-      <dt>Incident #</dt><dd>${esc(d.incident)}</dd>
+      <dt>Incident #</dt><dd><a class="incident-link" href="#" onclick="event.preventDefault()"><span class="incident-link__num">${esc(d.incident)}</span>${I.externalLink(14)}</a></dd>
       <dt>Unit / crew</dt><dd>${unitCrew?esc(unitCrew):dash}</dd>
       <dt>Call type</dt><dd>${d.call?esc(d.call):dash}</dd>
       <dt>Area</dt><dd>${d.zone?esc(d.zone):dash}</dd>
       <dt>Age band</dt><dd>${d.band?esc(d.band):dash}</dd>
       <dt>Language</dt><dd>${d.lang?esc(d.lang):dash}</dd>
       <dt>Phone #</dt><dd>${d.phone?esc(d.phone):dash}</dd>
-      <dt>Payor</dt><dd>${d.payor?esc(d.payor):dash}</dd>
+      <dt>Patient name</dt><dd>${d.patient?esc(d.patient):dash}</dd>
     </dl>`;
 }
-function caseAnswersHtml(response, qs, quote){
+function caseAnswersHtml(response, qs, onlyFlagged){
   if(!response){
     return `<p class="t-subtle dim">No linked survey response.</p>`;
   }
-  if(!qs.length){
-    return `<p class="t-subtle dim">No questions on this survey.</p>`;
-  }
-  return qs.filter(q=>!(quote && String(response.answers[q.id]||"")===quote)).map(q=>{
-    const v = response.answers[q.id];
+  const list = onlyFlagged
+    ? (qs||[]).filter(q=>q.type!=="text" && optionNeedsFollowUp(q, response.answers?.[q.id]))
+    : (qs||[]);
+  if(!list.length) return "";
+  return list.map(q=>{
+    const v = response.answers?.[q.id];
     const empty = v===undefined || v==="";
     return `<div class="ans">
-      <div class="t-subtle dim">${esc(questionLabel(q))}</div>
-      <div class="t-pui" style="font-weight:700;margin-top:4px">${empty?`<span class="dim">Skipped</span>`:esc(String(v))}</div>
+      <div class="ans-q">${esc(q.text)}</div>
+      <div class="ans-a">${empty?`<span class="dim">Skipped</span>`:esc(choiceLabel(q, v))}</div>
     </div>`;
   }).join("");
 }
@@ -5323,7 +5430,7 @@ function caseCallbackHtml(alert){
   const open = alert.status!=="resolved";
   return `
   <div class="case-section" id="case-callback">
-    <h3 class="case-section__title">Callback</h3>
+    <h2 class="case-section__title">Callback</h2>
     ${open?`
     <label class="t-subtle" style="font-weight:700;display:block;margin-bottom:8px" for="note-${alert.id}">
       What happened on the callback?</label>
@@ -5345,25 +5452,25 @@ function caseCallbackHtml(alert){
 function caseDrawer(){
   const ctx = caseContext();
   if(!ctx) return "";
-  const { entry, alert, survey, surveyId, response, marked } = ctx;
+  const { entry, alert, survey, surveyId, response } = ctx;
   const qs = surveyId ? (state.surveyQuestions[surveyId] || []) : [];
-  const quote = (response ? responseQuote(response, qs) : "") || (alert && alert.quote) || "";
-  const title = marked
-    ? marked.question
-    : response
-      ? alertTitleFromResponse(response, qs)
-      : (alert ? alertDisplayTitle(alert) : "Survey response");
+  const grouped = !!(state.followUpGroup && response && surveyId);
+  const groupItems = grouped ? followUpGroupItems(surveyId, response.id) : [];
+  const groupRecord = grouped ? followUpGroupRecord(surveyId, response.id) : null;
+  const callbackAlert = groupRecord || alert;
+  const title = grouped
+    ? (groupItems.length===1 ? followUpHeading(groupItems[0]).question : (survey ? survey.name : "Survey response"))
+    : entry==="alert" && alert
+      ? followUpHeading(alert).question
+      : survey
+        ? survey.name
+        : "Survey response";
   const meta = caseMetaLine(ctx);
+  const onlyFlagged = grouped || entry==="alert";
+  const answers = caseAnswersHtml(response, qs, onlyFlagged);
   const incident = caseIncidentKv(ctx);
-  const details = caseDetailFields(ctx);
-  const preferLang = details?.lang && details.lang!=="English" ? details.lang : "";
-  const idLine = marked
-    ? (response ? `Response <span style="font-weight:700">${esc(response.id)}</span>` : "")
-    : alert
-    ? `Follow-up <span style="font-weight:700">${esc(alert.id)}</span>${response?` · Response <span style="font-weight:700">${esc(response.id)}</span>`:""}`
-    : (response ? `Response <span style="font-weight:700">${esc(response.id)}</span>` : "");
-  const showCallbackFoot = !!(alert && alert.status!=="resolved");
-  const nav = entry==="response" && response ? responseNeighbors(state.openResponse) : null;
+  const showCallbackFoot = !!(callbackAlert && callbackAlert.status!=="resolved");
+  const nav = !grouped && entry==="response" && response ? responseNeighbors(state.openResponse) : null;
   const showNavFoot = !!(nav && nav.total>1);
   const paging = entry==="response" && isResponsePaging();
   const navHtml = showNavFoot?`
@@ -5376,9 +5483,9 @@ function caseDrawer(){
       </div>`:"";
   const callbackHtml = showCallbackFoot?`
       <div class="drawer-foot__actions">
-        <button class="fw-btn fw-btn--primary" onclick="logAndResolve('${alert.id}')">
+        <button class="fw-btn fw-btn--primary" onclick="logAndResolve('${callbackAlert.id}')">
           ${I.checkCircle(16)} Log and close</button>
-        <button class="fw-btn fw-btn--outline" onclick="logOnly('${alert.id}')">Log without closing</button>
+        <button class="fw-btn fw-btn--outline" onclick="logOnly('${callbackAlert.id}')">Log without closing</button>
       </div>`:"";
   return `
   <div class="scrim" onclick="closeCase()"></div>
@@ -5386,30 +5493,18 @@ function caseDrawer(){
     role="dialog" aria-modal="true" aria-labelledby="case-title">
     <div class="drawer-head">
       <div>
-        ${entry==="response"
+        ${entry==="response" && !grouped
           ? `<button type="button" class="drawer-back" onclick="closeCase()">${I.chevronLeft(16)} Responses</button>`
           : ""}
         <h2 class="t-h4" id="case-title">${esc(title)}</h2>
-        <p class="t-subtle dim">${idLine}${meta?`${idLine?" · ":""}${esc(meta)}`:""}</p>
+        ${meta?`<p class="t-subtle dim">${esc(meta)}</p>`:""}
       </div>
       <button class="iconbtn drawer-x" onclick="closeCase()" aria-label="Close">${I.x(18)}</button>
     </div>
     <div class="drawer-body">
-      ${caseSurveyLine(ctx)}
-      ${preferLang?`<div class="stale">
-        ${I.users(16)} Patient prefers ${esc(preferLang)}. Use the interpreter line for the callback.</div>`:""}
-      ${marked?`<div class="case-section">
-        <h3 class="case-section__title">Answer</h3>
-        <p class="t-pui" style="font-weight:700;margin-top:4px">${esc(marked.answer)}</p>
-        <h3 class="case-section__title" style="margin-top:16px">Comment</h3>
-        <p class="t-p" style="margin-top:4px">${marked.comment?esc(marked.comment):`<span class="dim">No written comment</span>`}</p>
-      </div>`:""}
-      ${quote && !(marked && quote===marked.comment)?`<div class="quote">“${esc(quote)}”</div>`:""}
-      ${incident?`<div class="${quote||preferLang?"mt24":""}">${incident}</div>`:""}
-      ${caseCallbackHtml(alert)}
-      <div class="case-section" id="case-answers">
-        ${caseAnswersHtml(response, qs, quote)}
-      </div>
+      ${incident}
+      ${answers?`<div class="case-section" id="case-answers">${answers}</div>`:""}
+      ${caseCallbackHtml(callbackAlert)}
     </div>
     ${showNavFoot||showCallbackFoot?`<div class="drawer-foot${showCallbackFoot&&showNavFoot?" drawer-foot--stacked":""}${showCallbackFoot&&!showNavFoot?" drawer-foot--alert":""}">
       ${navHtml}${callbackHtml}
@@ -5460,7 +5555,7 @@ function markedFollowUps(){
           call:r.call || linked?.call || "",
           crew:r.crew || linked?.crew || "",
           phone:r.phone || linked?.phone || "",
-          payor:linked?.payor || "",
+          patient:r.patient || linked?.patient || "",
           zone:r.zone || linked?.zone || "",
           band:r.band || linked?.band || "",
           lang:r.lang || linked?.lang || "",
@@ -5475,14 +5570,53 @@ function responseMarkedKey(surveyId, responseId){
   return `${surveyId}|${responseId}`;
 }
 function followUpQueue(){
-  const marked = markedFollowUps();
-  const covered = new Set(marked.map(a=>responseMarkedKey(a.surveyId, a.responseId)));
-  const legacy = state.alerts.filter(a=>{
-    const src = alertSource(a.id);
-    if(!src) return true;
-    return !covered.has(responseMarkedKey(src.surveyId, src.responseId));
+  return markedFollowUps().slice().sort((a,b)=>b.at - a.at);
+}
+function followUpGroupKey(a){
+  if(a && a.surveyId && a.responseId) return responseMarkedKey(a.surveyId, a.responseId);
+  const src = a ? alertSource(a.id) : null;
+  if(src) return responseMarkedKey(src.surveyId, src.responseId);
+  return "alert:"+(a ? a.id : "");
+}
+function followUpGroups(items){
+  const order = [];
+  const map = new Map();
+  (items||[]).forEach(a=>{
+    const key = followUpGroupKey(a);
+    if(!map.has(key)){ map.set(key, []); order.push(key); }
+    map.get(key).push(a);
   });
-  return [...marked, ...legacy].sort((a,b)=>b.at - a.at);
+  return order.map(key=>{
+    const rows = map.get(key).slice();
+    const sid = rows[0].surveyId || alertSource(rows[0].id)?.surveyId || "";
+    const rid = rows[0].responseId || alertSource(rows[0].id)?.responseId || "";
+    const qs = sid ? (state.surveyQuestions[sid] || []) : [];
+    const index = new Map(qs.map((q,i)=>[q.text, i]));
+    rows.sort((a,b)=>{
+      const ia = index.has(followUpHeading(a).question) ? index.get(followUpHeading(a).question) : 999;
+      const ib = index.has(followUpHeading(b).question) ? index.get(followUpHeading(b).question) : 999;
+      return ia - ib;
+    });
+    const at = rows.reduce((m,a)=>a.at>m ? a.at : m, rows[0].at);
+    return { key, rows, at, surveyId:sid, responseId:rid };
+  });
+}
+function followUpGroupItems(surveyId, responseId){
+  const key = responseMarkedKey(surveyId, responseId);
+  return followUpQueue().filter(a=>followUpGroupKey(a)===key);
+}
+function followUpGroupRecord(surveyId, responseId){
+  const items = followUpGroupItems(surveyId, responseId);
+  if(!items.length) return null;
+  const id = `grp|${surveyId}|${responseId}`;
+  const own = state.followUpLog[id] || [];
+  const prior = items.flatMap(a=>a.log || []);
+  const log = [...own, ...prior].sort((a,b)=>b.at - a.at);
+  return {
+    id,
+    status: items.some(a=>a.status!=="resolved") ? "elevated" : "resolved",
+    log
+  };
 }
 function followUpById(id){
   return state.alerts.find(a=>a.id===id) || markedFollowUps().find(a=>a.id===id) || null;
@@ -5495,18 +5629,23 @@ function viewAlerts(){
   const surveyFilter = alertSurveyFilter!=="all" && !liveSurveyIds.has(alertSurveyFilter)
     ? "all"
     : alertSurveyFilter;
-  const list = surveyFilter==="all"
+  const filtered = surveyFilter==="all"
     ? statusList
     : statusList.filter(a=>alertSurveyId(a)===surveyFilter);
+  const groups = followUpGroups(filtered);
   const o = openCount();
-  const surveyCount = sid => statusList.filter(a=>alertSurveyId(a)===sid).length;
+  const surveyCount = sid => followUpGroups(statusList.filter(a=>alertSurveyId(a)===sid)).length;
 
-  const tabs = [["open","Open",o],["resolved","Closed",all.filter(a=>a.status==="resolved").length],["all","All",all.length]];
+  const tabs = [
+    ["open","Open",o],
+    ["resolved","Closed",followUpGroups(all.filter(a=>a.status==="resolved")).length],
+    ["all","All",followUpGroups(all).length]
+  ];
 
-  const emptyTitle = statusList.length && surveyFilter!=="all"
+  const emptyTitle = followUpGroups(statusList).length && surveyFilter!=="all"
     ? "No follow-ups for this survey in this view."
     : "Nothing needs a callback right now.";
-  const emptySub = statusList.length && surveyFilter!=="all"
+  const emptySub = followUpGroups(statusList).length && surveyFilter!=="all"
     ? "Try all surveys or another status tab."
     : "New follow-ups show up here as responses come in.";
 
@@ -5524,7 +5663,7 @@ function viewAlerts(){
     </div>
     <div class="al-survey-filters" role="group" aria-label="Filter follow-ups by survey">
       <button type="button" class="lib-chip" aria-pressed="${surveyFilter==="all"}"
-        onclick="setAlertSurveyFilter('all')">All surveys (${statusList.length})</button>
+        onclick="setAlertSurveyFilter('all')">All surveys (${followUpGroups(statusList).length})</button>
       ${liveSurveys.map(s=>`
       <button type="button" class="lib-chip" aria-pressed="${surveyFilter===s.id}"
         title="${esc(s.name)}"
@@ -5533,7 +5672,7 @@ function viewAlerts(){
   </div>
   ${staleBanner()}
   <div class="fw-card sec" style="padding:0">
-    ${list.length?`
+    ${groups.length?`
     <div class="tbl-inset">
     <table class="tbl tbl--stack tbl--alerts">
       <thead><tr>
@@ -5543,24 +5682,29 @@ function viewAlerts(){
         <th class="al-opened">Sent</th>
       </tr></thead>
       <tbody aria-live="polite">
-        ${list.map(a=>{
-          const marked = a.kind==="marked";
-          const title = marked ? a.question : alertDisplayTitle(a);
-          const quote = marked ? "" : alertDisplayQuote(a);
-          const answerLine = marked ? a.answer : "";
-          const commentLine = marked ? (a.comment || "No written comment") : "";
+        ${groups.map(g=>{
+          const head = g.rows.find(a=>a.unit) || g.rows[0];
+          const pairs = g.rows.map(a=>{
+            const heading = followUpHeading(a);
+            return `<div class="al-pair">
+              <div class="al-reason">${esc(heading.question)}</div>
+              ${heading.answer?`<div class="snip">${esc(heading.answer)}</div>`:""}
+            </div>`;
+          }).join("");
+          const sid = esc(g.surveyId||"");
+          const rid = esc(g.responseId||"");
+          const aid = esc(g.rows[0].id||"");
           return `
-          <tr id="row-${a.id}">
+          <tr class="al-group" id="row-${esc(g.key)}" tabindex="0"
+            onclick="openFollowUpRow(event,'${sid}','${rid}','${aid}')"
+            onkeydown="openFollowUpRowKey(event,'${sid}','${rid}','${aid}')">
             <td class="al-why">
-              <button type="button" class="al-reason num-link" onclick="openAlert('${a.id}')">${esc(title)}</button>
-              ${answerLine?`<div class="snip">${esc(answerLine)}</div>`:""}
-              ${marked?`<div class="snip${a.comment?"":" dim"}">${esc(commentLine)}</div>`:""}
-              ${quote?`<div class="snip">${esc(quote)}</div>`:""}
-              <div class="al-meta">${a.unit?`${esc(a.unit)} · `:""}${ago(a.at)}</div>
+              ${pairs}
+              <div class="al-meta">${head.unit?`${esc(head.unit)} · `:""}${ago(g.at)}</div>
             </td>
-            ${alertSurveyCell(a)}
-            <td class="al-unit"><span style="font-size:14px;line-height:20px">${esc(a.unit)}</span><div class="t-subtle dim">${esc(a.call)}</div></td>
-            <td class="dim al-opened">${ago(a.at)}</td>
+            ${alertSurveyCell(head)}
+            <td class="al-unit"><span style="font-size:14px;line-height:20px">${esc(head.unit||"")}</span><div class="t-subtle dim">${esc(head.call||"")}</div></td>
+            <td class="dim al-opened">${ago(g.at)}</td>
           </tr>`;
         }).join("")}
       </tbody>
@@ -6910,6 +7054,30 @@ function negativeSeverity(q, v){
   }
   return 0.4;
 }
+function primaryFollowUp(r, qs){
+  if(!r) return null;
+  const list = qs || [];
+  const answers = r.answers || {};
+  const negatives = list
+    .filter(q=>isNegativeAnswer(q, answers[q.id]))
+    .slice()
+    .sort((a,b)=>negativeSeverity(b, answers[b.id]) - negativeSeverity(a, answers[a.id]));
+  let q = negatives[0];
+  if(!q && responseWantsCall(r, list)){
+    q = list.find(x=>x.type==="yesno" && /call you/i.test(x.text));
+  }
+  if(!q){
+    const texts = list.filter(x=>x.type==="text" && answers[x.id]);
+    q = texts.find(x=>/better/i.test(x.text))
+      || texts.find(x=>!/do well|did well/i.test(x.text))
+      || texts[0];
+  }
+  if(!q) q = list.find(x=>answers[x.id]!==undefined && answers[x.id]!=="");
+  if(!q) return null;
+  const value = answers[q.id];
+  const empty = value===undefined || value==="";
+  return { question: q.text, answer: empty ? "" : choiceLabel(q, value) };
+}
 function alertYesNoTitle(q, v){
   const label = questionLabel(q);
   const s = String(v).toLowerCase();
@@ -6965,24 +7133,12 @@ function responseTitle(r, qs, alert){
 function loadedResponses(id){
   return responsesFor(id).slice().sort((a,b)=>b.at-a.at);
 }
-function filteredResponses(id, qs){
-  const loaded = loadedResponses(id);
-  if(state.responseFilter==="flagged") return loaded.filter(r=>r.alert);
-  if(state.responseFilter==="callback") return loaded.filter(r=>responseWantsCall(r, qs));
-  return loaded;
-}
-function setResponseFilter(f){
-  state.responseFilter = f;
-  state.responseLimit = RESPONSE_PAGE;
-  render();
-}
 function showOlderResponses(){
   state.responseLimit += RESPONSE_PAGE;
   render();
 }
 function responseNeighbors(ref){
-  const qs = state.surveyQuestions[ref.surveyId] || [];
-  const list = filteredResponses(ref.surveyId, qs).slice(0, state.responseLimit);
+  const list = loadedResponses(ref.surveyId).slice(0, state.responseLimit);
   const i = list.findIndex(x=>x.id===ref.id);
   return {
     prev: i>0 ? list[i-1] : null,
@@ -7001,29 +7157,87 @@ function focusCaseDrawer(){
 }
 function focusResponseDrawer(){ focusCaseDrawer(); }
 
+function responseChecked(surveyId, id){
+  return !!state.selectedResponses[surveyId+":"+id];
+}
+function visibleSurveyResponses(){
+  const s = currentSurvey();
+  if(!s) return [];
+  return loadedResponses(s.id).slice(0, state.responseLimit);
+}
+function sendableResponses(){
+  const s = currentSurvey();
+  if(!s) return [];
+  return visibleSurveyResponses().filter(r=>!responseBlinkSent(s.id, r.id));
+}
+function selectedSendable(){
+  const s = currentSurvey();
+  if(!s) return [];
+  return sendableResponses().filter(r=>responseChecked(s.id, r.id));
+}
+function syncResponseBulkBar(){
+  const bar = document.querySelector(".rs-bulk");
+  if(!bar) return;
+  const n = selectedSendable().length;
+  bar.hidden = n===0;
+  const num = bar.querySelector(".rs-bulk-n");
+  if(num) num.textContent = String(n);
+}
+function syncResponsesSelectAll(){
+  const box = document.querySelector(".tbl--responses .rs-check-all");
+  const s = currentSurvey();
+  if(box && s){
+    const sendable = sendableResponses();
+    const n = sendable.filter(r=>responseChecked(s.id, r.id)).length;
+    box.disabled = sendable.length===0;
+    box.checked = sendable.length>0 && n===sendable.length;
+    box.indeterminate = n>0 && n<sendable.length;
+  }
+  syncResponseBulkBar();
+}
+function setResponseChecked(surveyId, id, on){
+  if(responseBlinkSent(surveyId, id)) return;
+  const key = surveyId+":"+id;
+  if(on) state.selectedResponses[key] = true;
+  else delete state.selectedResponses[key];
+  syncResponsesSelectAll();
+}
+function setAllVisibleResponses(on){
+  const s = currentSurvey();
+  if(!s) return;
+  sendableResponses().forEach(r=>{
+    const key = s.id+":"+r.id;
+    if(on) state.selectedResponses[key] = true;
+    else delete state.selectedResponses[key];
+  });
+  document.querySelectorAll(".tbl--responses .rs-check-row").forEach(box=>{
+    if(!box.disabled) box.checked = on;
+  });
+  syncResponsesSelectAll();
+}
+function clearResponseSelection(){
+  const s = currentSurvey();
+  if(!s) return;
+  visibleSurveyResponses().forEach(r=>{
+    delete state.selectedResponses[s.id+":"+r.id];
+  });
+  document.querySelectorAll(".tbl--responses .rs-check-row").forEach(box=>{
+    if(!box.disabled) box.checked = false;
+  });
+  syncResponsesSelectAll();
+}
 function viewSurveyResponses(){
   const s = currentSurvey();
   if(!s) return viewSurveysIndex();
   const qs = qList();
   const loaded = loadedResponses(s.id);
-  const flaggedN = loaded.filter(r=>r.alert).length;
-  const callN = loaded.filter(r=>responseWantsCall(r, qs)).length;
-  const filtered = filteredResponses(s.id, qs);
-  const visible = filtered.slice(0, state.responseLimit);
+  const visible = loaded.slice(0, state.responseLimit);
   const total = s.responses;
-  const hasMoreLoaded = filtered.length > visible.length;
-  const hasMoreProduct = state.responseFilter==="all" && loaded.length < total;
-  const filter = state.responseFilter;
+  const hasMoreLoaded = loaded.length > visible.length;
+  const hasMoreProduct = loaded.length < total;
   const subtitle = !total ? "None collected yet"
-    : filter==="flagged" ? `${filtered.length} flagged`
-    : filter==="callback" ? `${filtered.length} asked for a call`
     : (visible.length<total ? `${visible.length} of ${total}` : `${total} collected`);
-  const tabs = [
-    ["all","All", loaded.length],
-    ["flagged","Flagged", flaggedN],
-    ["callback","Call", callN]
-  ];
-  const emptyFilter = loaded.length && !visible.length;
+  const ready = visible.filter(r=>responseChecked(s.id, r.id) && !responseBlinkSent(s.id, r.id));
   return `
   <div class="page-head">
     <div class="crumbs"><a href="#/">Overview</a><span class="sep">/</span><a href="#/surveys">Surveys</a>
@@ -7032,27 +7246,48 @@ function viewSurveyResponses(){
     <a class="page-back" href="#/surveys/${s.id}">${I.chevronLeft(16)} ${esc(s.name)}</a>
     <div class="between">
       <div>
-        <h1 class="t-h2">Responses</h1>
+        <h1 class="t-h2">${esc(s.name)} responses</h1>
         ${total?`<p class="t-p dim">${subtitle}</p>`:""}
       </div>
     </div>
-    ${loaded.length?`<div class="seg rs-filters" role="group" aria-label="Filter responses">
-      ${tabs.map(([k,l,n])=>`<button aria-pressed="${filter===k}" aria-label="${k==="callback"?"Wants a call":l}, ${n}" onclick="setResponseFilter('${k}')">${l} (${n})</button>`).join("")}
-    </div>`:""}
   </div>
   ${visible.length?`<div class="fw-card fw-card-flush">
+    <div class="rs-bulk" ${ready.length?"":"hidden"}>
+      <p class="rs-bulk-count"><span class="rs-bulk-n">${ready.length}</span> selected</p>
+      <div class="rs-bulk-actions">
+        <button class="fw-btn fw-btn--ghost fw-btn--sm" type="button" onclick="clearResponseSelection()">Clear</button>
+        <button class="fw-btn fw-btn--primary fw-btn--sm" type="button" onclick="sendSelectedToBlink()">${I.arrow(14)} Send to Blink</button>
+      </div>
+    </div>
     <div class="tbl-inset">
     <table class="tbl tbl--stack tbl--responses">
-      <thead><tr><th>What they said</th><th>When</th><th>Area</th><th>Age</th><th>Language</th></tr></thead>
+      <thead><tr>
+        <th class="rs-check" scope="col">
+          <input class="fw-check rs-check-all" type="checkbox" aria-label="Select all responses"
+            onchange="setAllVisibleResponses(this.checked)">
+        </th>
+        <th>What they said</th><th>Sent</th><th>Area</th><th>Age</th><th>Language</th>
+      </tr></thead>
       <tbody>
         ${visible.map(r=>{
           const excerpt = responseExcerpt(r, qs);
           const meta = [ago(r.at), r.zone, r.band, r.lang].filter(Boolean).join(" · ");
+          const sent = responseBlinkSent(s.id, r.id);
           return `
           <tr id="row-${r.id}">
+            <td class="rs-check">
+              <input class="fw-check rs-check-row" type="checkbox"
+                aria-label="${sent?"Already sent to Blink":"Select this response"}"
+                ${sent?"disabled":""}
+                ${!sent && responseChecked(s.id, r.id)?"checked":""}
+                onchange="setResponseChecked('${esc(s.id)}','${esc(r.id)}', this.checked)">
+            </td>
             <td class="rs-quote">
-              <a class="rs-excerpt" href="#/surveys/${esc(s.id)}/responses"
-                onclick="event.preventDefault(); openResponse('${esc(s.id)}','${esc(r.id)}')">${esc(excerpt)}</a>
+              <div class="rs-quote-row">
+                <a class="rs-excerpt" href="#/surveys/${esc(s.id)}/responses"
+                  onclick="event.preventDefault(); openResponse('${esc(s.id)}','${esc(r.id)}')">${esc(excerpt)}</a>
+                ${sent?`<span class="rs-sent">Sent to Blink</span>`:""}
+              </div>
             </td>
             <td class="dim rs-when">${ago(r.at)}</td>
             <td class="rs-area">${esc(r.zone||"—")}</td>
@@ -7067,13 +7302,7 @@ function viewSurveyResponses(){
     ${hasMoreLoaded?`<div class="rs-more">
       <button class="fw-btn fw-btn--outline" type="button" onclick="showOlderResponses()">Show older</button>
     </div>`: hasMoreProduct?`<p class="t-detail dim rs-more">Showing the ${visible.length} most recent. Older responses aren't in this prototype.</p>`:""}
-  </div>`: emptyFilter?`<div class="fw-card empty">
-      <div class="dim" style="display:flex;justify-content:center;margin-bottom:12px">${I.inbox(32)}</div>
-      <div class="t">No matches.</div>
-      <div class="s t-p">${filter==="flagged"
-        ? "Nothing in this set is flagged."
-        : "Nobody in this set asked for a call."}</div>
-    </div>`:`
+  </div>`:`
     <div class="fw-card empty">
       <div class="dim" style="display:flex;justify-content:center;margin-bottom:12px">${I.inbox(32)}</div>
       <div class="t">No responses yet.</div>
@@ -7087,6 +7316,8 @@ function viewSurveyResponses(){
 }
 
 function openResponse(surveyId, id){
+  state.followUpGroup = false;
+  state.followUpGroupKey = null;
   state.openAlert = null;
   state.openTrigger = null;
   state.openResponse = { surveyId, id };
@@ -7126,8 +7357,47 @@ function closeResponse(){
   });
 }
 function closeCase(){
+  if(state.followUpGroup){
+    const key = state.followUpGroupKey;
+    state.followUpGroup = false;
+    state.followUpGroupKey = null;
+    state.openResponse = null;
+    state.openAlert = null;
+    render();
+    requestAnimationFrame(()=>{
+      const row = key && document.getElementById("row-"+key);
+      if(row) row.focus();
+    });
+    return;
+  }
   if(state.openResponse){ closeResponse(); return; }
   if(state.openAlert){ closeAlert(); }
+}
+function openFollowUpRow(event, surveyId, responseId, alertId){
+  if(event.target.closest("a, button, .trig-tip")) return;
+  openFollowUpGroup(surveyId, responseId, alertId);
+}
+function openFollowUpRowKey(event, surveyId, responseId, alertId){
+  if(event.key!=="Enter" && event.key!==" ") return;
+  if(event.target.closest("a, button, .trig-tip")) return;
+  event.preventDefault();
+  openFollowUpGroup(surveyId, responseId, alertId);
+}
+function openFollowUpGroup(surveyId, responseId, alertId){
+  state.openTrigger = null;
+  state.followUpGroup = true;
+  state.followUpGroupKey = surveyId && responseId
+    ? responseMarkedKey(surveyId, responseId)
+    : "alert:"+alertId;
+  if(surveyId && responseId){
+    state.openAlert = null;
+    state.openResponse = { surveyId, id:responseId };
+  } else {
+    state.openResponse = null;
+    state.openAlert = alertId || null;
+  }
+  render();
+  requestAnimationFrame(focusCaseDrawer);
 }
 function openAlert(id){
   state.openResponse = null;
@@ -8240,6 +8510,44 @@ function sizeLibList(){
   requestAnimationFrame(apply);
 }
 
+function responseBlinkKey(surveyId, id){
+  return "resp:"+surveyId+":"+id;
+}
+function responseBlinkSent(surveyId, id){
+  return !!state.blinkSent[responseBlinkKey(surveyId, id)];
+}
+function queueResponseForBlink(surveyId, id){
+  const key = responseBlinkKey(surveyId, id);
+  if(state.blinkSent[key]) return false;
+  const r = (state.responses[surveyId]||[]).find(x=>x.id===id);
+  if(!r) return false;
+  const qs = state.surveyQuestions[surveyId] || [];
+  const alert = r.alert ? state.alerts.find(a=>a.id===r.alert) : null;
+  if(!COMMENDATIONS.some(c=>c.id===key)){
+    COMMENDATIONS.unshift({
+      id: key,
+      crew: r.crew || (alert && alert.crew) || "Crew",
+      unit: r.unit || (alert && alert.unit) || "",
+      call: r.call || (alert && alert.call) || "",
+      text: responseExcerpt(r, qs),
+      patient: r.patient || patientForResponse(r) || "Patient",
+      lang: r.lang && r.lang!=="English" ? r.lang : undefined,
+      sent: false
+    });
+  }
+  state.blinkSent[key] = true;
+  delete state.selectedResponses[surveyId+":"+id];
+  return true;
+}
+function sendSelectedToBlink(){
+  const s = currentSurvey();
+  if(!s) return;
+  const rows = selectedSendable();
+  if(!rows.length) return;
+  const n = rows.filter(r=>queueResponseForBlink(s.id, r.id)).length;
+  if(!n) return;
+  toast(n===1 ? "Sent 1 to Blink." : `Sent ${n} to Blink.`);
+}
 function blinkSend(id){
   state.blinkSent[id] = true;
   toast("Sent to Blink feed.");
@@ -8249,11 +8557,30 @@ function noteFor(id){
   const el = document.getElementById("note-"+id);
   return el ? el.value.trim() : "";
 }
+function applyGroupFollowUp(id, entry, close){
+  const parts = id.split("|");
+  const items = followUpGroupItems(parts[1], parts[2]);
+  if(!items.length) return false;
+  if(!state.followUpLog[id]) state.followUpLog[id] = [];
+  state.followUpLog[id].unshift(entry);
+  if(close){
+    items.forEach(item=>{
+      const a = state.alerts.find(x=>x.id===item.id);
+      if(a) a.status = "resolved";
+      else state.followUpStatus[item.id] = "resolved";
+    });
+  }
+  return true;
+}
 function logOnly(id){
   const t = noteFor(id);
   if(!t){ toast("Add a note first, then log it."); return; }
-  const a = state.alerts.find(x=>x.id===id);
   const entry = { who:"You", at:NOW, text:t };
+  if(id.startsWith("grp|")){
+    if(!applyGroupFollowUp(id, entry, false)) return;
+    render(); toast("Logged."); return;
+  }
+  const a = state.alerts.find(x=>x.id===id);
   if(a) a.log.unshift(entry);
   else if(markedFollowUps().some(x=>x.id===id)){
     if(!state.followUpLog[id]) state.followUpLog[id] = [];
@@ -8264,19 +8591,27 @@ function logOnly(id){
 function logAndResolve(id){
   const t = noteFor(id);
   if(!t){ toast("Add a note before closing this out."); return; }
-  const a = state.alerts.find(x=>x.id===id);
   const entry = { who:"You", at:NOW, text:t };
-  if(a){
-    a.log.unshift(entry);
-    a.status = "resolved";
-  } else if(markedFollowUps().some(x=>x.id===id)){
-    if(!state.followUpLog[id]) state.followUpLog[id] = [];
-    state.followUpLog[id].unshift(entry);
-    state.followUpStatus[id] = "resolved";
-  } else return;
+  let rowId = id;
+  if(id.startsWith("grp|")){
+    if(!applyGroupFollowUp(id, entry, true)) return;
+    rowId = responseMarkedKey(id.split("|")[1], id.split("|")[2]);
+  } else {
+    const a = state.alerts.find(x=>x.id===id);
+    if(a){
+      a.log.unshift(entry);
+      a.status = "resolved";
+    } else if(markedFollowUps().some(x=>x.id===id)){
+      if(!state.followUpLog[id]) state.followUpLog[id] = [];
+      state.followUpLog[id].unshift(entry);
+      state.followUpStatus[id] = "resolved";
+    } else return;
+  }
+  state.followUpGroup = false;
+  state.followUpGroupKey = null;
   state.openAlert = null;
   state.openResponse = null;
-  const row = document.getElementById("row-"+id);
+  const row = document.getElementById("row-"+rowId);
   if(row && !matchMedia("(prefers-reduced-motion: reduce)").matches){
     row.classList.add("resolving");
     setTimeout(()=>{ render(); toast("Closed."); }, 180);
@@ -9399,6 +9734,7 @@ function render(){
   else if(h.startsWith("#/surveys/")) body = viewSurveys();
   else body = viewOverview();
   root.innerHTML = shell(body);
+  syncResponsesSelectAll();
   document.body.classList.toggle("nav-open", !!state.navOpen);
   document.body.classList.toggle("drawer-open", !!(state.openAlert||state.openResponse||state.openTrigger||state.bvAddOpen));
   restoreLibScroll();
@@ -9423,13 +9759,14 @@ window.addEventListener("hashchange", ()=>{
   state.editingSurveyDesc = null;
   state.surveyMenu = null;
   state.previewSurvey = false;
+  state.followUpGroup = false;
+  state.followUpGroupKey = null;
   state.openResponse = null;
   state.openTrigger = null;
   state.triggerSelectOpen = false;
   state.triggerSelectQuery = "";
   state.triggerSelectShowUsed = false;
   state.scheduleDurationOpen = false;
-  state.responseFilter = "all";
   state.responseLimit = RESPONSE_PAGE;
   state.navOpen = false;
   state.scrollPreserve = null;
