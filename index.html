@@ -5661,7 +5661,7 @@ function viewAlerts(){
         <th class="al-why">Reason</th>
         <th class="al-survey">Survey</th>
         <th class="al-unit">Unit</th>
-        <th class="al-opened">Sent</th>
+        <th class="al-opened">Received</th>
       </tr></thead>
       <tbody aria-live="polite">
         ${groups.map(g=>{
@@ -7247,7 +7247,7 @@ function viewSurveyResponses(){
           <input class="fw-check rs-check-all" type="checkbox" aria-label="Select all responses"
             onchange="setAllVisibleResponses(this.checked)">
         </th>
-        <th>Feedback</th><th>Sent</th><th>Area</th><th>Age</th><th>Language</th>
+        <th>Feedback</th><th>Received</th><th>Area</th><th>Age</th><th>Language</th>
       </tr></thead>
       <tbody>
         ${visible.map(r=>{
