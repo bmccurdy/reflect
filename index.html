@@ -3448,9 +3448,6 @@ const state = {
   overviewTag:"all",
   overviewTagOpen:false,
   overviewTagActive:0,
-  overviewPayer:"all",
-  overviewPayerOpen:false,
-  overviewPayerActive:0,
   pSlide:null,
   pBusy:false,
   survey:{ step:0, answers:{}, locale:"en" }
@@ -4181,8 +4178,7 @@ const OVX_TAGS = [
 const OVX_FILTERS = {
   scope:{ value:"overviewScope", open:"overviewScopeOpen", active:"overviewScopeActive" },
   period:{ value:"overviewPeriod", open:"overviewPeriodOpen", active:"overviewPeriodActive" },
-  tag:{ value:"overviewTag", open:"overviewTagOpen", active:"overviewTagActive" },
-  payer:{ value:"overviewPayer", open:"overviewPayerOpen", active:"overviewPayerActive" }
+  tag:{ value:"overviewTag", open:"overviewTagOpen", active:"overviewTagActive" }
 };
 function ovxLiveSurveys(){
   return state.surveys.filter(s=>s.status==="Live");
@@ -4192,21 +4188,14 @@ function ovxScopeOptions(){
     ovxLiveSurveys().map(s=>({ key:s.id, label:s.name }))
   );
 }
-function ovxPayerOptions(){
-  return [{ key:"all", label:"All payers" }].concat(
-    OVERVIEW_PAYORS.map(p=>({ key:p.label, label:p.label }))
-  );
-}
 function ovxOptions(which){
   if(which==="scope") return ovxScopeOptions();
   if(which==="tag") return OVX_TAGS;
-  if(which==="payer") return ovxPayerOptions();
   return OVERVIEW_PERIODS;
 }
 function ovxNormalizeFilters(){
   if(!ovxScopeOptions().some(o=>o.key===state.overviewScope)) state.overviewScope = "all";
   if(!OVX_TAGS.some(o=>o.key===state.overviewTag)) state.overviewTag = "all";
-  if(!ovxPayerOptions().some(o=>o.key===state.overviewPayer)) state.overviewPayer = "all";
 }
 function ovxPeriodLabel(){
   const p = OVERVIEW_PERIODS.find(x=>x.key===state.overviewPeriod) || OVERVIEW_PERIODS[1];
@@ -4331,20 +4320,11 @@ function ovxTagged(questions){
   const tag = state.overviewTag || "all";
   return questions.filter(q=>tag==="all" || q.tag===tag);
 }
-function ovxPayerShareOf(d){
-  if(state.overviewPayer==="all") return 1;
-  if(!d.completed) return 0;
-  const row = d.payors.find(p=>p.label===state.overviewPayer);
-  return row ? row.n / d.completed : 0;
-}
 function ovxPayorRows(slices){
-  const labels = state.overviewPayer==="all"
-    ? OVERVIEW_PAYORS.map(p=>p.label)
-    : [state.overviewPayer];
-  return labels.map(label=>({
-    label,
+  return OVERVIEW_PAYORS.map(p=>({
+    label:p.label,
     n: slices.reduce((sum,d)=>{
-      const row = d.payors.find(p=>p.label===label);
+      const row = d.payors.find(x=>x.label===p.label);
       return sum + (row ? row.n : 0);
     }, 0)
   })).sort((a,b)=>b.n - a.n);
@@ -4368,7 +4348,7 @@ function ovxDemographicRows(slices){
   const counts = OVERVIEW_DEMOGRAPHICS.map(()=>0);
   let total = 0;
   slices.forEach(d=>{
-    const t = Math.round(d.completed * ovxPayerShareOf(d));
+    const t = d.completed;
     total += t;
     dims.forEach(dim=>{
       const idx = idxOf(dim);
@@ -4440,8 +4420,7 @@ function ovxFiltersAtDefault(){
     && state.overviewPeriod==="30d"
     && !state.overviewCustomStart
     && !state.overviewCustomEnd
-    && state.overviewTag==="all"
-    && state.overviewPayer==="all";
+    && state.overviewTag==="all";
 }
 function ovxClearFilters(){
   state.overviewScope = "all";
@@ -4452,8 +4431,6 @@ function ovxClearFilters(){
   state.overviewCustomEnd = "";
   state.overviewTag = "all";
   state.overviewTagActive = 0;
-  state.overviewPayer = "all";
-  state.overviewPayerActive = 0;
   ovxCloseMenus();
   render();
 }
@@ -4461,7 +4438,6 @@ function ovxCloseMenus(){
   state.overviewScopeOpen = false;
   state.overviewPeriodOpen = false;
   state.overviewTagOpen = false;
-  state.overviewPayerOpen = false;
   state.overviewSurveyOpen = false;
 }
 function ovxToggle(which, e){
@@ -4537,7 +4513,6 @@ function viewOverview(){
   const attention = ovxAttention(questions);
   const showChange = questions.some(q=>q.delta!=null);
   const period = ovxPeriodLabel();
-  const payer = state.overviewPayer==="all" ? "" : state.overviewPayer;
   const quietQueue = callbacks===0;
   const scopeName = slices.length===1 ? slices[0].survey.name : "Live surveys";
   return `
@@ -4551,7 +4526,6 @@ function viewOverview(){
       ${ovxSelect("scope","Survey scope","ovx-field--scope")}
       ${ovxSelect("period","Date range","ovx-field--std")}
       ${ovxSelect("tag","Tag","ovx-field--std")}
-      ${ovxSelect("payer","Primary payer","ovx-field--std")}
       <button type="button" class="fw-btn fw-btn--outline fw-btn--md ovx-clear" onclick="ovxClearFilters()"${ovxFiltersAtDefault()?" disabled":""}>Clear all</button>
     </div>
     <div class="ovx-workspace">
@@ -4626,7 +4600,7 @@ function viewOverview(){
       <section class="ovx-card ovx-who" aria-labelledby="ovx-who">
         <div class="ovx-who__head">
           <h2 id="ovx-who">Who is responding</h2>
-          <p>${esc(scopeName)} · ${esc(period)}${payer?` · ${esc(payer)}`:""}</p>
+          <p>${esc(scopeName)} · ${esc(period)}</p>
         </div>
         <div class="ovx-who__grid">
           <div class="ovx-block">
@@ -9771,7 +9745,7 @@ window.addEventListener("keydown", e=>{
   if(document.querySelector(".p-lang .fw-select.is-open")){ pLangClose(); return; }
   if(state.triggerSelectOpen){ state.triggerSelectOpen = false; triggerSelectPaint(); return; }
   if(state.scheduleDurationOpen){ state.scheduleDurationOpen = false; scheduleDurationPaint(); return; }
-  if(state.overviewScopeOpen || state.overviewTagOpen || state.overviewPayerOpen || state.overviewPeriodOpen){
+  if(state.overviewScopeOpen || state.overviewTagOpen || state.overviewPeriodOpen){
     ovxCloseMenus(); render(); return;
   }
   if(state.overviewSurveyOpen){ state.overviewSurveyOpen = false; render(); return; }
@@ -9808,7 +9782,7 @@ window.addEventListener("mousedown", e=>{
     state.scheduleDurationOpen = false;
     scheduleDurationPaint(false);
   }
-  if((state.overviewPeriodOpen || state.overviewScopeOpen || state.overviewTagOpen || state.overviewPayerOpen)
+  if((state.overviewPeriodOpen || state.overviewScopeOpen || state.overviewTagOpen)
     && !e.target.closest(".ov-period-wrap") && !e.target.closest(".ovx-select")){
     ovxCloseMenus();
     render();
