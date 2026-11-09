@@ -1223,7 +1223,11 @@ html[data-theme="dark"] .tbl th.group-sys{background:var(--muted);color:var(--mu
   color:var(--foreground);
   text-decoration:underline dotted;text-underline-offset:4px;text-decoration-thickness:1.5px;
 }
+.trig-tip:has(.num-link){
+  cursor:default;color:inherit;text-decoration:none;
+}
 .trig-tip:focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:var(--radius-sm,4px)}
+.trig-tip:has(.num-link):focus-visible{outline:none}
 .trig-tip__card{
   position:absolute;left:0;top:calc(100% + 10px);z-index:30;
   display:none;flex-direction:column;gap:6px;
@@ -1395,9 +1399,6 @@ button.num-link{
 }
 .drawer--trigger .drawer-head .t-subtle{
   font-size:12px;line-height:18px;
-}
-.drawer--trigger .drawer-head .fw-badge{
-  font-size:11px;line-height:16px;padding:2px 7px;
 }
 .drawer--trigger .drawer-body{
   display:flex;flex-direction:column;gap:14px;
@@ -5174,10 +5175,7 @@ function triggerDrawer(callId){
   <aside class="drawer drawer--trigger" role="dialog" aria-modal="true" aria-labelledby="trigger-title">
     <div class="drawer-head">
       <div>
-        ${t
-          ? `<span class="fw-badge fw-badge--secondary">${esc(t.type||"Trigger")}</span>`
-          : `<span class="fw-badge fw-badge--secondary">Unknown</span>`}
-        <h2 class="t-h4 mt8 trigger-id-line" id="trigger-title">
+        <h2 class="t-h4 trigger-id-line" id="trigger-title">
           <span class="t-subtle dim" style="font-weight:400;font-size:14px">Trigger ID</span>
           <span style="font-family:var(--font-sans);font-weight:400;font-size:14px">${esc(call)}</span>
         </h2>
@@ -5864,7 +5862,10 @@ function surveyTriggerCell(s){
   const t = findTriggerDef(id);
   const num = formatTriggerId(id);
   const tipId = `trig-tip-${esc(String(id).replace(/^#/,""))}-${esc(s.id||"")}`;
-  return `<span class="trig-tip" tabindex="0" aria-describedby="${tipId}">${esc(num)}
+  const label = `Open trigger ${num}${t?`, ${t.name}`:""}`;
+  return `<span class="trig-tip" aria-describedby="${tipId}">
+    <button type="button" class="num-link" onclick="event.stopPropagation(); openTrigger('${esc(id)}')"
+      aria-label="${esc(label)}" aria-describedby="${tipId}">${esc(num)}</button>
     <span class="trig-tip__card" role="tooltip" id="${tipId}">
       <span class="trig-tip__label">Trigger name</span>
       <span class="trig-tip__name">${esc(t?t.name:"Unknown trigger")}</span>
