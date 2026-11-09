@@ -926,6 +926,23 @@ html[data-theme="dark"] .ovx-meter > span.is-warn{background:var(--status-elevat
 .tbl--alerts .al-unit > span,
 .tbl--alerts .trig-tip{color:var(--muted-foreground)}
 .tbl--alerts .al-unit > span{white-space:nowrap}
+.tbl-sort{
+  display:inline-flex;align-items:center;gap:6px;
+  margin:0;padding:0;border:0;background:transparent;
+  font:inherit;font-weight:500;color:inherit;cursor:pointer;
+  border-radius:var(--radius-md);
+}
+.tbl-sort:hover{color:var(--foreground)}
+.tbl-sort:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
+.tbl-sort[aria-sort="ascending"] .tbl-sort__ico,
+.tbl-sort[aria-sort="descending"] .tbl-sort__ico{color:var(--foreground)}
+.tbl-sort__ico{
+  display:inline-flex;flex:0 0 auto;color:var(--muted-foreground);
+  opacity:.55;transition:opacity var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.tbl-sort:hover .tbl-sort__ico,
+.tbl-sort[aria-sort="ascending"] .tbl-sort__ico,
+.tbl-sort[aria-sort="descending"] .tbl-sort__ico{opacity:1}
 .tbl--responses tbody tr{transition:background-color var(--dur-micro) var(--ease-out)}
 @media (hover:hover){
   .tbl--responses tbody tr:hover{background:var(--accent)}
@@ -5201,8 +5218,54 @@ function closeTrigger(){
    ============================================================ */
 let queueFilter = "open";
 let alertSurveyFilter = "all";
+let followUpSort = { key:"received", dir:"desc" };
 function setFilter(f){ queueFilter = f; render(); }
 function setAlertSurveyFilter(id){ alertSurveyFilter = id; render(); }
+function setFollowUpSort(key){
+  if(key!=="survey" && key!=="received") return;
+  if(followUpSort.key===key){
+    followUpSort = { key, dir: followUpSort.dir==="asc" ? "desc" : "asc" };
+  } else {
+    followUpSort = { key, dir: key==="received" ? "desc" : "asc" };
+  }
+  render();
+}
+function followUpGroupSurveyName(g){
+  const sid = g.surveyId || (g.rows[0] && alertSurveyId(g.rows[0])) || "";
+  const survey = sid ? state.surveys.find(s=>s.id===sid) : null;
+  return survey ? survey.name : "";
+}
+function sortFollowUpGroups(groups){
+  const list = groups.slice();
+  const dir = followUpSort.dir==="asc" ? 1 : -1;
+  if(followUpSort.key==="survey"){
+    list.sort((a,b)=>{
+      const an = followUpGroupSurveyName(a).toLowerCase();
+      const bn = followUpGroupSurveyName(b).toLowerCase();
+      if(an!==bn) return an < bn ? -dir : dir;
+      return (b.at - a.at);
+    });
+  } else {
+    list.sort((a,b)=>{
+      if(a.at!==b.at) return (a.at - b.at) * dir;
+      return followUpGroupSurveyName(a).localeCompare(followUpGroupSurveyName(b));
+    });
+  }
+  return list;
+}
+function followUpSortHeader(key, label, cls){
+  const on = followUpSort.key===key;
+  const aria = on ? (followUpSort.dir==="asc" ? "ascending" : "descending") : "none";
+  const ico = on && followUpSort.dir==="asc" ? I.up(14) : I.down(14);
+  return `<th class="${cls}" aria-sort="${aria}">
+    <button type="button" class="tbl-sort" aria-sort="${aria}"
+      aria-label="Sort by ${esc(label)}${on?`, ${followUpSort.dir==="asc"?"ascending":"descending"}`:""}"
+      onclick="setFollowUpSort('${key}')">
+      <span>${esc(label)}</span>
+      <span class="tbl-sort__ico" aria-hidden="true">${ico}</span>
+    </button>
+  </th>`;
+}
 function openFollowUpsFromOverview(e){
   if(e) e.preventDefault();
   const scope = state.overviewScope;
@@ -5588,7 +5651,7 @@ function viewAlerts(){
   const filtered = surveyFilter==="all"
     ? statusList
     : statusList.filter(a=>alertSurveyId(a)===surveyFilter);
-  const groups = followUpGroups(filtered);
+  const groups = sortFollowUpGroups(followUpGroups(filtered));
   const o = openCount();
   const surveyCount = sid => followUpGroups(statusList.filter(a=>alertSurveyId(a)===sid)).length;
 
@@ -5633,9 +5696,9 @@ function viewAlerts(){
     <table class="tbl tbl--stack tbl--alerts">
       <thead><tr>
         <th class="al-why">Reason</th>
-        <th class="al-survey">Survey</th>
+        ${followUpSortHeader("survey","Survey","al-survey")}
         <th class="al-unit">Unit</th>
-        <th class="al-opened">Received</th>
+        ${followUpSortHeader("received","Received","al-opened")}
       </tr></thead>
       <tbody aria-live="polite">
         ${groups.map(g=>{
