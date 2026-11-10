@@ -742,10 +742,12 @@ html[data-theme="dark"] .ov-reading .ov-label{
 }
 .ovx-follow{border-color:color-mix(in srgb,var(--amber-700) 32%,var(--amber-200))}
 .ovx-follow__head{
-  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
   padding:14px 20px;background:var(--amber-50);
   font-size:16px;line-height:normal;font-weight:700;
 }
+.ovx-follow__head h2,
+.ovx-follow__flag{margin:0}
 .ovx-follow__flag{font-size:12px;line-height:normal;font-weight:700;color:var(--amber-700)}
 .ovx-callback{display:flex;flex-direction:column;gap:12px;padding:16px 20px 14px}
 .ovx-kicker{font-size:12px;line-height:normal;font-weight:700;color:var(--muted-foreground)}
@@ -4564,7 +4566,6 @@ function viewOverview(){
                 <div class="ovx-ratebar" role="img" aria-label="${d.rate}% response rate"><span style="width:${Math.max(0,Math.min(100,d.rate))}%"></span></div>
                 <p class="ovx-part__note">Live survey · Response rate of those invited</p>
               </div>`).join("")}
-            ${slices.length>1?`<p class="ovx-part__note">Separate survey populations; totals are not combined.</p>`:""}
           </section>
         </div>
       </div>
@@ -6670,7 +6671,7 @@ function viewSurveysIndex(){
     <div class="between">
       <div>
         <h1 class="t-h2">Surveys</h1>
-        <p class="t-p dim">${live} live · ${drafts} draft${ended?` · ${ended} ended`:""}${archived.length?` · ${archived.length} archived`:""}</p>
+        <p class="t-subtle dim">${live} live · ${drafts} draft${ended?` · ${ended} ended`:""}${archived.length?` · ${archived.length} archived`:""}</p>
       </div>
       <button class="fw-btn fw-btn--primary" onclick="newSurvey()">${I.plus(16)} Create new survey</button>
     </div>
